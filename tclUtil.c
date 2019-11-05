@@ -1008,22 +1008,15 @@ Tcl_SetResult(interp, string, freeProc)
  *----------------------------------------------------------------------
  */
 
-	/* VARARGS2 */
-#ifndef lint
-void
-Tcl_AppendResult(va_alist)
-#else
 void
 	/* VARARGS2 */ /* ARGSUSED */
-Tcl_AppendResult(interp, p, va_alist)
-    Tcl_Interp *interp;		/* Interpreter whose result is to be
+Tcl_AppendResult(
+    Tcl_Interp *interp,		/* Interpreter whose result is to be
 				 * extended. */
-    char *p;			/* One or more strings to add to the
-				 * result, terminated with NULL. */
-#endif
-    va_dcl
+    ...				/* One or more strings to add to the
+				 * result, terminated with NULL. */)
 {
-    va_list argList;
+    va_list argList, argList2;
     register Interp *iPtr;
     char *string;
     int newSpace;
@@ -1033,8 +1026,9 @@ Tcl_AppendResult(interp, p, va_alist)
      * needed.
      */
 
-    va_start(argList);
-    iPtr = va_arg(argList, Interp *);
+    va_start(argList, interp);
+    va_copy(argList2, argList);
+    iPtr = (Interp *) interp;
     newSpace = 0;
     while (1) {
 	string = va_arg(argList, char *);
@@ -1060,17 +1054,15 @@ Tcl_AppendResult(interp, p, va_alist)
      * them into the buffer.
      */
 
-    va_start(argList);
-    (void) va_arg(argList, Tcl_Interp *);
     while (1) {
-	string = va_arg(argList, char *);
+	string = va_arg(argList2, char *);
 	if (string == NULL) {
 	    break;
 	}
 	strcpy(iPtr->appendResult + iPtr->appendUsed, string);
 	iPtr->appendUsed += strlen(string);
     }
-    va_end(argList);
+    va_end(argList2);
 }
 
 /*
@@ -1254,20 +1246,14 @@ Tcl_ResetResult(interp)
  *
  *----------------------------------------------------------------------
  */
-	/* VARARGS2 */
-#ifndef lint
-void
-Tcl_SetErrorCode(va_alist)
-#else
+
 void
 	/* VARARGS2 */ /* ARGSUSED */
-Tcl_SetErrorCode(interp, p, va_alist)
-    Tcl_Interp *interp;		/* Interpreter whose errorCode variable is
+Tcl_SetErrorCode(
+    Tcl_Interp *interp,		/* Interpreter whose errorCode variable is
 				 * to be set. */
-    char *p;			/* One or more elements to add to errorCode,
-				 * terminated with NULL. */
-#endif
-    va_dcl
+    ...				/* One or more elements to add to errorCode,
+				 * terminated with NULL. */)
 {
     va_list argList;
     char *string;
@@ -1279,8 +1265,8 @@ Tcl_SetErrorCode(interp, p, va_alist)
      * $errorCode as list elements.
      */
 
-    va_start(argList);
-    iPtr = va_arg(argList, Interp *);
+    va_start(argList, interp);
+    iPtr = (Interp *) interp;
     flags = TCL_GLOBAL_ONLY | TCL_LIST_ELEMENT;
     while (1) {
 	string = va_arg(argList, char *);
