@@ -29,9 +29,6 @@
 #    RANLIB		If you're using a System-V-based UNIX that doesn't
 #			have ranlib, change this definition to "echo" or
 #			something else harmless.
-#    SHELL		Some versions of make (e.g. SGI's) use this variable
-#			to determine which shell to use for executing
-#			commands.
 
 INSTALL_DIR =	/usr/local
 TCL_LIBRARY =	$(INSTALL_DIR)/lib/tcl
@@ -40,7 +37,6 @@ INCLUDE_DIR =	$(INSTALL_DIR)/include
 MAN3_DIR =	$(INSTALL_DIR)/man/man3
 MANN_DIR =	$(INSTALL_DIR)/man/mann
 RANLIB =	ranlib
-SHELL =		/bin/sh
 
 CC =		cc
 CFLAGS =	-O -I. -DTCL_LIBRARY=\"${TCL_LIBRARY}\"
