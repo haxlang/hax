@@ -85,16 +85,6 @@
 #endif
 
 /*
- * Not all systems declare the errno variable in errno.h. so this
- * file does it explicitly.  The list of system error messages also
- * isn't generally declared in a header file anywhere.
- */
-
-extern int errno;
-extern int sys_nerr;
-extern char *sys_errlist[];
-
-/*
  * The type of the status returned by wait varies from UNIX system
  * to UNIX system.  The macro below defines it:
  */
