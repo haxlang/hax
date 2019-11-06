@@ -1,8 +1,5 @@
 #
 # This Makefile is for use when distributing Tcl to the outside world.
-# It is normally set up by running the "config" script.  Before modifying
-# this file by hand, you should read through the "config" script to see
-# what it does.
 #
 # Some changes you may wish to make here:
 #
@@ -108,21 +105,8 @@ tclTest: tclTest.o libtcl.a
 test: tclTest
 	( echo cd tests ; echo source all ) | ./tclTest
 
-configured:
-	@echo "The configuration script \"./config\" hasn't been run"
-	@echo "successfully yet.  Please run it as described in the "
-	@echo "README file, then run make again."
-	exit 1
-
 clean:
 	rm -f ${OBJS} libtcl.a tclTest.o tclTest
 
-# The following target is used during configuration to compile
-# a test program to see if certain facilities are available on
-# the system.
-
-configtest:
-	${CC} ${CFLAGS} test.c
-
-${OBJS}: tcl.h tclHash.h tclInt.h configured
+${OBJS}: tcl.h tclHash.h tclInt.h
 ${UNIX_OBJS}: tclUnix.h
