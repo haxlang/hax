@@ -93,21 +93,21 @@ static void		SetupAppendBuffer (Interp *iPtr,
  */
 
 int
-TclFindElement(interp, list, elementPtr, nextPtr, sizePtr, bracePtr)
-    Tcl_Interp *interp;		/* Interpreter to use for error reporting. */
-    char *list;	/* String containing Tcl list with zero
+TclFindElement(
+    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+    char *list,			/* String containing Tcl list with zero
 				 * or more elements (possibly in braces). */
-    char **elementPtr;		/* Fill in with location of first significant
+    char **elementPtr,		/* Fill in with location of first significant
 				 * character in first element of list. */
-    char **nextPtr;		/* Fill in with location of character just
+    char **nextPtr,		/* Fill in with location of character just
 				 * after all white space following end of
 				 * argument (i.e. next argument or end of
 				 * list). */
-    int *sizePtr;		/* If non-zero, fill in with size of
+    int *sizePtr,		/* If non-zero, fill in with size of
 				 * element. */
-    int *bracePtr;		/* If non-zero fill in with non-zero/zero
+    int *bracePtr		/* If non-zero fill in with non-zero/zero
 				 * to indicate that arg was/wasn't
-				 * in braces. */
+				 * in braces. */)
 {
     char *p;
     int openBraces = 0;
@@ -293,11 +293,11 @@ TclFindElement(interp, list, elementPtr, nextPtr, sizePtr, bracePtr)
  */
 
 void
-TclCopyAndCollapse(count, src, dst)
-    int count;			/* Total number of characters to copy
+TclCopyAndCollapse(
+    int count,			/* Total number of characters to copy
 				 * from src. */
-    char *src;		/* Copy from here... */
-    char *dst;		/* ... to here. */
+    char *src,		/* Copy from here... */
+    char *dst		/* ... to here. */)
 {
     char c;
     int numRead;
@@ -349,13 +349,13 @@ TclCopyAndCollapse(count, src, dst)
  */
 
 int
-Tcl_SplitList(interp, list, argcPtr, argvPtr)
-    Tcl_Interp *interp;		/* Interpreter to use for error reporting. */
-    char *list;			/* Pointer to string with list structure. */
-    int *argcPtr;		/* Pointer to location to fill in with
+Tcl_SplitList(
+    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+    char *list,			/* Pointer to string with list structure. */
+    int *argcPtr,		/* Pointer to location to fill in with
 				 * the number of elements in the list. */
-    char ***argvPtr;		/* Pointer to place to store pointer to array
-				 * of pointers to list elements. */
+    char ***argvPtr		/* Pointer to place to store pointer to array
+				 * of pointers to list elements. */)
 {
     char **argv;
     char *p;
@@ -435,10 +435,10 @@ Tcl_SplitList(interp, list, argcPtr, argvPtr)
  */
 
 int
-Tcl_ScanElement(string, flagPtr)
-    char *string;		/* String to convert to Tcl list element. */
-    int *flagPtr;		/* Where to store information to guide
-				 * Tcl_ConvertElement. */
+Tcl_ScanElement(
+    char *string,		/* String to convert to Tcl list element. */
+    int *flagPtr		/* Where to store information to guide
+				 * Tcl_ConvertElement. */)
 {
     int flags, nestingLevel;
     char *p;
@@ -557,10 +557,10 @@ Tcl_ScanElement(string, flagPtr)
  */
 
 int
-Tcl_ConvertElement(src, dst, flags)
-    char *src;		/* Source information for list element. */
-    char *dst;			/* Place to put list-ified element. */
-    int flags;			/* Flags produced by Tcl_ScanElement. */
+Tcl_ConvertElement(
+    char *src,		/* Source information for list element. */
+    char *dst,			/* Place to put list-ified element. */
+    int flags			/* Flags produced by Tcl_ScanElement. */)
 {
     char *p = dst;
 
@@ -670,9 +670,9 @@ Tcl_ConvertElement(src, dst, flags)
  */
 
 char *
-Tcl_Merge(argc, argv)
-    int argc;			/* How many strings to merge. */
-    char **argv;		/* Array of string values. */
+Tcl_Merge(
+    int argc,			/* How many strings to merge. */
+    char **argv			/* Array of string values. */)
 {
 #   define LOCAL_SIZE 20
     int localFlags[LOCAL_SIZE], *flagPtr;
@@ -739,9 +739,9 @@ Tcl_Merge(argc, argv)
  */
 
 char *
-Tcl_Concat(argc, argv)
-    int argc;			/* Number of strings to concatenate. */
-    char **argv;		/* Array of strings to concatenate. */
+Tcl_Concat(
+    int argc,			/* Number of strings to concatenate. */
+    char **argv			/* Array of strings to concatenate. */)
 {
     int totalSize, i;
     char *p;
@@ -810,10 +810,10 @@ Tcl_Concat(argc, argv)
  */
 
 int
-Tcl_StringMatch(string, pattern)
-    char *string;	/* String. */
-    char *pattern;	/* Pattern, which may contain
-				 * special characters. */
+Tcl_StringMatch(
+    char *string,	/* String. */
+    char *pattern	/* Pattern, which may contain
+				 * special characters. */)
 {
     char c2;
 
@@ -941,14 +941,14 @@ Tcl_StringMatch(string, pattern)
  */
 
 void
-Tcl_SetResult(interp, string, freeProc)
-    Tcl_Interp *interp;		/* Interpreter with which to associate the
+Tcl_SetResult(
+    Tcl_Interp *interp,		/* Interpreter with which to associate the
 				 * return value. */
-    char *string;		/* Value to be returned.  If NULL,
+    char *string,		/* Value to be returned.  If NULL,
 				 * the result is set to an empty string. */
-    Tcl_FreeProc *freeProc;	/* Gives information about the string:
+    Tcl_FreeProc *freeProc	/* Gives information about the string:
 				 * TCL_STATIC, TCL_VOLATILE, or the address
-				 * of a Tcl_FreeProc such as free. */
+				 * of a Tcl_FreeProc such as free. */)
 {
     Interp *iPtr = (Interp *) interp;
     int length;
@@ -1086,15 +1086,15 @@ Tcl_AppendResult(
  */
 
 void
-Tcl_AppendElement(interp, string, noSep)
-    Tcl_Interp *interp;		/* Interpreter whose result is to be
+Tcl_AppendElement(
+    Tcl_Interp *interp,		/* Interpreter whose result is to be
 				 * extended. */
-    char *string;		/* String to convert to list element and
+    char *string,		/* String to convert to list element and
 				 * add to result. */
-    int noSep;			/* If non-zero, then don't output a
+    int noSep			/* If non-zero, then don't output a
 				 * space character before this element,
 				 * even if the element isn't the first
-				 * thing in the output buffer. */
+				 * thing in the output buffer. */)
 {
     Interp *iPtr = (Interp *) interp;
     int size, flags;
@@ -1144,10 +1144,10 @@ Tcl_AppendElement(interp, string, noSep)
  */
 
 static void
-SetupAppendBuffer(iPtr, newSpace)
-    Interp *iPtr;	/* Interpreter whose result is being set up. */
-    int newSpace;		/* Make sure that at least this many bytes
-				 * of new information may be added. */
+SetupAppendBuffer(
+    Interp *iPtr,	/* Interpreter whose result is being set up. */
+    int newSpace		/* Make sure that at least this many bytes
+				 * of new information may be added. */)
 {
     int totalSpace;
 
@@ -1214,8 +1214,8 @@ SetupAppendBuffer(iPtr, newSpace)
  */
 
 void
-Tcl_ResetResult(interp)
-    Tcl_Interp *interp;		/* Interpreter for which to clear result. */
+Tcl_ResetResult(
+    Tcl_Interp *interp		/* Interpreter for which to clear result. */)
 {
     Interp *iPtr = (Interp *) interp;
 
@@ -1305,10 +1305,10 @@ Tcl_SetErrorCode(
  */
 
 int
-TclGetListIndex(interp, string, indexPtr)
-    Tcl_Interp *interp;			/* Interpreter for error reporting. */
-    char *string;			/* String containing list index. */
-    int *indexPtr;			/* Where to store index. */
+TclGetListIndex(
+    Tcl_Interp *interp,			/* Interpreter for error reporting. */
+    char *string,			/* String containing list index. */
+    int *indexPtr			/* Where to store index. */)
 {
     if (isdigit(*string) || (*string == '-')) {
 	if (Tcl_GetInt(interp, string, indexPtr) != TCL_OK) {
@@ -1352,10 +1352,10 @@ TclGetListIndex(interp, string, indexPtr)
  */
 
 regexp *
-TclCompileRegexp(interp, string)
-    Tcl_Interp *interp;			/* For use in error reporting. */
-    char *string;			/* String for which to produce
-					 * compiled regular expression. */
+TclCompileRegexp(
+    Tcl_Interp *interp,			/* For use in error reporting. */
+    char *string			/* String for which to produce
+					 * compiled regular expression. */)
 {
     Interp *iPtr = (Interp *) interp;
     int i, length;
@@ -1437,8 +1437,8 @@ TclCompileRegexp(interp, string)
  */
 
 void
-regerror(string)
-    char *string;			/* Error message. */
+regerror(
+    char *string			/* Error message. */)
 {
     tclRegexpError = string;
 }
