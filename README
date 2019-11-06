@@ -60,12 +60,8 @@ existing Tcl scripts or C programs.
       script debugging easier.
 
 (b) The installation setup has been modified (improved?) in several ways:
-    - The Makefile checks to be sure that config has been run and won't
-      compile the program if it hasn't.
     - The TCL_LIBRARY environment variable can be used to override the
       compiled-in location of the library directory.
-    - The "config" script is now cleverer about figuring out which switches
-      to pass to nm.
     - Manual entries have been renamed to use ".3" and ".n" extensions.
     - The Makefile includes a "make install" target.
     - Introductory documents are no longer part of the release;  they have
@@ -135,40 +131,11 @@ similar to them, do the following:
 	file contains additional notes on getting Tcl to run on various
 	other systems.
 
-    (b) Edit the "set" commands at the beginning of the file "config"
-        if necessary to correspond to your system configuration (they
-	should already be right for most versions of Unix).
-
     (c) Configure the Makefile in this directory according to the
         instructions at the beginning of the file.  In particular, if
 	you're not going to install the library in the suggested place
 	(/usr/local/lib/tcl) you need to reset the TCL_LIBRARY variable.
 	You may also want to change CC, CFLAGS, etc.
-
-    (d) Type "./config" to invoke Tcl's auto-configuration script.  This
-        script pokes around in your system to see if certain almost-standard
-	things are missing (header files, library procedures, etc.); if
-	your system doesn't seem to have them, it configures Tcl to use
-	its own copies of these things instead (Tcl's copies are kept in
-	the "compat" subdirectory).  Config prints out messages for all
-	the substitutions it made.  You can ignore any of the messages
-	unless they say "ERROR!!", in which case something is fundamentally
-	wrong and the script couldn't handle your system configuration.
-
-	If Tcl isn't able to configure itself to compile on your machine,
-        then I suggest the following approach:
-	    - Start again with a fresh copy of the distribution.
-	    - Set the #defines that appear at the very front of
-	      tclUnix.h (before the first #include) to correspond
-	      to your system.
-	    - Create a file "configured" in this directory, so that the
-	      Makefile won't generate errors.
-	    - If things don't compile or don't link, then you may need
-	      to copy some of the .c or .h files from the "compat"
-	      directory into the main Tcl directory to compensate for
-	      files missing from your system.  Modify the COMPAT_OBJS
-	      definition in Makefile to include a .o name for each of
-	      the .c files that you copied up from the compat directory.
 
     (e) Type "make" to compile the library.  This will create the Tcl
 	library in "libtcl.a".  The Makefile should work without any
