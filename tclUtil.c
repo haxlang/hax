@@ -177,7 +177,7 @@ TclFindElement(interp, list, elementPtr, nextPtr, sizePtr, bracePtr)
 		    Tcl_ResetResult(interp);
 		    sprintf(interp->result,
 			    "list element in braces followed by \"%.*s\" instead of space",
-			    p2-p, p);
+			    (int)(p2-p), p);
 		    return TCL_ERROR;
 		} else if (openBraces != 0) {
 		    openBraces--;
@@ -234,7 +234,7 @@ TclFindElement(interp, list, elementPtr, nextPtr, sizePtr, bracePtr)
 		    Tcl_ResetResult(interp);
 		    sprintf(interp->result,
 			    "list element in quotes followed by \"%.*s\" %s",
-			    p2-p, p, "instead of space");
+			    (int)(p2-p), p, "instead of space");
 		    return TCL_ERROR;
 		}
 		break;

@@ -693,12 +693,12 @@ StoreStatData(interp, varName, statPtr)
 {
     char string[30];
 
-    sprintf(string, "%d", statPtr->st_dev);
+    sprintf(string, "%ld", (long)statPtr->st_dev);
     if (Tcl_SetVar2(interp, varName, "dev", string, TCL_LEAVE_ERR_MSG)
 	    == NULL) {
 	return TCL_ERROR;
     }
-    sprintf(string, "%d", statPtr->st_ino);
+    sprintf(string, "%lu", (unsigned long)statPtr->st_ino);
     if (Tcl_SetVar2(interp, varName, "ino", string, TCL_LEAVE_ERR_MSG)
 	    == NULL) {
 	return TCL_ERROR;
@@ -1514,7 +1514,7 @@ Tcl_TellCmd(notUsed, interp, argc, argv)
     if (TclGetOpenFile(interp, argv[1], &filePtr) != TCL_OK) {
 	return TCL_ERROR;
     }
-    sprintf(interp->result, "%d", ftell(filePtr->f));
+    sprintf(interp->result, "%ld", ftell(filePtr->f));
     return TCL_OK;
 }
 
