@@ -21,12 +21,6 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclHash.c,v 1.10 92/08/21 
 #include "tclInt.h"
 
 /*
- * Imported library procedures for which there are no header files:
- */
-
-extern void panic();
-
-/*
  * When there are this many entries per bucket, on average, rebuild
  * the hash table to make it larger.
  */

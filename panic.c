@@ -19,6 +19,7 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/panic.c,v 1.3 91/10/10 11:25:51 ouster Exp $ SPRITE (Berkeley)";
 #endif
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -40,15 +41,15 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/panic.c,v 1.3 91/10/10 11:
 
 	/* VARARGS ARGSUSED */
 void
-panic(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-    char *format;		/* Format string, suitable for passing to
+panic(
+    char *format,		/* Format string, suitable for passing to
 				 * fprintf. */
-    char *arg1, *arg2, *arg3;	/* Additional arguments (variable in number)
-				 * to pass to fprintf. */
-    char *arg4, *arg5, *arg6, *arg7, *arg8;
+    ...				/* Additional arguments (variable in number)
+				 * to pass to fprintf. */)
 {
-    (void) fprintf(stderr, format, arg1, arg2, arg3, arg4, arg5, arg6,
-	    arg7, arg8);
+    va_list va;
+    va_start(va, format);
+    (void) vfprintf(stderr, format, va);
     (void) fflush(stderr);
     abort();
 }

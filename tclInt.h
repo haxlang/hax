@@ -628,7 +628,7 @@ extern char *		tclRegexpError;
  *----------------------------------------------------------------
  */
 
-extern void		panic();
+extern void		panic(char *format, ...);
 extern regexp *		TclCompileRegexp (Tcl_Interp *interp,
 			    char *string);
 extern void		TclCopyAndCollapse (int count, char *src,
