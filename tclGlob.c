@@ -67,16 +67,16 @@ static int		DoGlob (Tcl_Interp *interp, char *dir,
  */
 
 static void
-AppendResult(interp, dir, separator, name, nameLength)
-    Tcl_Interp *interp;		/* Interpreter whose result should be
+AppendResult(
+    Tcl_Interp *interp,		/* Interpreter whose result should be
 				 * appended to. */
-    char *dir;			/* Name of directory, without trailing
+    char *dir,			/* Name of directory, without trailing
 				 * slash except for root directory. */
-    char *separator;		/* Separator string so use between dir and
+    char *separator,		/* Separator string so use between dir and
 				 * name:  either "/" or "" depending on dir. */
-    char *name;			/* Name of file withing directory (NOT
+    char *name,			/* Name of file withing directory (NOT
 				 * necessarily null-terminated!). */
-    int nameLength;		/* Number of characters in name. */
+    int nameLength		/* Number of characters in name. */)
 {
     int dirFlags, nameFlags;
     char *p, saved;
@@ -141,14 +141,14 @@ AppendResult(interp, dir, separator, name, nameLength)
  */
 
 static int
-DoGlob(interp, dir, rem)
-    Tcl_Interp *interp;			/* Interpreter to use for error
+DoGlob(
+    Tcl_Interp *interp,			/* Interpreter to use for error
 					 * reporting (e.g. unmatched brace). */
-    char *dir;				/* Name of a directory at which to
+    char *dir,				/* Name of a directory at which to
 					 * start glob expansion.  This name
 					 * is fixed: it doesn't contain any
 					 * globbing chars. */
-    char *rem;				/* Path to glob-expand. */
+    char *rem				/* Path to glob-expand. */)
 {
     /*
      * When this procedure is entered, the name to be globbed may
@@ -397,13 +397,13 @@ DoGlob(interp, dir, rem)
  */
 
 char *
-Tcl_TildeSubst(interp, name)
-    Tcl_Interp *interp;		/* Interpreter in which to store error
+Tcl_TildeSubst(
+    Tcl_Interp *interp,		/* Interpreter in which to store error
 				 * message (if necessary). */
-    char *name;			/* File name, which may begin with "~/"
+    char *name			/* File name, which may begin with "~/"
 				 * (to indicate current user's home directory)
 				 * or "~<user>/" (to indicate any user's
-				 * home directory). */
+				 * home directory). */)
 {
 #define STATIC_BUF_SIZE 50
     static char staticBuf[STATIC_BUF_SIZE];
@@ -501,11 +501,11 @@ Tcl_TildeSubst(interp, name)
 
 	/* ARGSUSED */
 int
-Tcl_GlobCmd(dummy, interp, argc, argv)
-    ClientData dummy;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_GlobCmd(
+    ClientData dummy,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     int i, result, noComplain;
 
