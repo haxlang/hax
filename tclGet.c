@@ -41,11 +41,11 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclGet.c,v 1.11 92/02/29 1
  */
 
 int
-Tcl_GetInt(interp, string, intPtr)
-    Tcl_Interp *interp;		/* Interpreter to use for error reporting. */
-    char *string;		/* String containing a (possibly signed)
+Tcl_GetInt(
+    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+    char *string,		/* String containing a (possibly signed)
 				 * integer in a form acceptable to strtol. */
-    int *intPtr;		/* Place to store converted result. */
+    int *intPtr			/* Place to store converted result. */)
 {
     char *end;
     int i;
@@ -84,11 +84,11 @@ Tcl_GetInt(interp, string, intPtr)
  */
 
 int
-Tcl_GetDouble(interp, string, doublePtr)
-    Tcl_Interp *interp;		/* Interpreter to use for error reporting. */
-    char *string;		/* String containing a floating-point number
+Tcl_GetDouble(
+    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+    char *string,		/* String containing a floating-point number
 				 * in a form acceptable to strtod. */
-    double *doublePtr;		/* Place to store converted result. */
+    double *doublePtr		/* Place to store converted result. */)
 {
     char *end;
     double d;
@@ -127,13 +127,13 @@ Tcl_GetDouble(interp, string, doublePtr)
  */
 
 int
-Tcl_GetBoolean(interp, string, boolPtr)
-    Tcl_Interp *interp;		/* Interpreter to use for error reporting. */
-    char *string;		/* String containing a boolean number
+Tcl_GetBoolean(
+    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+    char *string,		/* String containing a boolean number
 				 * specified either as 1/0 or true/false or
 				 * yes/no. */
-    int *boolPtr;		/* Place to store converted result, which
-				 * will be 0 or 1. */
+    int *boolPtr		/* Place to store converted result, which
+				 * will be 0 or 1. */)
 {
     char c;
     char lowerCase[10];
