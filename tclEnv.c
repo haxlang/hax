@@ -57,9 +57,9 @@ static char *		EnvTraceProc _ANSI_ARGS_((ClientData clientData,
 			    int flags));
 static int		FindVariable _ANSI_ARGS_((CONST char *name,
 			    int *lengthPtr));
-void			setenv _ANSI_ARGS_((CONST char *name,
+static void		SetEnv _ANSI_ARGS_((CONST char *name,
 			    CONST char *value));
-void			unsetenv _ANSI_ARGS_((CONST char *name));
+static void		UnsetEnv _ANSI_ARGS_((CONST char *name));
 
 /*
  *----------------------------------------------------------------------
@@ -183,7 +183,7 @@ FindVariable(name, lengthPtr)
 /*
  *----------------------------------------------------------------------
  *
- * setenv --
+ * SetEnv --
  *
  *	Set an environment variable, replacing an existing value
  *	or creating a new variable if there doesn't exist a variable
@@ -200,7 +200,7 @@ FindVariable(name, lengthPtr)
  */
 
 void
-setenv(name, value)
+SetEnv(name, value)
     CONST char *name;		/* Name of variable whose value is to be
 				 * set. */
     CONST char *value;		/* New value for variable. */
@@ -275,7 +275,7 @@ setenv(name, value)
 /*
  *----------------------------------------------------------------------
  *
- * putenv --
+ * PutEnv --
  *
  *	Set an environment variable.  Similar to setenv except that
  *	the information is passed in a single string of the form
@@ -295,7 +295,7 @@ setenv(name, value)
  */
 
 int
-putenv(string)
+PutEnv(string)
     char *string;		/* Info about environment variable in the
 				 * form NAME=value. */
 {
@@ -322,7 +322,7 @@ putenv(string)
     name = ckalloc(nameLength+1);
     memcpy(name, string, nameLength);
     name[nameLength] = 0;
-    setenv(name, value+1);
+    SetEnv(name, value+1);
     ckfree(name);
     return 0;
 }
@@ -330,7 +330,7 @@ putenv(string)
 /*
  *----------------------------------------------------------------------
  *
- * unsetenv --
+ * UnsetEnv --
  *
  *	Remove an environment variable, updating the "env" arrays
  *	in all interpreters managed by us.
@@ -345,7 +345,7 @@ putenv(string)
  */
 
 void
-unsetenv(name)
+UnsetEnv(name)
     CONST char *name;			/* Name of variable to remove. */
 {
     int index, dummy;
@@ -451,11 +451,11 @@ EnvTraceProc(clientData, interp, name1, name2, flags)
      */
 
     if (flags & TCL_TRACE_WRITES) {
-	setenv(name2, Tcl_GetVar2(interp, "env", name2, TCL_GLOBAL_ONLY));
+	SetEnv(name2, Tcl_GetVar2(interp, "env", name2, TCL_GLOBAL_ONLY));
     }
 
     if (flags & TCL_TRACE_UNSETS) {
-	unsetenv(name2);
+	UnsetEnv(name2);
     }
     return NULL;
 }
