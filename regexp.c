@@ -162,21 +162,18 @@ static long regsize;		/* Code size. */
 /*
  * Forward declarations for regcomp()'s friends.
  */
-#ifndef STATIC
-#define	STATIC	static
-#endif
-STATIC char *reg();
-STATIC char *regbranch();
-STATIC char *regpiece();
-STATIC char *regatom();
-STATIC char *regnode();
-STATIC char *regnext();
-STATIC void regc();
-STATIC void reginsert();
-STATIC void regtail();
-STATIC void regoptail();
+static char *reg();
+static char *regbranch();
+static char *regpiece();
+static char *regatom();
+static char *regnode();
+static char *regnext();
+static void regc();
+static void reginsert();
+static void regtail();
+static void regoptail();
 #ifdef STRCSPN
-STATIC int strcspn();
+static int strcspn();
 #endif
 
 /*
@@ -694,14 +691,14 @@ static char **regendp;		/* Ditto for endp. */
 /*
  * Forwards.
  */
-STATIC int regtry();
-STATIC int regmatch();
-STATIC int regrepeat();
+static int regtry();
+static int regmatch();
+static int regrepeat();
 
 #ifdef DEBUG
 int regnarrate = 0;
 void regdump();
-STATIC char *regprop();
+static char *regprop();
 #endif
 
 /*
@@ -1065,7 +1062,7 @@ char *p;
 
 #ifdef DEBUG
 
-STATIC char *regprop();
+static char *regprop();
 
 /*
  - regdump - dump a regexp onto stdout in vaguely comprehensible form
