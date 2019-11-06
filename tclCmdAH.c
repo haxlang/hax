@@ -888,7 +888,7 @@ Tcl_FormatCmd(dummy, interp, argc, argv)
 		 * directly from pointers to shorts.
 		 */
 
-		sprintf(dst+dstSize, newFormat, (short) (int) oneWordValue);
+		sprintf(dst+dstSize, newFormat, (short) (long) oneWordValue);
 	    } else {
 		sprintf(dst+dstSize, newFormat, (char *) oneWordValue);
 	    }
