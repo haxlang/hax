@@ -90,31 +90,7 @@ where <file> is the name of the man page you'd like to print.
 ---------------------
 
 If you follow the directions below, this release should compile
-and run on the following configurations either "out of the box"
-or with only trivial changes:
-
-    - Sun-3's, Sun-4's, SPARCstation-1's and SPARCstation-2's running
-      many variants of SunOS, such as 4.1.
-    - DECstation-3100's and DECstation-5000's running many versions of
-      Ultrix, such as 2.0 and 4.2.
-    - DEC VAXes running many versions of Ultrix or BSD UNIX. 
-    - Intel 386 based systems running SCO Unix 3.2v2.
-    - Intel 386 based systems running SCO Xenix 2.3.3.
-    - Intel 386 based systems running Bell-Tech (now Intel) Unix 3.2.0.
-    - Silicon Graphics systems running IRIX 4.0.
-    - Various H-P machines running versions of HP-UX such as 7.05
-    - Sequent Symmetry running versions of Dynix/ptx such as v1.2.4
-    - AT&T 368 machines running SVR4 2.0.1
-
-If you find problems running Tcl on any of the above configurations,
-please let me know.  Also, if you are able to compile Tcl and run the
-test suite successfully on configurations not listed above, please
-let me know and tell me what changes, if any, you needed to make to
-do it.  I'd like to keep the above list up-to-date and continue to
-improve the portability of Tcl.
-
-Tcl can be used on many other configurations with only a few
-modifications.
+and run either "out of the box" or with only trivial changes.
 
 5. Compiling Tcl
 ----------------
