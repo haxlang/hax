@@ -38,10 +38,6 @@
  * without the rest of Sprite).
  */
 
-#ifndef NULL
-#define NULL 0
-#endif
-
 #ifndef _CLIENTDATA
 typedef int *ClientData;
 #define _CLIENTDATA
