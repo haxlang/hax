@@ -118,8 +118,8 @@ static int		SubsAndEval (Interp *iPtr, char *cmd,
  */
 
 void
-Tcl_InitHistory(interp)
-    Tcl_Interp *interp;		/* Interpreter to initialize. */
+Tcl_InitHistory(
+    Tcl_Interp *interp		/* Interpreter to initialize. */)
 {
     Interp *iPtr = (Interp *) interp;
     int i;
@@ -164,13 +164,13 @@ Tcl_InitHistory(interp)
  */
 
 int
-Tcl_RecordAndEval(interp, cmd, flags)
-    Tcl_Interp *interp;		/* Token for interpreter in which command
+Tcl_RecordAndEval(
+    Tcl_Interp *interp,		/* Token for interpreter in which command
 				 * will be executed. */
-    char *cmd;			/* Command to record. */
-    int flags;			/* Additional flags to pass to Tcl_Eval. 
+    char *cmd,			/* Command to record. */
+    int flags			/* Additional flags to pass to Tcl_Eval. 
 				 * TCL_NO_EVAL means only record: don't
-				 * execute command. */
+				 * execute command. */)
 {
     Interp *iPtr = (Interp *) interp;
     HistoryEvent *eventPtr;
@@ -250,11 +250,11 @@ Tcl_RecordAndEval(interp, cmd, flags)
 
 	/* ARGSUSED */
 int
-Tcl_HistoryCmd(dummy, interp, argc, argv)
-    ClientData dummy;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_HistoryCmd(
+    ClientData dummy,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     Interp *iPtr = (Interp *) interp;
     HistoryEvent *eventPtr;
@@ -527,9 +527,9 @@ Tcl_HistoryCmd(dummy, interp, argc, argv)
  */
 
 static void
-MakeSpace(hPtr, size)
-    HistoryEvent *hPtr;
-    int size;			/* # of bytes needed in hPtr. */
+MakeSpace(
+    HistoryEvent *hPtr,
+    int size			/* # of bytes needed in hPtr. */)
 {
     if (hPtr->bytesAvl < size) {
 	ckfree(hPtr->command);
@@ -558,9 +558,9 @@ MakeSpace(hPtr, size)
  */
 
 static void
-InsertRev(iPtr, revPtr)
-    Interp *iPtr;			/* Interpreter to use. */
-    HistoryRev *revPtr;	/* Revision to add to iPtr's list. */
+InsertRev(
+    Interp *iPtr,			/* Interpreter to use. */
+    HistoryRev *revPtr	/* Revision to add to iPtr's list. */)
 {
     HistoryRev *curPtr;
     HistoryRev *prevPtr;
@@ -626,10 +626,10 @@ InsertRev(iPtr, revPtr)
  */
 
 static void
-RevCommand(iPtr, string)
-    Interp *iPtr;	/* Interpreter in which to perform the
+RevCommand(
+    Interp *iPtr,		/* Interpreter in which to perform the
 				 * substitution. */
-    char *string;		/* String to substitute. */
+    char *string		/* String to substitute. */)
 {
     HistoryRev *revPtr;
 
@@ -664,10 +664,10 @@ RevCommand(iPtr, string)
  */
 
 static void
-RevResult(iPtr, string)
-    Interp *iPtr;	/* Interpreter in which to perform the
+RevResult(
+    Interp *iPtr,		/* Interpreter in which to perform the
 				 * substitution. */
-    char *string;		/* String to substitute. */
+    char *string		/* String to substitute. */)
 {
     HistoryRev *revPtr;
     char *evalFirst, *evalLast;
@@ -730,9 +730,9 @@ RevResult(iPtr, string)
  */
 
 static void
-DoRevs(iPtr)
-    Interp *iPtr;	/* Interpreter whose history is to
-				 * be modified. */
+DoRevs(
+    Interp *iPtr		/* Interpreter whose history is to
+				 * be modified. */)
 {
     HistoryRev *revPtr;
     HistoryEvent *eventPtr;
@@ -812,9 +812,9 @@ DoRevs(iPtr)
  */
 
 static HistoryEvent *
-GetEvent(iPtr, string)
-    Interp *iPtr;	/* Interpreter in which to look. */
-    char *string;		/* Description of event. */
+GetEvent(
+    Interp *iPtr,		/* Interpreter in which to look. */
+    char *string		/* Description of event. */)
 {
     int eventNum, index;
     HistoryEvent *eventPtr;
@@ -894,12 +894,12 @@ GetEvent(iPtr, string)
  */
 
 static int
-SubsAndEval(iPtr, cmd, old, new)
-    Interp *iPtr;	/* Interpreter in which to execute
+SubsAndEval(
+    Interp *iPtr,		/* Interpreter in which to execute
 				 * new command. */
-    char *cmd;			/* Command in which to substitute. */
-    char *old;			/* String to search for in command. */
-    char *new;			/* Replacement string for "old". */
+    char *cmd,			/* Command in which to substitute. */
+    char *old,			/* String to search for in command. */
+    char *new			/* Replacement string for "old". */)
 {
     char *src, *dst, *newCmd;
     int count, oldLength, newLength, length, result;
@@ -976,13 +976,13 @@ SubsAndEval(iPtr, cmd, old, new)
  */
 
 static char *
-GetWords(iPtr, command, words)
-    Interp *iPtr;	/* Tcl interpreter in which to place
+GetWords(
+    Interp *iPtr,		/* Tcl interpreter in which to place
 				 * an error message if needed. */
-    char *command;		/* Command string. */
-    char *words;		/* Description of which words to extract
+    char *command,		/* Command string. */
+    char *words			/* Description of which words to extract
 				 * from the command.  Either num[-num] or
-				 * a pattern. */
+				 * a pattern. */)
 {
     char *result;
     char *start, *end, *dst;
