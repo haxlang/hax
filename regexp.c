@@ -28,6 +28,7 @@
  *
  * 2019-11-07 Remove another compat definition of strcspn()
  * 2019-11-07 Switch to ANSI function definitions
+ * 2019-11-07 Change FAIL() to standard do {} while(0) form
  */
 #include "tclInt.h"
 
@@ -134,7 +135,7 @@
 #define	UCHARAT(p)	((int)*(p)&CHARBITS)
 #endif
 
-#define	FAIL(m)	{ regerror(m); return(NULL); }
+#define	FAIL(m)	do { regerror(m); return(NULL); } while (0)
 #define	ISMULT(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	META	"^$.[()|?+*\\"
 
