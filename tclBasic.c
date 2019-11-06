@@ -1012,7 +1012,7 @@ Tcl_VarEval(
 	    spaceAvl = spaceUsed + length;
 	    spaceAvl += spaceAvl/2;
 	    new = ckalloc((unsigned) spaceAvl);
-	    memcpy((VOID *) new, (VOID *) cmd, spaceUsed);
+	    memcpy(new, cmd, spaceUsed);
 	    if (cmd != fixedSpace) {
 		ckfree(cmd);
 	    }

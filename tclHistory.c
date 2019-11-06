@@ -89,17 +89,17 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclHistory.c,v 1.24 92/12/
  * Forward declarations for procedures defined later in this file:
  */
 
-static void		DoRevs _ANSI_ARGS_((Interp *iPtr));
-static HistoryEvent *	GetEvent _ANSI_ARGS_((Interp *iPtr, char *string));
-static char *		GetWords _ANSI_ARGS_((Interp *iPtr, char *command,
-			    char *words));
-static void		InsertRev _ANSI_ARGS_((Interp *iPtr,
-			    HistoryRev *revPtr));
-static void		MakeSpace _ANSI_ARGS_((HistoryEvent *hPtr, int size));
-static void		RevCommand _ANSI_ARGS_((Interp *iPtr, char *string));
-static void		RevResult _ANSI_ARGS_((Interp *iPtr, char *string));
-static int		SubsAndEval _ANSI_ARGS_((Interp *iPtr, char *cmd,
-			    char *old, char *new));
+static void		DoRevs (Interp *iPtr);
+static HistoryEvent *	GetEvent (Interp *iPtr, char *string);
+static char *		GetWords (Interp *iPtr, char *command,
+			    char *words);
+static void		InsertRev (Interp *iPtr,
+			    HistoryRev *revPtr);
+static void		MakeSpace (HistoryEvent *hPtr, int size);
+static void		RevCommand (Interp *iPtr, char *string);
+static void		RevResult (Interp *iPtr, char *string);
+static int		SubsAndEval (Interp *iPtr, char *cmd,
+			    char *old, char *new);
 
 /*
  *----------------------------------------------------------------------

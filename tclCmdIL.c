@@ -26,8 +26,8 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclCmdIL.c,v 1.89 93/01/22
  * Forward declarations for procedures defined in this file:
  */
 
-static int		SortCompareProc _ANSI_ARGS_((CONST VOID *first,
-			    CONST VOID *second));
+static int		SortCompareProc (const void *first,
+			    const void *second);
 
 /*
  *----------------------------------------------------------------------
@@ -671,7 +671,7 @@ Tcl_LindexCmd(dummy, interp, argc, argv)
 	interp->freeProc = (Tcl_FreeProc *) free;
     }
     if (parenthesized) {
-	memcpy((VOID *) interp->result, (VOID *) element, size);
+	memcpy(interp->result, element, size);
 	interp->result[size] = 0;
     } else {
 	TclCopyAndCollapse(size, element, interp->result);
@@ -1144,7 +1144,7 @@ Tcl_LsortCmd(notUsed, interp, argc, argv)
     if (Tcl_SplitList(interp, argv[1], &listArgc, &listArgv) != TCL_OK) {
 	return TCL_ERROR;
     }
-    qsort((VOID *) listArgv, listArgc, sizeof (char *), SortCompareProc);
+    qsort(listArgv, listArgc, sizeof (char *), SortCompareProc);
     interp->result = Tcl_Merge(listArgc, listArgv);
     interp->freeProc = (Tcl_FreeProc *) free;
     ckfree((char *) listArgv);
@@ -1158,7 +1158,7 @@ Tcl_LsortCmd(notUsed, interp, argc, argv)
 
 static int
 SortCompareProc(first, second)
-    CONST VOID *first, *second;		/* Elements to be compared. */
+    const void *first, *second;		/* Elements to be compared. */
 {
     return strcmp(*((char **) first), *((char **) second));
 }

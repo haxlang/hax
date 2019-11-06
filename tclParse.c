@@ -99,8 +99,8 @@ char tclTypeTable[] = {
  * Function prototypes for procedures local to this file:
  */
 
-static char *	QuoteEnd _ANSI_ARGS_((char *string, int term));
-static char *	VarNameEnd _ANSI_ARGS_((char *string));
+static char *	QuoteEnd (char *string, int term);
+static char *	VarNameEnd (char *string);
 
 /*
  *----------------------------------------------------------------------
@@ -842,7 +842,7 @@ TclExpandParseValue(pvPtr, needed)
      * mark new buffer as malloc-ed.
      */
 
-    memcpy((VOID *) new, (VOID *) pvPtr->buffer, pvPtr->next - pvPtr->buffer);
+    memcpy(new, pvPtr->buffer, pvPtr->next - pvPtr->buffer);
     pvPtr->next = new + (pvPtr->next - pvPtr->buffer);
     if (pvPtr->clientData != 0) {
 	ckfree(pvPtr->buffer);

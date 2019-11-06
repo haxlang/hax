@@ -41,9 +41,9 @@ typedef struct {
  * Forward declarations for procedures defined in this file:
  */
 
-static char *		TraceVarProc _ANSI_ARGS_((ClientData clientData,
+static char *		TraceVarProc (ClientData clientData,
 			    Tcl_Interp *interp, char *name1, char *name2,
-			    int flags));
+			    int flags);
 
 /*
  *----------------------------------------------------------------------

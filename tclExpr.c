@@ -161,15 +161,15 @@ char *operatorStrings[] = {
  * Declarations for local procedures to this file:
  */
 
-static int		ExprGetValue _ANSI_ARGS_((Tcl_Interp *interp,
-			    ExprInfo *infoPtr, int prec, Value *valuePtr));
-static int		ExprLex _ANSI_ARGS_((Tcl_Interp *interp,
-			    ExprInfo *infoPtr, Value *valuePtr));
-static void		ExprMakeString _ANSI_ARGS_((Value *valuePtr));
-static int		ExprParseString _ANSI_ARGS_((Tcl_Interp *interp,
-			    char *string, Value *valuePtr));
-static int		ExprTopLevel _ANSI_ARGS_((Tcl_Interp *interp,
-			    char *string, Value *valuePtr));
+static int		ExprGetValue (Tcl_Interp *interp,
+			    ExprInfo *infoPtr, int prec, Value *valuePtr);
+static int		ExprLex (Tcl_Interp *interp,
+			    ExprInfo *infoPtr, Value *valuePtr);
+static void		ExprMakeString (Value *valuePtr);
+static int		ExprParseString (Tcl_Interp *interp,
+			    char *string, Value *valuePtr);
+static int		ExprTopLevel (Tcl_Interp *interp,
+			    char *string, Value *valuePtr);
 
 /*
  *--------------------------------------------------------------

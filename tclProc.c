@@ -24,9 +24,9 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclProc.c,v 1.60 92/09/14 
  * Forward references to procedures defined later in this file:
  */
 
-static  int	InterpProc _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
-static  void	ProcDeleteProc _ANSI_ARGS_((ClientData clientData));
+static  int	InterpProc (ClientData clientData,
+		    Tcl_Interp *interp, int argc, char **argv);
+static  void	ProcDeleteProc (ClientData clientData);
 
 /*
  *----------------------------------------------------------------------

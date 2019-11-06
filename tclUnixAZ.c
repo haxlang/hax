@@ -36,11 +36,11 @@ static char *currentDir =  NULL;
  * Prototypes for local procedures defined in this file:
  */
 
-static int		CleanupChildren _ANSI_ARGS_((Tcl_Interp *interp,
-			    int numPids, int *pidPtr, int errorId));
-static char *		GetFileType _ANSI_ARGS_((int mode));
-static int		StoreStatData _ANSI_ARGS_((Tcl_Interp *interp,
-			    char *varName, struct stat *statPtr));
+static int		CleanupChildren (Tcl_Interp *interp,
+			    int numPids, int *pidPtr, int errorId);
+static char *		GetFileType (int mode);
+static int		StoreStatData (Tcl_Interp *interp,
+			    char *varName, struct stat *statPtr);
 
 /*
  *----------------------------------------------------------------------

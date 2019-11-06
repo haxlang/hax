@@ -49,24 +49,24 @@ extern void panic();
  * Procedure prototypes for static procedures in this file:
  */
 
-static Tcl_HashEntry *	ArrayFind _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-			    char *key));
-static Tcl_HashEntry *	ArrayCreate _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-			    char *key, int *newPtr));
-static Tcl_HashEntry *	BogusFind _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-			    char *key));
-static Tcl_HashEntry *	BogusCreate _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-			    char *key, int *newPtr));
-static unsigned int	HashString _ANSI_ARGS_((char *string));
-static void		RebuildTable _ANSI_ARGS_((Tcl_HashTable *tablePtr));
-static Tcl_HashEntry *	StringFind _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-			    char *key));
-static Tcl_HashEntry *	StringCreate _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-			    char *key, int *newPtr));
-static Tcl_HashEntry *	OneWordFind _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-			    char *key));
-static Tcl_HashEntry *	OneWordCreate _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-			    char *key, int *newPtr));
+static Tcl_HashEntry *	ArrayFind (Tcl_HashTable *tablePtr,
+			    char *key);
+static Tcl_HashEntry *	ArrayCreate (Tcl_HashTable *tablePtr,
+			    char *key, int *newPtr);
+static Tcl_HashEntry *	BogusFind (Tcl_HashTable *tablePtr,
+			    char *key);
+static Tcl_HashEntry *	BogusCreate (Tcl_HashTable *tablePtr,
+			    char *key, int *newPtr);
+static unsigned int	HashString (char *string);
+static void		RebuildTable (Tcl_HashTable *tablePtr);
+static Tcl_HashEntry *	StringFind (Tcl_HashTable *tablePtr,
+			    char *key);
+static Tcl_HashEntry *	StringCreate (Tcl_HashTable *tablePtr,
+			    char *key, int *newPtr);
+static Tcl_HashEntry *	OneWordFind (Tcl_HashTable *tablePtr,
+			    char *key);
+static Tcl_HashEntry *	OneWordCreate (Tcl_HashTable *tablePtr,
+			    char *key, int *newPtr);
 
 /*
  *----------------------------------------------------------------------

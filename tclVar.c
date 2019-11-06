@@ -39,18 +39,18 @@ static char *traceActive =	"trace is active on variable";
  * Forward references to procedures defined later in this file:
  */
 
-static  char *		CallTraces _ANSI_ARGS_((Interp *iPtr, Var *arrayPtr,
+static  char *		CallTraces (Interp *iPtr, Var *arrayPtr,
 			    Tcl_HashEntry *hPtr, char *part1, char *part2,
-			    int flags));
-static void		DeleteSearches _ANSI_ARGS_((Var *arrayVarPtr));
-static void		DeleteArray _ANSI_ARGS_((Interp *iPtr, char *arrayName,
-			    Var *varPtr, int flags));
-static Var *		NewVar _ANSI_ARGS_((int space));
-static ArraySearch *	ParseSearchId _ANSI_ARGS_((Tcl_Interp *interp,
-			    Var *varPtr, char *varName, char *string));
-static void		VarErrMsg _ANSI_ARGS_((Tcl_Interp *interp,
+			    int flags);
+static void		DeleteSearches (Var *arrayVarPtr);
+static void		DeleteArray (Interp *iPtr, char *arrayName,
+			    Var *varPtr, int flags);
+static Var *		NewVar (int space);
+static ArraySearch *	ParseSearchId (Tcl_Interp *interp,
+			    Var *varPtr, char *varName, char *string);
+static void		VarErrMsg (Tcl_Interp *interp,
 			    char *part1, char *part2, char *operation,
-			    char *reason));
+			    char *reason);
 
 /*
  *----------------------------------------------------------------------

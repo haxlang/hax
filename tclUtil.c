@@ -55,8 +55,8 @@ char *tclRegexpError = NULL;
  * Function prototypes for local procedures in this file:
  */
 
-static void		SetupAppendBuffer _ANSI_ARGS_((Interp *iPtr,
-			    int newSpace));
+static void		SetupAppendBuffer (Interp *iPtr,
+			    int newSpace);
 
 /*
  *----------------------------------------------------------------------

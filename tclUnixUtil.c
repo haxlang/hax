@@ -199,7 +199,7 @@ Tcl_Fork()
 	newSize = waitTableSize + WAIT_TABLE_GROW_BY;
 	newWaitTable = (WaitInfo *) ckalloc((unsigned)
 		(newSize * sizeof(WaitInfo)));
-	memcpy((VOID *) newWaitTable, (VOID *) waitTable,
+	memcpy(newWaitTable, waitTable,
 		(waitTableSize * sizeof(WaitInfo)));
 	if (waitTable != NULL) {
 	    ckfree((char *) waitTable);
@@ -924,7 +924,7 @@ TclMakeFileTable(iPtr, index)
 	newSize = index+1;
 	newPtrArray = (OpenFile **) ckalloc((unsigned)
 		((newSize)*sizeof(OpenFile *)));
-	memcpy((VOID *) newPtrArray, (VOID *) iPtr->filePtrArray,
+	memcpy(newPtrArray, iPtr->filePtrArray,
 		iPtr->numFiles*sizeof(OpenFile *));
 	for (i = iPtr->numFiles; i < newSize; i++) {
 	    newPtrArray[i] = NULL;

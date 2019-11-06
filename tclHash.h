@@ -81,10 +81,10 @@ typedef struct Tcl_HashTable {
 					 * TCL_ONE_WORD_KEYS, or an integer
 					 * giving the number of ints in a
 					 */
-    Tcl_HashEntry *(*findProc) _ANSI_ARGS_((struct Tcl_HashTable *tablePtr,
-	    char *key));
-    Tcl_HashEntry *(*createProc) _ANSI_ARGS_((struct Tcl_HashTable *tablePtr,
-	    char *key, int *newPtr));
+    Tcl_HashEntry *(*findProc) (struct Tcl_HashTable *tablePtr,
+	    char *key);
+    Tcl_HashEntry *(*createProc) (struct Tcl_HashTable *tablePtr,
+	    char *key, int *newPtr);
 } Tcl_HashTable;
 
 /*
@@ -131,17 +131,17 @@ typedef struct Tcl_HashSearch {
  * Exported procedures:
  */
 
-extern void		Tcl_DeleteHashEntry _ANSI_ARGS_((
-			    Tcl_HashEntry *entryPtr));
-extern void		Tcl_DeleteHashTable _ANSI_ARGS_((
-			    Tcl_HashTable *tablePtr));
-extern Tcl_HashEntry *	Tcl_FirstHashEntry _ANSI_ARGS_((
+extern void		Tcl_DeleteHashEntry (
+			    Tcl_HashEntry *entryPtr);
+extern void		Tcl_DeleteHashTable (
+			    Tcl_HashTable *tablePtr);
+extern Tcl_HashEntry *	Tcl_FirstHashEntry (
 			    Tcl_HashTable *tablePtr,
-			    Tcl_HashSearch *searchPtr));
-extern char *		Tcl_HashStats _ANSI_ARGS_((Tcl_HashTable *tablePtr));
-extern void		Tcl_InitHashTable _ANSI_ARGS_((Tcl_HashTable *tablePtr,
-			    int keyType));
-extern Tcl_HashEntry *	Tcl_NextHashEntry _ANSI_ARGS_((
-			    Tcl_HashSearch *searchPtr));
+			    Tcl_HashSearch *searchPtr);
+extern char *		Tcl_HashStats (Tcl_HashTable *tablePtr);
+extern void		Tcl_InitHashTable (Tcl_HashTable *tablePtr,
+			    int keyType);
+extern Tcl_HashEntry *	Tcl_NextHashEntry (
+			    Tcl_HashSearch *searchPtr);
 
 #endif /* _TCLHASH */

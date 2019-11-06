@@ -382,7 +382,7 @@ Tcl_DbCkrealloc(ptr, size, file, line)
     char *new;
 
     new = Tcl_DbCkalloc(size, file, line);
-    memcpy((VOID *) new, (VOID *) ptr, (int) size);
+    memcpy(new, ptr, (int) size);
     Tcl_DbCkfree(ptr, file, line);
     return(new);
 }
@@ -518,7 +518,7 @@ Tcl_CreateCommand (interp, "memory", MemoryCmd, (ClientData)NULL,
  *
  *----------------------------------------------------------------------
  */
-VOID *
+void *
 Tcl_Ckalloc (size)
     unsigned int size;
 {
@@ -542,7 +542,7 @@ Tcl_Ckalloc (size)
  */
 void
 Tcl_Ckfree (ptr)
-    VOID *ptr;
+    void *ptr;
 {
         free (ptr);
 }

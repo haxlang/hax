@@ -42,11 +42,11 @@ typedef struct {
  * Declarations for procedures local to this file:
  */
 
-static void		AppendResult _ANSI_ARGS_((Tcl_Interp *interp,
+static void		AppendResult (Tcl_Interp *interp,
 			    char *dir, char *separator, char *name,
-			    int nameLength));
-static int		DoGlob _ANSI_ARGS_((Tcl_Interp *interp, char *dir,
-			    char *rem));
+			    int nameLength);
+static int		DoGlob (Tcl_Interp *interp, char *dir,
+			    char *rem);
 
 /*
  *----------------------------------------------------------------------
@@ -441,7 +441,7 @@ Tcl_TildeSubst(interp, name)
 	if (length >= curSize) {
 	    length = curSize-1;
 	}
-	memcpy((VOID *) curBuf, (VOID *) (name+1), length);
+	memcpy(curBuf, (name+1), length);
 	curBuf[length] = '\0';
 	pwPtr = getpwnam(curBuf);
 	if (pwPtr == NULL) {
