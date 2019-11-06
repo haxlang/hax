@@ -70,8 +70,8 @@ static int  init_malloced_bodies = FALSE;
  *----------------------------------------------------------------------
  */
 static void
-dump_memory_info(outFile) 
-    FILE *outFile;
+dump_memory_info(
+    FILE *outFile)
 {
         fprintf(outFile,"total mallocs             %10d\n", 
                 total_mallocs);
@@ -96,11 +96,11 @@ dump_memory_info(outFile)
  *----------------------------------------------------------------------
  */
 static void
-ValidateMemory (memHeaderP, file, line, nukeGuards)
-    struct mem_header *memHeaderP;
-    char              *file;
-    int                line;
-    int                nukeGuards;
+ValidateMemory (
+    struct mem_header *memHeaderP,
+    char              *file,
+    int                line,
+    int                nukeGuards)
 {
     unsigned char *hiPtr;
     int   idx;
@@ -165,9 +165,9 @@ ValidateMemory (memHeaderP, file, line, nukeGuards)
  *----------------------------------------------------------------------
  */
 void
-Tcl_ValidateAllMemory (file, line)
-    char  *file;
-    int    line;
+Tcl_ValidateAllMemory (
+    char  *file,
+    int    line)
 {
     struct mem_header *memScanP;
 
@@ -188,8 +188,8 @@ Tcl_ValidateAllMemory (file, line)
  *----------------------------------------------------------------------
  */
 int
-Tcl_DumpActiveMemory (fileName)
-    char *fileName;
+Tcl_DumpActiveMemory (
+    char *fileName)
 {
     FILE              *fileP;
     struct mem_header *memScanP;
@@ -232,10 +232,10 @@ Tcl_DumpActiveMemory (fileName)
  *----------------------------------------------------------------------
  */
 char *
-Tcl_DbCkalloc(size, file, line)
-    unsigned int size;
-    char        *file;
-    int          line;
+Tcl_DbCkalloc(
+    unsigned int size,
+    char        *file,
+    int          line)
 {
     struct mem_header *result;
 
@@ -322,10 +322,10 @@ Tcl_DbCkalloc(size, file, line)
  */
 
 int
-Tcl_DbCkfree(ptr, file, line)
-    char *  ptr;
-    char     *file;
-    int       line;
+Tcl_DbCkfree(
+    char *  ptr,
+    char     *file,
+    int       line)
 {
     struct mem_header *memp = 0;  /* Must be zero for size calc */
 
@@ -373,11 +373,11 @@ Tcl_DbCkfree(ptr, file, line)
  *--------------------------------------------------------------------
  */
 char *
-Tcl_DbCkrealloc(ptr, size, file, line)
-    char *ptr;
-    unsigned int size;
-    char *file;
-    int line;
+Tcl_DbCkrealloc(
+    char *ptr,
+    unsigned int size,
+    char *file,
+    int line)
 {
     char *new;
 
@@ -406,11 +406,11 @@ Tcl_DbCkrealloc(ptr, size, file, line)
  */
 	/* ARGSUSED */
 static int
-MemoryCmd (clientData, interp, argc, argv)
-    char       *clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+MemoryCmd (
+    char       *clientData,
+    Tcl_Interp *interp,
+    int         argc,
+    char      **argv)
 {
     char *fileName;
 
@@ -499,8 +499,8 @@ bad_suboption:
  *----------------------------------------------------------------------
  */
 void
-Tcl_InitMemory(interp)
-    Tcl_Interp *interp;
+Tcl_InitMemory(
+    Tcl_Interp *interp)
 {
 Tcl_CreateCommand (interp, "memory", MemoryCmd, (ClientData)NULL, 
                   (void (*)())NULL);
@@ -519,8 +519,8 @@ Tcl_CreateCommand (interp, "memory", MemoryCmd, (ClientData)NULL,
  *----------------------------------------------------------------------
  */
 void *
-Tcl_Ckalloc (size)
-    unsigned int size;
+Tcl_Ckalloc (
+    unsigned int size)
 {
         char *result;
 
@@ -541,8 +541,8 @@ Tcl_Ckalloc (size)
  *----------------------------------------------------------------------
  */
 void
-Tcl_Ckfree (ptr)
-    void *ptr;
+Tcl_Ckfree (
+    void *ptr)
 {
         free (ptr);
 }
@@ -558,8 +558,8 @@ Tcl_Ckfree (ptr)
  */
 	/* ARGSUSED */
 void
-Tcl_InitMemory(interp)
-    Tcl_Interp *interp;
+Tcl_InitMemory(
+    Tcl_Interp *interp)
 {
 }
 
