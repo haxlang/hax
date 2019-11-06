@@ -9,12 +9,7 @@
 # CFLAGS.  Lastly, you'll have to provide your own replacement for the
 # "panic" procedure (see panic.c for what the current one does).
 
-# 2. ANSI-C procedure prototypes are turned on by default if supported
-# by the compiler.  To turn them off, uncomment the following line:
-
-# NP =		-DNO_PROTOTYPE
-
-# 3. If you want to put Tcl-related information in non-standard places,
+# 2. If you want to put Tcl-related information in non-standard places,
 # change the following definitions below to reflect where you want
 # things (all must be specified as full rooted path names):
 #
@@ -48,7 +43,7 @@ RANLIB =	ranlib
 SHELL =		/bin/sh
 
 CC =		cc
-CFLAGS =	-O -I. -DTCL_LIBRARY=\"${TCL_LIBRARY}\" ${NP}
+CFLAGS =	-O -I. -DTCL_LIBRARY=\"${TCL_LIBRARY}\"
 
 GENERIC_OBJS =	regexp.o tclAssem.o tclBasic.o tclCkalloc.o \
 	tclCmdAH.o tclCmdIL.o tclCmdMZ.o tclExpr.o tclGet.o \
