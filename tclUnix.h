@@ -61,7 +61,7 @@
 #define TCL_SYS_ERRLIST 1
 #define TCL_SYS_TIME_H 1
 #define TCL_SYS_WAIT_H 1
-#define TCL_UNION_WAIT 1
+#define TCL_UNION_WAIT 0
 #define TCL_PID_T 1
 #define TCL_UID_T 1
 
