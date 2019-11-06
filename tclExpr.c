@@ -194,11 +194,11 @@ static int		ExprTopLevel (Tcl_Interp *interp,
  */
 
 static int
-ExprParseString(interp, string, valuePtr)
-    Tcl_Interp *interp;		/* Where to store error message. */
-    char *string;		/* String to turn into value. */
-    Value *valuePtr;		/* Where to store value information. 
-				 * Caller must have initialized pv field. */
+ExprParseString(
+    Tcl_Interp *interp,		/* Where to store error message. */
+    char *string,		/* String to turn into value. */
+    Value *valuePtr		/* Where to store value information.
+				 * Caller must have initialized pv field. */)
 {
     char c;
 
@@ -285,14 +285,14 @@ ExprParseString(interp, string, valuePtr)
  */
 
 static int
-ExprLex(interp, infoPtr, valuePtr)
-    Tcl_Interp *interp;			/* Interpreter to use for error
+ExprLex(
+    Tcl_Interp *interp,			/* Interpreter to use for error
 					 * reporting. */
-    ExprInfo *infoPtr;		/* Describes the state of the parse. */
-    Value *valuePtr;		/* Where to store value, if that is
+    ExprInfo *infoPtr,		/* Describes the state of the parse. */
+    Value *valuePtr		/* Where to store value, if that is
 					 * what's parsed from string.  Caller
 					 * must have initialized pv field
-					 * correctly. */
+					 * correctly. */)
 {
     char *p, c;
     char *var, *term;
@@ -561,19 +561,19 @@ ExprLex(interp, infoPtr, valuePtr)
  */
 
 static int
-ExprGetValue(interp, infoPtr, prec, valuePtr)
-    Tcl_Interp *interp;			/* Interpreter to use for error
+ExprGetValue(
+    Tcl_Interp *interp,			/* Interpreter to use for error
 					 * reporting. */
-    ExprInfo *infoPtr;		/* Describes the state of the parse
+    ExprInfo *infoPtr,		/* Describes the state of the parse
 					 * just before the value (i.e. ExprLex
 					 * will be called to get first token
 					 * of value). */
-    int prec;				/* Treat any un-parenthesized operator
+    int prec,				/* Treat any un-parenthesized operator
 					 * with precedence <= this as the end
 					 * of the expression. */
-    Value *valuePtr;			/* Where to store the value of the
+    Value *valuePtr			/* Where to store the value of the
 					 * expression.   Caller must have
-					 * initialized pv field. */
+					 * initialized pv field. */)
 {
     Interp *iPtr = (Interp *) interp;
     Value value2;			/* Second operand for current
@@ -1112,8 +1112,8 @@ ExprGetValue(interp, infoPtr, prec, valuePtr)
  */
 
 static void
-ExprMakeString(valuePtr)
-    Value *valuePtr;		/* Value to be converted. */
+ExprMakeString(
+    Value *valuePtr		/* Value to be converted. */)
 {
     int shortfall;
 
@@ -1153,12 +1153,12 @@ ExprMakeString(valuePtr)
  */
 
 static int
-ExprTopLevel(interp, string, valuePtr)
-    Tcl_Interp *interp;			/* Context in which to evaluate the
+ExprTopLevel(
+    Tcl_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
-    char *string;			/* Expression to evaluate. */
-    Value *valuePtr;			/* Where to store result.  Should
-					 * not be initialized by caller. */
+    char *string,			/* Expression to evaluate. */
+    Value *valuePtr			/* Where to store result.  Should
+					 * not be initialized by caller. */)
 {
     ExprInfo info;
     int result;
@@ -1205,11 +1205,11 @@ ExprTopLevel(interp, string, valuePtr)
  */
 
 int
-Tcl_ExprLong(interp, string, ptr)
-    Tcl_Interp *interp;			/* Context in which to evaluate the
+Tcl_ExprLong(
+    Tcl_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
-    char *string;			/* Expression to evaluate. */
-    long *ptr;				/* Where to store result. */
+    char *string,			/* Expression to evaluate. */
+    long *ptr				/* Where to store result. */)
 {
     Value value;
     int result;
@@ -1232,11 +1232,11 @@ Tcl_ExprLong(interp, string, ptr)
 }
 
 int
-Tcl_ExprDouble(interp, string, ptr)
-    Tcl_Interp *interp;			/* Context in which to evaluate the
+Tcl_ExprDouble(
+    Tcl_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
-    char *string;			/* Expression to evaluate. */
-    double *ptr;			/* Where to store result. */
+    char *string,			/* Expression to evaluate. */
+    double *ptr				/* Where to store result. */)
 {
     Value value;
     int result;
@@ -1259,11 +1259,11 @@ Tcl_ExprDouble(interp, string, ptr)
 }
 
 int
-Tcl_ExprBoolean(interp, string, ptr)
-    Tcl_Interp *interp;			/* Context in which to evaluate the
+Tcl_ExprBoolean(
+    Tcl_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
-    char *string;			/* Expression to evaluate. */
-    int *ptr;				/* Where to store 0/1 result. */
+    char *string,			/* Expression to evaluate. */
+    int *ptr				/* Where to store 0/1 result. */)
 {
     Value value;
     int result;
@@ -1305,10 +1305,10 @@ Tcl_ExprBoolean(interp, string, ptr)
  */
 
 int
-Tcl_ExprString(interp, string)
-    Tcl_Interp *interp;			/* Context in which to evaluate the
+Tcl_ExprString(
+    Tcl_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
-    char *string;			/* Expression to evaluate. */
+    char *string			/* Expression to evaluate. */)
 {
     Value value;
     int result;
