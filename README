@@ -114,22 +114,13 @@ do it.  I'd like to keep the above list up-to-date and continue to
 improve the portability of Tcl.
 
 Tcl can be used on many other configurations with only a few
-modifications.  The file "porting.notes" contains information sent to
-me about what it took to get Tcl to run on various other configurations.
-I make no guarantees that this information is accurate or complete, but
-you may find it useful.  If you get Tcl running on a new configuration,
-I'd be happy to receive new information to add to "porting.notes".
+modifications.
 
 5. Compiling Tcl
 ----------------
 
 To compile Tcl on any of the configurations listed above, or systems
 similar to them, do the following:
-
-    (a) If your system isn't one of the ones listed above, look in the
-        file "porting.notes" to see if your system is listed there.  This
-	file contains additional notes on getting Tcl to run on various
-	other systems.
 
     (c) Configure the Makefile in this directory according to the
         instructions at the beginning of the file.  In particular, if
