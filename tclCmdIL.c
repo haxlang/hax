@@ -48,11 +48,11 @@ static int		SortCompareProc (const void *first,
 
 	/* ARGSUSED */
 int
-Tcl_IfCmd(dummy, interp, argc, argv)
-    ClientData dummy;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_IfCmd(
+    ClientData dummy,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     int i, result, value;
 
@@ -141,11 +141,11 @@ Tcl_IfCmd(dummy, interp, argc, argv)
 
     /* ARGSUSED */
 int
-Tcl_IncrCmd(dummy, interp, argc, argv)
-    ClientData dummy;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_IncrCmd(
+    ClientData dummy,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     int value;
     char *oldString, *result;
@@ -206,11 +206,11 @@ Tcl_IncrCmd(dummy, interp, argc, argv)
 
 	/* ARGSUSED */
 int
-Tcl_InfoCmd(dummy, interp, argc, argv)
-    ClientData dummy;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_InfoCmd(
+    ClientData dummy,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     Interp *iPtr = (Interp *) interp;
     int length;
@@ -583,11 +583,11 @@ Tcl_InfoCmd(dummy, interp, argc, argv)
 
 	/* ARGSUSED */
 int
-Tcl_JoinCmd(dummy, interp, argc, argv)
-    ClientData dummy;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_JoinCmd(
+    ClientData dummy,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     char *joinString;
     char **listArgv;
@@ -636,11 +636,11 @@ Tcl_JoinCmd(dummy, interp, argc, argv)
 
     /* ARGSUSED */
 int
-Tcl_LindexCmd(dummy, interp, argc, argv)
-    ClientData dummy;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_LindexCmd(
+    ClientData dummy,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     char *p, *element;
     int index, size, parenthesized, result;
@@ -698,11 +698,11 @@ Tcl_LindexCmd(dummy, interp, argc, argv)
 
 	/* ARGSUSED */
 int
-Tcl_LinsertCmd(dummy, interp, argc, argv)
-    ClientData dummy;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_LinsertCmd(
+    ClientData dummy,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     char *p, *element, savedChar;
     int i, index, count, result, size;
@@ -783,11 +783,11 @@ Tcl_LinsertCmd(dummy, interp, argc, argv)
 
 	/* ARGSUSED */
 int
-Tcl_ListCmd(dummy, interp, argc, argv)
-    ClientData dummy;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_ListCmd(
+    ClientData dummy,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     if (argc < 2) {
 	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -818,11 +818,11 @@ Tcl_ListCmd(dummy, interp, argc, argv)
 
 	/* ARGSUSED */
 int
-Tcl_LlengthCmd(dummy, interp, argc, argv)
-    ClientData dummy;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_LlengthCmd(
+    ClientData dummy,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     int count, result;
     char *element, *p;
@@ -865,11 +865,11 @@ Tcl_LlengthCmd(dummy, interp, argc, argv)
 
 	/* ARGSUSED */
 int
-Tcl_LrangeCmd(notUsed, interp, argc, argv)
-    ClientData notUsed;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_LrangeCmd(
+    ClientData notUsed,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     int first, last, result;
     char *begin, *end, c, *dummy;
@@ -957,11 +957,11 @@ Tcl_LrangeCmd(notUsed, interp, argc, argv)
 
 	/* ARGSUSED */
 int
-Tcl_LreplaceCmd(notUsed, interp, argc, argv)
-    ClientData notUsed;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_LreplaceCmd(
+    ClientData notUsed,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     char *p1, *p2, *element, savedChar, *dummy;
     int i, first, last, count, result, size;
@@ -1078,11 +1078,11 @@ Tcl_LreplaceCmd(notUsed, interp, argc, argv)
 
 	/* ARGSUSED */
 int
-Tcl_LsearchCmd(notUsed, interp, argc, argv)
-    ClientData notUsed;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_LsearchCmd(
+    ClientData notUsed,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     int listArgc;
     char **listArgv;
@@ -1127,11 +1127,11 @@ Tcl_LsearchCmd(notUsed, interp, argc, argv)
 
 	/* ARGSUSED */
 int
-Tcl_LsortCmd(notUsed, interp, argc, argv)
-    ClientData notUsed;			/* Not used. */
-    Tcl_Interp *interp;			/* Current interpreter. */
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Argument strings. */
+Tcl_LsortCmd(
+    ClientData notUsed,			/* Not used. */
+    Tcl_Interp *interp,			/* Current interpreter. */
+    int argc,				/* Number of arguments. */
+    char **argv				/* Argument strings. */)
 {
     int listArgc;
     char **listArgv;
@@ -1157,8 +1157,8 @@ Tcl_LsortCmd(notUsed, interp, argc, argv)
  */
 
 static int
-SortCompareProc(first, second)
-    const void *first, *second;		/* Elements to be compared. */
+SortCompareProc(
+    const void *first, const void *second /* Elements to be compared. */)
 {
     return strcmp(*((char **) first), *((char **) second));
 }
