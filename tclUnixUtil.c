@@ -82,10 +82,10 @@ static int waitTableUsed = 0;	/* Number of entries in waitTable that
  */
 
 int
-Tcl_EvalFile(interp, fileName)
-    Tcl_Interp *interp;		/* Interpreter in which to process file. */
-    char *fileName;		/* Name of file to process.  Tilde-substitution
-				 * will be performed on this name. */
+Tcl_EvalFile(
+    Tcl_Interp *interp,		/* Interpreter in which to process file. */
+    char *fileName		/* Name of file to process.  Tilde-substitution
+				 * will be performed on this name. */)
 {
     int fileId, result;
     struct stat statBuf;
@@ -170,7 +170,7 @@ Tcl_EvalFile(interp, fileName)
  */
 
 int
-Tcl_Fork()
+Tcl_Fork(void)
 {
     WaitInfo *waitPtr;
     pid_t pid;
@@ -247,12 +247,12 @@ Tcl_Fork()
  */
 
 int
-Tcl_WaitPids(numPids, pidPtr, statusPtr)
-    int numPids;		/* Number of pids to wait on:  gives size
+Tcl_WaitPids(
+    int numPids,		/* Number of pids to wait on:  gives size
 				 * of array pointed to by pidPtr. */
-    int *pidPtr;		/* Pids to wait on:  return when one of
+    int *pidPtr,		/* Pids to wait on:  return when one of
 				 * these processes exits or suspends. */
-    int *statusPtr;		/* Wait status is returned here. */
+    int *statusPtr		/* Wait status is returned here. */)
 {
     int i, count, pid;
     WaitInfo *waitPtr;
@@ -357,11 +357,11 @@ Tcl_WaitPids(numPids, pidPtr, statusPtr)
  */
 
 void
-Tcl_DetachPids(numPids, pidPtr)
-    int numPids;		/* Number of pids to detach:  gives size
+Tcl_DetachPids(
+    int numPids,		/* Number of pids to detach:  gives size
 				 * of array pointed to by pidPtr. */
-    int *pidPtr;		/* Array of pids to detach:  must have
-				 * been created by Tcl_Fork. */
+    int *pidPtr			/* Array of pids to detach:  must have
+				 * been created by Tcl_Fork. */)
 {
     WaitInfo *waitPtr;
     int i, count, pid;
@@ -425,37 +425,36 @@ Tcl_DetachPids(numPids, pidPtr)
  */
 
 int
-Tcl_CreatePipeline(interp, argc, argv, pidArrayPtr, inPipePtr,
-	outPipePtr, errFilePtr)
-    Tcl_Interp *interp;		/* Interpreter to use for error reporting. */
-    int argc;			/* Number of entries in argv. */
-    char **argv;		/* Array of strings describing commands in
+Tcl_CreatePipeline(
+    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+    int argc,			/* Number of entries in argv. */
+    char **argv,		/* Array of strings describing commands in
 				 * pipeline plus I/O redirection with <,
 				 * <<, and >.  Argv[argc] must be NULL. */
-    int **pidArrayPtr;		/* Word at *pidArrayPtr gets filled in with
+    int **pidArrayPtr,		/* Word at *pidArrayPtr gets filled in with
 				 * address of array of pids for processes
 				 * in pipeline (first pid is first process
 				 * in pipeline). */
-    int *inPipePtr;		/* If non-NULL, input to the pipeline comes
+    int *inPipePtr,		/* If non-NULL, input to the pipeline comes
 				 * from a pipe (unless overridden by
 				 * redirection in the command).  The file
 				 * id with which to write to this pipe is
 				 * stored at *inPipePtr.  -1 means command
 				 * specified its own input source. */
-    int *outPipePtr;		/* If non-NULL, output to the pipeline goes
+    int *outPipePtr,		/* If non-NULL, output to the pipeline goes
 				 * to a pipe, unless overriden by redirection
 				 * in the command.  The file id with which to
 				 * read frome this pipe is stored at
 				 * *outPipePtr.  -1 means command specified
 				 * its own output sink. */
-    int *errFilePtr;		/* If non-NULL, all stderr output from the
+    int *errFilePtr		/* If non-NULL, all stderr output from the
 				 * pipeline will go to a temporary file
 				 * created here, and a descriptor to read
 				 * the file will be left at *errFilePtr.
 				 * The file will be removed already, so
 				 * closing this descriptor will be the end
 				 * of the file.  If this is NULL, then
-				 * all stderr output goes to our stderr. */
+				 * all stderr output goes to our stderr. */)
 {
     int *pidPtr = NULL;		/* Points to malloc-ed array holding all
 				 * the pids of child processes. */
