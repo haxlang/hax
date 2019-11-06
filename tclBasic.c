@@ -128,7 +128,7 @@ static CmdInfo builtInCmds[] = {
  */
 
 Tcl_Interp *
-Tcl_CreateInterp()
+Tcl_CreateInterp(void)
 {
     Interp *iPtr;
     Command *cmdPtr;
@@ -217,9 +217,9 @@ Tcl_CreateInterp()
  */
 
 void
-Tcl_DeleteInterp(interp)
-    Tcl_Interp *interp;		/* Token for command interpreter (returned
-				 * by a previous call to Tcl_CreateInterp). */
+Tcl_DeleteInterp(
+    Tcl_Interp *interp		/* Token for command interpreter (returned
+				 * by a previous call to Tcl_CreateInterp). */)
 {
     Interp *iPtr = (Interp *) interp;
     Tcl_HashEntry *hPtr;
@@ -329,16 +329,16 @@ Tcl_DeleteInterp(interp)
  */
 
 void
-Tcl_CreateCommand(interp, cmdName, proc, clientData, deleteProc)
-    Tcl_Interp *interp;		/* Token for command interpreter (returned
+Tcl_CreateCommand(
+    Tcl_Interp *interp,		/* Token for command interpreter (returned
 				 * by a previous call to Tcl_CreateInterp). */
-    char *cmdName;		/* Name of command. */
-    Tcl_CmdProc *proc;		/* Command procedure to associate with
+    char *cmdName,		/* Name of command. */
+    Tcl_CmdProc *proc,		/* Command procedure to associate with
 				 * cmdName. */
-    ClientData clientData;	/* Arbitrary one-word value to pass to proc. */
-    Tcl_CmdDeleteProc *deleteProc;
+    ClientData clientData,	/* Arbitrary one-word value to pass to proc. */
+    Tcl_CmdDeleteProc *deleteProc
 				/* If not NULL, gives a procedure to call when
-				 * this command is deleted. */
+				 * this command is deleted. */)
 {
     Interp *iPtr = (Interp *) interp;
     Command *cmdPtr;
@@ -384,10 +384,10 @@ Tcl_CreateCommand(interp, cmdName, proc, clientData, deleteProc)
  */
 
 int
-Tcl_DeleteCommand(interp, cmdName)
-    Tcl_Interp *interp;		/* Token for command interpreter (returned
+Tcl_DeleteCommand(
+    Tcl_Interp *interp,		/* Token for command interpreter (returned
 				 * by a previous call to Tcl_CreateInterp). */
-    char *cmdName;		/* Name of command to remove. */
+    char *cmdName		/* Name of command to remove. */)
 {
     Interp *iPtr = (Interp *) interp;
     Tcl_HashEntry *hPtr;
@@ -429,16 +429,16 @@ Tcl_DeleteCommand(interp, cmdName)
  */
 
 int
-Tcl_Eval(interp, cmd, flags, termPtr)
-    Tcl_Interp *interp;		/* Token for command interpreter (returned
+Tcl_Eval(
+    Tcl_Interp *interp,		/* Token for command interpreter (returned
 				 * by a previous call to Tcl_CreateInterp). */
-    char *cmd;			/* Pointer to TCL command to interpret. */
-    int flags;			/* OR-ed combination of flags like
+    char *cmd,			/* Pointer to TCL command to interpret. */
+    int flags,			/* OR-ed combination of flags like
 				 * TCL_BRACKET_TERM and TCL_RECORD_BOUNDS. */
-    char **termPtr;		/* If non-NULL, fill in the address it points
+    char **termPtr		/* If non-NULL, fill in the address it points
 				 * to with the address of the char. just after
 				 * the last one that was part of cmd.  See
-				 * the man page for details on this. */
+				 * the man page for details on this. */)
 {
     /*
      * The storage immediately below is used to generate a copy
@@ -840,13 +840,13 @@ Tcl_Eval(interp, cmd, flags, termPtr)
  */
 
 Tcl_Trace
-Tcl_CreateTrace(interp, level, proc, clientData)
-    Tcl_Interp *interp;		/* Interpreter in which to create the trace. */
-    int level;			/* Only call proc for commands at nesting level
+Tcl_CreateTrace(
+    Tcl_Interp *interp,		/* Interpreter in which to create the trace. */
+    int level,			/* Only call proc for commands at nesting level
 				 * <= level (1 => top level). */
-    Tcl_CmdTraceProc *proc;	/* Procedure to call before executing each
+    Tcl_CmdTraceProc *proc,	/* Procedure to call before executing each
 				 * command. */
-    ClientData clientData;	/* Arbitrary one-word value to pass to proc. */
+    ClientData clientData	/* Arbitrary one-word value to pass to proc. */)
 {
     Trace *tracePtr;
     Interp *iPtr = (Interp *) interp;
@@ -879,10 +879,10 @@ Tcl_CreateTrace(interp, level, proc, clientData)
  */
 
 void
-Tcl_DeleteTrace(interp, trace)
-    Tcl_Interp *interp;		/* Interpreter that contains trace. */
-    Tcl_Trace trace;		/* Token for trace (returned previously by
-				 * Tcl_CreateTrace). */
+Tcl_DeleteTrace(
+    Tcl_Interp *interp,		/* Interpreter that contains trace. */
+    Tcl_Trace trace		/* Token for trace (returned previously by
+				 * Tcl_CreateTrace). */)
 {
     Interp *iPtr = (Interp *) interp;
     Trace *tracePtr = (Trace *) trace;
@@ -923,10 +923,10 @@ Tcl_DeleteTrace(interp, trace)
  */
 
 void
-Tcl_AddErrorInfo(interp, message)
-    Tcl_Interp *interp;		/* Interpreter to which error information
+Tcl_AddErrorInfo(
+    Tcl_Interp *interp,		/* Interpreter to which error information
 				 * pertains. */
-    char *message;		/* Message to record. */
+    char *message		/* Message to record. */)
 {
     Interp *iPtr = (Interp *) interp;
 
@@ -1052,9 +1052,9 @@ Tcl_VarEval(
  */
 
 int
-Tcl_GlobalEval(interp, command)
-    Tcl_Interp *interp;		/* Interpreter in which to evaluate command. */
-    char *command;		/* Command to evaluate. */
+Tcl_GlobalEval(
+    Tcl_Interp *interp,		/* Interpreter in which to evaluate command. */
+    char *command		/* Command to evaluate. */)
 {
     Interp *iPtr = (Interp *) interp;
     int result;
