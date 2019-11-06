@@ -65,7 +65,7 @@ typedef struct {
 Tcl_CmdBuf
 Tcl_CreateCmdBuf()
 {
-    register CmdBuf *cbPtr;
+    CmdBuf *cbPtr;
 
     cbPtr = (CmdBuf *) ckalloc(sizeof(CmdBuf));
     cbPtr->buffer = (char *) ckalloc(CMD_BUF_SIZE);
@@ -97,7 +97,7 @@ Tcl_DeleteCmdBuf(buffer)
     Tcl_CmdBuf buffer;		/* Token for command buffer (return value
 				 * from previous call to Tcl_CreateCmdBuf). */
 {
-    register CmdBuf *cbPtr = (CmdBuf *) buffer;
+    CmdBuf *cbPtr = (CmdBuf *) buffer;
 
     ckfree(cbPtr->buffer);
     ckfree((char *) cbPtr);
@@ -141,7 +141,7 @@ Tcl_AssembleCmd(buffer, string)
 				 * regardless of whether parentheses are
 				 * matched or not. */
 {
-    register CmdBuf *cbPtr = (CmdBuf *) buffer;
+    CmdBuf *cbPtr = (CmdBuf *) buffer;
     int length, totalLength, c;
 
     /*
@@ -218,7 +218,7 @@ int
 Tcl_CommandComplete(cmd)
     char *cmd;			/* Command to check. */
 {
-    register char *p = cmd;
+    char *p = cmd;
 
     p = cmd;
     while (1) {

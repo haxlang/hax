@@ -121,7 +121,7 @@ void
 Tcl_InitHistory(interp)
     Tcl_Interp *interp;		/* Interpreter to initialize. */
 {
-    register Interp *iPtr = (Interp *) interp;
+    Interp *iPtr = (Interp *) interp;
     int i;
 
     if (iPtr->numEvents != 0) {
@@ -172,8 +172,8 @@ Tcl_RecordAndEval(interp, cmd, flags)
 				 * TCL_NO_EVAL means only record: don't
 				 * execute command. */
 {
-    register Interp *iPtr = (Interp *) interp;
-    register HistoryEvent *eventPtr;
+    Interp *iPtr = (Interp *) interp;
+    HistoryEvent *eventPtr;
     int length, result;
 
     if (iPtr->numEvents == 0) {
@@ -256,8 +256,8 @@ Tcl_HistoryCmd(dummy, interp, argc, argv)
     int argc;				/* Number of arguments. */
     char **argv;			/* Argument strings. */
 {
-    register Interp *iPtr = (Interp *) interp;
-    register HistoryEvent *eventPtr;
+    Interp *iPtr = (Interp *) interp;
+    HistoryEvent *eventPtr;
     int length;
     char c;
 
@@ -560,10 +560,10 @@ MakeSpace(hPtr, size)
 static void
 InsertRev(iPtr, revPtr)
     Interp *iPtr;			/* Interpreter to use. */
-    register HistoryRev *revPtr;	/* Revision to add to iPtr's list. */
+    HistoryRev *revPtr;	/* Revision to add to iPtr's list. */
 {
-    register HistoryRev *curPtr;
-    register HistoryRev *prevPtr;
+    HistoryRev *curPtr;
+    HistoryRev *prevPtr;
 
     for (curPtr = iPtr->revPtr, prevPtr = NULL; curPtr != NULL;
 	    prevPtr = curPtr, curPtr = curPtr->nextPtr) {
@@ -627,11 +627,11 @@ InsertRev(iPtr, revPtr)
 
 static void
 RevCommand(iPtr, string)
-    register Interp *iPtr;	/* Interpreter in which to perform the
+    Interp *iPtr;	/* Interpreter in which to perform the
 				 * substitution. */
     char *string;		/* String to substitute. */
 {
-    register HistoryRev *revPtr;
+    HistoryRev *revPtr;
 
     if ((iPtr->evalFirst == NULL) || (iPtr->revDisables > 0)) {
 	return;
@@ -665,11 +665,11 @@ RevCommand(iPtr, string)
 
 static void
 RevResult(iPtr, string)
-    register Interp *iPtr;	/* Interpreter in which to perform the
+    Interp *iPtr;	/* Interpreter in which to perform the
 				 * substitution. */
     char *string;		/* String to substitute. */
 {
-    register HistoryRev *revPtr;
+    HistoryRev *revPtr;
     char *evalFirst, *evalLast;
     char *argv[2];
 
@@ -731,11 +731,11 @@ RevResult(iPtr, string)
 
 static void
 DoRevs(iPtr)
-    register Interp *iPtr;	/* Interpreter whose history is to
+    Interp *iPtr;	/* Interpreter whose history is to
 				 * be modified. */
 {
-    register HistoryRev *revPtr;
-    register HistoryEvent *eventPtr;
+    HistoryRev *revPtr;
+    HistoryEvent *eventPtr;
     char *newCommand, *p;
     unsigned int size;
     int bytesSeen, count;
@@ -813,11 +813,11 @@ DoRevs(iPtr)
 
 static HistoryEvent *
 GetEvent(iPtr, string)
-    register Interp *iPtr;	/* Interpreter in which to look. */
+    Interp *iPtr;	/* Interpreter in which to look. */
     char *string;		/* Description of event. */
 {
     int eventNum, index;
-    register HistoryEvent *eventPtr;
+    HistoryEvent *eventPtr;
     int length;
 
     /*
@@ -895,7 +895,7 @@ GetEvent(iPtr, string)
 
 static int
 SubsAndEval(iPtr, cmd, old, new)
-    register Interp *iPtr;	/* Interpreter in which to execute
+    Interp *iPtr;	/* Interpreter in which to execute
 				 * new command. */
     char *cmd;			/* Command in which to substitute. */
     char *old;			/* String to search for in command. */
@@ -977,7 +977,7 @@ SubsAndEval(iPtr, cmd, old, new)
 
 static char *
 GetWords(iPtr, command, words)
-    register Interp *iPtr;	/* Tcl interpreter in which to place
+    Interp *iPtr;	/* Tcl interpreter in which to place
 				 * an error message if needed. */
     char *command;		/* Command string. */
     char *words;		/* Description of which words to extract
@@ -986,7 +986,7 @@ GetWords(iPtr, command, words)
 {
     char *result;
     char *start, *end, *dst;
-    register char *next;
+    char *next;
     int first;			/* First word desired. -1 means last word
 				 * only. */
     int last;			/* Last word desired.  -1 means use everything

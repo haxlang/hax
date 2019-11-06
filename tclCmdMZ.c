@@ -112,7 +112,7 @@ Tcl_RegexpCmd(dummy, interp, argc, argv)
      */
 
     if (noCase) {
-	register char *dst, *src;
+	char *dst, *src;
 
 	string = (char *) ckalloc((unsigned) (strlen(argPtr[1]) + 1));
 	for (src = argPtr[1], dst = string; *src != 0; src++, dst++) {
@@ -215,7 +215,7 @@ Tcl_RegsubCmd(dummy, interp, argc, argv)
     regexp *regexpPtr;
     char *string, *p, *firstChar, *newValue, **argPtr;
     int match, result, flags;
-    register char *src, c;
+    char *src, c;
 
     if (argc < 5) {
 	wrongNumArgs:
@@ -251,7 +251,7 @@ Tcl_RegsubCmd(dummy, interp, argc, argv)
      */
 
     if (noCase) {
-	register char *dst;
+	char *dst;
 
 	string = (char *) ckalloc((unsigned) (strlen(argPtr[1]) + 1));
 	for (src = argPtr[1], dst = string; *src != 0; src++, dst++) {
@@ -439,7 +439,7 @@ Tcl_RenameCmd(dummy, interp, argc, argv)
     int argc;				/* Number of arguments. */
     char **argv;			/* Argument strings. */
 {
-    register Command *cmdPtr;
+    Command *cmdPtr;
     Interp *iPtr = (Interp *) interp;
     Tcl_HashEntry *hPtr;
     int new;
@@ -549,7 +549,7 @@ Tcl_ScanCmd(dummy, interp, argc, argv)
     } Field;
     Field fields[MAX_FIELDS];		/* Info about all the fields in the
 					 * format string. */
-    register Field *curField;
+    Field *curField;
     int numFields = 0;			/* Number of fields actually
 					 * specified. */
     int suppress;			/* Current field is assignment-
@@ -558,7 +558,7 @@ Tcl_ScanCmd(dummy, interp, argc, argv)
 					 * all results combined. */
     char *results;			/* Where scanned output goes.  */
     int numScanned;			/* sscanf's result. */
-    register char *fmt;
+    char *fmt;
     int i, widthSpecified;
 
     if (argc < 3) {
@@ -779,7 +779,7 @@ Tcl_SplitCmd(dummy, interp, argc, argv)
     char **argv;			/* Argument strings. */
 {
     char *splitChars;
-    register char *p, *p2;
+    char *p, *p2;
     char *elementStart;
 
     if (argc == 2) {
@@ -855,7 +855,7 @@ Tcl_StringCmd(dummy, interp, argc, argv)
     char **argv;			/* Argument strings. */
 {
     int length;
-    register char *p, c;
+    char *p, c;
     int match;
     int first;
     int left = 0, right = 0;
@@ -995,7 +995,7 @@ Tcl_StringCmd(dummy, interp, argc, argv)
 	return TCL_OK;
     } else if ((c == 't') && (strncmp(argv[1], "tolower", length) == 0)
 	    && (length >= 3)) {
-	register char *p;
+	char *p;
 
 	if (argc != 3) {
 	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -1011,7 +1011,7 @@ Tcl_StringCmd(dummy, interp, argc, argv)
 	return TCL_OK;
     } else if ((c == 't') && (strncmp(argv[1], "toupper", length) == 0)
 	    && (length >= 3)) {
-	register char *p;
+	char *p;
 
 	if (argc != 3) {
 	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -1028,7 +1028,7 @@ Tcl_StringCmd(dummy, interp, argc, argv)
     } else if ((c == 't') && (strncmp(argv[1], "trim", length) == 0)
 	    && (length == 4)) {
 	char *trimChars;
-	register char *p, *checkPtr;
+	char *p, *checkPtr;
 
 	left = right = 1;
 

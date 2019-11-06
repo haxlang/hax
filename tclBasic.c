@@ -130,9 +130,9 @@ static CmdInfo builtInCmds[] = {
 Tcl_Interp *
 Tcl_CreateInterp()
 {
-    register Interp *iPtr;
-    register Command *cmdPtr;
-    register CmdInfo *cmdInfoPtr;
+    Interp *iPtr;
+    Command *cmdPtr;
+    CmdInfo *cmdInfoPtr;
     int i;
 
     iPtr = (Interp *) ckalloc(sizeof(Interp));
@@ -224,7 +224,7 @@ Tcl_DeleteInterp(interp)
     Interp *iPtr = (Interp *) interp;
     Tcl_HashEntry *hPtr;
     Tcl_HashSearch search;
-    register Command *cmdPtr;
+    Command *cmdPtr;
     int i;
 
     /*
@@ -341,7 +341,7 @@ Tcl_CreateCommand(interp, cmdName, proc, clientData, deleteProc)
 				 * this command is deleted. */
 {
     Interp *iPtr = (Interp *) interp;
-    register Command *cmdPtr;
+    Command *cmdPtr;
     Tcl_HashEntry *hPtr;
     int new;
 
@@ -463,13 +463,13 @@ Tcl_Eval(interp, cmd, flags, termPtr)
     int argc;
     int argSize = NUM_ARGS;
 
-    register char *src;			/* Points to current character
+    char *src;			/* Points to current character
 					 * in cmd. */
     char termChar;			/* Return when this character is found
 					 * (either ']' or '\0').  Zero means
 					 * that newlines terminate commands. */
     int result;				/* Return value. */
-    register Interp *iPtr = (Interp *) interp;
+    Interp *iPtr = (Interp *) interp;
     Tcl_HashEntry *hPtr;
     Command *cmdPtr;
     char *dummy;			/* Make termPtr point here if it was
@@ -482,7 +482,7 @@ Tcl_Eval(interp, cmd, flags, termPtr)
 					 * all of offending command is included
 					 * in errorInfo.  "" means that the
 					 * command is all there. */
-    register Trace *tracePtr;
+    Trace *tracePtr;
 
     /*
      * Initialize the result to an empty string and clear out any
@@ -543,7 +543,7 @@ Tcl_Eval(interp, cmd, flags, termPtr)
 	 */
 
 	while (1) {
-	    register char c = *src;
+	    char c = *src;
 
 	    if ((CHAR_TYPE(c) != TCL_SPACE) && (c != ';') && (c != '\n')) {
 		break;
@@ -751,7 +751,7 @@ Tcl_Eval(interp, cmd, flags, termPtr)
 
     if ((result == TCL_ERROR) && !(iPtr->flags & ERR_ALREADY_LOGGED)) {
 	int numChars;
-	register char *p;
+	char *p;
 
 	/*
 	 * Compute the line number where the error occurred.
@@ -848,8 +848,8 @@ Tcl_CreateTrace(interp, level, proc, clientData)
 				 * command. */
     ClientData clientData;	/* Arbitrary one-word value to pass to proc. */
 {
-    register Trace *tracePtr;
-    register Interp *iPtr = (Interp *) interp;
+    Trace *tracePtr;
+    Interp *iPtr = (Interp *) interp;
 
     tracePtr = (Trace *) ckalloc(sizeof(Trace));
     tracePtr->level = level;
@@ -884,9 +884,9 @@ Tcl_DeleteTrace(interp, trace)
     Tcl_Trace trace;		/* Token for trace (returned previously by
 				 * Tcl_CreateTrace). */
 {
-    register Interp *iPtr = (Interp *) interp;
-    register Trace *tracePtr = (Trace *) trace;
-    register Trace *tracePtr2;
+    Interp *iPtr = (Interp *) interp;
+    Trace *tracePtr = (Trace *) trace;
+    Trace *tracePtr2;
 
     if (iPtr->tracePtr == tracePtr) {
 	iPtr->tracePtr = tracePtr->nextPtr;
@@ -928,7 +928,7 @@ Tcl_AddErrorInfo(interp, message)
 				 * pertains. */
     char *message;		/* Message to record. */
 {
-    register Interp *iPtr = (Interp *) interp;
+    Interp *iPtr = (Interp *) interp;
 
     /*
      * If an error is already being logged, then the new errorInfo
@@ -1056,7 +1056,7 @@ Tcl_GlobalEval(interp, command)
     Tcl_Interp *interp;		/* Interpreter in which to evaluate command. */
     char *command;		/* Command to evaluate. */
 {
-    register Interp *iPtr = (Interp *) interp;
+    Interp *iPtr = (Interp *) interp;
     int result;
     CallFrame *savedVarFramePtr;
 

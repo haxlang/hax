@@ -872,7 +872,7 @@ Tcl_GetsCmd(notUsed, interp, argc, argv)
     char buffer[BUF_SIZE+1];
     int totalCount, done, flags;
     OpenFile *filePtr;
-    register FILE *f;
+    FILE *f;
 
     if ((argc != 2) && (argc != 3)) {
 	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -898,8 +898,8 @@ Tcl_GetsCmd(notUsed, interp, argc, argv)
     flags = 0;
     f = filePtr->f;
     while (!done) {
-	register int c, count;
-	register char *p;
+	int c, count;
+	char *p;
 
 	for (p = buffer, count = 0; count < BUF_SIZE-1; count++, p++) {
 	    c = getc(f);
@@ -971,7 +971,7 @@ Tcl_OpenCmd(notUsed, interp, argc, argv)
     Interp *iPtr = (Interp *) interp;
     int pipeline, fd;
     char *access;
-    register OpenFile *filePtr;
+    OpenFile *filePtr;
 
     if (argc == 2) {
 	access = "r";

@@ -200,7 +200,7 @@ ExprParseString(interp, string, valuePtr)
     Value *valuePtr;		/* Where to store value information. 
 				 * Caller must have initialized pv field. */
 {
-    register char c;
+    char c;
 
     /*
      * Try to convert the string to a number.
@@ -288,13 +288,13 @@ static int
 ExprLex(interp, infoPtr, valuePtr)
     Tcl_Interp *interp;			/* Interpreter to use for error
 					 * reporting. */
-    register ExprInfo *infoPtr;		/* Describes the state of the parse. */
-    register Value *valuePtr;		/* Where to store value, if that is
+    ExprInfo *infoPtr;		/* Describes the state of the parse. */
+    Value *valuePtr;		/* Where to store value, if that is
 					 * what's parsed from string.  Caller
 					 * must have initialized pv field
 					 * correctly. */
 {
-    register char *p, c;
+    char *p, c;
     char *var, *term;
     int result;
 
@@ -564,7 +564,7 @@ static int
 ExprGetValue(interp, infoPtr, prec, valuePtr)
     Tcl_Interp *interp;			/* Interpreter to use for error
 					 * reporting. */
-    register ExprInfo *infoPtr;		/* Describes the state of the parse
+    ExprInfo *infoPtr;		/* Describes the state of the parse
 					 * just before the value (i.e. ExprLex
 					 * will be called to get first token
 					 * of value). */
@@ -1113,7 +1113,7 @@ ExprGetValue(interp, infoPtr, prec, valuePtr)
 
 static void
 ExprMakeString(valuePtr)
-    register Value *valuePtr;		/* Value to be converted. */
+    Value *valuePtr;		/* Value to be converted. */
 {
     int shortfall;
 
