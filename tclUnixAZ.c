@@ -1537,14 +1537,9 @@ Tcl_TimeCmd(
 {
     int count, i, result;
     double timePer;
-#if TCL_GETTOD
     struct timeval start, stop;
     struct timezone tz;
     int micros;
-#else
-    struct tms dummy2;
-    long start, stop;
-#endif
 
     if (argc == 2) {
 	count = 1;
@@ -1557,11 +1552,7 @@ Tcl_TimeCmd(
 		" command ?count?\"", (char *) NULL);
 	return TCL_ERROR;
     }
-#if TCL_GETTOD
     gettimeofday(&start, &tz);
-#else
-    start = times(&dummy2);
-#endif
     for (i = count ; i > 0; i--) {
 	result = Tcl_Eval(interp, argv[1], 0, (char **) NULL);
 	if (result != TCL_OK) {
@@ -1574,15 +1565,11 @@ Tcl_TimeCmd(
 	    return result;
 	}
     }
-#if TCL_GETTOD
     gettimeofday(&stop, &tz);
     micros = (stop.tv_sec - start.tv_sec)*1000000
 	    + (stop.tv_usec - start.tv_usec);
     timePer = micros;
-#else
-    stop = times(&dummy2);
-    timePer = (((double) (stop - start))*1000000.0)/CLK_TCK;
-#endif
+
     Tcl_ResetResult(interp);
     sprintf(interp->result, "%.0f microseconds per iteration", timePer/count);
     return TCL_OK;

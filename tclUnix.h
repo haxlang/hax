@@ -33,9 +33,6 @@
  * areas.  The defaults below are for BSD-based systems like SunOS
  * or Ultrix.
  *
- * TCL_GETTOD -			1 means there exists a library procedure
- *				"gettimeofday" (e.g. BSD systems).  0 means
- *				have to use "times" instead.
  * TCL_SYS_ERRLIST -		1 means that the array sys_errlist is
  *				defined as part of the C library.
  * TCL_SYS_TIME_H -		1 means there exists an include file
@@ -49,7 +46,6 @@
  *				uid_t.  0 means that it doesn't.
  */
 
-#define TCL_GETTOD 1
 #define TCL_SYS_ERRLIST 1
 #define TCL_SYS_TIME_H 1
 #define TCL_SYS_WAIT_H 1
@@ -119,26 +115,6 @@
 
 #ifndef SEEK_END
 #   define SEEK_END 2
-#endif
-
-/*
- * The stuff below is needed by the "time" command.  If this
- * system has no gettimeofday call, then must use times and the
- * CLK_TCK #define (from sys/param.h) to compute elapsed time.
- * Unfortunately, some systems only have HZ and no CLK_TCK, and
- * some might not even have HZ.
- */
-
-#if ! TCL_GETTOD
-#   include <sys/times.h>
-#   include <sys/param.h>
-#   ifndef CLK_TCK
-#       ifdef HZ
-#           define CLK_TCK HZ
-#       else
-#           define CLK_TCK 60
-#       endif
-#   endif
 #endif
 
 /*
