@@ -40,17 +40,11 @@
  * TCL_SYS_WAIT_H -		1 means there exists an include file
  *				<sys/wait.h> that defines constants related
  *				to the results of "wait".
- * TCL_PID_T -			1 means that <sys/types> defines the type
- *				pid_t.  0 means that it doesn't.
- * TCL_UID_T -			1 means that <sys/types> defines the type
- *				uid_t.  0 means that it doesn't.
  */
 
 #define TCL_SYS_ERRLIST 1
 #define TCL_SYS_TIME_H 1
 #define TCL_SYS_WAIT_H 1
-#define TCL_PID_T 1
-#define TCL_UID_T 1
 
 #include <errno.h>
 #include <fcntl.h>
@@ -208,17 +202,6 @@
 #   else
 #       define MAXPATHLEN 2048
 #   endif
-#endif
-
-/*
- * Define pid_t and uid_t if they're not already defined.
- */
-
-#if ! TCL_PID_T
-#   define pid_t int
-#endif
-#if ! TCL_UID_T
-#   define uid_t int
 #endif
 
 /*
