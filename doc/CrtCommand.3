@@ -10,30 +10,30 @@
 '\" $Header: /user6/ouster/tcl/man/RCS/CrtCommand.3,v 1.7 93/01/31 15:35:29 ouster Exp $ SPRITE (Berkeley)
 '\" 
 .so man.macros
-.HS Tcl_CreateCommand tcl
+.HS Hax_CreateCommand hax
 .BS
 .SH NAME
-Tcl_CreateCommand, Tcl_DeleteCommand \- define application-specific command bindings
+Hax_CreateCommand, Hax_DeleteCommand \- define application-specific command bindings
 .SH SYNOPSIS
 .nf
-\fB#include <tcl.h>\fR
+\fB#include <hax.h>\fR
 .sp
-\fBTcl_CreateCommand\fR(\fIinterp, cmdName, proc, clientData, deleteProc\fR)
+\fBHax_CreateCommand\fR(\fIinterp, cmdName, proc, clientData, deleteProc\fR)
 .sp
 int
-\fBTcl_DeleteCommand\fR(\fIinterp, cmdName\fR)
+\fBHax_DeleteCommand\fR(\fIinterp, cmdName\fR)
 .SH ARGUMENTS
-.AS Tcl_CmdDeleteProc (*deleteProc)()
-.AP Tcl_Interp *interp in
+.AS Hax_CmdDeleteProc (*deleteProc)()
+.AP Hax_Interp *interp in
 Interpreter in which to create new command.
 .AP char *cmdName in
 Name of command to create or delete.
-.AP Tcl_CmdProc *proc in
+.AP Hax_CmdProc *proc in
 Implementation of new command:  \fIproc\fR will be called whenever
 \fIcmdName\fR is invoked as a command.
 .AP ClientData clientData in
 Arbitrary one-word value to pass to \fIproc\fR and \fIdeleteProc\fR.
-.AP Tcl_CmdDeleteProc *deleteProc in
+.AP Hax_CmdDeleteProc *deleteProc in
 Procedure to call before \fIcmdName\fR is deleted from the interpreter;
 allows for command-specific cleanup.  If NULL, then no procedure is
 called before the command is deleted.
@@ -41,19 +41,19 @@ called before the command is deleted.
 
 .SH DESCRIPTION
 .PP
-\fBTcl_CreateCommand\fR defines a new command in \fIinterp\fR and associates
+\fBHax_CreateCommand\fR defines a new command in \fIinterp\fR and associates
 it with procedure \fIproc\fR such that whenever \fIcmdName\fR is
-invoked as a Tcl command (via a call to \fBTcl_Eval\fR) the Tcl interpreter
+invoked as a Hax command (via a call to \fBHax_Eval\fR) the Hax interpreter
 will call \fIproc\fR
 to process the command.  If there is already a command \fIcmdName\fR
 associated with the interpreter, it is deleted.  \fIProc\fP should
-have arguments and result that match the type \fBTcl_CmdProc\fR:
+have arguments and result that match the type \fBHax_CmdProc\fR:
 .nf
 .RS
-typedef int Tcl_CmdProc(
+typedef int Hax_CmdProc(
 .RS
 ClientData \fIclientData\fR,
-Tcl_Interp *\fIinterp\fR,
+Hax_Interp *\fIinterp\fR,
 int \fIargc\fR,
 char *\fIargv\fR[]);
 .RE
@@ -61,7 +61,7 @@ char *\fIargv\fR[]);
 .fi
 When \fIproc\fR is invoked the \fIclientData\fP and \fIinterp\fR
 parameters will be copies of the \fIclientData\fP and \fIinterp\fR
-arguments given to \fBTcl_CreateCommand\fR.
+arguments given to \fBHax_CreateCommand\fR.
 Typically, \fIclientData\fR points to an application-specific
 data structure that describes what to do when the command procedure
 is invoked.  \fIArgc\fR and \fIargv\fR describe the arguments to
@@ -71,54 +71,54 @@ as strings.  The \fIargv\fR array will contain \fIargc\fR+1 values;
 the first \fIargc\fR values point to the argument strings, and the
 last value is NULL.
 .PP
-\fIProc\fR must return an integer code that is either \fBTCL_OK\fR, \fBTCL_ERROR\fR,
-\fBTCL_RETURN\fR, \fBTCL_BREAK\fR, or \fBTCL_CONTINUE\fR.  See the Tcl overview man page
+\fIProc\fR must return an integer code that is either \fBHAX_OK\fR, \fBHAX_ERROR\fR,
+\fBHAX_RETURN\fR, \fBHAX_BREAK\fR, or \fBHAX_CONTINUE\fR.  See the Hax overview man page
 for details on what these codes mean.  Most normal commands will only
-return \fBTCL_OK\fR or \fBTCL_ERROR\fR.  In addition, \fIproc\fR must set
+return \fBHAX_OK\fR or \fBHAX_ERROR\fR.  In addition, \fIproc\fR must set
 \fIinterp->result\fR to point to a string value;
-in the case of a \fBTCL_OK\fR return code this gives the result
-of the command, and in the case of \fBTCL_ERROR\fR it gives an error message.
-The \fBTcl_SetResult\fR procedure provides an easy interface for setting
+in the case of a \fBHAX_OK\fR return code this gives the result
+of the command, and in the case of \fBHAX_ERROR\fR it gives an error message.
+The \fBHax_SetResult\fR procedure provides an easy interface for setting
 the return value;  for complete details on how the \fIinterp->result\fR
-field is managed, see the \fBTcl_Interp\fR man page.
+field is managed, see the \fBHax_Interp\fR man page.
 Before invoking a command procedure,
-\fBTcl_Eval\fR sets \fIinterp->result\fR to point to an empty string, so simple
+\fBHax_Eval\fR sets \fIinterp->result\fR to point to an empty string, so simple
 commands can return an empty result by doing nothing at all.
 .PP
-The contents of the \fIargv\fR array are copies made by the Tcl interpreter
+The contents of the \fIargv\fR array are copies made by the Hax interpreter
 for the use of \fIproc\fR.  \fIProc\fR may alter any of the strings
 in \fIargv\fR.  However, the \fIargv\fR array
 is recycled as soon as \fIproc\fR returns, so \fIproc\fR must not set
 \fIinterp->result\fR to point anywhere within the \fIargv\fR values
-(call Tcl_SetResult
-with status \fBTCL_VOLATILE\fR if you want to return something from the
+(call Hax_SetResult
+with status \fBHAX_VOLATILE\fR if you want to return something from the
 \fIargv\fR array).
 .PP
 \fIDeleteProc\fR will be invoked when (if) \fIcmdName\fR is deleted.
-This can occur through a call to \fBTcl_DeleteCommand\fR or \fBTcl_DeleteInterp\fR,
-or by replacing \fIcmdName\fR in another call to Tcl_CreateCommand.
+This can occur through a call to \fBHax_DeleteCommand\fR or \fBHax_DeleteInterp\fR,
+or by replacing \fIcmdName\fR in another call to Hax_CreateCommand.
 \fIDeleteProc\fR is invoked before the command is deleted, and gives the
 application an opportunity to release any structures associated
 with the command.  \fIDeleteProc\fR should have arguments and
-result that match the type \fBTcl_CmdDeleteProc\fR:
+result that match the type \fBHax_CmdDeleteProc\fR:
 .nf
 .RS
 .sp
-typedef void Tcl_CmdDeleteProc(ClientData \fIclientData\fR);
+typedef void Hax_CmdDeleteProc(ClientData \fIclientData\fR);
 .sp
 .RE
 .fi
 The \fIclientData\fR argument will be the same as the \fIclientData\fR
-argument passed to \fBTcl_CreateCommand\fR.
+argument passed to \fBHax_CreateCommand\fR.
 .PP
-\fBTcl_DeleteCommand\fR deletes a command from a command interpreter.
+\fBHax_DeleteCommand\fR deletes a command from a command interpreter.
 Once the call completes, attempts to invoke \fIcmdName\fR in
 \fIinterp\fR will result in errors.
 If \fIcmdName\fR isn't bound as a command in \fIinterp\fR then
-\fBTcl_DeleteCommand\fR does nothing and returns -1;  otherwise
+\fBHax_DeleteCommand\fR does nothing and returns -1;  otherwise
 it returns 0.
 There are no restrictions on \fIcmdName\fR:  it may refer to
-a built-in command, an application-specific command, or a Tcl procedure.
+a built-in command, an application-specific command, or a Hax procedure.
 
 .SH KEYWORDS
 bind, command, create, delete, interpreter

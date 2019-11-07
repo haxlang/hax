@@ -5,8 +5,8 @@
  * not the System V one.
  */
 
-#ifndef _TCL
-#include "tcl.h"
+#ifndef _HAX
+#include "hax.h"
 #endif
 #ifndef _REGEXP
 #define _REGEXP 1

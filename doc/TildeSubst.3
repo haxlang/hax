@@ -10,19 +10,19 @@
 '\" $Header: /user6/ouster/tcl/man/RCS/TildeSubst.3,v 1.7 93/01/31 15:35:45 ouster Exp $ SPRITE (Berkeley)
 '\" 
 .so man.macros
-.HS Tcl_TildeSubst tcl
+.HS Hax_TildeSubst hax
 .BS
 .SH NAME
-Tcl_TildeSubst \- replace tilde with home directory in a file name
+Hax_TildeSubst \- replace tilde with home directory in a file name
 .SH SYNOPSIS
 .nf
-\fB#include <tcl.h>\fR
+\fB#include <hax.h>\fR
 .sp
 char *
-\fBTcl_TildeSubst\fR(\fIinterp\fR, \fIname\fR)
+\fBHax_TildeSubst\fR(\fIinterp\fR, \fIname\fR)
 .SH ARGUMENTS
-.AS Tcl_Interp *interp
-.AP Tcl_Interp *interp in
+.AS Hax_Interp *interp
+.AP Hax_Interp *interp in
 Interpreter in which to report an error, if any.
 .AP char *name in
 File name, which may start with a ``~''.
@@ -32,7 +32,7 @@ File name, which may start with a ``~''.
 .PP
 This utility procedure does tilde substition.  If \fIname\fR doesn't
 start with a ``~'' character, then the procedure returns \fIname\fR.
-If \fIname\fR does start with a tilde, then \fBTcl_TildeSubst\fR
+If \fIname\fR does start with a tilde, then \fBHax_TildeSubst\fR
 returns a new string identical to \fIname\fR except that the first
 element of \fIname\fR is replaced with the location of the home
 directory for the given user.  The substitution is carried out in
@@ -43,15 +43,15 @@ tilde and the next slash are taken as a user name, which is
 looked up in the password file;  the user's home directory is
 retrieved from the password file and substituted.
 .PP
-The string returned by \fBTcl_TildeSubst\fR is a static string
-belonging to \fBTcl_TildeSubst\fR.  Its value will only persist
-until the next call to \fBTcl_TildeSubst\fR;  the caller should
+The string returned by \fBHax_TildeSubst\fR is a static string
+belonging to \fBHax_TildeSubst\fR.  Its value will only persist
+until the next call to \fBHax_TildeSubst\fR;  the caller should
 make a copy of the result if it needs to live a long time.
 .PP
 If an error occurs (e.g. because there was no user by the given
 name) then NULL is returned and an error message will be left
 at \fIinterp->result\fR.  It is assumed that \fIinterp->result\fR
-has been initialized in the standard way when \fBTcl_TildeSubst\fR
+has been initialized in the standard way when \fBHax_TildeSubst\fR
 is invoked.
 
 .SH KEYWORDS

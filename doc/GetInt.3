@@ -10,25 +10,25 @@
 '\" $Header: /user6/ouster/tcl/man/RCS/GetInt.3,v 1.6 93/01/31 15:35:35 ouster Exp $ SPRITE (Berkeley)
 '\" 
 .so man.macros
-.HS Tcl_GetInt tcl
+.HS Hax_GetInt hax
 .BS
 .SH NAME
-Tcl_GetInt, Tcl_GetDouble, Tcl_GetBoolean \- convert from string to integer, double, or boolean
+Hax_GetInt, Hax_GetDouble, Hax_GetBoolean \- convert from string to integer, double, or boolean
 .SH SYNOPSIS
 .nf
-\fB#include <tcl.h>\fR
+\fB#include <hax.h>\fR
 .sp
 int
-\fBTcl_GetInt\fR(\fIinterp, string, intPtr\fR)
+\fBHax_GetInt\fR(\fIinterp, string, intPtr\fR)
 .sp
 int
-\fBTcl_GetDouble\fR(\fIinterp, string, doublePtr\fR)
+\fBHax_GetDouble\fR(\fIinterp, string, doublePtr\fR)
 .sp
 int
-\fBTcl_GetBoolean\fR(\fIinterp, string, boolPtr\fR)
+\fBHax_GetBoolean\fR(\fIinterp, string, boolPtr\fR)
 .SH ARGUMENTS
-.AS Tcl_Interp *doublePtr
-.AP Tcl_Interp *interp in
+.AS Hax_Interp *doublePtr
+.AP Hax_Interp *interp in
 Interpreter to use for error reporting.
 .AP char *string in
 Textual value to be converted.
@@ -49,12 +49,12 @@ integers).  Each of the procedures takes a \fIstring\fR argument,
 converts it to an internal form of a particular type, and stores
 the converted value at the location indicated by the procedure's
 third argument.  If all goes well, each of the procedures returns
-TCL_OK.  If \fIstring\fR doesn't have the proper syntax for the
-desired type then TCL_ERROR is returned, an error message is left
+HAX_OK.  If \fIstring\fR doesn't have the proper syntax for the
+desired type then HAX_ERROR is returned, an error message is left
 in \fIinterp->result\fR, and nothing is stored at *\fIintPtr\fR
 or *\fIdoublePtr\fR or *\fIboolPtr\fR.
 .PP
-\fBTcl_GetInt\fR expects \fIstring\fR to consist of a collection
+\fBHax_GetInt\fR expects \fIstring\fR to consist of a collection
 of integer digits, optionally signed and optionally preceded by
 white space.  If the first two characters of \fIstring\fR are ``0x''
 then \fIstring\fR is expected to be in hexadecimal form;  otherwise,
@@ -62,7 +62,7 @@ if the first character of \fIstring\fR is ``0'' then \fIstring\fR
 is expected to be in octal form;  otherwise, \fIstring\fR is
 expected to be in decimal form.
 .PP
-\fBTcl_GetDouble\fR expects \fIstring\fR to consist of a floating-point
+\fBHax_GetDouble\fR expects \fIstring\fR to consist of a floating-point
 number, which is:  white space;  a sign; a sequence of digits;  a
 decimal point;  a sequence of digits;  the letter ``e'';  and a
 signed decimal exponent.  Any of the fields may be omitted, except that
@@ -70,10 +70,10 @@ the digits either before or after the decimal point must be present
 and if the ``e'' is present then it must be followed by the
 exponent number.
 .PP
-\fBTcl_GetBoolean\fR expects \fIstring\fR to specify a boolean
+\fBHax_GetBoolean\fR expects \fIstring\fR to specify a boolean
 value.  If \fIstring\fR is any of \fB0\fR, \fBfalse\fR,
 .VS
-\fBno\fR, or \fBoff\fR, then \fBTcl_GetBoolean\fR stores a zero
+\fBno\fR, or \fBoff\fR, then \fBHax_GetBoolean\fR stores a zero
 value at \fI*boolPtr\fR.
 If \fIstring\fR is any of \fB1\fR, \fBtrue\fR, \fByes\fR, or \fBon\fR,
 .VE

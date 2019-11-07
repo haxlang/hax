@@ -1,7 +1,7 @@
 /*
- * tclInt.h --
+ * haxInt.h --
  *
- *	Declarations of things used internally by the Tcl interpreter.
+ *	Declarations of things used internally by the Hax interpreter.
  *
  * Copyright 1987-1991 Regents of the University of California
  * Permission to use, copy, modify, and distribute this
@@ -15,28 +15,28 @@
  * $Header: /user6/ouster/tcl/RCS/tclInt.h,v 1.70 93/01/22 15:17:35 ouster Exp $ SPRITE (Berkeley)
  */
 
-#ifndef _TCLINT
-#define _TCLINT
+#ifndef _HAXINT
+#define _HAXINT
 
 /*
- * Common include files needed by most of the Tcl source files are
+ * Common include files needed by most of the Hax source files are
  * included here, so that system-dependent personalizations for the
  * include files only have to be made in once place.  This results
  * in a few extra includes, but greater modularity.  The order of
  * the three groups of #includes is important.  For example, stdio.h
- * is needed by tcl.h.
+ * is needed by hax.h.
  */
 
 #include <stdio.h>
 
-#ifndef _TCL
-#include "tcl.h"
+#ifndef _HAX
+#include "hax.h"
 #endif
-#ifndef _TCLHASH
-#include "tclHash.h"
+#ifndef _HAXHASH
+#include "haxHash.h"
 #endif
 #ifndef _REGEXP
-#include "regexp.h"
+#include "haxRegexp.h"
 #endif
 
 #include <ctype.h>
@@ -47,7 +47,7 @@
 /*
  *----------------------------------------------------------------
  * Data structures related to variables.   These are used primarily
- * in tclVar.c
+ * in haxVar.c
  *----------------------------------------------------------------
  */
 
@@ -58,13 +58,13 @@
  */
 
 typedef struct VarTrace {
-    Tcl_VarTraceProc *traceProc;/* Procedure to call when operations given
+    Hax_VarTraceProc *traceProc;/* Procedure to call when operations given
 				 * by flags are performed on variable. */
     ClientData clientData;	/* Argument to pass to proc. */
     int flags;			/* What events the trace procedure is
 				 * interested in:  OR-ed combination of
-				 * TCL_TRACE_READS, TCL_TRACE_WRITES, and
-				 * TCL_TRACE_UNSETS. */
+				 * HAX_TRACE_READS, HAX_TRACE_WRITES, and
+				 * HAX_TRACE_UNSETS. */
     struct VarTrace *nextPtr;	/* Next in list of traces associated with
 				 * a particular variable. */
 } VarTrace;
@@ -73,7 +73,7 @@ typedef struct VarTrace {
  * When a variable trace is active (i.e. its associated procedure is
  * executing), one of the following structures is linked into a list
  * associated with the variable's interpreter.  The information in
- * the structure is needed in order for Tcl to behave reasonably
+ * the structure is needed in order for Hax to behave reasonably
  * if traces are deleted while traces are active.
  */
 
@@ -100,13 +100,13 @@ typedef struct ArraySearch {
 				 * same array. */
     struct Var *varPtr;		/* Pointer to array variable that's being
 				 * searched. */
-    Tcl_HashSearch search;	/* Info kept by the hash module about
+    Hax_HashSearch search;	/* Info kept by the hash module about
 				 * progress through the array. */
-    Tcl_HashEntry *nextEntry;	/* Non-null means this is the next element
+    Hax_HashEntry *nextEntry;	/* Non-null means this is the next element
 				 * to be enumerated (it's leftover from
-				 * the Tcl_FirstHashEntry call or from
+				 * the Hax_FirstHashEntry call or from
 				 * an "array anymore" command).  NULL
-				 * means must call Tcl_NextHashEntry
+				 * means must call Hax_NextHashEntry
 				 * to get value to return. */
     struct ArraySearch *nextPtr;/* Next in list of all active searches
 				 * for this variable, or NULL if this is
@@ -145,11 +145,11 @@ typedef struct Var {
 	char string[4];		/* String value of variable.  The actual
 				 * length of this field is given by the
 				 * valueSpace field above. */
-	Tcl_HashTable *tablePtr;/* For array variables, this points to
+	Hax_HashTable *tablePtr;/* For array variables, this points to
 				 * information about the hash table used
 				 * to implement the associative array. 
 				 * Points to malloc-ed data. */
-	Tcl_HashEntry *upvarPtr;
+	Hax_HashEntry *upvarPtr;
 				/* If this is a global variable being
 				 * referred to in a procedure, or a variable
 				 * created by "upvar", this field points to
@@ -195,7 +195,7 @@ typedef struct Var {
 /*
  *----------------------------------------------------------------
  * Data structures related to procedures.   These are used primarily
- * in tclProc.c
+ * in haxProc.c
  *----------------------------------------------------------------
  */
 
@@ -219,7 +219,7 @@ typedef struct Arg {
 
 /*
  * The structure below defines a command procedure, which consists of
- * a collection of Tcl commands plus information about arguments and
+ * a collection of Hax commands plus information about arguments and
  * variables.
  */
 
@@ -233,14 +233,14 @@ typedef struct Proc {
 } Proc;
 
 /*
- * The structure below defines a command trace.  This is used to allow Tcl
+ * The structure below defines a command trace.  This is used to allow Hax
  * clients to find out whenever a command is about to be executed.
  */
 
 typedef struct Trace {
     int level;			/* Only trace commands at nesting level
 				 * less than or equal to this. */
-    Tcl_CmdTraceProc *proc;	/* Procedure to call to trace command. */
+    Hax_CmdTraceProc *proc;	/* Procedure to call to trace command. */
     ClientData clientData;	/* Arbitrary value to pass to proc. */
     struct Trace *nextPtr;	/* Next in list of traces for this interp. */
 } Trace;
@@ -252,7 +252,7 @@ typedef struct Trace {
  */
 
 typedef struct CallFrame {
-    Tcl_HashTable varTable;	/* Hash table containing all of procedure's
+    Hax_HashTable varTable;	/* Hash table containing all of procedure's
 				 * local variables. */
     int level;			/* Level of this procedure, for "uplevel"
 				 * purposes (i.e. corresponds to nesting of
@@ -289,15 +289,15 @@ typedef struct {
 /*
  *----------------------------------------------------------------
  * Data structures related to history.   These are used primarily
- * in tclHistory.c
+ * in haxHistory.c
  *----------------------------------------------------------------
  */
 
 /*
  * The structure below defines a pending revision to the most recent
  * history event.  Changes are linked together into a list and applied
- * during the next call to Tcl_RecordHistory.  See the comments at the
- * beginning of tclHistory.c for information on revisions.
+ * during the next call to Hax_RecordHistory.  See the comments at the
+ * beginning of haxHistory.c for information on revisions.
  */
 
 typedef struct HistoryRev {
@@ -315,7 +315,7 @@ typedef struct HistoryRev {
 /*
  *----------------------------------------------------------------
  * Data structures related to files.  These are used primarily in
- * tclUnixUtil.c and tclUnixAZ.c.
+ * haxUnixUtil.c and haxUnixAZ.c.
  *----------------------------------------------------------------
  */
 
@@ -351,15 +351,15 @@ typedef struct OpenFile {
  * This structure defines an interpreter, which is a collection of
  * commands plus other state information related to interpreting
  * commands, such as variable storage.  Primary responsibility for
- * this data structure is in tclBasic.c, but almost every Tcl
+ * this data structure is in haxBasic.c, but almost every Hax
  * source file uses something in here.
  *----------------------------------------------------------------
  */
 
 typedef struct Command {
-    Tcl_CmdProc *proc;		/* Procedure to process command. */
+    Hax_CmdProc *proc;		/* Procedure to process command. */
     ClientData clientData;	/* Arbitrary value to pass to proc. */
-    Tcl_CmdDeleteProc *deleteProc;
+    Hax_CmdDeleteProc *deleteProc;
 				/* Procedure to invoke when deleting
 				 * command. */
 } Command;
@@ -370,35 +370,35 @@ typedef struct Interp {
 
     /*
      * Note:  the first three fields must match exactly the fields in
-     * a Tcl_Interp struct (see tcl.h).  If you change one, be sure to
+     * a Hax_Interp struct (see hax.h).  If you change one, be sure to
      * change the other.
      */
 
     char *result;		/* Points to result returned by last
 				 * command. */
-    Tcl_FreeProc *freeProc;	/* Zero means result is statically allocated.
+    Hax_FreeProc *freeProc;	/* Zero means result is statically allocated.
 				 * If non-zero, gives address of procedure
 				 * to invoke to free the result.  Must be
-				 * freed by Tcl_Eval before executing next
+				 * freed by Hax_Eval before executing next
 				 * command. */
-    int errorLine;		/* When TCL_ERROR is returned, this gives
+    int errorLine;		/* When HAX_ERROR is returned, this gives
 				 * the line number within the command where
 				 * the error occurred (1 means first line). */
-    Tcl_HashTable commandTable;	/* Contains all of the commands currently
+    Hax_HashTable commandTable;	/* Contains all of the commands currently
 				 * registered in this interpreter.  Indexed
 				 * by strings; values have type (Command *). */
 
     /*
-     * Information related to procedures and variables.  See tclProc.c
-     * and tclvar.c for usage.
+     * Information related to procedures and variables.  See haxProc.c
+     * and haxvar.c for usage.
      */
 
-    Tcl_HashTable globalTable;	/* Contains all global variables for
+    Hax_HashTable globalTable;	/* Contains all global variables for
 				 * interpreter. */
     int numLevels;		/* Keeps track of how many nested calls to
-				 * Tcl_Eval are in progress for this
+				 * Hax_Eval are in progress for this
 				 * interpreter.  It's used to delay deletion
-				 * of the table until all Tcl_Eval invocations
+				 * of the table until all Hax_Eval invocations
 				 * are completed. */
     CallFrame *framePtr;	/* Points to top-most in stack of all nested
 				 * procedure invocations.  NULL means there
@@ -430,21 +430,21 @@ typedef struct Interp {
     int revDisables;		/* 0 means history revision OK;  > 0 gives
 				 * a count of number of times revision has
 				 * been disabled. */
-    char *evalFirst;		/* If TCL_RECORD_BOUNDS flag set, Tcl_Eval
+    char *evalFirst;		/* If HAX_RECORD_BOUNDS flag set, Hax_Eval
 				 * sets this field to point to the first
 				 * char. of text from which the current
-				 * command came.  Otherwise Tcl_Eval sets
+				 * command came.  Otherwise Hax_Eval sets
 				 * this to NULL. */
     char *evalLast;		/* Similar to evalFirst, except points to
 				 * last character of current command. */
 
     /*
-     * Information used by Tcl_AppendResult to keep track of partial
-     * results.  See Tcl_AppendResult code for details.
+     * Information used by Hax_AppendResult to keep track of partial
+     * results.  See Hax_AppendResult code for details.
      */
 
     char *appendResult;		/* Storage space for results generated
-				 * by Tcl_AppendResult.  Malloc-ed.  NULL
+				 * by Hax_AppendResult.  Malloc-ed.  NULL
 				 * means not yet allocated. */
     int appendAvl;		/* Total amount of space available at
 				 * partialResult. */
@@ -452,7 +452,7 @@ typedef struct Interp {
 				 * stored at partialResult. */
 
     /*
-     * Information related to files.  See tclUnixAZ.c and tclUnixUtil.c
+     * Information related to files.  See haxUnixAZ.c and haxUnixUtil.c
      * for details.
      */
 
@@ -468,8 +468,8 @@ typedef struct Interp {
 				 * stdin/stdout/stderr entries haven't been
 				 * setup yet. */
     /*
-     * A cache of compiled regular expressions.  See TclCompileRegexp
-     * in tclUtil.c for details.
+     * A cache of compiled regular expressions.  See HaxCompileRegexp
+     * in haxUtil.c for details.
      */
 
 #define NUM_REGEXPS 5
@@ -499,10 +499,10 @@ typedef struct Interp {
 				 * command active;  otherwise this points to
 				 * the name of the file being sourced (it's
 				 * not malloc-ed:  it points to an argument
-				 * to Tcl_EvalFile. */
+				 * to Hax_EvalFile. */
     int flags;			/* Various flag bits.  See below. */
     Trace *tracePtr;		/* List of traces for this interpreter. */
-    char resultSpace[TCL_RESULT_SIZE+1];
+    char resultSpace[HAX_RESULT_SIZE+1];
 				/* Static space for storing small results. */
 } Interp;
 
@@ -512,17 +512,17 @@ typedef struct Interp {
  * DELETED:		Non-zero means the interpreter has been deleted:
  *			don't process any more commands for it, and destroy
  *			the structure as soon as all nested invocations of
- *			Tcl_Eval are done.
+ *			Hax_Eval are done.
  * ERR_IN_PROGRESS:	Non-zero means an error unwind is already in progress.
  *			Zero means a command proc has been invoked since last
  *			error occured.
  * ERR_ALREADY_LOGGED:	Non-zero means information has already been logged
- *			in $errorInfo for the current Tcl_Eval instance,
- *			so Tcl_Eval needn't log it (used to implement the
+ *			in $errorInfo for the current Hax_Eval instance,
+ *			so Hax_Eval needn't log it (used to implement the
  *			"error message log" command).
- * ERROR_CODE_SET:	Non-zero means that Tcl_SetErrorCode has been
+ * ERROR_CODE_SET:	Non-zero means that Hax_SetErrorCode has been
  *			called to record information for the current
- *			error.  Zero means Tcl_Eval must clear the
+ *			error.  Zero means Hax_Eval must clear the
  *			errorCode variable if an error is returned.
  */
 
@@ -534,7 +534,7 @@ typedef struct Interp {
 /*
  *----------------------------------------------------------------
  * Data structures related to command parsing.   These are used in
- * tclParse.c and its clients.
+ * haxParse.c and its clients.
  *----------------------------------------------------------------
  */
 
@@ -563,109 +563,109 @@ typedef struct ParseValue {
 
 /*
  * A table used to classify input characters to assist in parsing
- * Tcl commands.  The table should be indexed with a signed character
+ * Hax commands.  The table should be indexed with a signed character
  * using the CHAR_TYPE macro.  The character may have a negative
  * value.
  */
 
-extern char tclTypeTable[];
-#define CHAR_TYPE(c) (tclTypeTable+128)[c]
+extern char haxTypeTable[];
+#define CHAR_TYPE(c) (haxTypeTable+128)[c]
 
 /*
  * Possible values returned by CHAR_TYPE:
  *
- * TCL_NORMAL -		All characters that don't have special significance
- *			to the Tcl language.
- * TCL_SPACE -		Character is space, tab, or return.
- * TCL_COMMAND_END -	Character is newline or null or semicolon or
+ * HAX_NORMAL -		All characters that don't have special significance
+ *			to the Hax language.
+ * HAX_SPACE -		Character is space, tab, or return.
+ * HAX_COMMAND_END -	Character is newline or null or semicolon or
  *			close-bracket.
- * TCL_QUOTE -		Character is a double-quote.
- * TCL_OPEN_BRACKET -	Character is a "[".
- * TCL_OPEN_BRACE -	Character is a "{".
- * TCL_CLOSE_BRACE -	Character is a "}".
- * TCL_BACKSLASH -	Character is a "\".
- * TCL_DOLLAR -		Character is a "$".
+ * HAX_QUOTE -		Character is a double-quote.
+ * HAX_OPEN_BRACKET -	Character is a "[".
+ * HAX_OPEN_BRACE -	Character is a "{".
+ * HAX_CLOSE_BRACE -	Character is a "}".
+ * HAX_BACKSLASH -	Character is a "\".
+ * HAX_DOLLAR -		Character is a "$".
  */
 
-#define TCL_NORMAL		0
-#define TCL_SPACE		1
-#define TCL_COMMAND_END		2
-#define TCL_QUOTE		3
-#define TCL_OPEN_BRACKET	4
-#define TCL_OPEN_BRACE		5
-#define TCL_CLOSE_BRACE		6
-#define TCL_BACKSLASH		7
-#define TCL_DOLLAR		8
+#define HAX_NORMAL		0
+#define HAX_SPACE		1
+#define HAX_COMMAND_END		2
+#define HAX_QUOTE		3
+#define HAX_OPEN_BRACKET	4
+#define HAX_OPEN_BRACE		5
+#define HAX_CLOSE_BRACE		6
+#define HAX_BACKSLASH		7
+#define HAX_DOLLAR		8
 
 /*
- * Additional flags passed to Tcl_Eval.  See tcl.h for other flags to
- * Tcl_Eval;  these ones are only used internally by Tcl.
+ * Additional flags passed to Hax_Eval.  See hax.h for other flags to
+ * Hax_Eval;  these ones are only used internally by Hax.
  *
- * TCL_RECORD_BOUNDS	Tells Tcl_Eval to record information in the
+ * HAX_RECORD_BOUNDS	Tells Hax_Eval to record information in the
  *			evalFirst and evalLast fields for each command
  *			executed directly from the string (top-level
  *			commands and those from command substitution).
  */
 
-#define TCL_RECORD_BOUNDS	0x100
+#define HAX_RECORD_BOUNDS	0x100
 
 /*
- * Maximum number of levels of nesting permitted in Tcl commands.
+ * Maximum number of levels of nesting permitted in Hax commands.
  */
 
 #define MAX_NESTING_DEPTH	100
 
 /*
- * Variables shared among Tcl modules but not used by the outside
+ * Variables shared among Hax modules but not used by the outside
  * world:
  */
 
-extern char *		tclRegexpError;
+extern char *		haxRegexpError;
 
 /*
  *----------------------------------------------------------------
- * Procedures shared among Tcl modules but not used by the outside
+ * Procedures shared among Hax modules but not used by the outside
  * world:
  *----------------------------------------------------------------
  */
 
 extern void		panic(char *format, ...);
-extern regexp *		TclCompileRegexp (Tcl_Interp *interp,
+extern regexp *		HaxCompileRegexp (Hax_Interp *interp,
 			    char *string);
-extern void		TclCopyAndCollapse (int count, char *src,
+extern void		HaxCopyAndCollapse (int count, char *src,
 			    char *dst);
-extern void		TclDeleteVars (Interp *iPtr,
-			    Tcl_HashTable *tablePtr);
-extern void		TclExpandParseValue (ParseValue *pvPtr,
+extern void		HaxDeleteVars (Interp *iPtr,
+			    Hax_HashTable *tablePtr);
+extern void		HaxExpandParseValue (ParseValue *pvPtr,
 			    int needed);
-extern int		TclFindElement (Tcl_Interp *interp,
+extern int		HaxFindElement (Hax_Interp *interp,
 			    char *list, char **elementPtr, char **nextPtr,
 			    int *sizePtr, int *bracePtr);
-extern Proc *		TclFindProc (Interp *iPtr,
+extern Proc *		HaxFindProc (Interp *iPtr,
 			    char *procName);
-extern int		TclGetFrame (Tcl_Interp *interp,
+extern int		HaxGetFrame (Hax_Interp *interp,
 			    char *string, CallFrame **framePtrPtr);
-extern int		TclGetListIndex (Tcl_Interp *interp,
+extern int		HaxGetListIndex (Hax_Interp *interp,
 			    char *string, int *indexPtr);
-extern int		TclGetOpenFile (Tcl_Interp *interp,
+extern int		HaxGetOpenFile (Hax_Interp *interp,
 			    char *string, OpenFile **filePtrPtr);
-extern Proc *		TclIsProc (Command *cmdPtr);
-extern void		TclMakeFileTable (Interp *iPtr,
+extern Proc *		HaxIsProc (Command *cmdPtr);
+extern void		HaxMakeFileTable (Interp *iPtr,
 			    int index);
-extern int		TclParseBraces (Tcl_Interp *interp,
+extern int		HaxParseBraces (Hax_Interp *interp,
 			    char *string, char **termPtr, ParseValue *pvPtr);
-extern int		TclParseNestedCmd (Tcl_Interp *interp,
+extern int		HaxParseNestedCmd (Hax_Interp *interp,
 			    char *string, int flags, char **termPtr,
 			    ParseValue *pvPtr);
-extern int		TclParseQuotes (Tcl_Interp *interp,
+extern int		HaxParseQuotes (Hax_Interp *interp,
 			    char *string, int termChar, int flags,
 			    char **termPtr, ParseValue *pvPtr);
-extern int		TclParseWords (Tcl_Interp *interp,
+extern int		HaxParseWords (Hax_Interp *interp,
 			    char *string, int flags, int maxWords,
 			    char **termPtr, int *argcPtr, char **argv,
 			    ParseValue *pvPtr);
-extern void		TclSetupEnv (Tcl_Interp *interp);
-extern char *		TclWordEnd (char *start, int nested);
+extern void		HaxSetupEnv (Hax_Interp *interp);
+extern char *		HaxWordEnd (char *start, int nested);
 
 /*
  *----------------------------------------------------------------
@@ -673,94 +673,94 @@ extern char *		TclWordEnd (char *start, int nested);
  *----------------------------------------------------------------
  */
 
-extern int	Tcl_AppendCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ArrayCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_BreakCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_CaseCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_CatchCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ConcatCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ContinueCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ErrorCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_EvalCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ExprCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ForCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ForeachCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_FormatCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_GlobalCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_HistoryCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_IfCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_IncrCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_InfoCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_JoinCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_LappendCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_LindexCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_LinsertCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_LlengthCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ListCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_LrangeCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_LreplaceCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_LsearchCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_LsortCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ProcCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_RegexpCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_RegsubCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_RenameCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ReturnCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ScanCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_SetCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_SplitCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_StringCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_TraceCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_UnsetCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_UplevelCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_UpvarCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_WhileCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_Cmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_Cmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
+extern int	Hax_AppendCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ArrayCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_BreakCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_CaseCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_CatchCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ConcatCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ContinueCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ErrorCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_EvalCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ExprCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ForCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ForeachCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_FormatCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_GlobalCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_HistoryCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_IfCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_IncrCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_InfoCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_JoinCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_LappendCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_LindexCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_LinsertCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_LlengthCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ListCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_LrangeCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_LreplaceCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_LsearchCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_LsortCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ProcCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_RegexpCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_RegsubCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_RenameCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ReturnCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ScanCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_SetCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_SplitCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_StringCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_TraceCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_UnsetCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_UplevelCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_UpvarCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_WhileCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_Cmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_Cmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
 
 /*
  *----------------------------------------------------------------
@@ -768,39 +768,39 @@ extern int	Tcl_Cmd (ClientData clientData,
  *----------------------------------------------------------------
  */
 
-extern int	Tcl_CdCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_CloseCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_EofCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ExecCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ExitCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_FileCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_FlushCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_GetsCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_GlobCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_OpenCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_PutsCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_PwdCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_ReadCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_SeekCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_SourceCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_TellCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
-extern int	Tcl_TimeCmd (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
+extern int	Hax_CdCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_CloseCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_EofCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ExecCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ExitCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_FileCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_FlushCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_GetsCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_GlobCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_OpenCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_PutsCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_PwdCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_ReadCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_SeekCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_SourceCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_TellCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
+extern int	Hax_TimeCmd (ClientData clientData,
+		    Hax_Interp *interp, int argc, char **argv);
 
-#endif /* _TCLINT */
+#endif /* _HAXINT */

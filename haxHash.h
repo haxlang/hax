@@ -1,8 +1,8 @@
 /*
- * tclHash.h --
+ * haxHash.h --
  *
  *	This header file declares the facilities provided by the
- *	Tcl hash table procedures.
+ *	Hax hash table procedures.
  *
  * Copyright 1991 Regents of the University of California
  * Permission to use, copy, modify, and distribute this
@@ -16,29 +16,29 @@
  * $Header: /sprite/src/lib/tcl/RCS/tclHash.h,v 1.3 91/08/27 11:36:04 ouster Exp $ SPRITE (Berkeley)
  */
 
-#ifndef _TCLHASH
-#define _TCLHASH
+#ifndef _HAXHASH
+#define _HAXHASH
 
-#ifndef _TCL
-#include <tcl.h>
+#ifndef _HAX
+#include <hax.h>
 #endif
 
 /*
  * Structure definition for an entry in a hash table.  No-one outside
- * Tcl should access any of these fields directly;  use the macros
+ * Hax should access any of these fields directly;  use the macros
  * defined below.
  */
 
-typedef struct Tcl_HashEntry {
-    struct Tcl_HashEntry *nextPtr;	/* Pointer to next entry in this
+typedef struct Hax_HashEntry {
+    struct Hax_HashEntry *nextPtr;	/* Pointer to next entry in this
 					 * hash bucket, or NULL for end of
 					 * chain. */
-    struct Tcl_HashTable *tablePtr;	/* Pointer to table containing entry. */
-    struct Tcl_HashEntry **bucketPtr;	/* Pointer to bucket that points to
+    struct Hax_HashTable *tablePtr;	/* Pointer to table containing entry. */
+    struct Hax_HashEntry **bucketPtr;	/* Pointer to bucket that points to
 					 * first entry in this entry's chain:
 					 * used for deleting the entry. */
     ClientData clientData;		/* Application stores something here
-					 * with Tcl_SetHashValue. */
+					 * with Hax_SetHashValue. */
     union {				/* Key has one of these forms: */
 	char *oneWordValue;		/* One-word value for key. */
 	int words[1];			/* Multiple integer words for key.
@@ -49,20 +49,20 @@ typedef struct Tcl_HashEntry {
 					 * will be as large as needed to hold
 					 * the key. */
     } key;				/* MUST BE LAST FIELD IN RECORD!! */
-} Tcl_HashEntry;
+} Hax_HashEntry;
 
 /*
- * Structure definition for a hash table.  Must be in tcl.h so clients
+ * Structure definition for a hash table.  Must be in hax.h so clients
  * can allocate space for these structures, but clients should never
  * access any fields in this structure.
  */
 
-#define TCL_SMALL_HASH_TABLE 4
-typedef struct Tcl_HashTable {
-    Tcl_HashEntry **buckets;		/* Pointer to bucket array.  Each
+#define HAX_SMALL_HASH_TABLE 4
+typedef struct Hax_HashTable {
+    Hax_HashEntry **buckets;		/* Pointer to bucket array.  Each
 					 * element points to first entry in
 					 * bucket's hash chain, or NULL. */
-    Tcl_HashEntry *staticBuckets[TCL_SMALL_HASH_TABLE];
+    Hax_HashEntry *staticBuckets[HAX_SMALL_HASH_TABLE];
 					/* Bucket array used for small tables
 					 * (to avoid mallocs and frees). */
     int numBuckets;			/* Total number of buckets allocated
@@ -77,44 +77,44 @@ typedef struct Tcl_HashTable {
     int mask;				/* Mask value used in hashing
 					 * function. */
     int keyType;			/* Type of keys used in this table. 
-					 * It's either TCL_STRING_KEYS,
-					 * TCL_ONE_WORD_KEYS, or an integer
+					 * It's either HAX_STRING_KEYS,
+					 * HAX_ONE_WORD_KEYS, or an integer
 					 * giving the number of ints in a
 					 */
-    Tcl_HashEntry *(*findProc) (struct Tcl_HashTable *tablePtr,
+    Hax_HashEntry *(*findProc) (struct Hax_HashTable *tablePtr,
 	    char *key);
-    Tcl_HashEntry *(*createProc) (struct Tcl_HashTable *tablePtr,
+    Hax_HashEntry *(*createProc) (struct Hax_HashTable *tablePtr,
 	    char *key, int *newPtr);
-} Tcl_HashTable;
+} Hax_HashTable;
 
 /*
  * Structure definition for information used to keep track of searches
  * through hash tables:
  */
 
-typedef struct Tcl_HashSearch {
-    Tcl_HashTable *tablePtr;		/* Table being searched. */
+typedef struct Hax_HashSearch {
+    Hax_HashTable *tablePtr;		/* Table being searched. */
     int nextIndex;			/* Index of next bucket to be
 					 * enumerated after present one. */
-    Tcl_HashEntry *nextEntryPtr;	/* Next entry to be enumerated in the
+    Hax_HashEntry *nextEntryPtr;	/* Next entry to be enumerated in the
 					 * the current bucket. */
-} Tcl_HashSearch;
+} Hax_HashSearch;
 
 /*
  * Acceptable key types for hash tables:
  */
 
-#define TCL_STRING_KEYS		0
-#define TCL_ONE_WORD_KEYS	1
+#define HAX_STRING_KEYS		0
+#define HAX_ONE_WORD_KEYS	1
 
 /*
  * Macros for clients to use to access fields of hash entries:
  */
 
-#define Tcl_GetHashValue(h) ((h)->clientData)
-#define Tcl_SetHashValue(h, value) ((h)->clientData = (ClientData) (value))
-#define Tcl_GetHashKey(tablePtr, h) \
-    ((char *) (((tablePtr)->keyType == TCL_ONE_WORD_KEYS) ? (h)->key.oneWordValue \
+#define Hax_GetHashValue(h) ((h)->clientData)
+#define Hax_SetHashValue(h, value) ((h)->clientData = (ClientData) (value))
+#define Hax_GetHashKey(tablePtr, h) \
+    ((char *) (((tablePtr)->keyType == HAX_ONE_WORD_KEYS) ? (h)->key.oneWordValue \
 						: (h)->key.string))
 
 /*
@@ -122,26 +122,26 @@ typedef struct Tcl_HashSearch {
  * for hash tables:
  */
 
-#define Tcl_FindHashEntry(tablePtr, key) \
+#define Hax_FindHashEntry(tablePtr, key) \
 	(*((tablePtr)->findProc))(tablePtr, key)
-#define Tcl_CreateHashEntry(tablePtr, key, newPtr) \
+#define Hax_CreateHashEntry(tablePtr, key, newPtr) \
 	(*((tablePtr)->createProc))(tablePtr, key, newPtr)
 
 /*
  * Exported procedures:
  */
 
-extern void		Tcl_DeleteHashEntry (
-			    Tcl_HashEntry *entryPtr);
-extern void		Tcl_DeleteHashTable (
-			    Tcl_HashTable *tablePtr);
-extern Tcl_HashEntry *	Tcl_FirstHashEntry (
-			    Tcl_HashTable *tablePtr,
-			    Tcl_HashSearch *searchPtr);
-extern char *		Tcl_HashStats (Tcl_HashTable *tablePtr);
-extern void		Tcl_InitHashTable (Tcl_HashTable *tablePtr,
+extern void		Hax_DeleteHashEntry (
+			    Hax_HashEntry *entryPtr);
+extern void		Hax_DeleteHashTable (
+			    Hax_HashTable *tablePtr);
+extern Hax_HashEntry *	Hax_FirstHashEntry (
+			    Hax_HashTable *tablePtr,
+			    Hax_HashSearch *searchPtr);
+extern char *		Hax_HashStats (Hax_HashTable *tablePtr);
+extern void		Hax_InitHashTable (Hax_HashTable *tablePtr,
 			    int keyType);
-extern Tcl_HashEntry *	Tcl_NextHashEntry (
-			    Tcl_HashSearch *searchPtr);
+extern Hax_HashEntry *	Hax_NextHashEntry (
+			    Hax_HashSearch *searchPtr);
 
-#endif /* _TCLHASH */
+#endif /* _HAXHASH */

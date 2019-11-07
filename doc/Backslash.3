@@ -10,16 +10,16 @@
 '\" $Header: /user6/ouster/tcl/man/RCS/Backslash.3,v 1.9 93/01/31 15:35:28 ouster Exp $ SPRITE (Berkeley)
 '\" 
 .so man.macros
-.HS Tcl_Backslash tcl
+.HS Hax_Backslash hax
 .BS
 .SH NAME
-Tcl_Backslash \- parse a backslash sequence
+Hax_Backslash \- parse a backslash sequence
 .SH SYNOPSIS
 .nf
-\fB#include <tcl.h>\fR
+\fB#include <hax.h>\fR
 .sp
 char
-\fBTcl_Backslash\fR(\fIsrc, countPtr\fR)
+\fBHax_Backslash\fR(\fIsrc, countPtr\fR)
 .SH ARGUMENTS
 .AS char *countPtr
 .AP char *src in
@@ -32,25 +32,25 @@ the backslash character.
 
 .SH DESCRIPTION
 .PP
-This is a utility procedure used by several of the Tcl
+This is a utility procedure used by several of the Hax
 commands.  It parses a backslash sequence and returns
 the single character corresponding to the sequence.
 .VS
 If the backslash sequence should be replaced by no character
-at all (e.g. backslash-newline) then \fBTcl_Backslash\fR returns 0.
+at all (e.g. backslash-newline) then \fBHax_Backslash\fR returns 0.
 .VE
-\fBTcl_Backslash\fR modifies \fI*countPtr\fR to contain the number
+\fBHax_Backslash\fR modifies \fI*countPtr\fR to contain the number
 of characters in the backslash sequence.
 If \fIsrc\fR doesn't point to a backslash
-sequence understood by Tcl, then Tcl_Backslash returns a backslash
+sequence understood by Hax, then Hax_Backslash returns a backslash
 as its result and \fI*countPtr\fR gets set to 1 (in this case the
 backslash character should not get any special treatment).
 .PP
-See the Tcl manual entry for information on the valid
+See the Hax manual entry for information on the valid
 backslash sequences.
 .VS
-All of the sequences described in the Tcl
-manual entry are supported by \fBTcl_Backslash\fR.
+All of the sequences described in the Hax
+manual entry are supported by \fBHax_Backslash\fR.
 .VE
 
 .SH KEYWORDS

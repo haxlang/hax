@@ -1,5 +1,5 @@
 /* 
- * tclCkalloc.c --
+ * haxCkalloc.c --
  *    Interface to malloc and free that provides support for debugging problems
  *    involving overwritten, double freeing memory and loss of memory.
  *
@@ -16,14 +16,14 @@
  *
  */
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 #define FALSE	0
 #define TRUE	1
 
-#ifdef TCL_MEM_DEBUG
-#ifndef TCL_GENERIC_ONLY
-#include "tclUnix.h"
+#ifdef HAX_MEM_DEBUG
+#ifndef HAX_GENERIC_ONLY
+#include "haxUnix.h"
 #endif
 
 #define GUARD_SIZE 8
@@ -159,13 +159,13 @@ ValidateMemory (
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_ValidateAllMemory --
+ * Hax_ValidateAllMemory --
  *     Validates guard regions for all allocated memory.
  *
  *----------------------------------------------------------------------
  */
 void
-Tcl_ValidateAllMemory (
+Hax_ValidateAllMemory (
     char  *file,
     int    line)
 {
@@ -179,16 +179,16 @@ Tcl_ValidateAllMemory (
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_DumpActiveMemory --
+ * Hax_DumpActiveMemory --
  *     Displays all allocated memory to stderr.
  *
  * Results:
- *     Return TCL_ERROR if an error accessing the file occures, `errno' 
+ *     Return HAX_ERROR if an error accessing the file occures, `errno' 
  *     will have the file error number left in it.
  *----------------------------------------------------------------------
  */
 int
-Tcl_DumpActiveMemory (
+Hax_DumpActiveMemory (
     char *fileName)
 {
     FILE              *fileP;
@@ -197,26 +197,26 @@ Tcl_DumpActiveMemory (
 
     fileP = fopen (fileName, "w");
     if (fileP == NULL)
-        return TCL_ERROR;
+        return HAX_ERROR;
 
     for (memScanP = allocHead; memScanP != NULL; memScanP = memScanP->flink) {
         address = &memScanP->body [0];
         fprintf (fileP, "%8lx - %8lx  %7d @ %s %d", address,
                  address + memScanP->length - 1, memScanP->length,
                  memScanP->file, memScanP->line);
-        if (strcmp(memScanP->file, "tclHash.c") == 0 && memScanP->line == 518){
-	    fprintf(fileP, "\t|%s|", ((Tcl_HashEntry *) address)->key.string);
+        if (strcmp(memScanP->file, "haxHash.c") == 0 && memScanP->line == 518){
+	    fprintf(fileP, "\t|%s|", ((Hax_HashEntry *) address)->key.string);
 	}
 	(void) fputc('\n', fileP);
     }
     fclose (fileP);
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_DbCkalloc - debugging ckalloc
+ * Hax_DbCkalloc - debugging ckalloc
  *
  *        Allocate the requested amount of space plus some extra for
  *        guard bands at both ends of the request, plus a size, panicing 
@@ -232,7 +232,7 @@ Tcl_DumpActiveMemory (
  *----------------------------------------------------------------------
  */
 char *
-Tcl_DbCkalloc(
+Hax_DbCkalloc(
     unsigned int size,
     char        *file,
     int          line)
@@ -240,7 +240,7 @@ Tcl_DbCkalloc(
     struct mem_header *result;
 
     if (validate_memory)
-        Tcl_ValidateAllMemory (file, line);
+        Hax_ValidateAllMemory (file, line);
 
     result = (struct mem_header *)malloc((unsigned)size + 
                               sizeof(struct mem_header) + GUARD_SIZE);
@@ -305,7 +305,7 @@ Tcl_DbCkalloc(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_DbCkfree - debugging ckfree
+ * Hax_DbCkfree - debugging ckfree
  *
  *        Verify that the low and high guards are intact, and if so
  *        then free the buffer else panic.
@@ -322,7 +322,7 @@ Tcl_DbCkalloc(
  */
 
 int
-Tcl_DbCkfree(
+Hax_DbCkfree(
     char *  ptr,
     char     *file,
     int       line)
@@ -339,7 +339,7 @@ Tcl_DbCkfree(
                 memp->length, file, line);
 
     if (validate_memory)
-        Tcl_ValidateAllMemory (file, line);
+        Hax_ValidateAllMemory (file, line);
 
     ValidateMemory (memp, file, line, TRUE);
 
@@ -363,7 +363,7 @@ Tcl_DbCkfree(
 /*
  *--------------------------------------------------------------------
  *
- * Tcl_DbCkrealloc - debugging ckrealloc
+ * Hax_DbCkrealloc - debugging ckrealloc
  *
  *	Reallocate a chunk of memory by allocating a new one of the
  *	right size, copying the old data to the new location, and then
@@ -373,7 +373,7 @@ Tcl_DbCkfree(
  *--------------------------------------------------------------------
  */
 char *
-Tcl_DbCkrealloc(
+Hax_DbCkrealloc(
     char *ptr,
     unsigned int size,
     char *file,
@@ -381,9 +381,9 @@ Tcl_DbCkrealloc(
 {
     char *new;
 
-    new = Tcl_DbCkalloc(size, file, line);
+    new = Hax_DbCkalloc(size, file, line);
     memcpy(new, ptr, (int) size);
-    Tcl_DbCkfree(ptr, file, line);
+    Hax_DbCkfree(ptr, file, line);
     return(new);
 }
 
@@ -391,7 +391,7 @@ Tcl_DbCkrealloc(
  *----------------------------------------------------------------------
  *
  * MemoryCmd --
- *     Implements the TCL memory command:
+ *     Implements the HAX memory command:
  *       memory info
  *       memory display
  *       break_on_malloc count
@@ -400,7 +400,7 @@ Tcl_DbCkrealloc(
  *       validate on|off
  *
  * Results:
- *     Standard TCL results.
+ *     Standard HAX results.
  *
  *----------------------------------------------------------------------
  */
@@ -408,101 +408,101 @@ Tcl_DbCkrealloc(
 static int
 MemoryCmd (
     ClientData  clientData,
-    Tcl_Interp *interp,
+    Hax_Interp *interp,
     int         argc,
     char      **argv)
 {
     char *fileName;
 
     if (argc < 2) {
-	Tcl_AppendResult(interp, "wrong # args:  should be \"",
+	Hax_AppendResult(interp, "wrong # args:  should be \"",
 		argv[0], " option [args..]\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
     if (strcmp(argv[1],"trace") == 0) {
         if (argc != 3) 
             goto bad_suboption;
         alloc_tracing = (strcmp(argv[2],"on") == 0);
-        return TCL_OK;
+        return HAX_OK;
     }
     if (strcmp(argv[1],"init") == 0) {
         if (argc != 3)
             goto bad_suboption;
         init_malloced_bodies = (strcmp(argv[2],"on") == 0);
-        return TCL_OK;
+        return HAX_OK;
     }
     if (strcmp(argv[1],"validate") == 0) {
         if (argc != 3)
              goto bad_suboption;
         validate_memory = (strcmp(argv[2],"on") == 0);
-        return TCL_OK;
+        return HAX_OK;
     }
     if (strcmp(argv[1],"trace_on_at_malloc") == 0) {
         if (argc != 3) 
             goto argError;
-        if (Tcl_GetInt(interp, argv[2], &trace_on_at_malloc) != TCL_OK)
-                return TCL_ERROR;
-         return TCL_OK;
+        if (Hax_GetInt(interp, argv[2], &trace_on_at_malloc) != HAX_OK)
+                return HAX_ERROR;
+         return HAX_OK;
     }
     if (strcmp(argv[1],"break_on_malloc") == 0) {
         if (argc != 3) 
             goto argError;
-        if (Tcl_GetInt(interp, argv[2], &break_on_malloc) != TCL_OK)
-                return TCL_ERROR;
-        return TCL_OK;
+        if (Hax_GetInt(interp, argv[2], &break_on_malloc) != HAX_OK)
+                return HAX_ERROR;
+        return HAX_OK;
     }
 
     if (strcmp(argv[1],"info") == 0) {
         dump_memory_info(stdout);
-        return TCL_OK;
+        return HAX_OK;
     }
     if (strcmp(argv[1],"active") == 0) {
         if (argc != 3) {
-	    Tcl_AppendResult(interp, "wrong # args:  should be \"",
+	    Hax_AppendResult(interp, "wrong # args:  should be \"",
 		    argv[0], " active file", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
         fileName = argv [2];
         if (fileName [0] == '~')
-            if ((fileName = Tcl_TildeSubst (interp, fileName)) == NULL)
-                return TCL_ERROR;
-        if (Tcl_DumpActiveMemory (fileName) != TCL_OK) {
-	    Tcl_AppendResult(interp, "error accessing ", argv[2], 
+            if ((fileName = Hax_TildeSubst (interp, fileName)) == NULL)
+                return HAX_ERROR;
+        if (Hax_DumpActiveMemory (fileName) != HAX_OK) {
+	    Hax_AppendResult(interp, "error accessing ", argv[2], 
 		    (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	return TCL_OK;
+	return HAX_OK;
     }
-    Tcl_AppendResult(interp, "bad option \"", argv[1],
+    Hax_AppendResult(interp, "bad option \"", argv[1],
 	    "\":  should be info, init, active, break_on_malloc, ",
 	    "trace_on_at_malloc, trace, or validate", (char *) NULL);
-    return TCL_ERROR;
+    return HAX_ERROR;
 
 argError:
-    Tcl_AppendResult(interp, "wrong # args:  should be \"", argv[0],
+    Hax_AppendResult(interp, "wrong # args:  should be \"", argv[0],
 	    " ", argv[1], "count\"", (char *) NULL);
-    return TCL_ERROR;
+    return HAX_ERROR;
 
 bad_suboption:
-    Tcl_AppendResult(interp, "wrong # args:  should be \"", argv[0],
+    Hax_AppendResult(interp, "wrong # args:  should be \"", argv[0],
 	    " ", argv[1], " on|off\"", (char *) NULL);
-    return TCL_ERROR;
+    return HAX_ERROR;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_InitMemory --
+ * Hax_InitMemory --
  *     Initialize the memory command.
  *
  *----------------------------------------------------------------------
  */
 void
-Tcl_InitMemory(
-    Tcl_Interp *interp)
+Hax_InitMemory(
+    Hax_Interp *interp)
 {
-Tcl_CreateCommand (interp, "memory", MemoryCmd, (ClientData)NULL, 
+Hax_CreateCommand (interp, "memory", MemoryCmd, (ClientData)NULL, 
                   (void (*)())NULL);
 }
 
@@ -512,14 +512,14 @@ Tcl_CreateCommand (interp, "memory", MemoryCmd, (ClientData)NULL,
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_Ckalloc --
- *     Interface to malloc when TCL_MEM_DEBUG is disabled.  It does check
+ * Hax_Ckalloc --
+ *     Interface to malloc when HAX_MEM_DEBUG is disabled.  It does check
  *     that memory was actually allocated.
  *
  *----------------------------------------------------------------------
  */
 void *
-Tcl_Ckalloc (
+Hax_Ckalloc (
     unsigned int size)
 {
         char *result;
@@ -534,14 +534,14 @@ Tcl_Ckalloc (
  *----------------------------------------------------------------------
  *
  * TckCkfree --
- *     Interface to free when TCL_MEM_DEBUG is disabled.  Done here rather
+ *     Interface to free when HAX_MEM_DEBUG is disabled.  Done here rather
  *     in the macro to keep some modules from being compiled with 
- *     TCL_MEM_DEBUG enabled and some with it disabled.
+ *     HAX_MEM_DEBUG enabled and some with it disabled.
  *
  *----------------------------------------------------------------------
  */
 void
-Tcl_Ckfree (
+Hax_Ckfree (
     void *ptr)
 {
         free (ptr);
@@ -550,16 +550,16 @@ Tcl_Ckfree (
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_InitMemory --
+ * Hax_InitMemory --
  *     Dummy initialization for memory command, which is only available 
- *     if TCL_MEM_DEBUG is on.
+ *     if HAX_MEM_DEBUG is on.
  *
  *----------------------------------------------------------------------
  */
 	/* ARGSUSED */
 void
-Tcl_InitMemory(
-    Tcl_Interp *interp)
+Hax_InitMemory(
+    Hax_Interp *interp)
 {
 }
 

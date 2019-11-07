@@ -1,7 +1,7 @@
 /* 
- * tclBasic.c --
+ * haxBasic.c --
  *
- *	Contains the basic facilities for TCL command interpretation,
+ *	Contains the basic facilities for HAX command interpretation,
  *	including interpreter creation and deletion, command creation
  *	and deletion, and command parsing and execution.
  *
@@ -19,16 +19,16 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclBasic.c,v 1.133 92/08/21 15:45:32 ouster Exp $ SPRITE (Berkeley)";
 #endif
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
- * The following structure defines all of the commands in the Tcl core,
+ * The following structure defines all of the commands in the Hax core,
  * and the C procedures that execute them.
  */
 
 typedef struct {
     char *name;			/* Name of command. */
-    Tcl_CmdProc *proc;		/* Procedure that executes command. */
+    Hax_CmdProc *proc;		/* Procedure that executes command. */
 } CmdInfo;
 
 /*
@@ -40,85 +40,85 @@ static CmdInfo builtInCmds[] = {
      * Commands in the generic core:
      */
 
-    {"append",		Tcl_AppendCmd},
-    {"array",		Tcl_ArrayCmd},
-    {"break",		Tcl_BreakCmd},
-    {"case",		Tcl_CaseCmd},
-    {"catch",		Tcl_CatchCmd},
-    {"concat",		Tcl_ConcatCmd},
-    {"continue",	Tcl_ContinueCmd},
-    {"error",		Tcl_ErrorCmd},
-    {"eval",		Tcl_EvalCmd},
-    {"expr",		Tcl_ExprCmd},
-    {"for",		Tcl_ForCmd},
-    {"foreach",		Tcl_ForeachCmd},
-    {"format",		Tcl_FormatCmd},
-    {"global",		Tcl_GlobalCmd},
-    {"if",		Tcl_IfCmd},
-    {"incr",		Tcl_IncrCmd},
-    {"info",		Tcl_InfoCmd},
-    {"join",		Tcl_JoinCmd},
-    {"lappend",		Tcl_LappendCmd},
-    {"lindex",		Tcl_LindexCmd},
-    {"linsert",		Tcl_LinsertCmd},
-    {"list",		Tcl_ListCmd},
-    {"llength",		Tcl_LlengthCmd},
-    {"lrange",		Tcl_LrangeCmd},
-    {"lreplace",	Tcl_LreplaceCmd},
-    {"lsearch",		Tcl_LsearchCmd},
-    {"lsort",		Tcl_LsortCmd},
-    {"proc",		Tcl_ProcCmd},
-    {"regexp",		Tcl_RegexpCmd},
-    {"regsub",		Tcl_RegsubCmd},
-    {"rename",		Tcl_RenameCmd},
-    {"return",		Tcl_ReturnCmd},
-    {"scan",		Tcl_ScanCmd},
-    {"set",		Tcl_SetCmd},
-    {"split",		Tcl_SplitCmd},
-    {"string",		Tcl_StringCmd},
-    {"trace",		Tcl_TraceCmd},
-    {"unset",		Tcl_UnsetCmd},
-    {"uplevel",		Tcl_UplevelCmd},
-    {"upvar",		Tcl_UpvarCmd},
-    {"while",		Tcl_WhileCmd},
+    {"append",		Hax_AppendCmd},
+    {"array",		Hax_ArrayCmd},
+    {"break",		Hax_BreakCmd},
+    {"case",		Hax_CaseCmd},
+    {"catch",		Hax_CatchCmd},
+    {"concat",		Hax_ConcatCmd},
+    {"continue",	Hax_ContinueCmd},
+    {"error",		Hax_ErrorCmd},
+    {"eval",		Hax_EvalCmd},
+    {"expr",		Hax_ExprCmd},
+    {"for",		Hax_ForCmd},
+    {"foreach",		Hax_ForeachCmd},
+    {"format",		Hax_FormatCmd},
+    {"global",		Hax_GlobalCmd},
+    {"if",		Hax_IfCmd},
+    {"incr",		Hax_IncrCmd},
+    {"info",		Hax_InfoCmd},
+    {"join",		Hax_JoinCmd},
+    {"lappend",		Hax_LappendCmd},
+    {"lindex",		Hax_LindexCmd},
+    {"linsert",		Hax_LinsertCmd},
+    {"list",		Hax_ListCmd},
+    {"llength",		Hax_LlengthCmd},
+    {"lrange",		Hax_LrangeCmd},
+    {"lreplace",	Hax_LreplaceCmd},
+    {"lsearch",		Hax_LsearchCmd},
+    {"lsort",		Hax_LsortCmd},
+    {"proc",		Hax_ProcCmd},
+    {"regexp",		Hax_RegexpCmd},
+    {"regsub",		Hax_RegsubCmd},
+    {"rename",		Hax_RenameCmd},
+    {"return",		Hax_ReturnCmd},
+    {"scan",		Hax_ScanCmd},
+    {"set",		Hax_SetCmd},
+    {"split",		Hax_SplitCmd},
+    {"string",		Hax_StringCmd},
+    {"trace",		Hax_TraceCmd},
+    {"unset",		Hax_UnsetCmd},
+    {"uplevel",		Hax_UplevelCmd},
+    {"upvar",		Hax_UpvarCmd},
+    {"while",		Hax_WhileCmd},
 
     /*
      * Commands in the UNIX core:
      */
 
-#ifndef TCL_GENERIC_ONLY
-    {"cd",		Tcl_CdCmd},
-    {"close",		Tcl_CloseCmd},
-    {"eof",		Tcl_EofCmd},
-    {"exec",		Tcl_ExecCmd},
-    {"exit",		Tcl_ExitCmd},
-    {"file",		Tcl_FileCmd},
-    {"flush",		Tcl_FlushCmd},
-    {"gets",		Tcl_GetsCmd},
-    {"glob",		Tcl_GlobCmd},
-    {"open",		Tcl_OpenCmd},
-    {"puts",		Tcl_PutsCmd},
-    {"pwd",		Tcl_PwdCmd},
-    {"read",		Tcl_ReadCmd},
-    {"seek",		Tcl_SeekCmd},
-    {"source",		Tcl_SourceCmd},
-    {"tell",		Tcl_TellCmd},
-    {"time",		Tcl_TimeCmd},
-#endif /* TCL_GENERIC_ONLY */
-    {NULL,		(Tcl_CmdProc *) NULL}
+#ifndef HAX_GENERIC_ONLY
+    {"cd",		Hax_CdCmd},
+    {"close",		Hax_CloseCmd},
+    {"eof",		Hax_EofCmd},
+    {"exec",		Hax_ExecCmd},
+    {"exit",		Hax_ExitCmd},
+    {"file",		Hax_FileCmd},
+    {"flush",		Hax_FlushCmd},
+    {"gets",		Hax_GetsCmd},
+    {"glob",		Hax_GlobCmd},
+    {"open",		Hax_OpenCmd},
+    {"puts",		Hax_PutsCmd},
+    {"pwd",		Hax_PwdCmd},
+    {"read",		Hax_ReadCmd},
+    {"seek",		Hax_SeekCmd},
+    {"source",		Hax_SourceCmd},
+    {"tell",		Hax_TellCmd},
+    {"time",		Hax_TimeCmd},
+#endif /* HAX_GENERIC_ONLY */
+    {NULL,		(Hax_CmdProc *) NULL}
 };
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_CreateInterp --
+ * Hax_CreateInterp --
  *
- *	Create a new TCL command interpreter.
+ *	Create a new HAX command interpreter.
  *
  * Results:
  *	The return value is a token for the interpreter, which may be
- *	used in calls to procedures like Tcl_CreateCmd, Tcl_Eval, or
- *	Tcl_DeleteInterp.
+ *	used in calls to procedures like Hax_CreateCmd, Hax_Eval, or
+ *	Hax_DeleteInterp.
  *
  * Side effects:
  *	The command interpreter is initialized with an empty variable
@@ -127,8 +127,8 @@ static CmdInfo builtInCmds[] = {
  *----------------------------------------------------------------------
  */
 
-Tcl_Interp *
-Tcl_CreateInterp(void)
+Hax_Interp *
+Hax_CreateInterp(void)
 {
     Interp *iPtr;
     Command *cmdPtr;
@@ -139,8 +139,8 @@ Tcl_CreateInterp(void)
     iPtr->result = iPtr->resultSpace;
     iPtr->freeProc = 0;
     iPtr->errorLine = 0;
-    Tcl_InitHashTable(&iPtr->commandTable, TCL_STRING_KEYS);
-    Tcl_InitHashTable(&iPtr->globalTable, TCL_STRING_KEYS);
+    Hax_InitHashTable(&iPtr->commandTable, HAX_STRING_KEYS);
+    Hax_InitHashTable(&iPtr->globalTable, HAX_STRING_KEYS);
     iPtr->numLevels = 0;
     iPtr->framePtr = NULL;
     iPtr->varFramePtr = NULL;
@@ -172,36 +172,36 @@ Tcl_CreateInterp(void)
 
     /*
      * Create the built-in commands.  Do it here, rather than calling
-     * Tcl_CreateCommand, because it's faster (there's no need to
+     * Hax_CreateCommand, because it's faster (there's no need to
      * check for a pre-existing command by the same name).
      */
 
     for (cmdInfoPtr = builtInCmds; cmdInfoPtr->name != NULL; cmdInfoPtr++) {
 	int new;
-	Tcl_HashEntry *hPtr;
+	Hax_HashEntry *hPtr;
 
-	hPtr = Tcl_CreateHashEntry(&iPtr->commandTable,
+	hPtr = Hax_CreateHashEntry(&iPtr->commandTable,
 		cmdInfoPtr->name, &new);
 	if (new) {
 	    cmdPtr = (Command *) ckalloc(sizeof(Command));
 	    cmdPtr->proc = cmdInfoPtr->proc;
 	    cmdPtr->clientData = (ClientData) NULL;
 	    cmdPtr->deleteProc = NULL;
-	    Tcl_SetHashValue(hPtr, cmdPtr);
+	    Hax_SetHashValue(hPtr, cmdPtr);
 	}
     }
 
-#ifndef TCL_GENERIC_ONLY
-    TclSetupEnv((Tcl_Interp *) iPtr);
+#ifndef HAX_GENERIC_ONLY
+    HaxSetupEnv((Hax_Interp *) iPtr);
 #endif
 
-    return (Tcl_Interp *) iPtr;
+    return (Hax_Interp *) iPtr;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_DeleteInterp --
+ * Hax_DeleteInterp --
  *
  *	Delete an interpreter and free up all of the resources associated
  *	with it.
@@ -217,13 +217,13 @@ Tcl_CreateInterp(void)
  */
 
 void
-Tcl_DeleteInterp(
-    Tcl_Interp *interp		/* Token for command interpreter (returned
-				 * by a previous call to Tcl_CreateInterp). */)
+Hax_DeleteInterp(
+    Hax_Interp *interp		/* Token for command interpreter (returned
+				 * by a previous call to Hax_CreateInterp). */)
 {
     Interp *iPtr = (Interp *) interp;
-    Tcl_HashEntry *hPtr;
-    Tcl_HashSearch search;
+    Hax_HashEntry *hPtr;
+    Hax_HashSearch search;
     Command *cmdPtr;
     int i;
 
@@ -241,16 +241,16 @@ Tcl_DeleteInterp(
      * interpreter.
      */
 
-    for (hPtr = Tcl_FirstHashEntry(&iPtr->commandTable, &search);
-	    hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-	cmdPtr = (Command *) Tcl_GetHashValue(hPtr);
+    for (hPtr = Hax_FirstHashEntry(&iPtr->commandTable, &search);
+	    hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
+	cmdPtr = (Command *) Hax_GetHashValue(hPtr);
 	if (cmdPtr->deleteProc != NULL) { 
 	    (*cmdPtr->deleteProc)(cmdPtr->clientData);
 	}
 	ckfree((char *) cmdPtr);
     }
-    Tcl_DeleteHashTable(&iPtr->commandTable);
-    TclDeleteVars(iPtr, &iPtr->globalTable);
+    Hax_DeleteHashTable(&iPtr->commandTable);
+    HaxDeleteVars(iPtr, &iPtr->globalTable);
     if (iPtr->events != NULL) {
 	int i;
 
@@ -268,7 +268,7 @@ Tcl_DeleteInterp(
     if (iPtr->appendResult != NULL) {
 	ckfree(iPtr->appendResult);
     }
-#ifndef TCL_GENERIC_ONLY
+#ifndef HAX_GENERIC_ONLY
     if (iPtr->numFiles > 0) {
 	for (i = 0; i < iPtr->numFiles; i++) {
 	    OpenFile *filePtr;
@@ -283,7 +283,7 @@ Tcl_DeleteInterp(
 		    fclose(filePtr->f2);
 		}
 		if (filePtr->numPids > 0) {
-		    Tcl_DetachPids(filePtr->numPids, filePtr->pidPtr);
+		    Hax_DetachPids(filePtr->numPids, filePtr->pidPtr);
 		    ckfree((char *) filePtr->pidPtr);
 		}
 	    }
@@ -311,7 +311,7 @@ Tcl_DeleteInterp(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_CreateCommand --
+ * Hax_CreateCommand --
  *
  *	Define a new command in a command table.
  *
@@ -321,7 +321,7 @@ Tcl_DeleteInterp(
  * Side effects:
  *	If a command named cmdName already exists for interp, it is
  *	deleted.  In the future, when cmdName is seen as the name of
- *	a command by Tcl_Eval, proc will be called.  When the command
+ *	a command by Hax_Eval, proc will be called.  When the command
  *	is deleted from the table, deleteProc will be called.  See the
  *	manual entry for details on the calling sequence.
  *
@@ -329,35 +329,35 @@ Tcl_DeleteInterp(
  */
 
 void
-Tcl_CreateCommand(
-    Tcl_Interp *interp,		/* Token for command interpreter (returned
-				 * by a previous call to Tcl_CreateInterp). */
+Hax_CreateCommand(
+    Hax_Interp *interp,		/* Token for command interpreter (returned
+				 * by a previous call to Hax_CreateInterp). */
     char *cmdName,		/* Name of command. */
-    Tcl_CmdProc *proc,		/* Command procedure to associate with
+    Hax_CmdProc *proc,		/* Command procedure to associate with
 				 * cmdName. */
     ClientData clientData,	/* Arbitrary one-word value to pass to proc. */
-    Tcl_CmdDeleteProc *deleteProc
+    Hax_CmdDeleteProc *deleteProc
 				/* If not NULL, gives a procedure to call when
 				 * this command is deleted. */)
 {
     Interp *iPtr = (Interp *) interp;
     Command *cmdPtr;
-    Tcl_HashEntry *hPtr;
+    Hax_HashEntry *hPtr;
     int new;
 
-    hPtr = Tcl_CreateHashEntry(&iPtr->commandTable, cmdName, &new);
+    hPtr = Hax_CreateHashEntry(&iPtr->commandTable, cmdName, &new);
     if (!new) {
 	/*
 	 * Command already exists:  delete the old one.
 	 */
 
-	cmdPtr = (Command *) Tcl_GetHashValue(hPtr);
+	cmdPtr = (Command *) Hax_GetHashValue(hPtr);
 	if (cmdPtr->deleteProc != NULL) {
 	    (*cmdPtr->deleteProc)(cmdPtr->clientData);
 	}
     } else {
 	cmdPtr = (Command *) ckalloc(sizeof(Command));
-	Tcl_SetHashValue(hPtr, cmdPtr);
+	Hax_SetHashValue(hPtr, cmdPtr);
     }
     cmdPtr->proc = proc;
     cmdPtr->clientData = clientData;
@@ -367,7 +367,7 @@ Tcl_CreateCommand(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_DeleteCommand --
+ * Hax_DeleteCommand --
  *
  *	Remove the given command from the given interpreter.
  *
@@ -384,40 +384,40 @@ Tcl_CreateCommand(
  */
 
 int
-Tcl_DeleteCommand(
-    Tcl_Interp *interp,		/* Token for command interpreter (returned
-				 * by a previous call to Tcl_CreateInterp). */
+Hax_DeleteCommand(
+    Hax_Interp *interp,		/* Token for command interpreter (returned
+				 * by a previous call to Hax_CreateInterp). */
     char *cmdName		/* Name of command to remove. */)
 {
     Interp *iPtr = (Interp *) interp;
-    Tcl_HashEntry *hPtr;
+    Hax_HashEntry *hPtr;
     Command *cmdPtr;
 
-    hPtr = Tcl_FindHashEntry(&iPtr->commandTable, cmdName);
+    hPtr = Hax_FindHashEntry(&iPtr->commandTable, cmdName);
     if (hPtr == NULL) {
 	return -1;
     }
-    cmdPtr = (Command *) Tcl_GetHashValue(hPtr);
+    cmdPtr = (Command *) Hax_GetHashValue(hPtr);
     if (cmdPtr->deleteProc != NULL) {
 	(*cmdPtr->deleteProc)(cmdPtr->clientData);
     }
     ckfree((char *) cmdPtr);
-    Tcl_DeleteHashEntry(hPtr);
+    Hax_DeleteHashEntry(hPtr);
     return 0;
 }
 
 /*
  *-----------------------------------------------------------------
  *
- * Tcl_Eval --
+ * Hax_Eval --
  *
- *	Parse and execute a command in the Tcl language.
+ *	Parse and execute a command in the Hax language.
  *
  * Results:
- *	The return value is one of the return codes defined in tcl.hd
- *	(such as TCL_OK), and interp->result contains a string value
+ *	The return value is one of the return codes defined in hax.h
+ *	(such as HAX_OK), and interp->result contains a string value
  *	to supplement the return code.  The value of interp->result
- *	will persist only until the next call to Tcl_Eval:  copy it or
+ *	will persist only until the next call to Hax_Eval:  copy it or
  *	lose it! *TermPtr is filled in with the character just after
  *	the last one that was part of the command (usually a NULL
  *	character or a closing bracket).
@@ -429,12 +429,12 @@ Tcl_DeleteCommand(
  */
 
 int
-Tcl_Eval(
-    Tcl_Interp *interp,		/* Token for command interpreter (returned
-				 * by a previous call to Tcl_CreateInterp). */
-    char *cmd,			/* Pointer to TCL command to interpret. */
+Hax_Eval(
+    Hax_Interp *interp,		/* Token for command interpreter (returned
+				 * by a previous call to Hax_CreateInterp). */
+    char *cmd,			/* Pointer to HAX command to interpret. */
     int flags,			/* OR-ed combination of flags like
-				 * TCL_BRACKET_TERM and TCL_RECORD_BOUNDS. */
+				 * HAX_BRACKET_TERM and HAX_RECORD_BOUNDS. */
     char **termPtr		/* If non-NULL, fill in the address it points
 				 * to with the address of the char. just after
 				 * the last one that was part of cmd.  See
@@ -470,7 +470,7 @@ Tcl_Eval(
 					 * that newlines terminate commands. */
     int result;				/* Return value. */
     Interp *iPtr = (Interp *) interp;
-    Tcl_HashEntry *hPtr;
+    Hax_HashEntry *hPtr;
     Command *cmdPtr;
     char *dummy;			/* Make termPtr point here if it was
 					 * originally NULL. */
@@ -490,21 +490,21 @@ Tcl_Eval(
      * result if there are no commands in the command string.
      */
 
-    Tcl_FreeResult((Tcl_Interp *) iPtr);
+    Hax_FreeResult((Hax_Interp *) iPtr);
     iPtr->result = iPtr->resultSpace;
     iPtr->resultSpace[0] = 0;
-    result = TCL_OK;
+    result = HAX_OK;
 
     /*
-     * Check depth of nested calls to Tcl_Eval:  if this gets too large,
+     * Check depth of nested calls to Hax_Eval:  if this gets too large,
      * it's probably because of an infinite loop somewhere.
      */
 
     iPtr->numLevels++;
     if (iPtr->numLevels > MAX_NESTING_DEPTH) {
 	iPtr->numLevels--;
-	iPtr->result =  "too many nested calls to Tcl_Eval (infinite loop?)";
-	return TCL_ERROR;
+	iPtr->result =  "too many nested calls to Hax_Eval (infinite loop?)";
+	return HAX_ERROR;
     }
 
     /*
@@ -513,11 +513,11 @@ Tcl_Eval(
 
     pv.buffer = copyStorage;
     pv.end = copyStorage + NUM_CHARS - 1;
-    pv.expandProc = TclExpandParseValue;
+    pv.expandProc = HaxExpandParseValue;
     pv.clientData = (ClientData) NULL;
 
     src = cmd;
-    if (flags & TCL_BRACKET_TERM) {
+    if (flags & HAX_BRACKET_TERM) {
 	termChar = ']';
     } else {
 	termChar = 0;
@@ -545,7 +545,7 @@ Tcl_Eval(
 	while (1) {
 	    char c = *src;
 
-	    if ((CHAR_TYPE(c) != TCL_SPACE) && (c != ';') && (c != '\n')) {
+	    if ((CHAR_TYPE(c) != HAX_SPACE) && (c != ';') && (c != '\n')) {
 		break;
 	    }
 	    src += 1;
@@ -564,7 +564,7 @@ Tcl_Eval(
 	/*
 	 * Parse the words of the command, generating the argc and
 	 * argv for the command procedure.  May have to call
-	 * TclParseWords several times, expanding the argv array
+	 * HaxParseWords several times, expanding the argv array
 	 * between calls.
 	 */
 
@@ -584,10 +584,10 @@ Tcl_Eval(
 	     */
 
 	    maxArgs = argSize - argc - 2;
-	    result = TclParseWords((Tcl_Interp *) iPtr, src, flags,
+	    result = HaxParseWords((Hax_Interp *) iPtr, src, flags,
 		    maxArgs, termPtr, &newArgs, &argv[argc], &pv);
 	    src = *termPtr;
-	    if (result != TCL_OK) {
+	    if (result != HAX_OK) {
 		ellipsis = "...";
 		goto done;
 	    }
@@ -643,7 +643,7 @@ Tcl_Eval(
 	 * Save information for the history module, if needed.
 	 */
 
-	if (flags & TCL_RECORD_BOUNDS) {
+	if (flags & HAX_RECORD_BOUNDS) {
 	    iPtr->evalFirst = cmdStart;
 	    iPtr->evalLast = src-1;
 	}
@@ -655,16 +655,16 @@ Tcl_Eval(
 	 * command as arguments.
 	 */
 
-	hPtr = Tcl_FindHashEntry(&iPtr->commandTable, argv[0]);
+	hPtr = Hax_FindHashEntry(&iPtr->commandTable, argv[0]);
 	if (hPtr == NULL) {
 	    int i;
 
-	    hPtr = Tcl_FindHashEntry(&iPtr->commandTable, "unknown");
+	    hPtr = Hax_FindHashEntry(&iPtr->commandTable, "unknown");
 	    if (hPtr == NULL) {
-		Tcl_ResetResult(interp);
-		Tcl_AppendResult(interp, "invalid command name: \"",
+		Hax_ResetResult(interp);
+		Hax_AppendResult(interp, "invalid command name: \"",
 			argv[0], "\"", (char *) NULL);
-		result = TCL_ERROR;
+		result = HAX_ERROR;
 		goto done;
 	    }
 	    for (i = argc; i >= 0; i--) {
@@ -673,7 +673,7 @@ Tcl_Eval(
 	    argv[0] = "unknown";
 	    argc++;
 	}
-	cmdPtr = (Command *) Tcl_GetHashValue(hPtr);
+	cmdPtr = (Command *) Hax_GetHashValue(hPtr);
 
 	/*
 	 * Call trace procedures, if any.
@@ -701,11 +701,11 @@ Tcl_Eval(
 	 */
 
 	iPtr->cmdCount++;
-	Tcl_FreeResult(iPtr);
+	Hax_FreeResult(iPtr);
 	iPtr->result = iPtr->resultSpace;
 	iPtr->resultSpace[0] = 0;
 	result = (*cmdPtr->proc)(cmdPtr->clientData, interp, argc, argv);
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    break;
 	}
     }
@@ -723,24 +723,24 @@ Tcl_Eval(
     }
     iPtr->numLevels--;
     if (iPtr->numLevels == 0) {
-	if (result == TCL_RETURN) {
-	    result = TCL_OK;
+	if (result == HAX_RETURN) {
+	    result = HAX_OK;
 	}
-	if ((result != TCL_OK) && (result != TCL_ERROR)) {
-	    Tcl_ResetResult(interp);
-	    if (result == TCL_BREAK) {
+	if ((result != HAX_OK) && (result != HAX_ERROR)) {
+	    Hax_ResetResult(interp);
+	    if (result == HAX_BREAK) {
 		iPtr->result = "invoked \"break\" outside of a loop";
-	    } else if (result == TCL_CONTINUE) {
+	    } else if (result == HAX_CONTINUE) {
 		iPtr->result = "invoked \"continue\" outside of a loop";
 	    } else {
 		iPtr->result = iPtr->resultSpace;
 		sprintf(iPtr->resultSpace, "command returned bad code: %d",
 			result);
 	    }
-	    result = TCL_ERROR;
+	    result = HAX_ERROR;
 	}
 	if (iPtr->flags & DELETED) {
-	    Tcl_DeleteInterp(interp);
+	    Hax_DeleteInterp(interp);
 	}
     }
 
@@ -749,7 +749,7 @@ Tcl_Eval(
      * executed when the error occurred.
      */
 
-    if ((result == TCL_ERROR) && !(iPtr->flags & ERR_ALREADY_LOGGED)) {
+    if ((result == HAX_ERROR) && !(iPtr->flags & ERR_ALREADY_LOGGED)) {
 	int numChars;
 	char *p;
 
@@ -788,7 +788,7 @@ Tcl_Eval(
 	    sprintf(copyStorage, "\n    invoked from within\n\"%.*s%s\"",
 		    numChars, cmdStart, ellipsis);
 	}
-	Tcl_AddErrorInfo(interp, copyStorage);
+	Hax_AddErrorInfo(interp, copyStorage);
 	iPtr->flags &= ~ERR_ALREADY_LOGGED;
     } else {
 	iPtr->flags &= ~ERR_ALREADY_LOGGED;
@@ -799,24 +799,24 @@ Tcl_Eval(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_CreateTrace --
+ * Hax_CreateTrace --
  *
  *	Arrange for a procedure to be called to trace command execution.
  *
  * Results:
  *	The return value is a token for the trace, which may be passed
- *	to Tcl_DeleteTrace to eliminate the trace.
+ *	to Hax_DeleteTrace to eliminate the trace.
  *
  * Side effects:
  *	From now on, proc will be called just before a command procedure
- *	is called to execute a Tcl command.  Calls to proc will have the
+ *	is called to execute a Hax command.  Calls to proc will have the
  *	following form:
  *
  *	void
  *	proc(clientData, interp, level, command, cmdProc, cmdClientData,
  *		argc, argv)
  *	    ClientData clientData;
- *	    Tcl_Interp *interp;
+ *	    Hax_Interp *interp;
  *	    int level;
  *	    char *command;
  *	    int (*cmdProc)();
@@ -839,12 +839,12 @@ Tcl_Eval(
  *----------------------------------------------------------------------
  */
 
-Tcl_Trace
-Tcl_CreateTrace(
-    Tcl_Interp *interp,		/* Interpreter in which to create the trace. */
+Hax_Trace
+Hax_CreateTrace(
+    Hax_Interp *interp,		/* Interpreter in which to create the trace. */
     int level,			/* Only call proc for commands at nesting level
 				 * <= level (1 => top level). */
-    Tcl_CmdTraceProc *proc,	/* Procedure to call before executing each
+    Hax_CmdTraceProc *proc,	/* Procedure to call before executing each
 				 * command. */
     ClientData clientData	/* Arbitrary one-word value to pass to proc. */)
 {
@@ -858,13 +858,13 @@ Tcl_CreateTrace(
     tracePtr->nextPtr = iPtr->tracePtr;
     iPtr->tracePtr = tracePtr;
 
-    return (Tcl_Trace) tracePtr;
+    return (Hax_Trace) tracePtr;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_DeleteTrace --
+ * Hax_DeleteTrace --
  *
  *	Remove a trace.
  *
@@ -879,10 +879,10 @@ Tcl_CreateTrace(
  */
 
 void
-Tcl_DeleteTrace(
-    Tcl_Interp *interp,		/* Interpreter that contains trace. */
-    Tcl_Trace trace		/* Token for trace (returned previously by
-				 * Tcl_CreateTrace). */)
+Hax_DeleteTrace(
+    Hax_Interp *interp,		/* Interpreter that contains trace. */
+    Hax_Trace trace		/* Token for trace (returned previously by
+				 * Hax_CreateTrace). */)
 {
     Interp *iPtr = (Interp *) interp;
     Trace *tracePtr = (Trace *) trace;
@@ -906,7 +906,7 @@ Tcl_DeleteTrace(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_AddErrorInfo --
+ * Hax_AddErrorInfo --
  *
  *	Add information to a message being accumulated that describes
  *	the current error.
@@ -916,15 +916,15 @@ Tcl_DeleteTrace(
  *
  * Side effects:
  *	The contents of message are added to the "errorInfo" variable.
- *	If Tcl_Eval has been called since the current value of errorInfo
+ *	If Hax_Eval has been called since the current value of errorInfo
  *	was set, errorInfo is cleared before adding the new message.
  *
  *----------------------------------------------------------------------
  */
 
 void
-Tcl_AddErrorInfo(
-    Tcl_Interp *interp,		/* Interpreter to which error information
+Hax_AddErrorInfo(
+    Hax_Interp *interp,		/* Interpreter to which error information
 				 * pertains. */
     char *message		/* Message to record. */)
 {
@@ -939,8 +939,8 @@ Tcl_AddErrorInfo(
      */
 
     if (!(iPtr->flags & ERR_IN_PROGRESS)) {
-	Tcl_SetVar2(interp, "errorInfo", (char *) NULL, interp->result,
-		TCL_GLOBAL_ONLY);
+	Hax_SetVar2(interp, "errorInfo", (char *) NULL, interp->result,
+		HAX_GLOBAL_ONLY);
 	iPtr->flags |= ERR_IN_PROGRESS;
 
 	/*
@@ -949,24 +949,24 @@ Tcl_AddErrorInfo(
 	 */
 
 	if (!(iPtr->flags & ERROR_CODE_SET)) {
-	    (void) Tcl_SetVar2(interp, "errorCode", (char *) NULL, "NONE",
-		    TCL_GLOBAL_ONLY);
+	    (void) Hax_SetVar2(interp, "errorCode", (char *) NULL, "NONE",
+		    HAX_GLOBAL_ONLY);
 	}
     }
-    Tcl_SetVar2(interp, "errorInfo", (char *) NULL, message,
-	    TCL_GLOBAL_ONLY|TCL_APPEND_VALUE);
+    Hax_SetVar2(interp, "errorInfo", (char *) NULL, message,
+	    HAX_GLOBAL_ONLY|HAX_APPEND_VALUE);
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_VarEval --
+ * Hax_VarEval --
  *
  *	Given a variable number of string arguments, concatenate them
- *	all together and execute the result as a Tcl command.
+ *	all together and execute the result as a Hax command.
  *
  * Results:
- *	A standard Tcl return result.  An error message or other
+ *	A standard Hax return result.  An error message or other
  *	result may be left in interp->result.
  *
  * Side effects:
@@ -976,8 +976,8 @@ Tcl_AddErrorInfo(
  */
 	/* VARARGS2 */ /* ARGSUSED */
 int
-Tcl_VarEval(
-    Tcl_Interp *interp,		/* Interpreter in which to execute command. */
+Hax_VarEval(
+    Hax_Interp *interp,		/* Interpreter in which to execute command. */
     ...				/* One or more strings to concatenate,
 				 * terminated with a NULL string. */)
 {
@@ -996,7 +996,7 @@ Tcl_VarEval(
      */
 
     va_start(argList, interp);
-    interp = va_arg(argList, Tcl_Interp *);
+    interp = va_arg(argList, Hax_Interp *);
     spaceAvl = FIXED_SIZE;
     spaceUsed = 0;
     cmd = fixedSpace;
@@ -1024,7 +1024,7 @@ Tcl_VarEval(
     va_end(argList);
     cmd[spaceUsed] = '\0';
 
-    result = Tcl_Eval(interp, cmd, 0, (char **) NULL);
+    result = Hax_Eval(interp, cmd, 0, (char **) NULL);
     if (cmd != fixedSpace) {
 	ckfree(cmd);
     }
@@ -1034,12 +1034,12 @@ Tcl_VarEval(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_GlobalEval --
+ * Hax_GlobalEval --
  *
  *	Evaluate a command at global level in an interpreter.
  *
  * Results:
- *	A standard Tcl result is returned, and interp->result is
+ *	A standard Hax result is returned, and interp->result is
  *	modified accordingly.
  *
  * Side effects:
@@ -1052,8 +1052,8 @@ Tcl_VarEval(
  */
 
 int
-Tcl_GlobalEval(
-    Tcl_Interp *interp,		/* Interpreter in which to evaluate command. */
+Hax_GlobalEval(
+    Hax_Interp *interp,		/* Interpreter in which to evaluate command. */
     char *command		/* Command to evaluate. */)
 {
     Interp *iPtr = (Interp *) interp;
@@ -1062,7 +1062,7 @@ Tcl_GlobalEval(
 
     savedVarFramePtr = iPtr->varFramePtr;
     iPtr->varFramePtr = NULL;
-    result = Tcl_Eval(interp, command, 0, (char **) NULL);
+    result = Hax_Eval(interp, command, 0, (char **) NULL);
     iPtr->varFramePtr = savedVarFramePtr;
     return result;
 }

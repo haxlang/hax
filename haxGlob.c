@@ -1,5 +1,5 @@
 /* 
- * tclGlob.c --
+ * haxGlob.c --
  *
  *	This file provides procedures and commands for file name
  *	manipulation, such as tilde expansion and globbing.
@@ -18,8 +18,8 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclGlob.c,v 1.26 92/12/23 11:33:18 ouster Exp $ SPRITE (Berkeley)";
 #endif /* not lint */
 
-#include "tclInt.h"
-#include "tclUnix.h"
+#include "haxInt.h"
+#include "haxUnix.h"
 
 /*
  * The structure below is used to keep track of a globbing result
@@ -42,10 +42,10 @@ typedef struct {
  * Declarations for procedures local to this file:
  */
 
-static void		AppendResult (Tcl_Interp *interp,
+static void		AppendResult (Hax_Interp *interp,
 			    char *dir, char *separator, char *name,
 			    int nameLength);
-static int		DoGlob (Tcl_Interp *interp, char *dir,
+static int		DoGlob (Hax_Interp *interp, char *dir,
 			    char *rem);
 
 /*
@@ -68,7 +68,7 @@ static int		DoGlob (Tcl_Interp *interp, char *dir,
 
 static void
 AppendResult(
-    Tcl_Interp *interp,		/* Interpreter whose result should be
+    Hax_Interp *interp,		/* Interpreter whose result should be
 				 * appended to. */
     char *dir,			/* Name of directory, without trailing
 				 * slash except for root directory. */
@@ -83,22 +83,22 @@ AppendResult(
 
     /*
      * Next, see if we can put together a valid list element from dir
-     * and name by calling Tcl_AppendResult.
+     * and name by calling Hax_AppendResult.
      */
 
     if (*dir == 0) {
 	dirFlags = 0;
     } else {
-	Tcl_ScanElement(dir, &dirFlags);
+	Hax_ScanElement(dir, &dirFlags);
     }
     saved = name[nameLength];
     name[nameLength] = 0;
-    Tcl_ScanElement(name, &nameFlags);
+    Hax_ScanElement(name, &nameFlags);
     if ((dirFlags == 0) && (nameFlags == 0)) {
 	if (*interp->result != 0) {
-	    Tcl_AppendResult(interp, " ", dir, separator, name, (char *) NULL);
+	    Hax_AppendResult(interp, " ", dir, separator, name, (char *) NULL);
 	} else {
-	    Tcl_AppendResult(interp, dir, separator, name, (char *) NULL);
+	    Hax_AppendResult(interp, dir, separator, name, (char *) NULL);
 	}
 	name[nameLength] = saved;
 	return;
@@ -114,7 +114,7 @@ AppendResult(
 	    + nameLength + 1));
     sprintf(p, "%s%s%s", dir, separator, name);
     name[nameLength] = saved;
-    Tcl_AppendElement(interp, p, 0);
+    Hax_AppendElement(interp, p, 0);
     ckfree(p);
 }
 
@@ -128,7 +128,7 @@ AppendResult(
  *	given by the path name to be globbed.
  *
  * Results:
- *	The return value is a standard Tcl result indicating whether
+ *	The return value is a standard Hax result indicating whether
  *	an error occurred in globbing.  After a normal return the
  *	result in interp will be set to hold all of the file names
  *	given by the dir and rem arguments.  After an error the
@@ -142,7 +142,7 @@ AppendResult(
 
 static int
 DoGlob(
-    Tcl_Interp *interp,			/* Interpreter to use for error
+    Hax_Interp *interp,			/* Interpreter to use for error
 					 * reporting (e.g. unmatched brace). */
     char *dir,				/* Name of a directory at which to
 					 * start glob expansion.  This name
@@ -223,9 +223,9 @@ DoGlob(
 	char *element, *newRem;
 
 	if (closeBrace == NULL) {
-	    Tcl_ResetResult(interp);
+	    Hax_ResetResult(interp);
 	    interp->result = "unmatched open-brace in file name";
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	remLength = strlen(rem) + 1;
 	if (remLength <= STATIC_SIZE) {
@@ -244,14 +244,14 @@ DoGlob(
 	    l2 = p - element;
 	    strncpy(newRem+l1, element, l2);
 	    strcpy(newRem+l1+l2, closeBrace+1);
-	    if (DoGlob(interp, dir, newRem) != TCL_OK) {
-		return TCL_ERROR;
+	    if (DoGlob(interp, dir, newRem) != HAX_OK) {
+		return HAX_ERROR;
 	    }
 	}
 	if (remLength > STATIC_SIZE) {
 	    ckfree(newRem);
 	}
-	return TCL_OK;
+	return HAX_OK;
     }
 
     /*
@@ -279,14 +279,14 @@ DoGlob(
 	    dirName = dir;
 	}
 	if ((stat(dirName, &statBuf) != 0) || !S_ISDIR(statBuf.st_mode)) {
-	    return TCL_OK;
+	    return HAX_OK;
 	}
 	d = opendir(dirName);
 	if (d == NULL) {
-	    Tcl_ResetResult(interp);
-	    Tcl_AppendResult(interp, "couldn't read directory \"",
-		    dirName, "\": ", Tcl_UnixError(interp), (char *) NULL);
-	    return TCL_ERROR;
+	    Hax_ResetResult(interp);
+	    Hax_AppendResult(interp, "couldn't read directory \"",
+		    dirName, "\": ", Hax_UnixError(interp), (char *) NULL);
+	    return HAX_ERROR;
 	}
 	l1 = strlen(dir);
 	l2 = (p - rem);
@@ -297,7 +297,7 @@ DoGlob(
 	}
 	strncpy(pattern, rem, l2);
 	pattern[l2] = '\0';
-	result = TCL_OK;
+	result = HAX_OK;
 	while (1) {
 	    entryPtr = readdir(d);
 	    if (entryPtr == NULL) {
@@ -312,7 +312,7 @@ DoGlob(
 	    if ((*entryPtr->d_name == '.') && (*pattern != '.')) {
 		continue;
 	    }
-	    if (Tcl_StringMatch(entryPtr->d_name, pattern)) {
+	    if (Hax_StringMatch(entryPtr->d_name, pattern)) {
 		int nameLength = strlen(entryPtr->d_name);
 		if (*p == 0) {
 		    AppendResult(interp, dir, separator, entryPtr->d_name,
@@ -328,7 +328,7 @@ DoGlob(
 		    if (newDir != static1) {
 			ckfree(newDir);
 		    }
-		    if (result != TCL_OK) {
+		    if (result != HAX_OK) {
 			break;
 		    }
 		}
@@ -366,17 +366,17 @@ DoGlob(
 	if (newDir != static1) {
 	    ckfree(newDir);
 	}
-	if (result != TCL_OK) {
-	    return TCL_ERROR;
+	if (result != HAX_OK) {
+	    return HAX_ERROR;
 	}
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_TildeSubst --
+ * Hax_TildeSubst --
  *
  *	Given a name starting with a tilde, produce a name where
  *	the tilde and following characters have been replaced by
@@ -385,7 +385,7 @@ DoGlob(
  * Results:
  *	The result is a pointer to a static string containing
  *	the new name.  This name will only persist until the next
- *	call to Tcl_TildeSubst;  save it if you care about it for
+ *	call to Hax_TildeSubst;  save it if you care about it for
  *	the long term.  If there was an error in processing the
  *	tilde, then an error message is left in interp->result
  *	and the return value is NULL.
@@ -397,8 +397,8 @@ DoGlob(
  */
 
 char *
-Tcl_TildeSubst(
-    Tcl_Interp *interp,		/* Interpreter in which to store error
+Hax_TildeSubst(
+    Hax_Interp *interp,		/* Interpreter in which to store error
 				 * message (if necessary). */
     char *name			/* File name, which may begin with "~/"
 				 * (to indicate current user's home directory)
@@ -425,8 +425,8 @@ Tcl_TildeSubst(
     if ((name[1] == '/') || (name[1] == '\0')) {
 	dir = getenv("HOME");
 	if (dir == NULL) {
-	    Tcl_ResetResult(interp);
-	    Tcl_AppendResult(interp, "couldn't find HOME environment ",
+	    Hax_ResetResult(interp);
+	    Hax_AppendResult(interp, "couldn't find HOME environment ",
 		    "variable to expand \"", name, "\"", (char *) NULL);
 	    return NULL;
 	}
@@ -446,8 +446,8 @@ Tcl_TildeSubst(
 	pwPtr = getpwnam(curBuf);
 	if (pwPtr == NULL) {
 	    endpwent();
-	    Tcl_ResetResult(interp);
-	    Tcl_AppendResult(interp, "user \"", curBuf,
+	    Hax_ResetResult(interp);
+	    Hax_AppendResult(interp, "user \"", curBuf,
 		    "\" doesn't exist", (char *) NULL);
 	    return NULL;
 	}
@@ -485,13 +485,13 @@ Tcl_TildeSubst(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_GlobCmd --
+ * Hax_GlobCmd --
  *
- *	This procedure is invoked to process the "glob" Tcl command.
+ *	This procedure is invoked to process the "glob" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -501,9 +501,9 @@ Tcl_TildeSubst(
 
 	/* ARGSUSED */
 int
-Tcl_GlobCmd(
+Hax_GlobCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -511,9 +511,9 @@ Tcl_GlobCmd(
 
     if (argc < 2) {
 	notEnoughArgs:
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" ?-nocomplain? name ?name ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     noComplain = 0;
     if ((argv[1][0] == '-') && (strcmp(argv[1], "-nocomplain") == 0)) {
@@ -533,9 +533,9 @@ Tcl_GlobCmd(
 
 	thisName = argv[i];
 	if (*thisName == '~') {
-	    thisName = Tcl_TildeSubst(interp, thisName);
+	    thisName = Hax_TildeSubst(interp, thisName);
 	    if (thisName == NULL) {
-		return TCL_ERROR;
+		return HAX_ERROR;
 	    }
 	}
 	if (*thisName == '/') {
@@ -543,21 +543,21 @@ Tcl_GlobCmd(
 	} else {
 	    result = DoGlob(interp, "", thisName);
 	}
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    return result;
 	}
     }
     if ((*interp->result == 0) && !noComplain) {
 	char *sep = "";
 
-	Tcl_AppendResult(interp, "no files matched glob pattern",
+	Hax_AppendResult(interp, "no files matched glob pattern",
 		(argc == 2) ? " \"" : "s \"", (char *) NULL);
 	for (i = 1; i < argc; i++) {
-	    Tcl_AppendResult(interp, sep, argv[i], (char *) NULL);
+	    Hax_AppendResult(interp, sep, argv[i], (char *) NULL);
 	    sep = " ";
 	}
-	Tcl_AppendResult(interp, "\"", (char *) NULL);
-	return TCL_ERROR;
+	Hax_AppendResult(interp, "\"", (char *) NULL);
+	return HAX_ERROR;
     }
-    return TCL_OK;
+    return HAX_OK;
 }

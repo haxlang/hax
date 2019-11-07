@@ -1,5 +1,5 @@
 /* 
- * tclUnixStr.c --
+ * haxUnixStr.c --
  *
  *	This file contains procedures that generate strings
  *	corresponding to various UNIX-related codes, such
@@ -19,13 +19,13 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUnixStr.c,v 1.14 93/01/29 14:42:51 ouster Exp $ SPRITE (Berkeley)";
 #endif /* not lint */
 
-#include "tclInt.h"
-#include "tclUnix.h"
+#include "haxInt.h"
+#include "haxUnix.h"
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_ErrnoId --
+ * Hax_ErrnoId --
  *
  *	Return a textual identifier for the current errno value.
  *
@@ -41,7 +41,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUnixStr.c,v 1.14 93/01/
  */
 
 char *
-Tcl_ErrnoId(void)
+Hax_ErrnoId(void)
 {
     switch (errno) {
 #ifdef E2BIG
@@ -462,7 +462,7 @@ Tcl_ErrnoId(void)
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_SignalId --
+ * Hax_SignalId --
  *
  *	Return a textual identifier for a signal number.
  *
@@ -478,7 +478,7 @@ Tcl_ErrnoId(void)
  */
 
 char *
-Tcl_SignalId(
+Hax_SignalId(
     int sig			/* Number of signal. */)
 {
     switch (sig) {
@@ -594,7 +594,7 @@ Tcl_SignalId(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_SignalMsg --
+ * Hax_SignalMsg --
  *
  *	Return a human-readable message describing a signal.
  *
@@ -610,7 +610,7 @@ Tcl_SignalId(
  */
 
 char *
-Tcl_SignalMsg(
+Hax_SignalMsg(
     int sig			/* Number of signal. */)
 {
     switch (sig) {

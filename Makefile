@@ -5,9 +5,9 @@
 #
 # 1. To compile for non-UNIX systems (so that only the non-UNIX-specific
 # commands are available), change the OBJS line below so it doesn't
-# include ${UNIX_OBJS}.  Also, add the switch "-DTCL_GENERIC_ONLY" to
+# include ${UNIX_OBJS}.  Also, add the switch "-DHAX_GENERIC_ONLY" to
 # CFLAGS.  Lastly, you'll have to provide your own replacement for the
-# "panic" procedure (see panic.c for what the current one does).
+# "panic" procedure (see haxPanic.c for what the current one does).
 
 # 2. If you want to put Hax-related information in non-standard places,
 # change the following definitions below to reflect where you want
@@ -15,17 +15,17 @@
 #
 #    PREFIX		Top-level directory in which to install;  contains
 #			each of the other directories below.
-#    TCL_LIBRARY	Directory in which to install the library of Tcl
-#			scripts.  Note: if the TCL_LIBRARY environment
-#			variable is specified at run-time then Tcl looks
+#    HAX_LIBRARY	Directory in which to install the library of Hax
+#			scripts.  Note: if the HAX_LIBRARY environment
+#			variable is specified at run-time then Hax looks
 #			there rather than in the place specified here.
-#    LIB_DIR		Directory in which to install the archive libtcl.a
+#    LIB_DIR		Directory in which to install the archive libhax.a
 #    INCLUDE_DIR	Directory in which to install include files.
 #    MAN_DIR		Directory in which to install manual pages.
 #    MAN3_DIR		Directory in which to install manual entries for
-#			library procedures such as Tcl_Eval.
+#			library procedures such as Hax_Eval.
 #    MANN_DIR		Directory in which to install manual entries for
-#			miscellaneous things such as the Tcl overview
+#			miscellaneous things such as the Hax overview
 #			manual entry.
 #
 
@@ -49,73 +49,78 @@ CFLAGS	=
 LDFLAGS	=
 
 PREFIX ?=	/usr/local
-TCL_LIBRARY ?=	lib/tcl
+HAX_LIBRARY ?=	lib/hax
 LIB_DIR ?=	lib
 INCLUDE_DIR ?=	include
 MAN_DIR ?=	man
 MAN3_DIR ?=	$(MAN_DIR)/man3
 MANN_DIR ?=	$(MAN_DIR)/mann
 
-all: libtcl.a
+all: libhax.a
 
-GENERIC_OBJS =	regexp.o tclAssem.o tclBasic.o tclCkalloc.o \
-	tclCmdAH.o tclCmdIL.o tclCmdMZ.o tclExpr.o tclGet.o \
-	tclHash.o tclHistory.o tclParse.o tclProc.o tclUtil.o \
-	tclVar.o
+GENERIC_OBJS =	haxRegexp.o haxAssem.o haxBasic.o haxCkalloc.o \
+	haxCmdAH.o haxCmdIL.o haxCmdMZ.o haxExpr.o haxGet.o \
+	haxHash.o haxHistory.o haxParse.o haxProc.o haxUtil.o \
+	haxVar.o
 
-UNIX_OBJS = panic.o tclEnv.o tclGlob.o tclUnixAZ.o tclUnixStr.o \
-	tclUnixUtil.o 
+UNIX_OBJS = haxPanic.o haxEnv.o haxGlob.o haxUnixAZ.o haxUnixStr.o \
+	haxUnixUtil.o 
 
 COMPAT_OBJS =
 
 OBJS = $(GENERIC_OBJS) $(UNIX_OBJS) $(COMPAT_OBJS)
 
-libtcl.a: $(OBJS)
+libhax.a: $(OBJS)
 	$(AR) cr $@ $(OBJS)
 	$(RANLIB) $@
 
-tclTest: tclTest.o libtcl.a
-	$(CC) $(LDFLAGS) -o $@ tclTest.o libtcl.a
+haxTest: haxTest.o libhax.a
+	$(CC) $(LDFLAGS) -o $@ haxTest.o libhax.a
 
-install: libtcl.a
+install: libhax.a
 	install -d $(DESTDIR)$(PREFIX)/$(LIB_DIR)
-	install -d $(DESTDIR)$(PREFIX)/$(TCL_LIBRARY)
+	install -d $(DESTDIR)$(PREFIX)/$(HAX_LIBRARY)
 	install -d $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(MAN3_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(MANN_DIR)
 
 	cd library; for i in *.tcl; do \
-		install $$i $(DESTDIR)$(PREFIX)/$(TCL_LIBRARY); \
+		install $$i $(DESTDIR)$(PREFIX)/$(HAX_LIBRARY); \
 	done
 
-	install libtcl.a $(DESTDIR)$(PREFIX)/$(LIB_DIR)
+	install libhax.a $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 
-	install tcl.h $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
-	install tclHash.h $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
+	install hax.h $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
+	install haxHash.h $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
 
 	cd doc; for i in *.3; do \
 		sed -e '/man\.macros/r man.macros' -e '/man\.macros/d' \
-			$$i > $$i.tmp; \
-		install $$i.tmp $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i; \
-		rm -f $$i.tmp; \
+			$$i > Hax_$$i; \
+		install Hax_$$i $(DESTDIR)$(PREFIX)/$(MAN3_DIR); \
+		rm -f Hax_$$i; \
 	done
 
-	cd doc; for i in *.n; do \
-		sed -e '/man\.macros/r man.macros' -e '/man\.macros/d' \
-			$$i > $$i.tmp; \
-		install $$i.tmp $(DESTDIR)$(PREFIX)/$(MANN_DIR)/$$i; \
-		rm -f $$i.tmp; \
-	done
+	cd doc; \
+		sed -e '/man\.macros/r man.macros' \
+		    -e '/man\.macros/d' Hax.n > Hax.n.tmp; \
+		install Hax.n.tmp $(DESTDIR)$(PREFIX)/$(MANN_DIR)/Hax.n; \
+		rm -f Hax.n.tmp
 
-test: tclTest
-	( echo cd tests ; echo source all ) | ./tclTest
+	cd doc; \
+		sed -e '/man\.macros/r man.macros' \
+		    -e '/man\.macros/d' library.n > Hax_library.n; \
+		install Hax_library.n $(DESTDIR)$(PREFIX)/$(MANN_DIR); \
+		rm -f Hax_library.n
+
+test: haxTest
+	( echo cd tests ; echo source all ) | ./haxTest
 
 clean:
-	rm -f $(OBJS) libtcl.a tclTest.o tclTest
+	rm -f $(OBJS) libhax.a haxTest.o haxTest
 
-$(OBJS): tcl.h tclHash.h tclInt.h
-$(UNIX_OJBS): tclUnix.h
+$(OBJS): hax.h haxHash.h haxInt.h
+$(UNIX_OJBS): haxUnix.h
 
 .SUFFIXES: .c .o
 .c.o:
-	$(CC) $(CFLAGS) -I. -DTCL_LIBRARY=\"$(PREFIX)/$(TCL_LIBRARY)\" -c $<
+	$(CC) $(CFLAGS) -I. -DHAX_LIBRARY=\"$(PREFIX)/$(HAX_LIBRARY)\" -c $<

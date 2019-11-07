@@ -1,8 +1,8 @@
 /* 
- * tclExpr.c --
+ * haxExpr.c --
  *
  *	This file contains the code to evaluate expressions for
- *	Tcl.
+ *	Hax.
  *
  *	This implementation of floating-point support was modelled
  *	after an initial implementation by Bill Carpenter.
@@ -21,7 +21,7 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclExpr.c,v 1.36 92/08/16 13:25:34 ouster Exp $ SPRITE (Berkeley)";
 #endif
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
  * The stuff below is a bit of a hack so that this file can be used
@@ -29,8 +29,8 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclExpr.c,v 1.36 92/08/16 
  * errno here.
  */
 
-#ifndef TCL_GENERIC_ONLY
-#include "tclUnix.h"
+#ifndef HAX_GENERIC_ONLY
+#include "haxUnix.h"
 #else
 int errno;
 #define ERANGE 34
@@ -72,7 +72,7 @@ typedef struct {
 
 typedef struct {
     char *originalExpr;		/* The entire expression, as originally
-				 * passed to Tcl_Expr. */
+				 * passed to Hax_Expr. */
     char *expr;			/* Position to the next character to be
 				 * scanned from the expression string. */
     int token;			/* Type of the last token to be parsed from
@@ -161,14 +161,14 @@ char *operatorStrings[] = {
  * Declarations for local procedures to this file:
  */
 
-static int		ExprGetValue (Tcl_Interp *interp,
+static int		ExprGetValue (Hax_Interp *interp,
 			    ExprInfo *infoPtr, int prec, Value *valuePtr);
-static int		ExprLex (Tcl_Interp *interp,
+static int		ExprLex (Hax_Interp *interp,
 			    ExprInfo *infoPtr, Value *valuePtr);
 static void		ExprMakeString (Value *valuePtr);
-static int		ExprParseString (Tcl_Interp *interp,
+static int		ExprParseString (Hax_Interp *interp,
 			    char *string, Value *valuePtr);
-static int		ExprTopLevel (Tcl_Interp *interp,
+static int		ExprTopLevel (Hax_Interp *interp,
 			    char *string, Value *valuePtr);
 
 /*
@@ -182,7 +182,7 @@ static int		ExprTopLevel (Tcl_Interp *interp,
  *	will just be a copy of the string.
  *
  * Results:
- *	TCL_OK is returned under normal circumstances, and TCL_ERROR
+ *	HAX_OK is returned under normal circumstances, and HAX_ERROR
  *	is returned if a floating-point overflow or underflow occurred
  *	while reading in a number.  The value at *valuePtr is modified
  *	to hold a number, if possible.
@@ -195,7 +195,7 @@ static int		ExprTopLevel (Tcl_Interp *interp,
 
 static int
 ExprParseString(
-    Tcl_Interp *interp,		/* Where to store error message. */
+    Hax_Interp *interp,		/* Where to store error message. */
     char *string,		/* String to turn into value. */
     Value *valuePtr		/* Where to store value information.
 				 * Caller must have initialized pv field. */)
@@ -215,27 +215,27 @@ ExprParseString(
 	valuePtr->intValue = strtol(string, &term, 0);
 	c = *term;
 	if ((c == '\0') && (errno != ERANGE)) {
-	    return TCL_OK;
+	    return HAX_OK;
 	}
 	if ((c == '.') || (c == 'e') || (c == 'E') || (errno == ERANGE)) {
 	    errno = 0;
 	    valuePtr->doubleValue = strtod(string, &term);
 	    if (errno == ERANGE) {
-		Tcl_ResetResult(interp);
+		Hax_ResetResult(interp);
 		if (valuePtr->doubleValue == 0.0) {
-		    Tcl_AppendResult(interp, "floating-point value \"",
+		    Hax_AppendResult(interp, "floating-point value \"",
 			    string, "\" too small to represent",
 			    (char *) NULL);
 		} else {
-		    Tcl_AppendResult(interp, "floating-point value \"",
+		    Hax_AppendResult(interp, "floating-point value \"",
 			    string, "\" too large to represent",
 			    (char *) NULL);
 		}
-		return TCL_ERROR;
+		return HAX_ERROR;
 	    }
 	    if (*term == '\0') {
 		valuePtr->type = TYPE_DOUBLE;
-		return TCL_OK;
+		return HAX_OK;
 	    }
 	}
     }
@@ -257,7 +257,7 @@ ExprParseString(
 	}
 	strcpy(valuePtr->pv.buffer, string);
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
@@ -269,9 +269,9 @@ ExprParseString(
  *	operator, or other syntactic element from an expression string.
  *
  * Results:
- *	TCL_OK is returned unless an error occurred while doing lexical
+ *	HAX_OK is returned unless an error occurred while doing lexical
  *	analysis or executing an embedded command.  In that case a
- *	standard Tcl error is returned, using interp->result to hold
+ *	standard Hax error is returned, using interp->result to hold
  *	an error message.  In the event of a successful return, the token
  *	and field in infoPtr is updated to refer to the next symbol in
  *	the expression string, and the expr field is advanced past that
@@ -286,7 +286,7 @@ ExprParseString(
 
 static int
 ExprLex(
-    Tcl_Interp *interp,			/* Interpreter to use for error
+    Hax_Interp *interp,			/* Interpreter to use for error
 					 * reporting. */
     ExprInfo *infoPtr,		/* Describes the state of the parse. */
     Value *valuePtr		/* Where to store value, if that is
@@ -336,7 +336,7 @@ ExprLex(
 		errno = 0;
 		valuePtr->doubleValue = strtod(p, &term2);
 		if (errno == ERANGE) {
-		    Tcl_ResetResult(interp);
+		    Hax_ResetResult(interp);
 		    if (valuePtr->doubleValue == 0.0) {
 			interp->result =
 				"floating-point value too small to represent";
@@ -344,18 +344,18 @@ ExprLex(
 			interp->result =
 				"floating-point value too large to represent";
 		    }
-		    return TCL_ERROR;
+		    return HAX_ERROR;
 		}
 		if (term2 == infoPtr->expr) {
 		    interp->result = "poorly-formed floating-point value";
-		    return TCL_ERROR;
+		    return HAX_ERROR;
 		}
 		valuePtr->type = TYPE_DOUBLE;
 		infoPtr->expr = term2;
 	    } else {
 		infoPtr->expr = term;
 	    }
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '$':
 
@@ -365,91 +365,91 @@ ExprLex(
 	     */
 
 	    infoPtr->token = VALUE;
-	    var = Tcl_ParseVar(interp, p, &infoPtr->expr);
+	    var = Hax_ParseVar(interp, p, &infoPtr->expr);
 	    if (var == NULL) {
-		return TCL_ERROR;
+		return HAX_ERROR;
 	    }
 	    if (((Interp *) interp)->noEval) {
 		valuePtr->type = TYPE_INT;
 		valuePtr->intValue = 0;
-		return TCL_OK;
+		return HAX_OK;
 	    }
 	    return ExprParseString(interp, var, valuePtr);
 
 	case '[':
 	    infoPtr->token = VALUE;
-	    result = Tcl_Eval(interp, p+1, TCL_BRACKET_TERM,
+	    result = Hax_Eval(interp, p+1, HAX_BRACKET_TERM,
 		    &infoPtr->expr);
-	    if (result != TCL_OK) {
+	    if (result != HAX_OK) {
 		return result;
 	    }
 	    infoPtr->expr++;
 	    if (((Interp *) interp)->noEval) {
 		valuePtr->type = TYPE_INT;
 		valuePtr->intValue = 0;
-		Tcl_ResetResult(interp);
-		return TCL_OK;
+		Hax_ResetResult(interp);
+		return HAX_OK;
 	    }
 	    result = ExprParseString(interp, interp->result, valuePtr);
-	    if (result != TCL_OK) {
+	    if (result != HAX_OK) {
 		return result;
 	    }
-	    Tcl_ResetResult(interp);
-	    return TCL_OK;
+	    Hax_ResetResult(interp);
+	    return HAX_OK;
 
 	case '"':
 	    infoPtr->token = VALUE;
-	    result = TclParseQuotes(interp, infoPtr->expr, '"', 0,
+	    result = HaxParseQuotes(interp, infoPtr->expr, '"', 0,
 		    &infoPtr->expr, &valuePtr->pv);
-	    if (result != TCL_OK) {
+	    if (result != HAX_OK) {
 		return result;
 	    }
 	    return ExprParseString(interp, valuePtr->pv.buffer, valuePtr);
 
 	case '{':
 	    infoPtr->token = VALUE;
-	    result = TclParseBraces(interp, infoPtr->expr, &infoPtr->expr,
+	    result = HaxParseBraces(interp, infoPtr->expr, &infoPtr->expr,
 		    &valuePtr->pv);
-	    if (result != TCL_OK) {
+	    if (result != HAX_OK) {
 		return result;
 	    }
 	    return ExprParseString(interp, valuePtr->pv.buffer, valuePtr);
 
 	case '(':
 	    infoPtr->token = OPEN_PAREN;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case ')':
 	    infoPtr->token = CLOSE_PAREN;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '*':
 	    infoPtr->token = MULT;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '/':
 	    infoPtr->token = DIVIDE;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '%':
 	    infoPtr->token = MOD;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '+':
 	    infoPtr->token = PLUS;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '-':
 	    infoPtr->token = MINUS;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '?':
 	    infoPtr->token = QUESTY;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case ':':
 	    infoPtr->token = COLON;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '<':
 	    switch (p[1]) {
@@ -465,7 +465,7 @@ ExprLex(
 		    infoPtr->token = LESS;
 		    break;
 	    }
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '>':
 	    switch (p[1]) {
@@ -481,7 +481,7 @@ ExprLex(
 		    infoPtr->token = GREATER;
 		    break;
 	    }
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '=':
 	    if (p[1] == '=') {
@@ -490,7 +490,7 @@ ExprLex(
 	    } else {
 		infoPtr->token = UNKNOWN;
 	    }
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '!':
 	    if (p[1] == '=') {
@@ -499,7 +499,7 @@ ExprLex(
 	    } else {
 		infoPtr->token = NOT;
 	    }
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '&':
 	    if (p[1] == '&') {
@@ -508,11 +508,11 @@ ExprLex(
 	    } else {
 		infoPtr->token = BIT_AND;
 	    }
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '^':
 	    infoPtr->token = BIT_XOR;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '|':
 	    if (p[1] == '|') {
@@ -521,21 +521,21 @@ ExprLex(
 	    } else {
 		infoPtr->token = BIT_OR;
 	    }
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case '~':
 	    infoPtr->token = BIT_NOT;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	case 0:
 	    infoPtr->token = END;
 	    infoPtr->expr = p;
-	    return TCL_OK;
+	    return HAX_OK;
 
 	default:
 	    infoPtr->expr = p+1;
 	    infoPtr->token = UNKNOWN;
-	    return TCL_OK;
+	    return HAX_OK;
     }
 }
 
@@ -547,9 +547,9 @@ ExprLex(
  *	Parse a "value" from the remainder of the expression in infoPtr.
  *
  * Results:
- *	Normally TCL_OK is returned.  The value of the expression is
+ *	Normally HAX_OK is returned.  The value of the expression is
  *	returned in *valuePtr.  If an error occurred, then interp->result
- *	contains an error message and TCL_ERROR is returned.
+ *	contains an error message and HAX_ERROR is returned.
  *	InfoPtr->token will be left pointing to the token AFTER the
  *	expression, and infoPtr->expr will point to the character just
  *	after the terminating token.
@@ -562,7 +562,7 @@ ExprLex(
 
 static int
 ExprGetValue(
-    Tcl_Interp *interp,			/* Interpreter to use for error
+    Hax_Interp *interp,			/* Interpreter to use for error
 					 * reporting. */
     ExprInfo *infoPtr,		/* Describes the state of the parse
 					 * just before the value (i.e. ExprLex
@@ -596,10 +596,10 @@ ExprGetValue(
     gotOp = 0;
     value2.pv.buffer = value2.pv.next = value2.staticSpace;
     value2.pv.end = value2.pv.buffer + STATIC_STRING_SPACE - 1;
-    value2.pv.expandProc = TclExpandParseValue;
+    value2.pv.expandProc = HaxExpandParseValue;
     value2.pv.clientData = (ClientData) NULL;
     result = ExprLex(interp, infoPtr, valuePtr);
-    if (result != TCL_OK) {
+    if (result != HAX_OK) {
 	goto done;
     }
     if (infoPtr->token == OPEN_PAREN) {
@@ -609,15 +609,15 @@ ExprGetValue(
 	 */
 
 	result = ExprGetValue(interp, infoPtr, -1, valuePtr);
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    goto done;
 	}
 	if (infoPtr->token != CLOSE_PAREN) {
-	    Tcl_ResetResult(interp);
-	    Tcl_AppendResult(interp,
+	    Hax_ResetResult(interp);
+	    Hax_AppendResult(interp,
 		    "unmatched parentheses in expression \"",
 		    infoPtr->originalExpr, "\"", (char *) NULL);
-	    result = TCL_ERROR;
+	    result = HAX_ERROR;
 	    goto done;
 	}
     } else {
@@ -633,7 +633,7 @@ ExprGetValue(
 	    operator = infoPtr->token;
 	    result = ExprGetValue(interp, infoPtr, precTable[infoPtr->token],
 		    valuePtr);
-	    if (result != TCL_OK) {
+	    if (result != HAX_OK) {
 		goto done;
 	    }
 	    switch (operator) {
@@ -688,7 +688,7 @@ ExprGetValue(
 
     if (!gotOp) {
 	result = ExprLex(interp, infoPtr, &value2);
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    goto done;
 	}
     }
@@ -697,14 +697,14 @@ ExprGetValue(
 	value2.pv.next = value2.pv.buffer;
 	if ((operator < MULT) || (operator >= UNARY_MINUS)) {
 	    if ((operator == END) || (operator == CLOSE_PAREN)) {
-		result = TCL_OK;
+		result = HAX_OK;
 		goto done;
 	    } else {
 		goto syntaxError;
 	    }
 	}
 	if (precTable[operator] <= prec) {
-	    result = TCL_OK;
+	    result = HAX_OK;
 	    goto done;
 	}
 
@@ -733,7 +733,7 @@ ExprGetValue(
 		    valuePtr->pv.next = valuePtr->pv.buffer;
 		    result = ExprGetValue(interp, infoPtr, precTable[operator],
 			    valuePtr);
-		    if (result != TCL_OK) {
+		    if (result != HAX_OK) {
 			goto done;
 		    }
 		    if (infoPtr->token != COLON) {
@@ -749,7 +749,7 @@ ExprGetValue(
 		    result = ExprGetValue(interp, infoPtr, precTable[operator],
 			    &value2);
 		    iPtr->noEval--;
-		    if (result != TCL_OK) {
+		    if (result != HAX_OK) {
 			goto done;
 		    }
 		    if (infoPtr->token != COLON) {
@@ -767,7 +767,7 @@ ExprGetValue(
 	    result = ExprGetValue(interp, infoPtr, precTable[operator],
 		    &value2);
 	}
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    goto done;
 	}
 	if ((infoPtr->token < MULT) && (infoPtr->token != VALUE)
@@ -883,7 +883,7 @@ ExprGetValue(
 
 	    default:
 		interp->result = "unknown operator in expression";
-		result = TCL_ERROR;
+		result = HAX_ERROR;
 		goto done;
 	}
 
@@ -907,7 +907,7 @@ ExprGetValue(
 		    if (value2.intValue == 0) {
 			divideByZero:
 			interp->result = "divide by zero";
-			result = TCL_ERROR;
+			result = HAX_ERROR;
 			goto done;
 		    }
 		    valuePtr->intValue /= value2.intValue;
@@ -1066,7 +1066,7 @@ ExprGetValue(
 
 	    case COLON:
 		interp->result = "can't have : operator without ? first";
-		result = TCL_ERROR;
+		result = HAX_ERROR;
 		goto done;
 	}
     }
@@ -1078,18 +1078,18 @@ ExprGetValue(
     return result;
 
     syntaxError:
-    Tcl_ResetResult(interp);
-    Tcl_AppendResult(interp, "syntax error in expression \"",
+    Hax_ResetResult(interp);
+    Hax_AppendResult(interp, "syntax error in expression \"",
 	    infoPtr->originalExpr, "\"", (char *) NULL);
-    result = TCL_ERROR;
+    result = HAX_ERROR;
     goto done;
 
     illegalType:
-    Tcl_AppendResult(interp, "can't use ", (badType == TYPE_DOUBLE) ?
+    Hax_AppendResult(interp, "can't use ", (badType == TYPE_DOUBLE) ?
 	    "floating-point value" : "non-numeric string",
 	    " as operand of \"", operatorStrings[operator], "\"",
 	    (char *) NULL);
-    result = TCL_ERROR;
+    result = HAX_ERROR;
     goto done;
 }
 
@@ -1135,10 +1135,10 @@ ExprMakeString(
  * ExprTopLevel --
  *
  *	This procedure provides top-level functionality shared by
- *	procedures like Tcl_ExprInt, Tcl_ExprDouble, etc.
+ *	procedures like Hax_ExprInt, Hax_ExprDouble, etc.
  *
  * Results:
- *	The result is a standard Tcl return value.  If an error
+ *	The result is a standard Hax return value.  If an error
  *	occurs then an error message is left in interp->result.
  *	The value of the expression is returned in *valuePtr, in
  *	whatever form it ends up in (could be string or integer
@@ -1154,7 +1154,7 @@ ExprMakeString(
 
 static int
 ExprTopLevel(
-    Tcl_Interp *interp,			/* Context in which to evaluate the
+    Hax_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
     char *string,			/* Expression to evaluate. */
     Value *valuePtr			/* Where to store result.  Should
@@ -1167,31 +1167,31 @@ ExprTopLevel(
     info.expr = string;
     valuePtr->pv.buffer = valuePtr->pv.next = valuePtr->staticSpace;
     valuePtr->pv.end = valuePtr->pv.buffer + STATIC_STRING_SPACE - 1;
-    valuePtr->pv.expandProc = TclExpandParseValue;
+    valuePtr->pv.expandProc = HaxExpandParseValue;
     valuePtr->pv.clientData = (ClientData) NULL;
 
     result = ExprGetValue(interp, &info, -1, valuePtr);
-    if (result != TCL_OK) {
+    if (result != HAX_OK) {
 	return result;
     }
     if (info.token != END) {
-	Tcl_AppendResult(interp, "syntax error in expression \"",
+	Hax_AppendResult(interp, "syntax error in expression \"",
 		string, "\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *--------------------------------------------------------------
  *
- * Tcl_ExprLong, Tcl_ExprDouble, Tcl_ExprBoolean --
+ * Hax_ExprLong, Hax_ExprDouble, Hax_ExprBoolean --
  *
  *	Procedures to evaluate an expression and return its value
  *	in a particular form.
  *
  * Results:
- *	Each of the procedures below returns a standard Tcl result.
+ *	Each of the procedures below returns a standard Hax result.
  *	If an error occurs then an error message is left in
  *	interp->result.  Otherwise the value of the expression,
  *	in the appropriate form, is stored at *resultPtr.  If
@@ -1205,8 +1205,8 @@ ExprTopLevel(
  */
 
 int
-Tcl_ExprLong(
-    Tcl_Interp *interp,			/* Context in which to evaluate the
+Hax_ExprLong(
+    Hax_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
     char *string,			/* Expression to evaluate. */
     long *ptr				/* Where to store result. */)
@@ -1215,14 +1215,14 @@ Tcl_ExprLong(
     int result;
 
     result = ExprTopLevel(interp, string, &value);
-    if (result == TCL_OK) {
+    if (result == HAX_OK) {
 	if (value.type == TYPE_INT) {
 	    *ptr = value.intValue;
 	} else if (value.type == TYPE_DOUBLE) {
 	    *ptr = value.doubleValue;
 	} else {
 	    interp->result = "expression didn't have numeric value";
-	    result = TCL_ERROR;
+	    result = HAX_ERROR;
 	}
     }
     if (value.pv.buffer != value.staticSpace) {
@@ -1232,8 +1232,8 @@ Tcl_ExprLong(
 }
 
 int
-Tcl_ExprDouble(
-    Tcl_Interp *interp,			/* Context in which to evaluate the
+Hax_ExprDouble(
+    Hax_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
     char *string,			/* Expression to evaluate. */
     void *ptr				/* Where to store result. */)
@@ -1242,14 +1242,14 @@ Tcl_ExprDouble(
     int result;
 
     result = ExprTopLevel(interp, string, &value);
-    if (result == TCL_OK) {
+    if (result == HAX_OK) {
 	if (value.type == TYPE_INT) {
 	    *(double *)ptr = value.intValue;
 	} else if (value.type == TYPE_DOUBLE) {
 	    *(double *)ptr = value.doubleValue;
 	} else {
 	    interp->result = "expression didn't have numeric value";
-	    result = TCL_ERROR;
+	    result = HAX_ERROR;
 	}
     }
     if (value.pv.buffer != value.staticSpace) {
@@ -1259,8 +1259,8 @@ Tcl_ExprDouble(
 }
 
 int
-Tcl_ExprBoolean(
-    Tcl_Interp *interp,			/* Context in which to evaluate the
+Hax_ExprBoolean(
+    Hax_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
     char *string,			/* Expression to evaluate. */
     int *ptr				/* Where to store 0/1 result. */)
@@ -1269,14 +1269,14 @@ Tcl_ExprBoolean(
     int result;
 
     result = ExprTopLevel(interp, string, &value);
-    if (result == TCL_OK) {
+    if (result == HAX_OK) {
 	if (value.type == TYPE_INT) {
 	    *ptr = value.intValue != 0;
 	} else if (value.type == TYPE_DOUBLE) {
 	    *ptr = value.doubleValue != 0.0;
 	} else {
 	    interp->result = "expression didn't have numeric value";
-	    result = TCL_ERROR;
+	    result = HAX_ERROR;
 	}
     }
     if (value.pv.buffer != value.staticSpace) {
@@ -1288,14 +1288,14 @@ Tcl_ExprBoolean(
 /*
  *--------------------------------------------------------------
  *
- * Tcl_ExprString --
+ * Hax_ExprString --
  *
  *	Evaluate an expression and return its value in string form.
  *
  * Results:
- *	A standard Tcl result.  If the result is TCL_OK, then the
+ *	A standard Hax result.  If the result is HAX_OK, then the
  *	interpreter's result is set to the string value of the
- *	expression.  If the result is TCL_OK, then interp->result
+ *	expression.  If the result is HAX_OK, then interp->result
  *	contains an error message.
  *
  * Side effects:
@@ -1305,8 +1305,8 @@ Tcl_ExprBoolean(
  */
 
 int
-Tcl_ExprString(
-    Tcl_Interp *interp,			/* Context in which to evaluate the
+Hax_ExprString(
+    Hax_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
     char *string			/* Expression to evaluate. */)
 {
@@ -1314,7 +1314,7 @@ Tcl_ExprString(
     int result;
 
     result = ExprTopLevel(interp, string, &value);
-    if (result == TCL_OK) {
+    if (result == HAX_OK) {
 	if (value.type == TYPE_INT) {
 	    sprintf(interp->result, "%ld", value.intValue);
 	} else if (value.type == TYPE_DOUBLE) {
@@ -1322,10 +1322,10 @@ Tcl_ExprString(
 	} else {
 	    if (value.pv.buffer != value.staticSpace) {
 		interp->result = value.pv.buffer;
-		interp->freeProc = (Tcl_FreeProc *) free;
+		interp->freeProc = (Hax_FreeProc *) free;
 		value.pv.buffer = value.staticSpace;
 	    } else {
-		Tcl_SetResult(interp, value.pv.buffer, TCL_VOLATILE);
+		Hax_SetResult(interp, value.pv.buffer, HAX_VOLATILE);
 	    }
 	}
     }

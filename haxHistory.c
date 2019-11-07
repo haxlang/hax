@@ -1,7 +1,7 @@
 /* 
- * tclHistory.c --
+ * haxHistory.c --
  *
- *	This module implements history as an optional addition to Tcl.
+ *	This module implements history as an optional addition to Hax.
  *	It can be called to record commands ("events") before they are
  *	executed, and it provides a command that may be used to perform
  *	history substitutions.
@@ -20,7 +20,7 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclHistory.c,v 1.24 92/12/09 16:54:52 ouster Exp $ SPRITE (Berkeley)";
 #endif /* not lint */
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
  * This history stuff is mostly straightforward, except for one thing
@@ -45,7 +45,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclHistory.c,v 1.24 92/12/
  *	echo foo bar
  *	echo [history word 3]
  * In this case, the second event should be recorded as "echo bar".  Only
- * part of the recorded event is to be modified.  Fortunately, Tcl_Eval
+ * part of the recorded event is to be modified.  Fortunately, Hax_Eval
  * helps with this by recording (in the evalFirst and evalLast fields of
  * the intepreter) the location of the command being executed, so the
  * history module can replace exactly the range of bytes corresponding
@@ -75,7 +75,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclHistory.c,v 1.24 92/12/
  * this problem, the actual history revision isn't made during the execution
  * of the "history" command.  Information about the changes is just recorded,
  * in xxx records, and the actual changes are made during the next call to
- * Tcl_RecordHistory (when we know that execution of the previous command
+ * Hax_RecordHistory (when we know that execution of the previous command
  * has finished).
  */
 
@@ -104,7 +104,7 @@ static int		SubsAndEval (Interp *iPtr, char *cmd,
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_InitHistory --
+ * Hax_InitHistory --
  *
  *	Initialize history-related state in an interpreter.
  *
@@ -118,8 +118,8 @@ static int		SubsAndEval (Interp *iPtr, char *cmd,
  */
 
 void
-Tcl_InitHistory(
-    Tcl_Interp *interp		/* Interpreter to initialize. */)
+Hax_InitHistory(
+    Hax_Interp *interp		/* Interpreter to initialize. */)
 {
     Interp *iPtr = (Interp *) interp;
     int i;
@@ -137,26 +137,26 @@ Tcl_InitHistory(
     }
     iPtr->curEvent = 0;
     iPtr->curEventNum = 0;
-    Tcl_CreateCommand((Tcl_Interp *) iPtr, "history", Tcl_HistoryCmd,
+    Hax_CreateCommand((Hax_Interp *) iPtr, "history", Hax_HistoryCmd,
 	    (ClientData) NULL, (void (*)()) NULL);
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_RecordAndEval --
+ * Hax_RecordAndEval --
  *
  *	This procedure adds its command argument to the current list of
- *	recorded events and then executes the command by calling Tcl_Eval.
+ *	recorded events and then executes the command by calling Hax_Eval.
  *
  * Results:
- *	The return value is a standard Tcl return value, the result of
+ *	The return value is a standard Hax return value, the result of
  *	executing cmd.
  *
  * Side effects:
  *	The command is recorded and executed.  In addition, pending history
  *	revisions are carried out, and information is set up to enable
- *	Tcl_Eval to identify history command ranges.  This procedure also
+ *	Hax_Eval to identify history command ranges.  This procedure also
  *	initializes history information for the interpreter, if it hasn't
  *	already been initialized.
  *
@@ -164,12 +164,12 @@ Tcl_InitHistory(
  */
 
 int
-Tcl_RecordAndEval(
-    Tcl_Interp *interp,		/* Token for interpreter in which command
+Hax_RecordAndEval(
+    Hax_Interp *interp,		/* Token for interpreter in which command
 				 * will be executed. */
     char *cmd,			/* Command to record. */
-    int flags			/* Additional flags to pass to Tcl_Eval.
-				 * TCL_NO_EVAL means only record: don't
+    int flags			/* Additional flags to pass to Hax_Eval.
+				 * HAX_NO_EVAL means only record: don't
 				 * execute command. */)
 {
     Interp *iPtr = (Interp *) interp;
@@ -177,7 +177,7 @@ Tcl_RecordAndEval(
     int length, result;
 
     if (iPtr->numEvents == 0) {
-	Tcl_InitHistory(interp);
+	Hax_InitHistory(interp);
     }
     DoRevs(iPtr);
 
@@ -189,8 +189,8 @@ Tcl_RecordAndEval(
 	cmd++;
     }
     if (*cmd == '\0') {
-	Tcl_ResetResult(interp);
-	return TCL_OK;
+	Hax_ResetResult(interp);
+	return HAX_OK;
     }
 
     iPtr->curEventNum++;
@@ -220,11 +220,11 @@ Tcl_RecordAndEval(
      * disabled when we return.
      */
 
-    result = TCL_OK;
-    if (flags != TCL_NO_EVAL) {
+    result = HAX_OK;
+    if (flags != HAX_NO_EVAL) {
 	iPtr->historyFirst = cmd;
 	iPtr->revDisables = 0;
-	result = Tcl_Eval(interp, cmd, flags | TCL_RECORD_BOUNDS,
+	result = Hax_Eval(interp, cmd, flags | HAX_RECORD_BOUNDS,
 		(char **) NULL);
     }
     iPtr->revDisables = 1;
@@ -234,13 +234,13 @@ Tcl_RecordAndEval(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_HistoryCmd --
+ * Hax_HistoryCmd --
  *
- *	This procedure is invoked to process the "history" Tcl command.
+ *	This procedure is invoked to process the "history" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -250,9 +250,9 @@ Tcl_RecordAndEval(
 
 	/* ARGSUSED */
 int
-Tcl_HistoryCmd(
+Hax_HistoryCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -274,24 +274,24 @@ Tcl_HistoryCmd(
 
     if ((c == 'a') && (strncmp(argv[1], "add", length)) == 0) {
 	if ((argc != 3) && (argc != 4)) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " add event ?exec?\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	if (argc == 4) {
 	    if (strncmp(argv[3], "exec", strlen(argv[3])) != 0) {
-		Tcl_AppendResult(interp, "bad argument \"", argv[3],
+		Hax_AppendResult(interp, "bad argument \"", argv[3],
 			"\": should be \"exec\"", (char *) NULL);
-		return TCL_ERROR;
+		return HAX_ERROR;
 	    }
-	    return Tcl_RecordAndEval(interp, argv[2], 0);
+	    return Hax_RecordAndEval(interp, argv[2], 0);
 	}
-	return Tcl_RecordAndEval(interp, argv[2], TCL_NO_EVAL);
+	return Hax_RecordAndEval(interp, argv[2], HAX_NO_EVAL);
     } else if ((c == 'c') && (strncmp(argv[1], "change", length)) == 0) {
 	if ((argc != 3) && (argc != 4)) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " change newValue ?event?\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	if (argc == 3) {
 	    eventPtr = &iPtr->events[iPtr->curEvent];
@@ -307,38 +307,38 @@ Tcl_HistoryCmd(
 	} else {
 	    eventPtr = GetEvent(iPtr, argv[3]);
 	    if (eventPtr == NULL) {
-		return TCL_ERROR;
+		return HAX_ERROR;
 	    }
 	}
 	MakeSpace(eventPtr, strlen(argv[2]) + 1);
 	strcpy(eventPtr->command, argv[2]);
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'e') && (strncmp(argv[1], "event", length)) == 0) {
 	if (argc > 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " event ?event?\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	eventPtr = GetEvent(iPtr, argc==2 ? "-1" : argv[2]);
 	if (eventPtr == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	RevResult(iPtr, eventPtr->command);
-	Tcl_SetResult(interp, eventPtr->command, TCL_VOLATILE);
-	return TCL_OK;
+	Hax_SetResult(interp, eventPtr->command, HAX_VOLATILE);
+	return HAX_OK;
     } else if ((c == 'i') && (strncmp(argv[1], "info", length)) == 0) {
 	int count, indx, i;
 	char *newline;
 
 	if ((argc != 2) && (argc != 3)) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " info ?count?\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	infoCmd:
 	if (argc == 3) {
-	    if (Tcl_GetInt(interp, argv[2], &count) != TCL_OK) {
-		return TCL_ERROR;
+	    if (Hax_GetInt(interp, argv[2], &count) != HAX_OK) {
+		return HAX_ERROR;
 	    }
 	    if (count > iPtr->numEvents) {
 		count = iPtr->numEvents;
@@ -360,7 +360,7 @@ Tcl_HistoryCmd(
 		continue;		/* No command recorded here. */
 	    }
 	    sprintf(serial, "%6d  ", iPtr->curEventNum + 1 - (count - i));
-	    Tcl_AppendResult(interp, newline, serial, (char *) NULL);
+	    Hax_AppendResult(interp, newline, serial, (char *) NULL);
 	    newline = "\n";
 
 	    /*
@@ -376,29 +376,29 @@ Tcl_HistoryCmd(
 		next++;
 		savedChar = *next;
 		*next = 0;
-		Tcl_AppendResult(interp, cur, "\t", (char *) NULL);
+		Hax_AppendResult(interp, cur, "\t", (char *) NULL);
 		*next = savedChar;
 		cur = next;
 	    }
-	    Tcl_AppendResult(interp, cur, (char *) NULL);
+	    Hax_AppendResult(interp, cur, (char *) NULL);
 	}
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'k') && (strncmp(argv[1], "keep", length)) == 0) {
 	int count, i, src;
 	HistoryEvent *events;
 
 	if (argc != 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " keep number\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	if (Tcl_GetInt(interp, argv[2], &count) != TCL_OK) {
-	    return TCL_ERROR;
+	if (Hax_GetInt(interp, argv[2], &count) != HAX_OK) {
+	    return HAX_ERROR;
 	}
 	if ((count <= 0) || (count > 1000)) {
-	    Tcl_AppendResult(interp, "illegal keep count \"", argv[2],
+	    Hax_AppendResult(interp, "illegal keep count \"", argv[2],
 		    "\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 
 	/*
@@ -448,64 +448,64 @@ Tcl_HistoryCmd(
 	    iPtr->curEvent = iPtr->numEvents-1;
 	}
 	iPtr->numEvents = count;
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'n') && (strncmp(argv[1], "nextid", length)) == 0) {
 	if (argc != 2) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " nextid\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	sprintf(iPtr->result, "%d", iPtr->curEventNum+1);
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'r') && (strncmp(argv[1], "redo", length)) == 0) {
 	if (argc > 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " redo ?event?\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	eventPtr = GetEvent(iPtr, argc==2 ? "-1" : argv[2]);
 	if (eventPtr == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	RevCommand(iPtr, eventPtr->command);
-	return Tcl_Eval(interp, eventPtr->command, 0, (char **) NULL);
+	return Hax_Eval(interp, eventPtr->command, 0, (char **) NULL);
     } else if ((c == 's') && (strncmp(argv[1], "substitute", length)) == 0) {
 	if ((argc > 5) || (argc < 4)) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " substitute old new ?event?\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	eventPtr = GetEvent(iPtr, argc==4 ? "-1" : argv[4]);
 	if (eventPtr == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	return SubsAndEval(iPtr, eventPtr->command, argv[2], argv[3]);
     } else if ((c == 'w') && (strncmp(argv[1], "words", length)) == 0) {
 	char *words;
 
 	if ((argc != 3) && (argc != 4)) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " words num-num/pat ?event?\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	eventPtr = GetEvent(iPtr, argc==3 ? "-1" : argv[3]);
 	if (eventPtr == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	words = GetWords(iPtr, eventPtr->command, argv[2]);
 	if (words == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	RevResult(iPtr, words);
 	iPtr->result = words;
-	iPtr->freeProc = (Tcl_FreeProc *) free;
-	return TCL_OK;
+	iPtr->freeProc = (Hax_FreeProc *) free;
+	return HAX_OK;
     }
 
-    Tcl_AppendResult(interp, "bad option \"", argv[1],
+    Hax_AppendResult(interp, "bad option \"", argv[1],
 	    "\": must be add, change, event, info, keep, nextid, ",
 	    "redo, substitute, or words", (char *) NULL);
-    return TCL_ERROR;
+    return HAX_ERROR;
 }
 
 /*
@@ -707,7 +707,7 @@ RevResult(
     revPtr->firstIndex = evalFirst - iPtr->historyFirst;
     revPtr->lastIndex = evalLast - iPtr->historyFirst;
     argv[0] = string;
-    revPtr->newBytes = Tcl_Merge(1, argv);
+    revPtr->newBytes = Hax_Merge(1, argv);
     revPtr->newSize = strlen(revPtr->newBytes);
     InsertRev(iPtr, revPtr);
 }
@@ -825,20 +825,20 @@ GetEvent(
      */
 
     if (isdigit(*string) || (*string == '-')) {
-	if (Tcl_GetInt((Tcl_Interp *) iPtr, string, &eventNum) != TCL_OK) {
+	if (Hax_GetInt((Hax_Interp *) iPtr, string, &eventNum) != HAX_OK) {
 	    return NULL;
 	}
 	if (eventNum < 0) {
 	    eventNum += iPtr->curEventNum;
         }
 	if (eventNum > iPtr->curEventNum) {
-	    Tcl_AppendResult((Tcl_Interp *) iPtr, "event \"", string,
+	    Hax_AppendResult((Hax_Interp *) iPtr, "event \"", string,
 		    "\" hasn't occurred yet", (char *) NULL);
 	    return NULL;
 	}
 	if ((eventNum <= iPtr->curEventNum-iPtr->numEvents)
 		|| (eventNum <= 0)) {
-	    Tcl_AppendResult((Tcl_Interp *) iPtr, "event \"", string,
+	    Hax_AppendResult((Hax_Interp *) iPtr, "event \"", string,
 		    "\" is too far in the past", (char *) NULL);
 	    return NULL;
 	}
@@ -851,7 +851,7 @@ GetEvent(
 
     /*
      * Next, check for an event that contains the string as a prefix or
-     * that matches the string in the sense of Tcl_StringMatch.
+     * that matches the string in the sense of Hax_StringMatch.
      */
 
     length = strlen(string);
@@ -864,12 +864,12 @@ GetEvent(
 	}
 	eventPtr = &iPtr->events[index];
 	if ((strncmp(eventPtr->command, string, length) == 0)
-		|| Tcl_StringMatch(eventPtr->command, string)) {
+		|| Hax_StringMatch(eventPtr->command, string)) {
 	    return eventPtr;
 	}
     }
 
-    Tcl_AppendResult((Tcl_Interp *) iPtr, "no event matches \"", string,
+    Hax_AppendResult((Hax_Interp *) iPtr, "no event matches \"", string,
 	    "\"", (char *) NULL);
     return NULL;
 }
@@ -883,7 +883,7 @@ GetEvent(
  *	the "cmd" argument.  Then execute the new command.
  *
  * Results:
- *	The return value is a standard Tcl error.
+ *	The return value is a standard Hax error.
  *
  * Side effects:
  *	History gets revised if the substitution is occurring on
@@ -923,9 +923,9 @@ SubsAndEval(
 	count++;
     }
     if (count == 0) {
-	Tcl_AppendResult((Tcl_Interp *) iPtr, "\"", old,
+	Hax_AppendResult((Hax_Interp *) iPtr, "\"", old,
 		"\" doesn't appear in event", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     length = strlen(cmd) + count*(newLength - oldLength);
 
@@ -949,7 +949,7 @@ SubsAndEval(
     }
 
     RevCommand(iPtr, newCmd);
-    result = Tcl_Eval((Tcl_Interp *) iPtr, newCmd, 0, (char **) NULL);
+    result = Hax_Eval((Hax_Interp *) iPtr, newCmd, 0, (char **) NULL);
     ckfree(newCmd);
     return result;
 }
@@ -977,7 +977,7 @@ SubsAndEval(
 
 static char *
 GetWords(
-    Interp *iPtr,		/* Tcl interpreter in which to place
+    Interp *iPtr,		/* Hax interpreter in which to place
 				 * an error message if needed. */
     char *command,		/* Command string. */
     char *words			/* Description of which words to extract
@@ -1044,7 +1044,7 @@ GetWords(
     }
     for (index = 0; *next != 0; index++) {
 	start = next;
-	end = TclWordEnd(next, 0);
+	end = HaxWordEnd(next, 0);
 	if (*end != 0) {
 	    end++;
 	    for (next = end; isspace(*next); next++) {
@@ -1062,7 +1062,7 @@ GetWords(
 	    char savedChar = *end;
 
 	    *end = 0;
-	    match = Tcl_StringMatch(start, pattern);
+	    match = Hax_StringMatch(start, pattern);
 	    *end = savedChar;
 	    if (!match) {
 		continue;
@@ -1083,14 +1083,14 @@ GetWords(
 
     if ((last >= index) || (first >= index)) {
 	ckfree(result);
-	Tcl_AppendResult((Tcl_Interp *) iPtr, "word selector \"", words,
+	Hax_AppendResult((Hax_Interp *) iPtr, "word selector \"", words,
 		"\" specified non-existent words", (char *) NULL);
 	return NULL;
     }
     return result;
 
     error:
-    Tcl_AppendResult((Tcl_Interp *) iPtr, "bad word selector \"", words,
+    Hax_AppendResult((Hax_Interp *) iPtr, "bad word selector \"", words,
 	    "\":  should be num-num or pattern", (char *) NULL);
     return NULL;
 }

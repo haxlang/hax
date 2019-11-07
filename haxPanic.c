@@ -1,7 +1,7 @@
 /* 
  * panic.c --
  *
- *	Source code for the "panic" library procedure for Tcl;
+ *	Source code for the "panic" library procedure for Hax;
  *	individual applications will probably override this with
  *	an application-specific panic procedure.
  *

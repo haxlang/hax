@@ -1,7 +1,7 @@
 /* 
- * tclUtil.c --
+ * haxUtil.c --
  *
- *	This file contains utility procedures that are used by many Tcl
+ *	This file contains utility procedures that are used by many Hax
  *	commands.
  *
  * Copyright 1987-1991 Regents of the University of California
@@ -18,15 +18,15 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUtil.c,v 1.66 92/10/21 16:12:01 ouster Exp $ SPRITE (Berkeley)";
 #endif
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
- * The following values are used in the flags returned by Tcl_ScanElement
- * and used by Tcl_ConvertElement.  The value TCL_DONT_USE_BRACES is also
- * defined in tcl.h;  make sure its value doesn't overlap with any of the
+ * The following values are used in the flags returned by Hax_ScanElement
+ * and used by Hax_ConvertElement.  The value HAX_DONT_USE_BRACES is also
+ * defined in hax.h;  make sure its value doesn't overlap with any of the
  * values below.
  *
- * TCL_DONT_USE_BRACES -	1 means the string mustn't be enclosed in
+ * HAX_DONT_USE_BRACES -	1 means the string mustn't be enclosed in
  *				braces (e.g. it contains unmatched braces,
  *				or ends in a backslash character, or user
  *				just doesn't want braces);  handle all
@@ -49,7 +49,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUtil.c,v 1.66 92/10/21 
  * neither does the rest of the regexp facilities.
  */
 
-char *tclRegexpError = NULL;
+char *haxRegexpError = NULL;
 
 /*
  * Function prototypes for local procedures in this file:
@@ -61,18 +61,18 @@ static void		SetupAppendBuffer (Interp *iPtr,
 /*
  *----------------------------------------------------------------------
  *
- * TclFindElement --
+ * HaxFindElement --
  *
- *	Given a pointer into a Tcl list, locate the first (or next)
+ *	Given a pointer into a Hax list, locate the first (or next)
  *	element in the list.
  *
  * Results:
- *	The return value is normally TCL_OK, which means that the
- *	element was successfully located.  If TCL_ERROR is returned
+ *	The return value is normally HAX_OK, which means that the
+ *	element was successfully located.  If HAX_ERROR is returned
  *	it means that list didn't have proper list structure;
  *	interp->result contains a more detailed error message.
  *
- *	If TCL_OK is returned, then *elementPtr will be set to point
+ *	If HAX_OK is returned, then *elementPtr will be set to point
  *	to the first element of list, and *nextPtr will be set to point
  *	to the character just after any white space following the last
  *	character that's part of the element.  If this is the last argument
@@ -93,9 +93,9 @@ static void		SetupAppendBuffer (Interp *iPtr,
  */
 
 int
-TclFindElement(
-    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
-    char *list,			/* String containing Tcl list with zero
+HaxFindElement(
+    Hax_Interp *interp,		/* Interpreter to use for error reporting. */
+    char *list,			/* String containing Hax list with zero
 				 * or more elements (possibly in braces). */
     char **elementPtr,		/* Fill in with location of first significant
 				 * character in first element of list. */
@@ -119,7 +119,7 @@ TclFindElement(
      * quote.   Note:  use of "isascii" below and elsewhere in this
      * procedure is a temporary hack (7/27/90) because Mx uses characters
      * with the high-order bit set for some things.  This should probably
-     * be changed back eventually, or all of Tcl should call isascii.
+     * be changed back eventually, or all of Hax should call isascii.
      */
 
     while (isascii(*list) && isspace(*list)) {
@@ -174,11 +174,11 @@ TclFindElement(
 			    p2++) {
 			/* null body */
 		    }
-		    Tcl_ResetResult(interp);
+		    Hax_ResetResult(interp);
 		    sprintf(interp->result,
 			    "list element in braces followed by \"%.*s\" instead of space",
 			    (int)(p2-p), p);
-		    return TCL_ERROR;
+		    return HAX_ERROR;
 		} else if (openBraces != 0) {
 		    openBraces--;
 		}
@@ -192,7 +192,7 @@ TclFindElement(
 	    case '\\': {
 		int size;
 
-		(void) Tcl_Backslash(p, &size);
+		(void) Hax_Backslash(p, &size);
 		p += size - 1;
 		break;
 	    }
@@ -231,11 +231,11 @@ TclFindElement(
 			    p2++) {
 			/* null body */
 		    }
-		    Tcl_ResetResult(interp);
+		    Hax_ResetResult(interp);
 		    sprintf(interp->result,
 			    "list element in quotes followed by \"%.*s\" %s",
 			    (int)(p2-p), p, "instead of space");
-		    return TCL_ERROR;
+		    return HAX_ERROR;
 		}
 		break;
 
@@ -245,13 +245,13 @@ TclFindElement(
 
 	    case 0:
 		if (openBraces != 0) {
-		    Tcl_SetResult(interp, "unmatched open brace in list",
-			    TCL_STATIC);
-		    return TCL_ERROR;
+		    Hax_SetResult(interp, "unmatched open brace in list",
+			    HAX_STATIC);
+		    return HAX_ERROR;
 		} else if (inQuotes) {
-		    Tcl_SetResult(interp, "unmatched open quote in list",
-			    TCL_STATIC);
-		    return TCL_ERROR;
+		    Hax_SetResult(interp, "unmatched open quote in list",
+			    HAX_STATIC);
+		    return HAX_ERROR;
 		}
 		size = p - list;
 		goto done;
@@ -269,13 +269,13 @@ TclFindElement(
     if (sizePtr != 0) {
 	*sizePtr = size;
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * TclCopyAndCollapse --
+ * HaxCopyAndCollapse --
  *
  *	Copy a string and eliminate any backslashes that aren't in braces.
  *
@@ -293,7 +293,7 @@ TclFindElement(
  */
 
 void
-TclCopyAndCollapse(
+HaxCopyAndCollapse(
     int count,			/* Total number of characters to copy
 				 * from src. */
     char *src,		/* Copy from here... */
@@ -304,7 +304,7 @@ TclCopyAndCollapse(
 
     for (c = *src; count > 0; src++, c = *src, count--) {
 	if (c == '\\') {
-	    *dst = Tcl_Backslash(src, &numRead);
+	    *dst = Hax_Backslash(src, &numRead);
 	    if (*dst != 0) {
 		dst++;
 	    }
@@ -321,13 +321,13 @@ TclCopyAndCollapse(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_SplitList --
+ * Hax_SplitList --
  *
  *	Splits a list up into its constituent fields.
  *
  * Results
- *	The return value is normally TCL_OK, which means that
- *	the list was successfully split up.  If TCL_ERROR is
+ *	The return value is normally HAX_OK, which means that
+ *	the list was successfully split up.  If HAX_ERROR is
  *	returned, it means that "list" didn't have proper list
  *	structure;  interp->result will contain a more detailed
  *	error message.
@@ -349,8 +349,8 @@ TclCopyAndCollapse(
  */
 
 int
-Tcl_SplitList(
-    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+Hax_SplitList(
+    Hax_Interp *interp,		/* Interpreter to use for error reporting. */
     char *list,			/* Pointer to string with list structure. */
     int *argcPtr,		/* Pointer to location to fill in with
 				 * the number of elements in the list. */
@@ -379,8 +379,8 @@ Tcl_SplitList(
 	    ((size * sizeof(char *)) + (p - list) + 1));
     for (i = 0, p = ((char *) argv) + size*sizeof(char *);
 	    *list != 0; i++) {
-	result = TclFindElement(interp, list, &element, &list, &elSize, &brace);
-	if (result != TCL_OK) {
+	result = HaxFindElement(interp, list, &element, &list, &elSize, &brace);
+	if (result != HAX_OK) {
 	    ckfree((char *) argv);
 	    return result;
 	}
@@ -389,9 +389,9 @@ Tcl_SplitList(
 	}
 	if (i >= size) {
 	    ckfree((char *) argv);
-	    Tcl_SetResult(interp, "internal error in Tcl_SplitList",
-		    TCL_STATIC);
-	    return TCL_ERROR;
+	    Hax_SetResult(interp, "internal error in Hax_SplitList",
+		    HAX_STATIC);
+	    return HAX_ERROR;
 	}
 	argv[i] = p;
 	if (brace) {
@@ -400,7 +400,7 @@ Tcl_SplitList(
 	    *p = 0;
 	    p++;
 	} else {
-	    TclCopyAndCollapse(elSize, element, p);
+	    HaxCopyAndCollapse(elSize, element, p);
 	    p += elSize+1;
 	}
     }
@@ -408,24 +408,24 @@ Tcl_SplitList(
     argv[i] = NULL;
     *argvPtr = argv;
     *argcPtr = i;
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_ScanElement --
+ * Hax_ScanElement --
  *
- *	This procedure is a companion procedure to Tcl_ConvertElement.
+ *	This procedure is a companion procedure to Hax_ConvertElement.
  *	It scans a string to see what needs to be done to it (e.g.
  *	add backslashes or enclosing braces) to make the string into
- *	a valid Tcl list element.
+ *	a valid Hax list element.
  *
  * Results:
  *	The return value is an overestimate of the number of characters
- *	that will be needed by Tcl_ConvertElement to produce a valid
+ *	that will be needed by Hax_ConvertElement to produce a valid
  *	list element from string.  The word at *flagPtr is filled in
- *	with a value needed by Tcl_ConvertElement when doing the actual
+ *	with a value needed by Hax_ConvertElement when doing the actual
  *	conversion.
  *
  * Side effects:
@@ -435,20 +435,20 @@ Tcl_SplitList(
  */
 
 int
-Tcl_ScanElement(
-    char *string,		/* String to convert to Tcl list element. */
+Hax_ScanElement(
+    char *string,		/* String to convert to Hax list element. */
     int *flagPtr		/* Where to store information to guide
-				 * Tcl_ConvertElement. */)
+				 * Hax_ConvertElement. */)
 {
     int flags, nestingLevel;
     char *p;
 
     /*
-     * This procedure and Tcl_ConvertElement together do two things:
+     * This procedure and Hax_ConvertElement together do two things:
      *
      * 1. They produce a proper list, one that will yield back the
      * argument strings when evaluated or when disassembled with
-     * Tcl_SplitList.  This is the most important thing.
+     * Hax_SplitList.  This is the most important thing.
      * 
      * 2. They try to produce legible output, which means minimizing the
      * use of backslashes (using braces instead).  However, there are
@@ -494,7 +494,7 @@ Tcl_ScanElement(
 	    case '}':
 		nestingLevel--;
 		if (nestingLevel < 0) {
-		    flags |= TCL_DONT_USE_BRACES|BRACES_UNMATCHED;
+		    flags |= HAX_DONT_USE_BRACES|BRACES_UNMATCHED;
 		}
 		break;
 	    case '[':
@@ -510,11 +510,11 @@ Tcl_ScanElement(
 		break;
 	    case '\\':
 		if ((p[1] == 0) || (p[1] == '\n')) {
-		    flags = TCL_DONT_USE_BRACES;
+		    flags = HAX_DONT_USE_BRACES;
 		} else {
 		    int size;
 
-		    (void) Tcl_Backslash(p, &size);
+		    (void) Hax_Backslash(p, &size);
 		    p += size-1;
 		    flags |= USE_BRACES;
 		}
@@ -522,7 +522,7 @@ Tcl_ScanElement(
 	}
     }
     if (nestingLevel != 0) {
-	flags = TCL_DONT_USE_BRACES | BRACES_UNMATCHED;
+	flags = HAX_DONT_USE_BRACES | BRACES_UNMATCHED;
     }
     *flagPtr = flags;
 
@@ -537,15 +537,15 @@ Tcl_ScanElement(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_ConvertElement --
+ * Hax_ConvertElement --
  *
- *	This is a companion procedure to Tcl_ScanElement.  Given the
- *	information produced by Tcl_ScanElement, this procedure converts
+ *	This is a companion procedure to Hax_ScanElement.  Given the
+ *	information produced by Hax_ScanElement, this procedure converts
  *	a string to a list element equal to that string.
  *
  * Results:
  *	Information is copied to *dst in the form of a list element
- *	identical to src (i.e. if Tcl_SplitList is applied to dst it
+ *	identical to src (i.e. if Hax_SplitList is applied to dst it
  *	will produce a string identical to src).  The return value is
  *	a count of the number of characters copied (not including the
  *	terminating NULL character).
@@ -557,22 +557,22 @@ Tcl_ScanElement(
  */
 
 int
-Tcl_ConvertElement(
+Hax_ConvertElement(
     char *src,		/* Source information for list element. */
     char *dst,			/* Place to put list-ified element. */
-    int flags			/* Flags produced by Tcl_ScanElement. */)
+    int flags			/* Flags produced by Hax_ScanElement. */)
 {
     char *p = dst;
 
     /*
-     * See the comment block at the beginning of the Tcl_ScanElement
+     * See the comment block at the beginning of the Hax_ScanElement
      * code for details of how this works.
      */
 
     if (src == NULL) {
 	src = "";
     }
-    if ((flags & USE_BRACES) && !(flags & TCL_DONT_USE_BRACES)) {
+    if ((flags & USE_BRACES) && !(flags & HAX_DONT_USE_BRACES)) {
 	*p = '{';
 	p++;
 	for ( ; *src != 0; src++, p++) {
@@ -651,12 +651,12 @@ Tcl_ConvertElement(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_Merge --
+ * Hax_Merge --
  *
  *	Given a collection of strings, merge them together into a
- *	single string that has proper Tcl list structured (i.e.
- *	Tcl_SplitList may be used to retrieve strings equal to the
- *	original elements, and Tcl_Eval will parse the string back
+ *	single string that has proper Hax list structured (i.e.
+ *	Hax_SplitList may be used to retrieve strings equal to the
+ *	original elements, and Hax_Eval will parse the string back
  *	into its original elements).
  *
  * Results:
@@ -670,7 +670,7 @@ Tcl_ConvertElement(
  */
 
 char *
-Tcl_Merge(
+Hax_Merge(
     int argc,			/* How many strings to merge. */
     char **argv			/* Array of string values. */)
 {
@@ -692,7 +692,7 @@ Tcl_Merge(
     }
     numChars = 1;
     for (i = 0; i < argc; i++) {
-	numChars += Tcl_ScanElement(argv[i], &flagPtr[i]) + 1;
+	numChars += Hax_ScanElement(argv[i], &flagPtr[i]) + 1;
     }
 
     /*
@@ -702,7 +702,7 @@ Tcl_Merge(
     result = (char *) ckalloc((unsigned) numChars);
     dst = result;
     for (i = 0; i < argc; i++) {
-	numChars = Tcl_ConvertElement(argv[i], dst, flagPtr[i]);
+	numChars = Hax_ConvertElement(argv[i], dst, flagPtr[i]);
 	dst += numChars;
 	*dst = ' ';
 	dst++;
@@ -722,7 +722,7 @@ Tcl_Merge(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_Concat --
+ * Hax_Concat --
  *
  *	Concatenate a set of strings into a single large string.
  *
@@ -739,7 +739,7 @@ Tcl_Merge(
  */
 
 char *
-Tcl_Concat(
+Hax_Concat(
     int argc,			/* Number of strings to concatenate. */
     char **argv			/* Array of strings to concatenate. */)
 {
@@ -793,7 +793,7 @@ Tcl_Concat(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_StringMatch --
+ * Hax_StringMatch --
  *
  *	See if a particular string matches a particular pattern.
  *
@@ -810,7 +810,7 @@ Tcl_Concat(
  */
 
 int
-Tcl_StringMatch(
+Hax_StringMatch(
     char *string,	/* String. */
     char *pattern	/* Pattern, which may contain
 				 * special characters. */)
@@ -846,7 +846,7 @@ Tcl_StringMatch(
 		return 1;
 	    }
 	    while (1) {
-		if (Tcl_StringMatch(string, pattern)) {
+		if (Hax_StringMatch(string, pattern)) {
 		    return 1;
 		}
 		if (*string == 0) {
@@ -926,9 +926,9 @@ Tcl_StringMatch(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_SetResult --
+ * Hax_SetResult --
  *
- *	Arrange for "string" to be the Tcl return value.
+ *	Arrange for "string" to be the Hax return value.
  *
  * Results:
  *	None.
@@ -941,18 +941,18 @@ Tcl_StringMatch(
  */
 
 void
-Tcl_SetResult(
-    Tcl_Interp *interp,		/* Interpreter with which to associate the
+Hax_SetResult(
+    Hax_Interp *interp,		/* Interpreter with which to associate the
 				 * return value. */
     char *string,		/* Value to be returned.  If NULL,
 				 * the result is set to an empty string. */
-    Tcl_FreeProc *freeProc	/* Gives information about the string:
-				 * TCL_STATIC, TCL_VOLATILE, or the address
-				 * of a Tcl_FreeProc such as free. */)
+    Hax_FreeProc *freeProc	/* Gives information about the string:
+				 * HAX_STATIC, HAX_VOLATILE, or the address
+				 * of a Hax_FreeProc such as free. */)
 {
     Interp *iPtr = (Interp *) interp;
     int length;
-    Tcl_FreeProc *oldFreeProc = iPtr->freeProc;
+    Hax_FreeProc *oldFreeProc = iPtr->freeProc;
     char *oldResult = iPtr->result;
 
     iPtr->freeProc = freeProc;
@@ -960,11 +960,11 @@ Tcl_SetResult(
 	iPtr->resultSpace[0] = 0;
 	iPtr->result = iPtr->resultSpace;
 	iPtr->freeProc = 0;
-    } else if (freeProc == TCL_VOLATILE) {
+    } else if (freeProc == HAX_VOLATILE) {
 	length = strlen(string);
-	if (length > TCL_RESULT_SIZE) {
+	if (length > HAX_RESULT_SIZE) {
 	    iPtr->result = (char *) ckalloc((unsigned) length+1);
-	    iPtr->freeProc = (Tcl_FreeProc *) free;
+	    iPtr->freeProc = (Hax_FreeProc *) free;
 	} else {
 	    iPtr->result = iPtr->resultSpace;
 	    iPtr->freeProc = 0;
@@ -981,7 +981,7 @@ Tcl_SetResult(
      */
 
     if (oldFreeProc != 0) {
-	if (oldFreeProc == (Tcl_FreeProc *) free) {
+	if (oldFreeProc == (Hax_FreeProc *) free) {
 	    ckfree(oldResult);
 	} else {
 	    (*oldFreeProc)(oldResult);
@@ -992,7 +992,7 @@ Tcl_SetResult(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_AppendResult --
+ * Hax_AppendResult --
  *
  *	Append a variable number of strings onto the result already
  *	present for an interpreter.
@@ -1010,8 +1010,8 @@ Tcl_SetResult(
 
 void
 	/* VARARGS2 */ /* ARGSUSED */
-Tcl_AppendResult(
-    Tcl_Interp *interp,		/* Interpreter whose result is to be
+Hax_AppendResult(
+    Hax_Interp *interp,		/* Interpreter whose result is to be
 				 * extended. */
     ...				/* One or more strings to add to the
 				 * result, terminated with NULL. */)
@@ -1068,9 +1068,9 @@ Tcl_AppendResult(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_AppendElement --
+ * Hax_AppendElement --
  *
- *	Convert a string to a valid Tcl list element and append it
+ *	Convert a string to a valid Hax list element and append it
  *	to the current result (which is ostensibly a list).
  *
  * Results:
@@ -1086,8 +1086,8 @@ Tcl_AppendResult(
  */
 
 void
-Tcl_AppendElement(
-    Tcl_Interp *interp,		/* Interpreter whose result is to be
+Hax_AppendElement(
+    Hax_Interp *interp,		/* Interpreter whose result is to be
 				 * extended. */
     char *string,		/* String to convert to list element and
 				 * add to result. */
@@ -1105,7 +1105,7 @@ Tcl_AppendElement(
      * needed to accommodate the list element.
      */
 
-    size = Tcl_ScanElement(string, &flags) + 1;
+    size = Hax_ScanElement(string, &flags) + 1;
     if ((iPtr->result != iPtr->appendResult)
 	   || ((size + iPtr->appendUsed) >= iPtr->appendAvl)) {
        SetupAppendBuffer(iPtr, size+iPtr->appendUsed);
@@ -1122,7 +1122,7 @@ Tcl_AppendElement(
 	*dst = ' ';
 	dst++;
     }
-    iPtr->appendUsed += Tcl_ConvertElement(string, dst, flags);
+    iPtr->appendUsed += Hax_ConvertElement(string, dst, flags);
 }
 
 /*
@@ -1154,7 +1154,7 @@ SetupAppendBuffer(
     /*
      * Make the append buffer larger, if that's necessary, then
      * copy the current result into the append buffer and make the
-     * append buffer the official Tcl result.
+     * append buffer the official Hax result.
      */
 
     if (iPtr->result != iPtr->appendResult) {
@@ -1190,14 +1190,14 @@ SetupAppendBuffer(
     } else if (iPtr->result != iPtr->appendResult) {
 	strcpy(iPtr->appendResult, iPtr->result);
     }
-    Tcl_FreeResult(iPtr);
+    Hax_FreeResult(iPtr);
     iPtr->result = iPtr->appendResult;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_ResetResult --
+ * Hax_ResetResult --
  *
  *	This procedure restores the result area for an interpreter
  *	to its default initialized state, freeing up any memory that
@@ -1214,12 +1214,12 @@ SetupAppendBuffer(
  */
 
 void
-Tcl_ResetResult(
-    Tcl_Interp *interp		/* Interpreter for which to clear result. */)
+Hax_ResetResult(
+    Hax_Interp *interp		/* Interpreter for which to clear result. */)
 {
     Interp *iPtr = (Interp *) interp;
 
-    Tcl_FreeResult(iPtr);
+    Hax_FreeResult(iPtr);
     iPtr->result = iPtr->resultSpace;
     iPtr->resultSpace[0] = 0;
     iPtr->flags &=
@@ -1229,7 +1229,7 @@ Tcl_ResetResult(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_SetErrorCode --
+ * Hax_SetErrorCode --
  *
  *	This procedure is called to record machine-readable information
  *	about an error that is about to be returned.
@@ -1249,8 +1249,8 @@ Tcl_ResetResult(
 
 void
 	/* VARARGS2 */ /* ARGSUSED */
-Tcl_SetErrorCode(
-    Tcl_Interp *interp,		/* Interpreter whose errorCode variable is
+Hax_SetErrorCode(
+    Hax_Interp *interp,		/* Interpreter whose errorCode variable is
 				 * to be set. */
     ...				/* One or more elements to add to errorCode,
 				 * terminated with NULL. */)
@@ -1267,15 +1267,15 @@ Tcl_SetErrorCode(
 
     va_start(argList, interp);
     iPtr = (Interp *) interp;
-    flags = TCL_GLOBAL_ONLY | TCL_LIST_ELEMENT;
+    flags = HAX_GLOBAL_ONLY | HAX_LIST_ELEMENT;
     while (1) {
 	string = va_arg(argList, char *);
 	if (string == NULL) {
 	    break;
 	}
-	(void) Tcl_SetVar2((Tcl_Interp *) iPtr, "errorCode",
+	(void) Hax_SetVar2((Hax_Interp *) iPtr, "errorCode",
 		(char *) NULL, string, flags);
-	flags |= TCL_APPEND_VALUE;
+	flags |= HAX_APPEND_VALUE;
     }
     va_end(argList);
     iPtr->flags |= ERROR_CODE_SET;
@@ -1284,15 +1284,15 @@ Tcl_SetErrorCode(
 /*
  *----------------------------------------------------------------------
  *
- * TclGetListIndex --
+ * HaxGetListIndex --
  *
  *	Parse a list index, which may be either an integer or the
  *	value "end".
  *
  * Results:
- *	The return value is either TCL_OK or TCL_ERROR.  If it is
- *	TCL_OK, then the index corresponding to string is left in
- *	*indexPtr.  If the return value is TCL_ERROR, then string
+ *	The return value is either HAX_OK or HAX_ERROR.  If it is
+ *	HAX_OK, then the index corresponding to string is left in
+ *	*indexPtr.  If the return value is HAX_ERROR, then string
  *	was bogus;  an error message is returned in interp->result.
  *	If a negative index is specified, it is rounded up to 0.
  *	The index value may be larger than the size of the list
@@ -1305,14 +1305,14 @@ Tcl_SetErrorCode(
  */
 
 int
-TclGetListIndex(
-    Tcl_Interp *interp,			/* Interpreter for error reporting. */
+HaxGetListIndex(
+    Hax_Interp *interp,			/* Interpreter for error reporting. */
     char *string,			/* String containing list index. */
     int *indexPtr			/* Where to store index. */)
 {
     if (isdigit(*string) || (*string == '-')) {
-	if (Tcl_GetInt(interp, string, indexPtr) != TCL_OK) {
-	    return TCL_ERROR;
+	if (Hax_GetInt(interp, string, indexPtr) != HAX_OK) {
+	    return HAX_ERROR;
 	}
 	if (*indexPtr < 0) {
 	    *indexPtr = 0;
@@ -1320,17 +1320,17 @@ TclGetListIndex(
     } else if (strncmp(string, "end", strlen(string)) == 0) {
 	*indexPtr = 1<<30;
     } else {
-	Tcl_AppendResult(interp, "bad index \"", string,
+	Hax_AppendResult(interp, "bad index \"", string,
 		"\": must be integer or \"end\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * TclCompileRegexp --
+ * HaxCompileRegexp --
  *
  *	Compile a regular expression into a form suitable for fast
  *	matching.  This procedure retains a small cache of pre-compiled
@@ -1352,8 +1352,8 @@ TclGetListIndex(
  */
 
 regexp *
-TclCompileRegexp(
-    Tcl_Interp *interp,			/* For use in error reporting. */
+HaxCompileRegexp(
+    Hax_Interp *interp,			/* For use in error reporting. */
     char *string			/* String for which to produce
 					 * compiled regular expression. */)
 {
@@ -1394,12 +1394,12 @@ TclCompileRegexp(
      * cache.
      */
 
-    tclRegexpError = NULL;
+    haxRegexpError = NULL;
     result = RegComp(string);
-    if (tclRegexpError != NULL) {
-	Tcl_AppendResult(interp,
+    if (haxRegexpError != NULL) {
+	Hax_AppendResult(interp,
 	    "couldn't compile regular expression pattern: ",
-	    tclRegexpError, (char *) NULL);
+	    haxRegexpError, (char *) NULL);
 	return NULL;
     }
     if (iPtr->patterns[NUM_REGEXPS-1] != NULL) {
@@ -1431,7 +1431,7 @@ TclCompileRegexp(
  *	None.
  *
  * Side effects:
- *	The value of "string" is saved in "tclRegexpError".
+ *	The value of "string" is saved in "haxRegexpError".
  *
  *----------------------------------------------------------------------
  */
@@ -1440,5 +1440,5 @@ void
 RegError(
     char *string			/* Error message. */)
 {
-    tclRegexpError = string;
+    haxRegexpError = string;
 }

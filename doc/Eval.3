@@ -10,115 +10,115 @@
 '\" $Header: /user6/ouster/tcl/man/RCS/Eval.3,v 1.10 93/01/31 15:35:32 ouster Exp $ SPRITE (Berkeley)
 '\" 
 .so man.macros
-.HS Tcl_Eval tcl
+.HS Hax_Eval hax
 .BS
 .SH NAME
-Tcl_Eval, Tcl_VarEval, Tcl_EvalFile, Tcl_GlobalEval \- execute Tcl commands
+Hax_Eval, Hax_VarEval, Hax_EvalFile, Hax_GlobalEval \- execute Hax commands
 .SH SYNOPSIS
 .nf
-\fB#include <tcl.h>\fR
+\fB#include <hax.h>\fR
 .sp
 int
-\fBTcl_Eval\fR(\fIinterp, cmd, flags, termPtr\fR)
+\fBHax_Eval\fR(\fIinterp, cmd, flags, termPtr\fR)
 .sp
 int
-\fBTcl_VarEval\fR(\fIinterp, string, string, ... \fB(char *) NULL\fR)
+\fBHax_VarEval\fR(\fIinterp, string, string, ... \fB(char *) NULL\fR)
 .sp
 int
-\fBTcl_EvalFile\fR(\fIinterp, fileName\fR)
+\fBHax_EvalFile\fR(\fIinterp, fileName\fR)
 .sp
 .VS
 int
-\fBTcl_GlobalEval\fR(\fIinterp, cmd\fR)
+\fBHax_GlobalEval\fR(\fIinterp, cmd\fR)
 .VE
 .SH ARGUMENTS
-.AS Tcl_Interp **termPtr;
-.AP Tcl_Interp *interp in
+.AS Hax_Interp **termPtr;
+.AP Hax_Interp *interp in
 Interpreter in which to execute the command.  String result will be
 stored in \fIinterp->result\fR.
 .AP char *cmd in
 Command (or sequence of commands) to execute.  Must be in writable
-memory (Tcl_Eval makes temporary modifications to the command).
+memory (Hax_Eval makes temporary modifications to the command).
 .AP int flags in
-Either \fBTCL_BRACKET_TERM\fR or 0.
-If 0, then \fBTcl_Eval\fR will process commands from \fIcmd\fR until
+Either \fBHAX_BRACKET_TERM\fR or 0.
+If 0, then \fBHax_Eval\fR will process commands from \fIcmd\fR until
 it reaches the null character at the end of the string.
-If \fBTCL_BRACKET_TERM\fR,
-then \fBTcl_Eval\fR will process comands from \fIcmd\fR until either it
+If \fBHAX_BRACKET_TERM\fR,
+then \fBHax_Eval\fR will process comands from \fIcmd\fR until either it
 reaches a null character or it encounters a close bracket that isn't
 backslashed or enclosed in braces, at which point it will return.
 Under normal conditions, \fIflags\fR should be 0.
 .AP char **termPtr out
-If \fItermPtr\fR is non-NULL, \fBTcl_Eval\fR fills in *\fItermPtr\fR with
+If \fItermPtr\fR is non-NULL, \fBHax_Eval\fR fills in *\fItermPtr\fR with
 the address of the character just after the last one in the last command
 successfully executed (normally the null character at the end of \fIcmd\fR).
 If an error occurs in the first command in \fIcmd\fR, then \fI*termPtr\fR
 will be set to \fIcmd\fR.
 .AP char *string in
-String forming part of Tcl command.
+String forming part of Hax command.
 .AP char *fileName in
-Name of file containing Tcl command string.
+Name of file containing Hax command string.
 .BE
 
 .SH DESCRIPTION
 .PP
-All four of these procedures execute Tcl commands.
-\fBTcl_Eval\fR is the core procedure:  it parses commands
+All four of these procedures execute Hax commands.
+\fBHax_Eval\fR is the core procedure:  it parses commands
 from \fIcmd\fR and executes them in
-order until either an error occurs or \fBTcl_Eval\fR reaches a terminating
+order until either an error occurs or \fBHax_Eval\fR reaches a terminating
 character (']' or '\e0', depending on the value of \fIflags\fR).
-The return value from \fBTcl_Eval\fR is one
-of the Tcl return codes \fBTCL_OK\fR, \fBTCL_ERROR\fR, \fBTCL_RETURN\fR, \fBTCL_BREAK\fR, or
-\fBTCL_CONTINUE\fR, and \fIinterp->result\fR will point to
+The return value from \fBHax_Eval\fR is one
+of the Hax return codes \fBHAX_OK\fR, \fBHAX_ERROR\fR, \fBHAX_RETURN\fR, \fBHAX_BREAK\fR, or
+\fBHAX_CONTINUE\fR, and \fIinterp->result\fR will point to
 a string with additional information (result value or error message).
 This return information corresponds to the last command executed from
 \fIcmd\fR.
 .PP
-\fBTcl_VarEval\fR takes any number of string arguments
+\fBHax_VarEval\fR takes any number of string arguments
 of any length, concatenates
-them into a single string, then calls \fBTcl_Eval\fR to
-execute that string as a Tcl command.
+them into a single string, then calls \fBHax_Eval\fR to
+execute that string as a Hax command.
 It returns the result of the command and also modifies
-\fIinterp->result\fR in the usual fashion for Tcl commands.  The
-last argument to \fBTcl_VarEval\fR must be NULL to indicate the end
+\fIinterp->result\fR in the usual fashion for Hax commands.  The
+last argument to \fBHax_VarEval\fR must be NULL to indicate the end
 of arguments.
 .PP
-\fBTcl_EvalFile\fR reads the file given by \fIfileName\fR and evaluates
-its contents as a Tcl command by calling \fBTcl_Eval\fR.  It returns
-a standard Tcl result that reflects the result of evaluating the
+\fBHax_EvalFile\fR reads the file given by \fIfileName\fR and evaluates
+its contents as a Hax command by calling \fBHax_Eval\fR.  It returns
+a standard Hax result that reflects the result of evaluating the
 file.
-If the file couldn't be read then a Tcl error is returned to describe
+If the file couldn't be read then a Hax error is returned to describe
 why the file couldn't be read.
 .PP
 .VS
-\fBTcl_GlobalEval\fR is similar to \fBTcl_Eval\fR except that it
+\fBHax_GlobalEval\fR is similar to \fBHax_Eval\fR except that it
 processes the command at global level.
 This means that the variable context for the command consists of
-global variables only (it ignores any Tcl procedure that is active).
-This produces an effect similar to the Tcl command ``\fBuplevel 0\fR''.
+global variables only (it ignores any Hax procedure that is active).
+This produces an effect similar to the Hax command ``\fBuplevel 0\fR''.
 .VE
 .PP
-During the processing of a Tcl command it is legal to make nested
+During the processing of a Hax command it is legal to make nested
 calls to evaluate other commands (this is how conditionals, loops,
 and procedures are implemented).
 If a code other than
-\fBTCL_OK\fR is returned from a nested \fBTcl_Eval\fR invocation, then the
+\fBHAX_OK\fR is returned from a nested \fBHax_Eval\fR invocation, then the
 caller should normally return immediately, passing that same
 return code back to its caller, and so on until the top-level application is
 reached.  A few commands, like \fBfor\fR, will check for certain
-return codes, like \fBTCL_BREAK\fR and \fBTCL_CONTINUE\fR, and process them
+return codes, like \fBHAX_BREAK\fR and \fBHAX_CONTINUE\fR, and process them
 specially without returning.
 .PP
-\fBTcl_Eval\fR keeps track of how many nested Tcl_Eval invocations are
+\fBHax_Eval\fR keeps track of how many nested Hax_Eval invocations are
 in progress for \fIinterp\fR.
-If a code of \fBTCL_RETURN\fR, \fBTCL_BREAK\fR, or \fBTCL_CONTINUE\fR is
-about to be returned from the topmost \fBTcl_Eval\fR invocation for
-\fIinterp\fR, then \fBTcl_Eval\fR converts the return code to \fBTCL_ERROR\fR
+If a code of \fBHAX_RETURN\fR, \fBHAX_BREAK\fR, or \fBHAX_CONTINUE\fR is
+about to be returned from the topmost \fBHax_Eval\fR invocation for
+\fIinterp\fR, then \fBHax_Eval\fR converts the return code to \fBHAX_ERROR\fR
 and sets \fIinterp->result\fR to point to an error message indicating that
 the \fBreturn\fR, \fBbreak\fR, or \fBcontinue\fR command was
 invoked in an inappropriate place.  This means that top-level
-applications should never see a return code from \fBTcl_Eval\fR other then
-\fBTCL_OK\fR or \fBTCL_ERROR\fR.
+applications should never see a return code from \fBHax_Eval\fR other then
+\fBHAX_OK\fR or \fBHAX_ERROR\fR.
 
 .SH KEYWORDS
 command, execute, file, global, interpreter, variable

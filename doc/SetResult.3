@@ -10,39 +10,39 @@
 '\" $Header: /user6/ouster/tcl/man/RCS/SetResult.3,v 1.9 93/01/31 15:35:38 ouster Exp $ SPRITE (Berkeley)
 '\" 
 .so man.macros
-.HS Tcl_SetResult tcl
+.HS Hax_SetResult hax
 .BS
 .SH NAME
-Tcl_SetResult, Tcl_AppendResult, Tcl_AppendElement, Tcl_ResetResult \- manipulate Tcl result string
+Hax_SetResult, Hax_AppendResult, Hax_AppendElement, Hax_ResetResult \- manipulate Hax result string
 .SH SYNOPSIS
 .nf
-\fB#include <tcl.h>\fR
+\fB#include <hax.h>\fR
 .sp
 .VS
-\fBTcl_SetResult\fR(\fIinterp, string, freeProc\fR)
+\fBHax_SetResult\fR(\fIinterp, string, freeProc\fR)
 .VE
 .sp
-\fBTcl_AppendResult(\fIinterp, string, string, ... , \fB(char *) NULL\fR)
+\fBHax_AppendResult(\fIinterp, string, string, ... , \fB(char *) NULL\fR)
 .sp
 .VS
-\fBTcl_AppendElement\fR(\fIinterp, string, noSep\fR)
+\fBHax_AppendElement\fR(\fIinterp, string, noSep\fR)
 .sp
-\fBTcl_ResetResult\fR(\fIinterp\fR)
+\fBHax_ResetResult\fR(\fIinterp\fR)
 .sp
-\fBTcl_FreeResult\fR(\fIinterp\fR)
+\fBHax_FreeResult\fR(\fIinterp\fR)
 .VE
 .SH ARGUMENTS
-.AS Tcl_FreeProc freeProc
-.AP Tcl_Interp *interp out
+.AS Hax_FreeProc freeProc
+.AP Hax_Interp *interp out
 Interpreter whose result is to be modified.
 .AP char *string in
 String value to become result for \fIinterp\fR or to be
 appended to existing result.
-.AP Tcl_FreeProc freeProc in
+.AP Hax_FreeProc freeProc in
 .VS
 Address of procedure to call to release storage at
-\fIstring\fR, or \fBTCL_STATIC\fR, \fBTCL_DYNAMIC\fR, or
-\fBTCL_VOLATILE\fR.
+\fIstring\fR, or \fBHAX_STATIC\fR, \fBHAX_DYNAMIC\fR, or
+\fBHAX_VOLATILE\fR.
 .AP int noSep in
 If non-zero then don't output a space character before this element,
 even if the element isn't the first thing in the result string.
@@ -52,112 +52,112 @@ even if the element isn't the first thing in the result string.
 .SH DESCRIPTION
 .PP
 The procedures described here are utilities for setting the
-result/error string in a Tcl interpreter.
+result/error string in a Hax interpreter.
 .PP
-\fBTcl_SetResult\fR
-arranges for \fIstring\fR to be the return string for the current Tcl
+\fBHax_SetResult\fR
+arranges for \fIstring\fR to be the return string for the current Hax
 command in \fIinterp\fR, replacing any existing result.
 .VS
-If \fIfreeProc\fR is \fBTCL_STATIC\fR it means that \fIstring\fR
+If \fIfreeProc\fR is \fBHAX_STATIC\fR it means that \fIstring\fR
 refers to an area of static storage that is guaranteed not to be
-modified until at least the next call to \fBTcl_Eval\fR.
+modified until at least the next call to \fBHax_Eval\fR.
 If \fIfreeProc\fR
-is \fBTCL_DYNAMIC\fR it means that \fIstring\fR was allocated with a call
-to \fBmalloc()\fR and is now the property of the Tcl system.
-\fBTcl_SetResult\fR will arrange for the string's storage to be
+is \fBHAX_DYNAMIC\fR it means that \fIstring\fR was allocated with a call
+to \fBmalloc()\fR and is now the property of the Hax system.
+\fBHax_SetResult\fR will arrange for the string's storage to be
 released by calling \fBfree()\fR when it is no longer needed.
-If \fIfreeProc\fR is \fBTCL_VOLATILE\fR it means that \fIstring\fR
+If \fIfreeProc\fR is \fBHAX_VOLATILE\fR it means that \fIstring\fR
 points to an area of memory that is likely to be overwritten when
-\fBTcl_SetResult\fR returns (e.g. it points to something in a stack frame).
-In this case \fBTcl_SetResult\fR will make a copy of the string in
+\fBHax_SetResult\fR returns (e.g. it points to something in a stack frame).
+In this case \fBHax_SetResult\fR will make a copy of the string in
 dynamically allocated storage and arrange for the copy to be the
-return string for the current Tcl command.
+return string for the current Hax command.
 .PP
-If \fIfreeProc\fR isn't one of the values \fBTCL_STATIC\fR,
-\fBTCL_DYNAMIC\fR, and \fBTCL_VOLATILE\fR, then it is the address
-of a procedure that Tcl should call to free the string.
+If \fIfreeProc\fR isn't one of the values \fBHAX_STATIC\fR,
+\fBHAX_DYNAMIC\fR, and \fBHAX_VOLATILE\fR, then it is the address
+of a procedure that Hax should call to free the string.
 This allows applications to use non-standard storage allocators.
-When Tcl no longer needs the storage for the string, it will
+When Hax no longer needs the storage for the string, it will
 call \fIfreeProc\fR.  \fIFreeProc\fR should have arguments and
-result that match the type \fBTcl_FreeProc\fR:
+result that match the type \fBHax_FreeProc\fR:
 .nf
 .RS
 
-typedef void Tcl_FreeProc(char *\fIblockPtr\fR);
+typedef void Hax_FreeProc(char *\fIblockPtr\fR);
 
 .RE
 .fi
 When \fIfreeProc\fR is called, its \fIblockPtr\fR will be set to
-the value of \fIstring\fR passed to \fBTcl_SetResult\fR.
+the value of \fIstring\fR passed to \fBHax_SetResult\fR.
 .VE
 .PP
 If \fIstring\fR is \fBNULL\fR, then \fIfreeProc\fR is ignored
-and \fBTcl_SetResult\fR
+and \fBHax_SetResult\fR
 re-initializes \fIinterp\fR's result to point to the pre-allocated result
 area, with an empty string in the result area.
 .PP
 .VS
-If \fBTcl_SetResult\fR is called at a time when \fIinterp\fR holds a
-result, \fBTcl_SetResult\fR does whatever is necessary to dispose
-of the old result (see the \fBTcl_Interp\fR manual entry for details
+If \fBHax_SetResult\fR is called at a time when \fIinterp\fR holds a
+result, \fBHax_SetResult\fR does whatever is necessary to dispose
+of the old result (see the \fBHax_Interp\fR manual entry for details
 on this).
 .VE
 .PP
-\fBTcl_AppendResult\fR makes it easy to build up Tcl results in pieces.
+\fBHax_AppendResult\fR makes it easy to build up Hax results in pieces.
 It takes each of its \fIstring\fR arguments and appends them in order
 to the current result associated with \fIinterp\fR.
 .VS
 If the result is in its initialized empty state (e.g. a command procedure
-was just invoked or \fBTcl_ResetResult\fR was just called),
-then \fBTcl_AppendResult\fR sets the result to the concatenation of
+was just invoked or \fBHax_ResetResult\fR was just called),
+then \fBHax_AppendResult\fR sets the result to the concatenation of
 its \fIstring\fR arguments.
 .VE
-\fBTcl_AppendResult\fR may be called repeatedly as additional pieces
+\fBHax_AppendResult\fR may be called repeatedly as additional pieces
 of the result are produced.
-\fBTcl_AppendResult\fR takes care of all the
+\fBHax_AppendResult\fR takes care of all the
 storage management issues associated with managing \fIinterp\fR's
 result, such as allocating a larger result area if necessary.
 Any number of \fIstring\fR arguments may be passed in a single
 call;  the last argument in the list must be a NULL pointer.
 .PP
-\fBTcl_AppendElement\fR is similar to \fBTcl_AppendResult\fR in
+\fBHax_AppendElement\fR is similar to \fBHax_AppendResult\fR in
 .VS
 that it allows results to be built up in pieces.
-However, \fBTcl_AppendElement\fR takes only a single \fIstring\fR
+However, \fBHax_AppendElement\fR takes only a single \fIstring\fR
 argument and it appends that argument to the current result
-as a proper Tcl list element.
-\fBTcl_AppendElement\fR adds backslashes or braces if necessary
+as a proper Hax list element.
+\fBHax_AppendElement\fR adds backslashes or braces if necessary
 to ensure that \fIinterp\fR's result can be parsed as a list and that
 \fIstring\fR will be extracted as a single element.
-Under normal conditions, \fBTcl_AppendElement\fR will add a space
+Under normal conditions, \fBHax_AppendElement\fR will add a space
 character to \fIinterp\fR's result just before adding the new
 list element, so that the list elements in the result are properly
 separated.
-However, if \fIinterp\fR's result is empty when \fBTcl_AppendElement\fR
+However, if \fIinterp\fR's result is empty when \fBHax_AppendElement\fR
 is called, or if the \fInoSep\fR argument is 1, then no space
 is added.
 .PP
-\fBTcl_ResetResult\fR clears the result for \fIinterp\fR,
+\fBHax_ResetResult\fR clears the result for \fIinterp\fR,
 freeing the memory associated with it if the current result was
 dynamically allocated.
 It leaves the result in its normal initialized state with
 \fIinterp->result\fR pointing to a static buffer containing
-\fBTCL_RESULT_SIZE\fR characters, of which the first character
+\fBHAX_RESULT_SIZE\fR characters, of which the first character
 is zero.
-\fBTcl_ResetResult\fR also clears the error state managed by
-\fBTcl_AddErrorInfo\fR and \fBTcl_SetErrorCode\fR.
+\fBHax_ResetResult\fR also clears the error state managed by
+\fBHax_AddErrorInfo\fR and \fBHax_SetErrorCode\fR.
 .PP
-\fBTcl_FreeResult\fR is a macro that performs part of the work
-of \fBTcl_ResetResult\fR.
+\fBHax_FreeResult\fR is a macro that performs part of the work
+of \fBHax_ResetResult\fR.
 It frees up the memory associated with \fIinterp\fR's result
 and sets \fIinterp->freeProc\fR to zero, but it doesn't
 change \fIinterp->result\fR or clear error state.
-\fBTcl_FreeResult\fR is most commonly used when a procedure
+\fBHax_FreeResult\fR is most commonly used when a procedure
 is about to replace one result value with another.
 .VE
 
 .SH "SEE ALSO"
-Tcl_AddErrorInfo, Tcl_SetErrorCode, Tcl_Interp
+Hax_AddErrorInfo, Hax_SetErrorCode, Hax_Interp
 
 .SH KEYWORDS
 append, command, element, list, result, return value, interpreter

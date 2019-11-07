@@ -1,8 +1,8 @@
 /* 
- * tclCmdIL.c --
+ * haxCmdIL.c --
  *
  *	This file contains the top-level command routines for most of
- *	the Tcl built-in commands whose names begin with the letters
+ *	the Hax built-in commands whose names begin with the letters
  *	I through L.  It contains only commands in the generic core
  *	(i.e. those that don't depend much upon UNIX facilities).
  *
@@ -20,7 +20,7 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclCmdIL.c,v 1.89 93/01/22 15:17:42 ouster Exp $ SPRITE (Berkeley)";
 #endif
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
  * Forward declarations for procedures defined in this file:
@@ -32,13 +32,13 @@ static int		SortCompareProc (const void *first,
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_IfCmd --
+ * Hax_IfCmd --
  *
- *	This procedure is invoked to process the "if" Tcl command.
+ *	This procedure is invoked to process the "if" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -48,9 +48,9 @@ static int		SortCompareProc (const void *first,
 
 	/* ARGSUSED */
 int
-Tcl_IfCmd(
+Hax_IfCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -67,12 +67,12 @@ Tcl_IfCmd(
 	 */
 
 	if (i >= argc) {
-	    Tcl_AppendResult(interp, "wrong # args: no expression after \"",
+	    Hax_AppendResult(interp, "wrong # args: no expression after \"",
 		    argv[i-1], "\" argument", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	result = Tcl_ExprBoolean(interp, argv[i], &value);
-	if (result != TCL_OK) {
+	result = Hax_ExprBoolean(interp, argv[i], &value);
+	if (result != HAX_OK) {
 	    return result;
 	}
 	i++;
@@ -80,12 +80,12 @@ Tcl_IfCmd(
 	    i++;
 	}
 	if (i >= argc) {
-	    Tcl_AppendResult(interp, "wrong # args: no script following \"",
+	    Hax_AppendResult(interp, "wrong # args: no script following \"",
 		    argv[i-1], "\" argument", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	if (value) {
-	    return Tcl_Eval(interp, argv[i], 0, (char **) NULL);
+	    return Hax_Eval(interp, argv[i], 0, (char **) NULL);
 	}
 
 	/*
@@ -95,7 +95,7 @@ Tcl_IfCmd(
 
 	i++;
 	if (i >= argc) {
-	    return TCL_OK;
+	    return HAX_OK;
 	}
 	if ((argv[i][0] == 'e') && (strcmp(argv[i], "elseif") == 0)) {
 	    i++;
@@ -113,25 +113,25 @@ Tcl_IfCmd(
     if (strcmp(argv[i], "else") == 0) {
 	i++;
 	if (i >= argc) {
-	    Tcl_AppendResult(interp,
+	    Hax_AppendResult(interp,
 		    "wrong # args: no script following \"else\" argument",
 		    (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
     }
-    return Tcl_Eval(interp, argv[i], 0, (char **) NULL);
+    return Hax_Eval(interp, argv[i], 0, (char **) NULL);
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_IncrCmd --
+ * Hax_IncrCmd --
  *
- *	This procedure is invoked to process the "incr" Tcl command.
+ *	This procedure is invoked to process the "incr" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -141,9 +141,9 @@ Tcl_IfCmd(
 
     /* ARGSUSED */
 int
-Tcl_IncrCmd(
+Hax_IncrCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -152,51 +152,51 @@ Tcl_IncrCmd(
     char newString[30];
 
     if ((argc != 2) && (argc != 3)) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" varName ?increment?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
-    oldString = Tcl_GetVar(interp, argv[1], TCL_LEAVE_ERR_MSG);
+    oldString = Hax_GetVar(interp, argv[1], HAX_LEAVE_ERR_MSG);
     if (oldString == NULL) {
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    if (Tcl_GetInt(interp, oldString, &value) != TCL_OK) {
-	Tcl_AddErrorInfo(interp,
+    if (Hax_GetInt(interp, oldString, &value) != HAX_OK) {
+	Hax_AddErrorInfo(interp,
 		"\n    (reading value of variable to increment)");
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     if (argc == 2) {
 	value += 1;
     } else {
 	int increment;
 
-	if (Tcl_GetInt(interp, argv[2], &increment) != TCL_OK) {
-	    Tcl_AddErrorInfo(interp,
+	if (Hax_GetInt(interp, argv[2], &increment) != HAX_OK) {
+	    Hax_AddErrorInfo(interp,
 		    "\n    (reading increment)");
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	value += increment;
     }
     sprintf(newString, "%d", value);
-    result = Tcl_SetVar(interp, argv[1], newString, TCL_LEAVE_ERR_MSG);
+    result = Hax_SetVar(interp, argv[1], newString, HAX_LEAVE_ERR_MSG);
     if (result == NULL) {
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     interp->result = result;
-    return TCL_OK; 
+    return HAX_OK; 
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_InfoCmd --
+ * Hax_InfoCmd --
  *
- *	This procedure is invoked to process the "info" Tcl command.
+ *	This procedure is invoked to process the "info" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -206,9 +206,9 @@ Tcl_IncrCmd(
 
 	/* ARGSUSED */
 int
-Tcl_InfoCmd(
+Hax_InfoCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -219,186 +219,186 @@ Tcl_InfoCmd(
     Proc *procPtr;
     Var *varPtr;
     Command *cmdPtr;
-    Tcl_HashEntry *hPtr;
-    Tcl_HashSearch search;
+    Hax_HashEntry *hPtr;
+    Hax_HashSearch search;
 
     if (argc < 2) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" option ?arg arg ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     c = argv[1][0];
     length = strlen(argv[1]);
     if ((c == 'a') && (strncmp(argv[1], "args", length)) == 0) {
 	if (argc != 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " args procname\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	procPtr = TclFindProc(iPtr, argv[2]);
+	procPtr = HaxFindProc(iPtr, argv[2]);
 	if (procPtr == NULL) {
 	    infoNoSuchProc:
-	    Tcl_AppendResult(interp, "\"", argv[2],
+	    Hax_AppendResult(interp, "\"", argv[2],
 		    "\" isn't a procedure", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	for (argPtr = procPtr->argPtr; argPtr != NULL;
 		argPtr = argPtr->nextPtr) {
-	    Tcl_AppendElement(interp, argPtr->name, 0);
+	    Hax_AppendElement(interp, argPtr->name, 0);
 	}
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'b') && (strncmp(argv[1], "body", length)) == 0) {
 	if (argc != 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " body procname\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	procPtr = TclFindProc(iPtr, argv[2]);
+	procPtr = HaxFindProc(iPtr, argv[2]);
 	if (procPtr == NULL) {
 	    goto infoNoSuchProc;
 	}
 	iPtr->result = procPtr->command;
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'c') && (strncmp(argv[1], "cmdcount", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 2) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " cmdcount\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	sprintf(iPtr->result, "%d", iPtr->cmdCount);
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'c') && (strncmp(argv[1], "commands", length) == 0)
 	    && (length >= 4)) {
 	if (argc > 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " commands [pattern]\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	for (hPtr = Tcl_FirstHashEntry(&iPtr->commandTable, &search);
-		hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-	    char *name = Tcl_GetHashKey(&iPtr->commandTable, hPtr);
-	    if ((argc == 3) && !Tcl_StringMatch(name, argv[2])) {
+	for (hPtr = Hax_FirstHashEntry(&iPtr->commandTable, &search);
+		hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
+	    char *name = Hax_GetHashKey(&iPtr->commandTable, hPtr);
+	    if ((argc == 3) && !Hax_StringMatch(name, argv[2])) {
 		continue;
 	    }
-	    Tcl_AppendElement(interp, name, 0);
+	    Hax_AppendElement(interp, name, 0);
 	}
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'c') && (strncmp(argv[1], "complete", length) == 0)
 	    && (length >= 4)) {
 	if (argc != 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " complete command\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	if (Tcl_CommandComplete(argv[2])) {
+	if (Hax_CommandComplete(argv[2])) {
 	    interp->result = "1";
 	} else {
 	    interp->result = "0";
 	}
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'd') && (strncmp(argv[1], "default", length)) == 0) {
 	if (argc != 5) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " default procname arg varname\"",
 		    (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	procPtr = TclFindProc(iPtr, argv[2]);
+	procPtr = HaxFindProc(iPtr, argv[2]);
 	if (procPtr == NULL) {
 	    goto infoNoSuchProc;
 	}
 	for (argPtr = procPtr->argPtr; ; argPtr = argPtr->nextPtr) {
 	    if (argPtr == NULL) {
-		Tcl_AppendResult(interp, "procedure \"", argv[2],
+		Hax_AppendResult(interp, "procedure \"", argv[2],
 			"\" doesn't have an argument \"", argv[3],
 			"\"", (char *) NULL);
-		return TCL_ERROR;
+		return HAX_ERROR;
 	    }
 	    if (strcmp(argv[3], argPtr->name) == 0) {
 		if (argPtr->defValue != NULL) {
-		    if (Tcl_SetVar((Tcl_Interp *) iPtr, argv[4],
+		    if (Hax_SetVar((Hax_Interp *) iPtr, argv[4],
 			    argPtr->defValue, 0) == NULL) {
 			defStoreError:
-			Tcl_AppendResult(interp,
+			Hax_AppendResult(interp,
 				"couldn't store default value in variable \"",
 				argv[4], "\"", (char *) NULL);
-			return TCL_ERROR;
+			return HAX_ERROR;
 		    }
 		    iPtr->result = "1";
 		} else {
-		    if (Tcl_SetVar((Tcl_Interp *) iPtr, argv[4], "", 0)
+		    if (Hax_SetVar((Hax_Interp *) iPtr, argv[4], "", 0)
 			    == NULL) {
 			goto defStoreError;
 		    }
 		    iPtr->result = "0";
 		}
-		return TCL_OK;
+		return HAX_OK;
 	    }
 	}
     } else if ((c == 'e') && (strncmp(argv[1], "exists", length) == 0)) {
 	char *p;
 	if (argc != 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " exists varName\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	p = Tcl_GetVar((Tcl_Interp *) iPtr, argv[2], 0);
+	p = Hax_GetVar((Hax_Interp *) iPtr, argv[2], 0);
 
 	/*
 	 * The code below handles the special case where the name is for
-	 * an array:  Tcl_GetVar will reject this since you can't read
+	 * an array:  Hax_GetVar will reject this since you can't read
 	 * an array variable without an index.
 	 */
 
 	if (p == NULL) {
-	    Tcl_HashEntry *hPtr;
+	    Hax_HashEntry *hPtr;
 	    Var *varPtr;
 
 	    if (strchr(argv[2], '(') != NULL) {
 		noVar:
 		iPtr->result = "0";
-		return TCL_OK;
+		return HAX_OK;
 	    }
 	    if (iPtr->varFramePtr == NULL) {
-		hPtr = Tcl_FindHashEntry(&iPtr->globalTable, argv[2]);
+		hPtr = Hax_FindHashEntry(&iPtr->globalTable, argv[2]);
 	    } else {
-		hPtr = Tcl_FindHashEntry(&iPtr->varFramePtr->varTable, argv[2]);
+		hPtr = Hax_FindHashEntry(&iPtr->varFramePtr->varTable, argv[2]);
 	    }
 	    if (hPtr == NULL) {
 		goto noVar;
 	    }
-	    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	    varPtr = (Var *) Hax_GetHashValue(hPtr);
 	    if (varPtr->flags & VAR_UPVAR) {
-		varPtr = (Var *) Tcl_GetHashValue(varPtr->value.upvarPtr);
+		varPtr = (Var *) Hax_GetHashValue(varPtr->value.upvarPtr);
 	    }
 	    if (!(varPtr->flags & VAR_ARRAY)) {
 		goto noVar;
 	    }
 	}
 	iPtr->result = "1";
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'g') && (strncmp(argv[1], "globals", length) == 0)) {
 	char *name;
 
 	if (argc > 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " globals [pattern]\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	for (hPtr = Tcl_FirstHashEntry(&iPtr->globalTable, &search);
-		hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-	    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	for (hPtr = Hax_FirstHashEntry(&iPtr->globalTable, &search);
+		hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
+	    varPtr = (Var *) Hax_GetHashValue(hPtr);
 	    if (varPtr->flags & VAR_UNDEFINED) {
 		continue;
 	    }
-	    name = Tcl_GetHashKey(&iPtr->globalTable, hPtr);
-	    if ((argc == 3) && !Tcl_StringMatch(name, argv[2])) {
+	    name = Hax_GetHashKey(&iPtr->globalTable, hPtr);
+	    if ((argc == 3) && !Hax_StringMatch(name, argv[2])) {
 		continue;
 	    }
-	    Tcl_AppendElement(interp, name, 0);
+	    Hax_AppendElement(interp, name, 0);
 	}
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'l') && (strncmp(argv[1], "level", length) == 0)
 	    && (length >= 2)) {
 	if (argc == 2) {
@@ -407,20 +407,20 @@ Tcl_InfoCmd(
 	    } else {
 		sprintf(iPtr->result, "%d", iPtr->varFramePtr->level);
 	    }
-	    return TCL_OK;
+	    return HAX_OK;
 	} else if (argc == 3) {
 	    int level;
 	    CallFrame *framePtr;
 
-	    if (Tcl_GetInt(interp, argv[2], &level) != TCL_OK) {
-		return TCL_ERROR;
+	    if (Hax_GetInt(interp, argv[2], &level) != HAX_OK) {
+		return HAX_ERROR;
 	    }
 	    if (level <= 0) {
 		if (iPtr->varFramePtr == NULL) {
 		    levelError:
-		    Tcl_AppendResult(interp, "bad level \"", argv[2],
+		    Hax_AppendResult(interp, "bad level \"", argv[2],
 			    "\"", (char *) NULL);
-		    return TCL_ERROR;
+		    return HAX_ERROR;
 		}
 		level += iPtr->varFramePtr->level;
 	    }
@@ -433,147 +433,147 @@ Tcl_InfoCmd(
 	    if (framePtr == NULL) {
 		goto levelError;
 	    }
-	    iPtr->result = Tcl_Merge(framePtr->argc, framePtr->argv);
-	    iPtr->freeProc = (Tcl_FreeProc *) free;
-	    return TCL_OK;
+	    iPtr->result = Hax_Merge(framePtr->argc, framePtr->argv);
+	    iPtr->freeProc = (Hax_FreeProc *) free;
+	    return HAX_OK;
 	}
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" level [number]\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     } else if ((c == 'l') && (strncmp(argv[1], "library", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 2) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " library\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	interp->result = getenv("TCL_LIBRARY");
+	interp->result = getenv("HAX_LIBRARY");
 	if (interp->result == NULL) {
-#ifdef TCL_LIBRARY
-	    interp->result = TCL_LIBRARY;
+#ifdef HAX_LIBRARY
+	    interp->result = HAX_LIBRARY;
 #else
-	    interp->result = "there is no Tcl library at this installation";
-	    return TCL_ERROR;
+	    interp->result = "there is no Hax library at this installation";
+	    return HAX_ERROR;
 #endif
 	}
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'l') && (strncmp(argv[1], "locals", length) == 0)
 	    && (length >= 2)) {
 	char *name;
 
 	if (argc > 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " locals [pattern]\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	if (iPtr->varFramePtr == NULL) {
-	    return TCL_OK;
+	    return HAX_OK;
 	}
-	for (hPtr = Tcl_FirstHashEntry(&iPtr->varFramePtr->varTable, &search);
-		hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-	    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	for (hPtr = Hax_FirstHashEntry(&iPtr->varFramePtr->varTable, &search);
+		hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
+	    varPtr = (Var *) Hax_GetHashValue(hPtr);
 	    if (varPtr->flags & (VAR_UNDEFINED|VAR_UPVAR)) {
 		continue;
 	    }
-	    name = Tcl_GetHashKey(&iPtr->varFramePtr->varTable, hPtr);
-	    if ((argc == 3) && !Tcl_StringMatch(name, argv[2])) {
+	    name = Hax_GetHashKey(&iPtr->varFramePtr->varTable, hPtr);
+	    if ((argc == 3) && !Hax_StringMatch(name, argv[2])) {
 		continue;
 	    }
-	    Tcl_AppendElement(interp, name, 0);
+	    Hax_AppendElement(interp, name, 0);
 	}
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'p') && (strncmp(argv[1], "procs", length)) == 0) {
 	if (argc > 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " procs [pattern]\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	for (hPtr = Tcl_FirstHashEntry(&iPtr->commandTable, &search);
-		hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-	    char *name = Tcl_GetHashKey(&iPtr->commandTable, hPtr);
+	for (hPtr = Hax_FirstHashEntry(&iPtr->commandTable, &search);
+		hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
+	    char *name = Hax_GetHashKey(&iPtr->commandTable, hPtr);
 
-	    cmdPtr = (Command *) Tcl_GetHashValue(hPtr);
-	    if (!TclIsProc(cmdPtr)) {
+	    cmdPtr = (Command *) Hax_GetHashValue(hPtr);
+	    if (!HaxIsProc(cmdPtr)) {
 		continue;
 	    }
-	    if ((argc == 3) && !Tcl_StringMatch(name, argv[2])) {
+	    if ((argc == 3) && !Hax_StringMatch(name, argv[2])) {
 		continue;
 	    }
-	    Tcl_AppendElement(interp, name, 0);
+	    Hax_AppendElement(interp, name, 0);
 	}
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 's') && (strncmp(argv[1], "script", length) == 0)) {
 	if (argc != 2) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " script\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	if (iPtr->scriptFile != NULL) {
 	    interp->result = iPtr->scriptFile;
 	}
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 't') && (strncmp(argv[1], "tclversion", length) == 0)) {
 	if (argc != 2) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " tclversion\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 
 	/*
-	 * Note:  TCL_VERSION below is expected to be set with a "-D"
+	 * Note:  HAX_VERSION below is expected to be set with a "-D"
 	 * switch in the Makefile.
 	 */
 
-	strcpy(iPtr->result, TCL_VERSION);
-	return TCL_OK;
+	strcpy(iPtr->result, HAX_VERSION);
+	return HAX_OK;
     } else if ((c == 'v') && (strncmp(argv[1], "vars", length)) == 0) {
-	Tcl_HashTable *tablePtr;
+	Hax_HashTable *tablePtr;
 	char *name;
 
 	if (argc > 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " vars [pattern]\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	if (iPtr->varFramePtr == NULL) {
 	    tablePtr = &iPtr->globalTable;
 	} else {
 	    tablePtr = &iPtr->varFramePtr->varTable;
 	}
-	for (hPtr = Tcl_FirstHashEntry(tablePtr, &search);
-		hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-	    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	for (hPtr = Hax_FirstHashEntry(tablePtr, &search);
+		hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
+	    varPtr = (Var *) Hax_GetHashValue(hPtr);
 	    if (varPtr->flags & VAR_UNDEFINED) {
 		continue;
 	    }
-	    name = Tcl_GetHashKey(tablePtr, hPtr);
-	    if ((argc == 3) && !Tcl_StringMatch(name, argv[2])) {
+	    name = Hax_GetHashKey(tablePtr, hPtr);
+	    if ((argc == 3) && !Hax_StringMatch(name, argv[2])) {
 		continue;
 	    }
-	    Tcl_AppendElement(interp, name, 0);
+	    Hax_AppendElement(interp, name, 0);
 	}
-	return TCL_OK;
+	return HAX_OK;
     } else {
-	Tcl_AppendResult(interp, "bad option \"", argv[1],
+	Hax_AppendResult(interp, "bad option \"", argv[1],
 		"\": should be args, body, cmdcount, commands, ",
 		"complete, default, ",
 		"exists, globals, level, library, locals, procs, ",
 		"script, tclversion, or vars",
 		(char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_JoinCmd --
+ * Hax_JoinCmd --
  *
- *	This procedure is invoked to process the "join" Tcl command.
+ *	This procedure is invoked to process the "join" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -583,9 +583,9 @@ Tcl_InfoCmd(
 
 	/* ARGSUSED */
 int
-Tcl_JoinCmd(
+Hax_JoinCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -598,35 +598,35 @@ Tcl_JoinCmd(
     } else if (argc == 3) {
 	joinString = argv[2];
     } else {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list ?joinString?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
-    if (Tcl_SplitList(interp, argv[1], &listArgc, &listArgv) != TCL_OK) {
-	return TCL_ERROR;
+    if (Hax_SplitList(interp, argv[1], &listArgc, &listArgv) != HAX_OK) {
+	return HAX_ERROR;
     }
     for (i = 0; i < listArgc; i++) {
 	if (i == 0) {
-	    Tcl_AppendResult(interp, listArgv[0], (char *) NULL);
+	    Hax_AppendResult(interp, listArgv[0], (char *) NULL);
 	} else  {
-	    Tcl_AppendResult(interp, joinString, listArgv[i], (char *) NULL);
+	    Hax_AppendResult(interp, joinString, listArgv[i], (char *) NULL);
 	}
     }
     ckfree((char *) listArgv);
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_LindexCmd --
+ * Hax_LindexCmd --
  *
- *	This procedure is invoked to process the "lindex" Tcl command.
+ *	This procedure is invoked to process the "lindex" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -636,9 +636,9 @@ Tcl_JoinCmd(
 
     /* ARGSUSED */
 int
-Tcl_LindexCmd(
+Hax_LindexCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -646,49 +646,49 @@ Tcl_LindexCmd(
     int index, size, parenthesized, result;
 
     if (argc != 3) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list index\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    if (Tcl_GetInt(interp, argv[2], &index) != TCL_OK) {
-	return TCL_ERROR;
+    if (Hax_GetInt(interp, argv[2], &index) != HAX_OK) {
+	return HAX_ERROR;
     }
     if (index < 0) {
-	return TCL_OK;
+	return HAX_OK;
     }
     for (p = argv[1] ; index >= 0; index--) {
-	result = TclFindElement(interp, p, &element, &p, &size,
+	result = HaxFindElement(interp, p, &element, &p, &size,
 		&parenthesized);
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    return result;
 	}
     }
     if (size == 0) {
-	return TCL_OK;
+	return HAX_OK;
     }
-    if (size >= TCL_RESULT_SIZE) {
+    if (size >= HAX_RESULT_SIZE) {
 	interp->result = (char *) ckalloc((unsigned) size+1);
-	interp->freeProc = (Tcl_FreeProc *) free;
+	interp->freeProc = (Hax_FreeProc *) free;
     }
     if (parenthesized) {
 	memcpy(interp->result, element, size);
 	interp->result[size] = 0;
     } else {
-	TclCopyAndCollapse(size, element, interp->result);
+	HaxCopyAndCollapse(size, element, interp->result);
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_LinsertCmd --
+ * Hax_LinsertCmd --
  *
- *	This procedure is invoked to process the "linsert" Tcl command.
+ *	This procedure is invoked to process the "linsert" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -698,9 +698,9 @@ Tcl_LindexCmd(
 
 	/* ARGSUSED */
 int
-Tcl_LinsertCmd(
+Hax_LinsertCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -708,12 +708,12 @@ Tcl_LinsertCmd(
     int i, index, count, result, size;
 
     if (argc < 4) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list index element ?element ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    if (Tcl_GetInt(interp, argv[2], &index) != TCL_OK) {
-	return TCL_ERROR;
+    if (Hax_GetInt(interp, argv[2], &index) != HAX_OK) {
+	return HAX_ERROR;
     }
 
     /*
@@ -724,13 +724,13 @@ Tcl_LinsertCmd(
     size = 0;
     element = argv[1];
     for (count = 0, p = argv[1]; (count < index) && (*p != 0); count++) {
-	result = TclFindElement(interp, p, &element, &p, &size, (int *) NULL);
-	if (result != TCL_OK) {
+	result = HaxFindElement(interp, p, &element, &p, &size, (int *) NULL);
+	if (result != HAX_OK) {
 	    return result;
 	}
     }
     if (*p == 0) {
-	Tcl_AppendResult(interp, argv[1], (char *) NULL);
+	Hax_AppendResult(interp, argv[1], (char *) NULL);
     } else {
 	char *end;
 
@@ -742,7 +742,7 @@ Tcl_LinsertCmd(
 	}
 	savedChar = *end;
 	*end = 0;
-	Tcl_AppendResult(interp, argv[1], (char *) NULL);
+	Hax_AppendResult(interp, argv[1], (char *) NULL);
 	*end = savedChar;
     }
 
@@ -751,7 +751,7 @@ Tcl_LinsertCmd(
      */
 
     for (i = 3; i < argc; i++) {
-	Tcl_AppendElement(interp, argv[i], 0);
+	Hax_AppendElement(interp, argv[i], 0);
     }
 
     /*
@@ -759,21 +759,21 @@ Tcl_LinsertCmd(
      */
 
     if (*p != 0) {
-	Tcl_AppendResult(interp, " ", p, (char *) NULL);
+	Hax_AppendResult(interp, " ", p, (char *) NULL);
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_ListCmd --
+ * Hax_ListCmd --
  *
- *	This procedure is invoked to process the "list" Tcl command.
+ *	This procedure is invoked to process the "list" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -783,32 +783,32 @@ Tcl_LinsertCmd(
 
 	/* ARGSUSED */
 int
-Tcl_ListCmd(
+Hax_ListCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
     if (argc < 2) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" arg ?arg ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    interp->result = Tcl_Merge(argc-1, argv+1);
-    interp->freeProc = (Tcl_FreeProc *) free;
-    return TCL_OK;
+    interp->result = Hax_Merge(argc-1, argv+1);
+    interp->freeProc = (Hax_FreeProc *) free;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_LlengthCmd --
+ * Hax_LlengthCmd --
  *
- *	This procedure is invoked to process the "llength" Tcl command.
+ *	This procedure is invoked to process the "llength" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -818,9 +818,9 @@ Tcl_ListCmd(
 
 	/* ARGSUSED */
 int
-Tcl_LlengthCmd(
+Hax_LlengthCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -828,14 +828,14 @@ Tcl_LlengthCmd(
     char *element, *p;
 
     if (argc != 2) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     for (count = 0, p = argv[1]; *p != 0 ; count++) {
-	result = TclFindElement(interp, p, &element, &p, (int *) NULL,
+	result = HaxFindElement(interp, p, &element, &p, (int *) NULL,
 		(int *) NULL);
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    return result;
 	}
 	if (*element == 0) {
@@ -843,19 +843,19 @@ Tcl_LlengthCmd(
 	}
     }
     sprintf(interp->result, "%d", count);
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_LrangeCmd --
+ * Hax_LrangeCmd --
  *
- *	This procedure is invoked to process the "lrange" Tcl command.
+ *	This procedure is invoked to process the "lrange" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -865,9 +865,9 @@ Tcl_LlengthCmd(
 
 	/* ARGSUSED */
 int
-Tcl_LrangeCmd(
+Hax_LrangeCmd(
     ClientData notUsed,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -876,12 +876,12 @@ Tcl_LrangeCmd(
     int count;
 
     if (argc != 4) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list first last\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    if (Tcl_GetInt(interp, argv[2], &first) != TCL_OK) {
-	return TCL_ERROR;
+    if (Hax_GetInt(interp, argv[2], &first) != HAX_OK) {
+	return HAX_ERROR;
     }
     if (first < 0) {
 	first = 0;
@@ -889,16 +889,16 @@ Tcl_LrangeCmd(
     if ((*argv[3] == 'e') && (strncmp(argv[3], "end", strlen(argv[3])) == 0)) {
 	last = 1000000;
     } else {
-	if (Tcl_GetInt(interp, argv[3], &last) != TCL_OK) {
-	    Tcl_ResetResult(interp);
-	    Tcl_AppendResult(interp,
+	if (Hax_GetInt(interp, argv[3], &last) != HAX_OK) {
+	    Hax_ResetResult(interp);
+	    Hax_AppendResult(interp,
 		    "expected integer or \"end\" but got \"",
 		    argv[3], "\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
     }
     if (first > last) {
-	return TCL_OK;
+	return HAX_OK;
     }
 
     /*
@@ -906,9 +906,9 @@ Tcl_LrangeCmd(
      */
 
     for (count = 0, begin = argv[1]; count < first; count++) {
-	result = TclFindElement(interp, begin, &dummy, &begin, (int *) NULL,
+	result = HaxFindElement(interp, begin, &dummy, &begin, (int *) NULL,
 		(int *) NULL);
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    return result;
 	}
 	if (*begin == 0) {
@@ -917,9 +917,9 @@ Tcl_LrangeCmd(
     }
     for (count = first, end = begin; (count <= last) && (*end != 0);
 	    count++) {
-	result = TclFindElement(interp, end, &dummy, &end, (int *) NULL,
+	result = HaxFindElement(interp, end, &dummy, &end, (int *) NULL,
 		(int *) NULL);
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    return result;
 	}
     }
@@ -933,21 +933,21 @@ Tcl_LrangeCmd(
     }
     c = *end;
     *end = 0;
-    Tcl_SetResult(interp, begin, TCL_VOLATILE);
+    Hax_SetResult(interp, begin, HAX_VOLATILE);
     *end = c;
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_LreplaceCmd --
+ * Hax_LreplaceCmd --
  *
- *	This procedure is invoked to process the "lreplace" Tcl command.
+ *	This procedure is invoked to process the "lreplace" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -957,9 +957,9 @@ Tcl_LrangeCmd(
 
 	/* ARGSUSED */
 int
-Tcl_LreplaceCmd(
+Hax_LreplaceCmd(
     ClientData notUsed,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -967,15 +967,15 @@ Tcl_LreplaceCmd(
     int i, first, last, count, result, size;
 
     if (argc < 4) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list first last ?element element ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    if (Tcl_GetInt(interp, argv[2], &first) != TCL_OK) {
-	return TCL_ERROR;
+    if (Hax_GetInt(interp, argv[2], &first) != HAX_OK) {
+	return HAX_ERROR;
     }
-    if (TclGetListIndex(interp, argv[3], &last) != TCL_OK) {
-	return TCL_ERROR;
+    if (HaxGetListIndex(interp, argv[3], &last) != HAX_OK) {
+	return HAX_ERROR;
     }
     if (first < 0) {
 	first = 0;
@@ -984,9 +984,9 @@ Tcl_LreplaceCmd(
 	last = 0;
     }
     if (first > last) {
-	Tcl_AppendResult(interp, "first index must not be greater than second",
+	Hax_AppendResult(interp, "first index must not be greater than second",
 		(char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
     /*
@@ -996,16 +996,16 @@ Tcl_LreplaceCmd(
     size = 0;
     element = argv[1];
     for (count = 0, p1 = argv[1]; (count < first) && (*p1 != 0); count++) {
-	result = TclFindElement(interp, p1, &element, &p1, &size,
+	result = HaxFindElement(interp, p1, &element, &p1, &size,
 		(int *) NULL);
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    return result;
 	}
     }
     if (*p1 == 0) {
-	Tcl_AppendResult(interp, "list doesn't contain element ",
+	Hax_AppendResult(interp, "list doesn't contain element ",
 		argv[2], (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
     /*
@@ -1013,9 +1013,9 @@ Tcl_LreplaceCmd(
      */
 
     for (p2 = p1 ; (count <= last) && (*p2 != 0); count++) {
-	result = TclFindElement(interp, p2, &dummy, &p2, (int *) NULL,
+	result = HaxFindElement(interp, p2, &dummy, &p2, (int *) NULL,
 		(int *) NULL);
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    return result;
 	}
     }
@@ -1034,7 +1034,7 @@ Tcl_LreplaceCmd(
     }
     savedChar = *p1;
     *p1 = 0;
-    Tcl_AppendResult(interp, argv[1], (char *) NULL);
+    Hax_AppendResult(interp, argv[1], (char *) NULL);
     *p1 = savedChar;
 
     /*
@@ -1042,7 +1042,7 @@ Tcl_LreplaceCmd(
      */
 
     for (i = 4; i < argc; i++) {
-	Tcl_AppendElement(interp, argv[i], 0);
+	Hax_AppendElement(interp, argv[i], 0);
     }
 
     /*
@@ -1051,24 +1051,24 @@ Tcl_LreplaceCmd(
 
     if (*p2 != 0) {
 	if (*interp->result == 0) {
-	    Tcl_SetResult(interp, p2, TCL_VOLATILE);
+	    Hax_SetResult(interp, p2, HAX_VOLATILE);
 	} else {
-	    Tcl_AppendResult(interp, " ", p2, (char *) NULL);
+	    Hax_AppendResult(interp, " ", p2, (char *) NULL);
 	}
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_LsearchCmd --
+ * Hax_LsearchCmd --
  *
- *	This procedure is invoked to process the "lsearch" Tcl command.
+ *	This procedure is invoked to process the "lsearch" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -1078,9 +1078,9 @@ Tcl_LreplaceCmd(
 
 	/* ARGSUSED */
 int
-Tcl_LsearchCmd(
+Hax_LsearchCmd(
     ClientData notUsed,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -1089,35 +1089,35 @@ Tcl_LsearchCmd(
     int i, match;
 
     if (argc != 3) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list pattern\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    if (Tcl_SplitList(interp, argv[1], &listArgc, &listArgv) != TCL_OK) {
-	return TCL_ERROR;
+    if (Hax_SplitList(interp, argv[1], &listArgc, &listArgv) != HAX_OK) {
+	return HAX_ERROR;
     }
     match = -1;
     for (i = 0; i < listArgc; i++) {
-	if (Tcl_StringMatch(listArgv[i], argv[2])) {
+	if (Hax_StringMatch(listArgv[i], argv[2])) {
 	    match = i;
 	    break;
 	}
     }
     sprintf(interp->result, "%d", match);
     ckfree((char *) listArgv);
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_LsortCmd --
+ * Hax_LsortCmd --
  *
- *	This procedure is invoked to process the "lsort" Tcl command.
+ *	This procedure is invoked to process the "lsort" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result.
+ *	A standard Hax result.
  *
  * Side effects:
  *	See the user documentation.
@@ -1127,9 +1127,9 @@ Tcl_LsearchCmd(
 
 	/* ARGSUSED */
 int
-Tcl_LsortCmd(
+Hax_LsortCmd(
     ClientData notUsed,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -1137,18 +1137,18 @@ Tcl_LsortCmd(
     char **listArgv;
 
     if (argc != 2) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    if (Tcl_SplitList(interp, argv[1], &listArgc, &listArgv) != TCL_OK) {
-	return TCL_ERROR;
+    if (Hax_SplitList(interp, argv[1], &listArgc, &listArgv) != HAX_OK) {
+	return HAX_ERROR;
     }
     qsort(listArgv, listArgc, sizeof (char *), SortCompareProc);
-    interp->result = Tcl_Merge(listArgc, listArgv);
-    interp->freeProc = (Tcl_FreeProc *) free;
+    interp->result = Hax_Merge(listArgc, listArgv);
+    interp->freeProc = (Hax_FreeProc *) free;
     ckfree((char *) listArgv);
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*

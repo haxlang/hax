@@ -1,12 +1,12 @@
 /* 
- * tclUnixUtil.c --
+ * haxUnixUtil.c --
  *
  *	This file contains a collection of utility procedures that
- *	are present in the Tcl's UNIX core but not in the generic
+ *	are present in the Hax's UNIX core but not in the generic
  *	core.  For example, they do file manipulation and process
  *	manipulation.
  *
- *	The Tcl_Fork and Tcl_WaitPids procedures are based on code
+ *	The Hax_Fork and Hax_WaitPids procedures are based on code
  *	contributed by Karl Lehenbauer, Mark Diekhans and Peter
  *	da Silva.
  *
@@ -24,12 +24,12 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUnixUtil.c,v 1.19 93/01/08 08:41:00 ouster Exp $ SPRITE (Berkeley)";
 #endif /* not lint */
 
-#include "tclInt.h"
-#include "tclUnix.h"
+#include "haxInt.h"
+#include "haxUnix.h"
 
 /*
- * Data structures of the following type are used by Tcl_Fork and
- * Tcl_WaitPids to keep track of child processes.
+ * Data structures of the following type are used by Hax_Fork and
+ * Hax_WaitPids to keep track of child processes.
  */
 
 typedef struct {
@@ -45,7 +45,7 @@ typedef struct {
  *
  * WI_READY -			Non-zero means process has exited or
  *				suspended since it was forked or last
- *				returned by Tcl_WaitPids.
+ *				returned by Hax_WaitPids.
  * WI_DETACHED -		Non-zero means no-one cares about the
  *				process anymore.  Ignore it until it
  *				exits, then forget about it.
@@ -66,13 +66,13 @@ static int waitTableUsed = 0;	/* Number of entries in waitTable that
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_EvalFile --
+ * Hax_EvalFile --
  *
  *	Read in a file and process the entire file as one gigantic
- *	Tcl command.
+ *	Hax command.
  *
  * Results:
- *	A standard Tcl result, which is either the result of executing
+ *	A standard Hax result, which is either the result of executing
  *	the file or an error indicating why the file couldn't be read.
  *
  * Side effects:
@@ -82,8 +82,8 @@ static int waitTableUsed = 0;	/* Number of entries in waitTable that
  */
 
 int
-Tcl_EvalFile(
-    Tcl_Interp *interp,		/* Interpreter in which to process file. */
+Hax_EvalFile(
+    Hax_Interp *interp,		/* Interpreter in which to process file. */
     char *fileName		/* Name of file to process.  Tilde-substitution
 				 * will be performed on this name. */)
 {
@@ -94,42 +94,42 @@ Tcl_EvalFile(
 
     oldScriptFile = iPtr->scriptFile;
     iPtr->scriptFile = fileName;
-    fileName = Tcl_TildeSubst(interp, fileName);
+    fileName = Hax_TildeSubst(interp, fileName);
     if (fileName == NULL) {
 	goto error;
     }
     fileId = open(fileName, O_RDONLY, 0);
     if (fileId < 0) {
-	Tcl_AppendResult(interp, "couldn't read file \"", fileName,
-		"\": ", Tcl_UnixError(interp), (char *) NULL);
+	Hax_AppendResult(interp, "couldn't read file \"", fileName,
+		"\": ", Hax_UnixError(interp), (char *) NULL);
 	goto error;
     }
     if (fstat(fileId, &statBuf) == -1) {
-	Tcl_AppendResult(interp, "couldn't stat file \"", fileName,
-		"\": ", Tcl_UnixError(interp), (char *) NULL);
+	Hax_AppendResult(interp, "couldn't stat file \"", fileName,
+		"\": ", Hax_UnixError(interp), (char *) NULL);
 	close(fileId);
 	goto error;
     }
     cmdBuffer = (char *) ckalloc((unsigned) statBuf.st_size+1);
     if (read(fileId, cmdBuffer, (int) statBuf.st_size) != statBuf.st_size) {
-	Tcl_AppendResult(interp, "error in reading file \"", fileName,
-		"\": ", Tcl_UnixError(interp), (char *) NULL);
+	Hax_AppendResult(interp, "error in reading file \"", fileName,
+		"\": ", Hax_UnixError(interp), (char *) NULL);
 	close(fileId);
 	ckfree(cmdBuffer);
 	goto error;
     }
     if (close(fileId) != 0) {
-	Tcl_AppendResult(interp, "error closing file \"", fileName,
-		"\": ", Tcl_UnixError(interp), (char *) NULL);
+	Hax_AppendResult(interp, "error closing file \"", fileName,
+		"\": ", Hax_UnixError(interp), (char *) NULL);
 	ckfree(cmdBuffer);
 	goto error;
     }
     cmdBuffer[statBuf.st_size] = 0;
-    result = Tcl_Eval(interp, cmdBuffer, 0, &end);
-    if (result == TCL_RETURN) {
-	result = TCL_OK;
+    result = Hax_Eval(interp, cmdBuffer, 0, &end);
+    if (result == HAX_RETURN) {
+	result = HAX_OK;
     }
-    if (result == TCL_ERROR) {
+    if (result == HAX_ERROR) {
 	char msg[200];
 
 	/*
@@ -138,7 +138,7 @@ Tcl_EvalFile(
 
 	sprintf(msg, "\n    (file \"%.150s\" line %d)", fileName,
 		interp->errorLine);
-	Tcl_AddErrorInfo(interp, msg);
+	Hax_AddErrorInfo(interp, msg);
     }
     ckfree(cmdBuffer);
     iPtr->scriptFile = oldScriptFile;
@@ -146,16 +146,16 @@ Tcl_EvalFile(
 
     error:
     iPtr->scriptFile = oldScriptFile;
-    return TCL_ERROR;
+    return HAX_ERROR;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_Fork --
+ * Hax_Fork --
  *
  *	Create a new process using the vfork system call, and keep
- *	track of it for "safe" waiting with Tcl_WaitPids.
+ *	track of it for "safe" waiting with Hax_WaitPids.
  *
  * Results:
  *	The return value is the value returned by the vfork system
@@ -170,7 +170,7 @@ Tcl_EvalFile(
  */
 
 int
-Tcl_Fork(void)
+Hax_Fork(void)
 {
     WaitInfo *waitPtr;
     pid_t pid;
@@ -226,10 +226,10 @@ Tcl_Fork(void)
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_WaitPids --
+ * Hax_WaitPids --
  *
  *	This procedure is used to wait for one or more processes created
- *	by Tcl_Fork to exit or suspend.  It records information about
+ *	by Hax_Fork to exit or suspend.  It records information about
  *	all processes that exit or suspend, even those not waited for,
  *	so that later waits for them will be able to get the status
  *	information.
@@ -247,7 +247,7 @@ Tcl_Fork(void)
  */
 
 int
-Tcl_WaitPids(
+Hax_WaitPids(
     int numPids,		/* Number of pids to wait on:  gives size
 				 * of array pointed to by pidPtr. */
     int *pidPtr,		/* Pids to wait on:  return when one of
@@ -340,12 +340,12 @@ Tcl_WaitPids(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_DetachPids --
+ * Hax_DetachPids --
  *
  *	This procedure is called to indicate that one or more child
  *	processes have been placed in background and are no longer
  *	cared about.  They should be ignored in future calls to
- *	Tcl_WaitPids.
+ *	Hax_WaitPids.
  *
  * Results:
  *	None.
@@ -357,11 +357,11 @@ Tcl_WaitPids(
  */
 
 void
-Tcl_DetachPids(
+Hax_DetachPids(
     int numPids,		/* Number of pids to detach:  gives size
 				 * of array pointed to by pidPtr. */
     int *pidPtr			/* Array of pids to detach:  must have
-				 * been created by Tcl_Fork. */)
+				 * been created by Hax_Fork. */)
 {
     WaitInfo *waitPtr;
     int i, count, pid;
@@ -388,7 +388,7 @@ Tcl_DetachPids(
 	    }
 	    goto nextPid;
 	}
-	panic("Tcl_Detach couldn't find process");
+	panic("Hax_Detach couldn't find process");
 
 	nextPid:
 	continue;
@@ -398,7 +398,7 @@ Tcl_DetachPids(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_CreatePipeline --
+ * Hax_CreatePipeline --
  *
  *	Given an argc/argv array, instantiate a pipeline of processes
  *	as described by the argv.
@@ -425,8 +425,8 @@ Tcl_DetachPids(
  */
 
 int
-Tcl_CreatePipeline(
-    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+Hax_CreatePipeline(
+    Hax_Interp *interp,		/* Interpreter to use for error reporting. */
     int argc,			/* Number of entries in argv. */
     char **argv,		/* Array of strings describing commands in
 				 * pipeline plus I/O redirection with <,
@@ -535,7 +535,7 @@ Tcl_CreatePipeline(
 	    continue;
 	}
 	if (i >= (argc-1)) {
-	    Tcl_AppendResult(interp, "can't specify \"", argv[i],
+	    Hax_AppendResult(interp, "can't specify \"", argv[i],
 		    "\" as last word in command", (char *) NULL);
 	    return -1;
 	}
@@ -562,7 +562,7 @@ Tcl_CreatePipeline(
 	     * put data into file.
 	     */
 
-#	    define TMP_STDIN_NAME "/tmp/tcl.in.XXXXXX"
+#	    define TMP_STDIN_NAME "/tmp/hax.in.XXXXXX"
 	    char inName[sizeof(TMP_STDIN_NAME) + 1];
 	    int length;
 
@@ -570,22 +570,22 @@ Tcl_CreatePipeline(
 	    mktemp(inName);
 	    inputId = open(inName, O_RDWR|O_CREAT|O_TRUNC, 0600);
 	    if (inputId < 0) {
-		Tcl_AppendResult(interp,
+		Hax_AppendResult(interp,
 			"couldn't create input file for command: ",
-			Tcl_UnixError(interp), (char *) NULL);
+			Hax_UnixError(interp), (char *) NULL);
 		goto error;
 	    }
 	    length = strlen(input);
 	    if (write(inputId, input, length) != length) {
-		Tcl_AppendResult(interp,
+		Hax_AppendResult(interp,
 			"couldn't write file input for command: ",
-			Tcl_UnixError(interp), (char *) NULL);
+			Hax_UnixError(interp), (char *) NULL);
 		goto error;
 	    }
 	    if ((lseek(inputId, 0L, 0) == -1) || (unlink(inName) == -1)) {
-		Tcl_AppendResult(interp,
+		Hax_AppendResult(interp,
 			"couldn't reset or remove input file for command: ",
-			Tcl_UnixError(interp), (char *) NULL);
+			Hax_UnixError(interp), (char *) NULL);
 		goto error;
 	    }
 	} else {
@@ -595,17 +595,17 @@ Tcl_CreatePipeline(
 
 	    inputId = open(input, O_RDONLY, 0);
 	    if (inputId < 0) {
-		Tcl_AppendResult(interp,
+		Hax_AppendResult(interp,
 			"couldn't read file \"", input, "\": ",
-			Tcl_UnixError(interp), (char *) NULL);
+			Hax_UnixError(interp), (char *) NULL);
 		goto error;
 	    }
 	}
     } else if (inPipePtr != NULL) {
 	if (pipe(pipeIds) != 0) {
-	    Tcl_AppendResult(interp,
+	    Hax_AppendResult(interp,
 		    "couldn't create input pipe for command: ",
-		    Tcl_UnixError(interp), (char *) NULL);
+		    Hax_UnixError(interp), (char *) NULL);
 	    goto error;
 	}
 	inputId = pipeIds[0];
@@ -625,9 +625,9 @@ Tcl_CreatePipeline(
 
 	lastOutputId = open(output, O_WRONLY|O_CREAT|O_TRUNC, 0666);
 	if (lastOutputId < 0) {
-	    Tcl_AppendResult(interp,
+	    Hax_AppendResult(interp,
 		    "couldn't write file \"", output, "\": ",
-		    Tcl_UnixError(interp), (char *) NULL);
+		    Hax_UnixError(interp), (char *) NULL);
 	    goto error;
 	}
     } else if (outPipePtr != NULL) {
@@ -636,9 +636,9 @@ Tcl_CreatePipeline(
 	 */
 
 	if (pipe(pipeIds) != 0) {
-	    Tcl_AppendResult(interp,
+	    Hax_AppendResult(interp,
 		    "couldn't create output pipe: ",
-		    Tcl_UnixError(interp), (char *) NULL);
+		    Hax_UnixError(interp), (char *) NULL);
 	    goto error;
 	}
 	lastOutputId = pipeIds[1];
@@ -656,7 +656,7 @@ Tcl_CreatePipeline(
      */
 
     if (errFilePtr != NULL) {
-#	define TMP_STDERR_NAME "/tmp/tcl.err.XXXXXX"
+#	define TMP_STDERR_NAME "/tmp/hax.err.XXXXXX"
 	char errName[sizeof(TMP_STDERR_NAME) + 1];
 
 	strcpy(errName, TMP_STDERR_NAME);
@@ -664,9 +664,9 @@ Tcl_CreatePipeline(
 	errorId = open(errName, O_WRONLY|O_CREAT|O_TRUNC, 0600);
 	if (errorId < 0) {
 	    errFileError:
-	    Tcl_AppendResult(interp,
+	    Hax_AppendResult(interp,
 		    "couldn't create error file for command: ",
-		    Tcl_UnixError(interp), (char *) NULL);
+		    Hax_UnixError(interp), (char *) NULL);
 	    goto error;
 	}
 	*errFilePtr = open(errName, O_RDONLY, 0);
@@ -674,9 +674,9 @@ Tcl_CreatePipeline(
 	    goto errFileError;
 	}
 	if (unlink(errName) == -1) {
-	    Tcl_AppendResult(interp,
+	    Hax_AppendResult(interp,
 		    "couldn't remove error file for command: ",
-		    Tcl_UnixError(interp), (char *) NULL);
+		    Hax_UnixError(interp), (char *) NULL);
 	    goto error;
 	}
     }
@@ -701,17 +701,17 @@ Tcl_CreatePipeline(
 	    outputId = lastOutputId;
 	} else {
 	    if (pipe(pipeIds) != 0) {
-		Tcl_AppendResult(interp, "couldn't create pipe: ",
-			Tcl_UnixError(interp), (char *) NULL);
+		Hax_AppendResult(interp, "couldn't create pipe: ",
+			Hax_UnixError(interp), (char *) NULL);
 		goto error;
 	    }
 	    outputId = pipeIds[1];
 	}
-	execName = Tcl_TildeSubst(interp, argv[firstArg]);
-	pid = Tcl_Fork();
+	execName = Hax_TildeSubst(interp, argv[firstArg]);
+	pid = Hax_Fork();
 	if (pid == -1) {
-	    Tcl_AppendResult(interp, "couldn't fork child process: ",
-		    Tcl_UnixError(interp), (char *) NULL);
+	    Hax_AppendResult(interp, "couldn't fork child process: ",
+		    Hax_UnixError(interp), (char *) NULL);
 	    goto error;
 	}
 	if (pid == 0) {
@@ -798,7 +798,7 @@ cleanup:
     if (pidPtr != NULL) {
 	for (i = 0; i < numPids; i++) {
 	    if (pidPtr[i] != -1) {
-		Tcl_DetachPids(1, &pidPtr[i]);
+		Hax_DetachPids(1, &pidPtr[i]);
 	    }
 	}
 	ckfree((char *) pidPtr);
@@ -810,7 +810,7 @@ cleanup:
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_UnixError --
+ * Hax_UnixError --
  *
  *	This procedure is typically called after UNIX kernel calls
  *	return errors.  It stores machine-readable information about
@@ -828,22 +828,22 @@ cleanup:
  */
 
 char *
-Tcl_UnixError(interp)
-    Tcl_Interp *interp;		/* Interpreter whose $errorCode variable
+Hax_UnixError(interp)
+    Hax_Interp *interp;		/* Interpreter whose $errorCode variable
 				 * is to be changed. */
 {
     char *id, *msg;
 
-    id = Tcl_ErrnoId();
+    id = Hax_ErrnoId();
     msg = strerror(errno);
-    Tcl_SetErrorCode(interp, "UNIX", id, msg, (char *) NULL);
+    Hax_SetErrorCode(interp, "UNIX", id, msg, (char *) NULL);
     return msg;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * TclMakeFileTable --
+ * HaxMakeFileTable --
  *
  *	Create or enlarge the file table for the interpreter, so that
  *	there is room for a given index.
@@ -860,7 +860,7 @@ Tcl_UnixError(interp)
  */
 
 void
-TclMakeFileTable(iPtr, index)
+HaxMakeFileTable(iPtr, index)
     Interp *iPtr;		/* Interpreter whose table of files is
 				 * to be manipulated. */
     int index;			/* Make sure table is large enough to
@@ -937,15 +937,15 @@ TclMakeFileTable(iPtr, index)
 /*
  *----------------------------------------------------------------------
  *
- * TclGetOpenFile --
+ * HaxGetOpenFile --
  *
  *	Given a string identifier for an open file, find the corresponding
  *	open file structure, if there is one.
  *
  * Results:
- *	A standard Tcl return value.  If the open file is successfully
+ *	A standard Hax return value.  If the open file is successfully
  *	located, *filePtrPtr is modified to point to its structure.
- *	If TCL_ERROR is returned then interp->result contains an error
+ *	If HAX_ERROR is returned then interp->result contains an error
  *	message.
  *
  * Side effects:
@@ -955,8 +955,8 @@ TclMakeFileTable(iPtr, index)
  */
 
 int
-TclGetOpenFile(interp, string, filePtrPtr)
-    Tcl_Interp *interp;		/* Interpreter in which to find file. */
+HaxGetOpenFile(interp, string, filePtrPtr)
+    Hax_Interp *interp;		/* Interpreter in which to find file. */
     char *string;		/* String that identifies file. */
     OpenFile **filePtrPtr;	/* Address of word in which to store pointer
 				 * to structure about open file. */
@@ -986,24 +986,24 @@ TclGetOpenFile(interp, string, filePtrPtr)
 	}
     } else {
 	badId:
-	Tcl_AppendResult(interp, "bad file identifier \"", string,
+	Hax_AppendResult(interp, "bad file identifier \"", string,
 		"\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
     if (fd >= iPtr->numFiles) {
 	if ((iPtr->numFiles == 0) && (fd <= 2)) {
-	    TclMakeFileTable(iPtr, fd);
+	    HaxMakeFileTable(iPtr, fd);
 	} else {
 	    notOpen:
-	    Tcl_AppendResult(interp, "file \"", string, "\" isn't open",
+	    Hax_AppendResult(interp, "file \"", string, "\" isn't open",
 		    (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
     }
     if (iPtr->filePtrArray[fd] == NULL) {
 	goto notOpen;
     }
     *filePtrPtr = iPtr->filePtrArray[fd];
-    return TCL_OK;
+    return HAX_OK;
 }

@@ -1,7 +1,7 @@
 /* 
- * tclAssem.c --
+ * haxAssem.c --
  *
- *	This file contains procedures to help assemble Tcl commands
+ *	This file contains procedures to help assemble Hax commands
  *	from an input source  where commands may arrive in pieces, e.g.
  *	several lines of type-in corresponding to one command.
  *
@@ -19,14 +19,14 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclAssem.c,v 1.13 93/01/29 10:14:45 ouster Exp $ SPRITE (Berkeley)";
 #endif /* not lint */
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
  * The structure below is the internal representation for a command
  * buffer, which is used to hold a piece of a command until a full
  * command is available.  When a full command is available, it will
  * be returned to the user, but it will also be retained in the buffer
- * until the NEXT call to Tcl_AssembleCmd, at which point it will be
+ * until the NEXT call to Hax_AssembleCmd, at which point it will be
  * removed.
  */
 
@@ -48,13 +48,13 @@ typedef struct {
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_CreateCmdBuf --
+ * Hax_CreateCmdBuf --
  *
  *	Allocate and initialize a command buffer.
  *
  * Results:
  *	The return value is a token that may be passed to
- *	Tcl_AssembleCmd and Tcl_DeleteCmdBuf.
+ *	Hax_AssembleCmd and Hax_DeleteCmdBuf.
  *
  * Side effects:
  *	Memory is allocated.
@@ -62,8 +62,8 @@ typedef struct {
  *----------------------------------------------------------------------
  */
 
-Tcl_CmdBuf
-Tcl_CreateCmdBuf(void)
+Hax_CmdBuf
+Hax_CreateCmdBuf(void)
 {
     CmdBuf *cbPtr;
 
@@ -72,13 +72,13 @@ Tcl_CreateCmdBuf(void)
     cbPtr->buffer[0] = '\0';
     cbPtr->bufSize = CMD_BUF_SIZE;
     cbPtr->bytesUsed = 0;
-    return (Tcl_CmdBuf) cbPtr;
+    return (Hax_CmdBuf) cbPtr;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_DeleteCmdBuf --
+ * Hax_DeleteCmdBuf --
  *
  *	Release all of the resources associated with a command buffer.
  *	The caller should never again use buffer again.
@@ -93,9 +93,9 @@ Tcl_CreateCmdBuf(void)
  */
 
 void
-Tcl_DeleteCmdBuf(
-    Tcl_CmdBuf buffer		/* Token for command buffer (return value
-				 * from previous call to Tcl_CreateCmdBuf). */)
+Hax_DeleteCmdBuf(
+    Hax_CmdBuf buffer		/* Token for command buffer (return value
+				 * from previous call to Hax_CreateCmdBuf). */)
 {
     CmdBuf *cbPtr = (CmdBuf *) buffer;
 
@@ -106,7 +106,7 @@ Tcl_DeleteCmdBuf(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_AssembleCmd --
+ * Hax_AssembleCmd --
  *
  *	This is a utility procedure to assist in situations where
  *	commands may be read piece-meal from some input source.  Given
@@ -115,7 +115,7 @@ Tcl_DeleteCmdBuf(
  *
  * Results:
  *	If the addition of string to any currently-buffered information
- *	results in one or more complete Tcl commands, then the return value
+ *	results in one or more complete Hax commands, then the return value
  *	is a pointer to the complete command(s).  The command value will
  *	only be valid until the next call to this procedure with the
  *	same buffer.  If the addition of string leaves an incomplete
@@ -131,9 +131,9 @@ Tcl_DeleteCmdBuf(
  */
 
 char *
-Tcl_AssembleCmd(
-    Tcl_CmdBuf buffer,		/* Token for a command buffer previously
-				 * created by Tcl_CreateCmdBuf.  */
+Hax_AssembleCmd(
+    Hax_CmdBuf buffer,		/* Token for a command buffer previously
+				 * created by Hax_CreateCmdBuf.  */
     char *string		/* Bytes to be appended to command stream.
 				 * Note:  if the string is zero length,
 				 * then whatever is buffered will be
@@ -189,7 +189,7 @@ Tcl_AssembleCmd(
     if ((c != '\n') && (c != ';')) {
 	return NULL;
     }
-    if (Tcl_CommandComplete(cbPtr->buffer)) {
+    if (Hax_CommandComplete(cbPtr->buffer)) {
 	cbPtr->bytesUsed = 0;
 	return cbPtr->buffer;
     }
@@ -199,9 +199,9 @@ Tcl_AssembleCmd(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_CommandComplete --
+ * Hax_CommandComplete --
  *
- *	Given a partial or complete Tcl command, this procedure
+ *	Given a partial or complete Hax command, this procedure
  *	determines whether the command is complete in the sense
  *	of having matched braces and quotes and brackets.
  *
@@ -215,7 +215,7 @@ Tcl_AssembleCmd(
  */
 
 int
-Tcl_CommandComplete(
+Hax_CommandComplete(
     char *cmd			/* Command to check. */)
 {
     char *p = cmd;
@@ -228,7 +228,7 @@ Tcl_CommandComplete(
 	if (*p == 0) {
 	    return 1;
 	}
-	p = TclWordEnd(p, 0);
+	p = HaxWordEnd(p, 0);
 	if (*p == 0) {
 	    return 0;
 	}

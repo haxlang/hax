@@ -1,7 +1,7 @@
 /* 
- * tclProc.c --
+ * haxProc.c --
  *
- *	This file contains routines that implement Tcl procedures,
+ *	This file contains routines that implement Hax procedures,
  *	including the "proc" and "uplevel" commands.
  *
  * Copyright 1987-1991 Regents of the University of California
@@ -18,26 +18,26 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclProc.c,v 1.60 92/09/14 15:42:07 ouster Exp $ SPRITE (Berkeley)";
 #endif
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
  * Forward references to procedures defined later in this file:
  */
 
 static  int	InterpProc (ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv);
+		    Hax_Interp *interp, int argc, char **argv);
 static  void	ProcDeleteProc (ClientData clientData);
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_ProcCmd --
+ * Hax_ProcCmd --
  *
- *	This procedure is invoked to process the "proc" Tcl command.
+ *	This procedure is invoked to process the "proc" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result value.
+ *	A standard Hax result value.
  *
  * Side effects:
  *	A new procedure gets created.
@@ -47,9 +47,9 @@ static  void	ProcDeleteProc (ClientData clientData);
 
 	/* ARGSUSED */
 int
-Tcl_ProcCmd(
+Hax_ProcCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -62,9 +62,9 @@ Tcl_ProcCmd(
 					 * prevents compiler warning. */
 
     if (argc != 4) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" name args body\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
     procPtr = (Proc *) ckalloc(sizeof(Proc));
@@ -78,8 +78,8 @@ Tcl_ProcCmd(
      * each argument specifier.
      */
 
-    result = Tcl_SplitList(interp, argv[2], &argCount, &argArray);
-    if (result != TCL_OK) {
+    result = Hax_SplitList(interp, argv[2], &argCount, &argArray);
+    if (result != HAX_OK) {
 	goto procError;
     }
     lastArgPtr = NULL;
@@ -91,24 +91,24 @@ Tcl_ProcCmd(
 	 * Now divide the specifier up into name and default.
 	 */
 
-	result = Tcl_SplitList(interp, argArray[i], &fieldCount,
+	result = Hax_SplitList(interp, argArray[i], &fieldCount,
 		&fieldValues);
-	if (result != TCL_OK) {
+	if (result != HAX_OK) {
 	    goto procError;
 	}
 	if (fieldCount > 2) {
 	    ckfree((char *) fieldValues);
-	    Tcl_AppendResult(interp,
+	    Hax_AppendResult(interp,
 		    "too many fields in argument specifier \"",
 		    argArray[i], "\"", (char *) NULL);
-	    result = TCL_ERROR;
+	    result = HAX_ERROR;
 	    goto procError;
 	}
 	if ((fieldCount == 0) || (*fieldValues[0] == 0)) {
 	    ckfree((char *) fieldValues);
-	    Tcl_AppendResult(interp, "procedure \"", argv[1],
+	    Hax_AppendResult(interp, "procedure \"", argv[1],
 		    "\" has argument with no name", (char *) NULL);
-	    result = TCL_ERROR;
+	    result = HAX_ERROR;
 	    goto procError;
 	}
 	nameLength = strlen(fieldValues[0]) + 1;
@@ -137,10 +137,10 @@ Tcl_ProcCmd(
 	ckfree((char *) fieldValues);
     }
 
-    Tcl_CreateCommand(interp, argv[1], InterpProc, (ClientData) procPtr,
+    Hax_CreateCommand(interp, argv[1], InterpProc, (ClientData) procPtr,
 	    ProcDeleteProc);
     ckfree((char *) argArray);
-    return TCL_OK;
+    return HAX_OK;
 
     procError:
     ckfree(procPtr->command);
@@ -159,7 +159,7 @@ Tcl_ProcCmd(
 /*
  *----------------------------------------------------------------------
  *
- * TclGetFrame --
+ * HaxGetFrame --
  *
  *	Given a description of a procedure frame, such as the first
  *	argument to an "uplevel" or "upvar" command, locate the
@@ -182,8 +182,8 @@ Tcl_ProcCmd(
  */
 
 int
-TclGetFrame(
-    Tcl_Interp *interp,		/* Interpreter in which to find frame. */
+HaxGetFrame(
+    Hax_Interp *interp,		/* Interpreter in which to find frame. */
     char *string,		/* String describing frame. */
     CallFrame **framePtrPtr	/* Store pointer to frame here (or NULL
 				 * if global frame indicated). */)
@@ -203,17 +203,17 @@ TclGetFrame(
 
     result = 1;
     if (*string == '#') {
-	if (Tcl_GetInt(interp, string+1, &level) != TCL_OK) {
+	if (Hax_GetInt(interp, string+1, &level) != HAX_OK) {
 	    return -1;
 	}
 	if (level < 0) {
 	    levelError:
-	    Tcl_AppendResult(interp, "bad level \"", string, "\"",
+	    Hax_AppendResult(interp, "bad level \"", string, "\"",
 		    (char *) NULL);
 	    return -1;
 	}
     } else if (isdigit(*string)) {
-	if (Tcl_GetInt(interp, string, &level) != TCL_OK) {
+	if (Hax_GetInt(interp, string, &level) != HAX_OK) {
 	    return -1;
 	}
 	level = iPtr->varFramePtr->level - level;
@@ -247,13 +247,13 @@ TclGetFrame(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_UplevelCmd --
+ * Hax_UplevelCmd --
  *
- *	This procedure is invoked to process the "uplevel" Tcl command.
+ *	This procedure is invoked to process the "uplevel" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result value.
+ *	A standard Hax result value.
  *
  * Side effects:
  *	See the user documentation.
@@ -263,9 +263,9 @@ TclGetFrame(
 
 	/* ARGSUSED */
 int
-Tcl_UplevelCmd(
+Hax_UplevelCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -275,18 +275,18 @@ Tcl_UplevelCmd(
 
     if (argc < 2) {
 	uplevelSyntax:
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" ?level? command ?arg ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
     /*
      * Find the level to use for executing the command.
      */
 
-    result = TclGetFrame(interp, argv[1], &framePtr);
+    result = HaxGetFrame(interp, argv[1], &framePtr);
     if (result == -1) {
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     argc -= (result+1);
     if (argc == 0) {
@@ -306,18 +306,18 @@ Tcl_UplevelCmd(
      */
 
     if (argc == 1) {
-	result = Tcl_Eval(interp, argv[0], 0, (char **) NULL);
+	result = Hax_Eval(interp, argv[0], 0, (char **) NULL);
     } else {
 	char *cmd;
 
-	cmd = Tcl_Concat(argc, argv);
-	result = Tcl_Eval(interp, cmd, 0, (char **) NULL);
+	cmd = Hax_Concat(argc, argv);
+	result = Hax_Eval(interp, cmd, 0, (char **) NULL);
 	ckfree(cmd);
     }
-    if (result == TCL_ERROR) {
+    if (result == HAX_ERROR) {
 	char msg[60];
 	sprintf(msg, "\n    (\"uplevel\" body line %d)", interp->errorLine);
-	Tcl_AddErrorInfo(interp, msg);
+	Hax_AddErrorInfo(interp, msg);
     }
 
     /*
@@ -331,7 +331,7 @@ Tcl_UplevelCmd(
 /*
  *----------------------------------------------------------------------
  *
- * TclFindProc --
+ * HaxFindProc --
  *
  *	Given the name of a procedure, return a pointer to the
  *	record describing the procedure.
@@ -348,18 +348,18 @@ Tcl_UplevelCmd(
  */
 
 Proc *
-TclFindProc(
+HaxFindProc(
     Interp *iPtr,		/* Interpreter in which to look. */
     char *procName		/* Name of desired procedure. */)
 {
-    Tcl_HashEntry *hPtr;
+    Hax_HashEntry *hPtr;
     Command *cmdPtr;
 
-    hPtr = Tcl_FindHashEntry(&iPtr->commandTable, procName);
+    hPtr = Hax_FindHashEntry(&iPtr->commandTable, procName);
     if (hPtr == NULL) {
 	return NULL;
     }
-    cmdPtr = (Command *) Tcl_GetHashValue(hPtr);
+    cmdPtr = (Command *) Hax_GetHashValue(hPtr);
     if (cmdPtr->proc != InterpProc) {
 	return NULL;
     }
@@ -369,12 +369,12 @@ TclFindProc(
 /*
  *----------------------------------------------------------------------
  *
- * TclIsProc --
+ * HaxIsProc --
  *
- *	Tells whether a command is a Tcl procedure or not.
+ *	Tells whether a command is a Hax procedure or not.
  *
  * Results:
- *	If the given command is actuall a Tcl procedure, the
+ *	If the given command is actuall a Hax procedure, the
  *	return value is the address of the record describing
  *	the procedure.  Otherwise the return value is 0.
  *
@@ -385,7 +385,7 @@ TclFindProc(
  */
 
 Proc *
-TclIsProc(
+HaxIsProc(
     Command *cmdPtr		/* Command to test. */)
 {
     if (cmdPtr->proc == InterpProc) {
@@ -399,11 +399,11 @@ TclIsProc(
  *
  * InterpProc --
  *
- *	When a Tcl procedure gets invoked, this routine gets invoked
+ *	When a Hax procedure gets invoked, this routine gets invoked
  *	to interpret the procedure.
  *
  * Results:
- *	A standard Tcl result value, usually TCL_OK.
+ *	A standard Hax result value, usually HAX_OK.
  *
  * Side effects:
  *	Depends on the commands in the procedure.
@@ -415,7 +415,7 @@ static int
 InterpProc(
     ClientData clientData,	/* Record describing procedure to be
 				 * interpreted. */
-    Tcl_Interp *interp,		/* Interpreter in which procedure was
+    Hax_Interp *interp,		/* Interpreter in which procedure was
 				 * invoked. */
     int argc,			/* Count of number of arguments to this
 				 * procedure. */
@@ -434,7 +434,7 @@ InterpProc(
      */
 
     iPtr = procPtr->iPtr;
-    Tcl_InitHashTable(&frame.varTable, TCL_STRING_KEYS);
+    Hax_InitHashTable(&frame.varTable, HAX_STRING_KEYS);
     if (iPtr->varFramePtr != NULL) {
 	frame.level = iPtr->varFramePtr->level + 1;
     } else {
@@ -467,8 +467,8 @@ InterpProc(
 	    if (argc < 0) {
 		argc = 0;
 	    }
-	    value = Tcl_Merge(argc, args);
-	    Tcl_SetVar(interp, argPtr->name, value, 0);
+	    value = Hax_Merge(argc, args);
+	    Hax_SetVar(interp, argPtr->name, value, 0);
 	    ckfree(value);
 	    argc = 0;
 	    break;
@@ -477,18 +477,18 @@ InterpProc(
 	} else if (argPtr->defValue != NULL) {
 	    value = argPtr->defValue;
 	} else {
-	    Tcl_AppendResult(interp, "no value given for parameter \"",
+	    Hax_AppendResult(interp, "no value given for parameter \"",
 		    argPtr->name, "\" to \"", argv[0], "\"",
 		    (char *) NULL);
-	    result = TCL_ERROR;
+	    result = HAX_ERROR;
 	    goto procDone;
 	}
-	Tcl_SetVar(interp, argPtr->name, value, 0);
+	Hax_SetVar(interp, argPtr->name, value, 0);
     }
     if (argc > 0) {
-	Tcl_AppendResult(interp, "called \"", argv[0],
+	Hax_AppendResult(interp, "called \"", argv[0],
 		"\" with too many arguments", (char *) NULL);
-	result = TCL_ERROR;
+	result = HAX_ERROR;
 	goto procDone;
     }
 
@@ -496,10 +496,10 @@ InterpProc(
      * Invoke the commands in the procedure's body.
      */
 
-    result = Tcl_Eval(interp, procPtr->command, 0, &end);
-    if (result == TCL_RETURN) {
-	result = TCL_OK;
-    } else if (result == TCL_ERROR) {
+    result = Hax_Eval(interp, procPtr->command, 0, &end);
+    if (result == HAX_RETURN) {
+	result = HAX_OK;
+    } else if (result == HAX_ERROR) {
 	char msg[100];
 
 	/*
@@ -508,13 +508,13 @@ InterpProc(
 
 	sprintf(msg, "\n    (procedure \"%.50s\" line %d)", argv[0],
 		iPtr->errorLine);
-	Tcl_AddErrorInfo(interp, msg);
-    } else if (result == TCL_BREAK) {
+	Hax_AddErrorInfo(interp, msg);
+    } else if (result == HAX_BREAK) {
 	iPtr->result = "invoked \"break\" outside of a loop";
-	result = TCL_ERROR;
-    } else if (result == TCL_CONTINUE) {
+	result = HAX_ERROR;
+    } else if (result == HAX_CONTINUE) {
 	iPtr->result = "invoked \"continue\" outside of a loop";
-	result = TCL_ERROR;
+	result = HAX_ERROR;
     }
 
     /*
@@ -527,7 +527,7 @@ InterpProc(
     procDone:
     iPtr->framePtr = frame.callerPtr;
     iPtr->varFramePtr = frame.callerVarPtr;
-    TclDeleteVars(iPtr, &frame.varTable);
+    HaxDeleteVars(iPtr, &frame.varTable);
     return result;
 }
 

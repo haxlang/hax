@@ -1,7 +1,7 @@
 /* 
- * tclEnv.c --
+ * haxEnv.c --
  *
- *	Tcl support for environment variables, including a setenv
+ *	Hax support for environment variables, including a setenv
  *	procedure.
  *
  * Copyright 1991 Regents of the University of California
@@ -18,8 +18,8 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclEnv.c,v 1.10 93/02/01 16:23:26 ouster Exp $ SPRITE (Berkeley)";
 #endif /* not lint */
 
-#include "tclInt.h"
-#include "tclUnix.h"
+#include "haxInt.h"
+#include "haxUnix.h"
 
 /*
  * The structure below is used to keep track of all of the interpereters
@@ -29,7 +29,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclEnv.c,v 1.10 93/02/01 1
  */
 
 typedef struct EnvInterp {
-    Tcl_Interp *interp;		/* Interpreter for which we're managing
+    Hax_Interp *interp;		/* Interpreter for which we're managing
 				 * the env array. */
     struct EnvInterp *nextPtr;	/* Next in list of all such interpreters,
 				 * or zero. */
@@ -53,7 +53,7 @@ static int environSize = 0;	/* Non-zero means that the all of the
 
 static void		EnvInit (void);
 static char *		EnvTraceProc (ClientData clientData,
-			    Tcl_Interp *interp, char *name1, char *name2,
+			    Hax_Interp *interp, char *name1, char *name2,
 			    int flags);
 static int		FindVariable (const char *name,
 			    int *lengthPtr);
@@ -64,7 +64,7 @@ static void		UnsetEnv (const char *name);
 /*
  *----------------------------------------------------------------------
  *
- * TclSetupEnv --
+ * HaxSetupEnv --
  *
  *	This procedure is invoked for an interpreter to make environment
  *	variables accessible from that interpreter via the "env"
@@ -77,7 +77,7 @@ static void		UnsetEnv (const char *name);
  *	The interpreter is added to a list of interpreters managed
  *	by us, so that its view of envariables can be kept consistent
  *	with the view in other interpreters.  If this is the first
- *	call to Tcl_SetupEnv, then additional initialization happens,
+ *	call to Hax_SetupEnv, then additional initialization happens,
  *	such as copying the environment to dynamically-allocated space
  *	for ease of management.
  *
@@ -85,8 +85,8 @@ static void		UnsetEnv (const char *name);
  */
 
 void
-TclSetupEnv(
-    Tcl_Interp *interp		/* Interpreter whose "env" array is to be
+HaxSetupEnv(
+    Hax_Interp *interp		/* Interpreter whose "env" array is to be
 				 * managed. */)
 {
     EnvInterp *eiPtr;
@@ -116,7 +116,7 @@ TclSetupEnv(
      * writes and unsets to that array.
      */
 
-    (void) Tcl_UnsetVar2(interp, "env", (char *) NULL, TCL_GLOBAL_ONLY);
+    (void) Hax_UnsetVar2(interp, "env", (char *) NULL, HAX_GLOBAL_ONLY);
     for (i = 0; ; i++) {
 	char *p, *p2;
 
@@ -128,11 +128,11 @@ TclSetupEnv(
 	    /* Empty loop body. */
 	}
 	*p2 = 0;
-	(void) Tcl_SetVar2(interp, "env", p, p2+1, TCL_GLOBAL_ONLY);
+	(void) Hax_SetVar2(interp, "env", p, p2+1, HAX_GLOBAL_ONLY);
 	*p2 = '=';
     }
-    Tcl_TraceVar2(interp, "env", (char *) NULL,
-	    TCL_GLOBAL_ONLY | TCL_TRACE_WRITES | TCL_TRACE_UNSETS,
+    Hax_TraceVar2(interp, "env", (char *) NULL,
+	    HAX_GLOBAL_ONLY | HAX_TRACE_WRITES | HAX_TRACE_UNSETS,
 	    EnvTraceProc, (ClientData) NULL);
 }
 
@@ -267,8 +267,8 @@ SetEnv(
      */
 
     for (eiPtr= firstInterpPtr; eiPtr != NULL; eiPtr = eiPtr->nextPtr) {
-	(void) Tcl_SetVar2(eiPtr->interp, "env", (char *) name,
-		p+1, TCL_GLOBAL_ONLY);
+	(void) Hax_SetVar2(eiPtr->interp, "env", (char *) name,
+		p+1, HAX_GLOBAL_ONLY);
     }
 }
 
@@ -282,7 +282,7 @@ SetEnv(
  *	NAME=value, rather than as separate name strings.  This procedure
  *	is a stand-in for the standard UNIX procedure by the same name,
  *	so that applications using that procedure will interface
- *	properly to Tcl.
+ *	properly to Hax.
  *
  * Results:
  *	None.
@@ -377,8 +377,8 @@ UnsetEnv(
      */
 
     for (eiPtr = firstInterpPtr; eiPtr != NULL; eiPtr = eiPtr->nextPtr) {
-	(void) Tcl_UnsetVar2(eiPtr->interp, "env", (char *) name,
-		TCL_GLOBAL_ONLY);
+	(void) Hax_UnsetVar2(eiPtr->interp, "env", (char *) name,
+		HAX_GLOBAL_ONLY);
     }
 }
 
@@ -408,7 +408,7 @@ UnsetEnv(
 static char *
 EnvTraceProc(
     ClientData clientData,	/* Not used. */
-    Tcl_Interp *interp,		/* Interpreter whose "env" variable is
+    Hax_Interp *interp,		/* Interpreter whose "env" variable is
 				 * being modified. */
     char *name1,		/* Better be "env". */
     char *name2,		/* Name of variable being modified, or
@@ -423,8 +423,8 @@ EnvTraceProc(
     if (name2 == NULL) {
 	EnvInterp *eiPtr, *prevPtr;
 
-	if ((flags & (TCL_TRACE_UNSETS|TCL_TRACE_DESTROYED))
-		!= (TCL_TRACE_UNSETS|TCL_TRACE_DESTROYED)) {
+	if ((flags & (HAX_TRACE_UNSETS|HAX_TRACE_DESTROYED))
+		!= (HAX_TRACE_UNSETS|HAX_TRACE_DESTROYED)) {
 	    panic("EnvTraceProc called with confusing arguments");
 	}
 	eiPtr = firstInterpPtr;
@@ -450,11 +450,11 @@ EnvTraceProc(
      * If a value is being set, call setenv to do all of the work.
      */
 
-    if (flags & TCL_TRACE_WRITES) {
-	SetEnv(name2, Tcl_GetVar2(interp, "env", name2, TCL_GLOBAL_ONLY));
+    if (flags & HAX_TRACE_WRITES) {
+	SetEnv(name2, Hax_GetVar2(interp, "env", name2, HAX_GLOBAL_ONLY));
     }
 
-    if (flags & TCL_TRACE_UNSETS) {
+    if (flags & HAX_TRACE_UNSETS) {
 	UnsetEnv(name2);
     }
     return NULL;

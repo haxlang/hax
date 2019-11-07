@@ -13,10 +13,10 @@
 .de UL
 \\$1\l'|0\(ul'\\$2
 ..
-.HS library tcl
+.HS library hax
 .BS
 .SH NAME
-library \- standard library of Tcl procedures
+library \- standard library of Hax procedures
 .SH SYNOPSIS
 .nf
 \fBauto_execok \fIcmd\fR
@@ -30,12 +30,12 @@ library \- standard library of Tcl procedures
 
 .SH INTRODUCTION
 .PP
-Tcl includes a library of Tcl procedures for commonly-needed functions.
-The procedures defined in the Tcl library are generic ones suitable
+Hax includes a library of Hax procedures for commonly-needed functions.
+The procedures defined in the Hax library are generic ones suitable
 for use by many different applications.
-The location of the Tcl library is returned by the \fBinfo library\fR
+The location of the Hax library is returned by the \fBinfo library\fR
 command.
-In addition to the Tcl library, each application will normally have
+In addition to the Hax library, each application will normally have
 its own library of support procedures as well;  the location of this
 .VS
 library is normally given by the value of the \fB$\fIapp\fB_library\fR
@@ -44,11 +44,11 @@ For example, the location of the Tk library is kept in the variable
 \fB$tk_library\fR.
 .VE
 .PP
-To access the procedures in the Tcl library, an application should
-source the file \fBinit.tcl\fR in the library, for example with
-the Tcl command
+To access the procedures in the Hax library, an application should
+source the file \fBinit.hax\fR in the library, for example with
+the Hax command
 .DS
-\fBsource [info library]/init.tcl
+\fBsource [info library]/init.hax
 .DE
 This will define the \fBunknown\fR procedure and arrange for the
 other procedures to be loaded on-demand using the auto-load
@@ -56,7 +56,7 @@ mechanism defined below.
 
 .SH "COMMAND PROCEDURES"
 .PP
-The following procedures are provided in the Tcl library:
+The following procedures are provided in the Hax library:
 .TP
 \fBauto_execok \fIcmd\fR
 Determines whether there is an executable file by the name \fIcmd\fR.
@@ -71,18 +71,18 @@ may be used to force \fBauto_execok\fR to forget its cached
 information.
 .TP
 \fBauto_load \fIcmd\fR
-This command attempts to load the definition for a Tcl procedure named
+This command attempts to load the definition for a Hax procedure named
 \fIcmd\fR.
 To do this, it searches an \fIauto-load path\fR, which is a list of
 one or more directories.
 The auto-load path is given by the global variable \fB$auto_path\fR
 if it exists.
-If there is no \fB$auto_path\fR variable, then the TCLLIBPATH environment
+If there is no \fB$auto_path\fR variable, then the HAXLIBPATH environment
 variable is used, if it exists.
-Otherwise the auto-load path consists of just the Tcl library directory.
+Otherwise the auto-load path consists of just the Hax library directory.
 Within each directory in the auto-load path there must be a file
-\fBtclIndex\fR that describes the procedures defined in that directory
-and the file in which each procedure is defined.  The \fBtclIndex\fR
+\fBhaxIndex\fR that describes the procedures defined in that directory
+and the file in which each procedure is defined.  The \fBhaxIndex\fR
 file should be generated with the \fBauto_mkindex\fR command.
 If \fIcmd\fR is found in an index file, then the appropriate
 script is \fBsource\fRd to create the procedure.
@@ -106,19 +106,19 @@ index database from disk.
 Generates an index suitable for use by \fBauto_load\fR.
 The command searches \fIdir\fR for all files whose names match
 \fIpattern\fR (matching is done with the \fBglob\fR command),
-generates an index of all the Tcl command
+generates an index of all the Hax command
 procedures defined in all the matching files, and stores the
-index information in a file named \fBtclIndex\fR in \fIdir\fR.
+index information in a file named \fBhaxIndex\fR in \fIdir\fR.
 For example, the command
 .RS
 .DS
-\fBauto_mkindex foo *.tcl\fR
+\fBauto_mkindex foo *.hax\fR
 .DE
 .LP
-will read all the \fB.tcl\fR files in subdirectory \fBfoo\fR
-and generate a new index file \fBfoo/tclIndex\fR.
+will read all the \fB.hax\fR files in subdirectory \fBfoo\fR
+and generate a new index file \fBfoo/haxIndex\fR.
 .PP
-\fBAuto_mkindex\fR parses the Tcl scripts in a relatively
+\fBAuto_mkindex\fR parses the Hax scripts in a relatively
 unsophisticated way:  if any line contains the word \fBproc\fR
 as its first characters then it is assumed to be a procedure
 definition and the next word of the line is taken as the
@@ -147,7 +147,7 @@ It may be either local or global.
 .VE
 .TP
 \fBunknown \fIcmd \fR?\fIarg arg ...\fR?
-This procedure is invoked automatically by the Tcl interpreter
+This procedure is invoked automatically by the Hax interpreter
 whenever the name of a command doesn't exist.
 The \fBunknown\fR procedure receives as its arguments the
 name and arguments of the missing command.
@@ -157,7 +157,7 @@ If this succeeds, then it executes the original command with its
 original arguments.
 If the auto-load fails then \fBunknown\fR calls \fBauto_execok\fR
 to see if there is an executable file by the name \fIcmd\fR.
-If so, it invokes the Tcl \fBexec\fR command
+If so, it invokes the Hax \fBexec\fR command
 with \fIcmd\fR and all the \fIargs\fR as arguments.
 If \fIcmd\fR can't be auto-executed, \fBunknown\fR checks to
 see if the command was invoked at top-level and outside of any
@@ -167,7 +167,7 @@ First, it sees if \fIcmd\fR has one of the following three forms:
 If so, then \fBunknown\fR carries out history substitution
 in the same way that \fBcsh\fR would for these constructs.
 Second, and last, \fBunknown\fR checks to see if \fIcmd\fR is
-a unique abbreviation for an existing Tcl command.
+a unique abbreviation for an existing Hax command.
 If so, it expands the command name and executes the command with
 the original arguments.
 If none of the above efforts has been able to execute
@@ -183,7 +183,7 @@ executed.
 .SH "VARIABLES"
 .PP
 The following global variables are defined or used by the procedures in
-the Tcl library:
+the Hax library:
 .TP
 \fBauto_execs\fR
 Used by \fBauto_execok\fR to record information about whether
@@ -202,10 +202,10 @@ If set to any value, then \fBunknown\fR will not attempt to auto-load
 any commands.
 .TP
 \fBauto_path\fR
-If set, then it must contain a valid Tcl list giving directories to
+If set, then it must contain a valid Hax list giving directories to
 search during auto-load operations.
 .TP
-\fBenv(TCL_LIBRARY)\fR
+\fBenv(HAX_LIBRARY)\fR
 .VS
 If set, then it specifies the location of the directory containing
 library scripts (the value of this variable will be returned by
@@ -213,8 +213,8 @@ the command \fBinfo library\fR).  If this variable isn't set then
 a default value is used.
 .VE
 .TP
-\fBenv(TCLLIBPATH)\fR
-If set, then it must contain a valid Tcl list giving directories to
+\fBenv(HAXLIBPATH)\fR
+If set, then it must contain a valid Hax list giving directories to
 search during auto-load operations.
 This variable is only used if \fBauto_path\fR is not defined.
 .TP

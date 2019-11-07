@@ -1,4 +1,4 @@
-.\" The definitions below are for supplemental macros used in Tcl/Tk
+.\" The definitions below are for supplemental macros used in Hax/Tk
 .\" manual entries.
 .\"
 .\" .HS name section [date [version]]
@@ -37,11 +37,11 @@
 .\" .DE
 .\"	End of indented unfilled display.
 .\"
-'\"	# Heading for Tcl/Tk man pages
+'\"	# Heading for Hax/Tk man pages
 .de HS
 .if '\\$2'cmds'       .TH \\$1 1 \\$3 \\$4
 .if '\\$2'lib'        .TH \\$1 3 \\$3 \\$4
-.if '\\$2'tcl'        .TH \\$1 3 \\$3 \\$4
+.if '\\$2'hax'        .TH \\$1 3 \\$3 \\$4
 .if '\\$2'tk'         .TH \\$1 3 \\$3 \\$4
 .if t .wh -1.3i ^B
 .nr ^l \\n(.l

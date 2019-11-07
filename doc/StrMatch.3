@@ -10,16 +10,16 @@
 '\" $Header: /user6/ouster/tcl/man/RCS/StrMatch.3,v 1.5 93/01/31 15:35:41 ouster Exp $ SPRITE (Berkeley)
 '\" 
 .so man.macros
-.HS Tcl_StringMatch tcl
+.HS Hax_StringMatch hax
 .BS
 .SH NAME
-Tcl_StringMatch \- test whether a string matches a pattern
+Hax_StringMatch \- test whether a string matches a pattern
 .SH SYNOPSIS
 .nf
-\fB#include <tcl.h>\fR
+\fB#include <hax.h>\fR
 .sp
 int
-\fBTcl_StringMatch\fR(\fIstring\fR, \fIpattern\fR)
+\fBHax_StringMatch\fR(\fIstring\fR, \fIpattern\fR)
 .SH ARGUMENTS
 .AP char *string in
 String to test.
@@ -31,11 +31,11 @@ characters from the set *?\e[].
 .SH DESCRIPTION
 .PP
 This utility procedure determines whether a string matches
-a given pattern.  If it does, then \fBTcl_StringMatch\fR returns
-1.  Otherwise \fBTcl_StringMatch\fR returns 0.  The algorithm
+a given pattern.  If it does, then \fBHax_StringMatch\fR returns
+1.  Otherwise \fBHax_StringMatch\fR returns 0.  The algorithm
 used for matching is the same algorithm used in the ``string match''
-Tcl command and is similar to the algorithm used by the C-shell
-for file name matching;  see the Tcl manual entry for details.
+Hax command and is similar to the algorithm used by the C-shell
+for file name matching;  see the Hax manual entry for details.
 
 .SH KEYWORDS
 match, pattern, string

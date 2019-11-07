@@ -1,8 +1,8 @@
 /* 
- * tclParse.c --
+ * haxParse.c --
  *
  *	This file contains a collection of procedures that are used
- *	to parse Tcl commands or parts of commands (like quoted
+ *	to parse Hax commands or parts of commands (like quoted
  *	strings or nested sub-commands).
  *
  * Copyright 1991 Regents of the University of California.
@@ -19,80 +19,80 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclParse.c,v 1.25 93/01/06 15:23:03 ouster Exp $ SPRITE (Berkeley)";
 #endif
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
  * The following table assigns a type to each character.  Only types
- * meaningful to Tcl parsing are represented here.  The table indexes
+ * meaningful to Hax parsing are represented here.  The table indexes
  * all 256 characters, with the negative ones first, then the positive
  * ones.
  */
 
-char tclTypeTable[] = {
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_COMMAND_END,   TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_SPACE,         TCL_COMMAND_END,   TCL_SPACE,
-    TCL_SPACE,         TCL_SPACE,         TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_SPACE,         TCL_NORMAL,        TCL_QUOTE,         TCL_NORMAL,
-    TCL_DOLLAR,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_COMMAND_END,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_OPEN_BRACKET,
-    TCL_BACKSLASH,     TCL_COMMAND_END,   TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,
-    TCL_NORMAL,        TCL_NORMAL,        TCL_NORMAL,        TCL_OPEN_BRACE,
-    TCL_NORMAL,        TCL_CLOSE_BRACE,   TCL_NORMAL,        TCL_NORMAL,
+char haxTypeTable[] = {
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_COMMAND_END,   HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_SPACE,         HAX_COMMAND_END,   HAX_SPACE,
+    HAX_SPACE,         HAX_SPACE,         HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_SPACE,         HAX_NORMAL,        HAX_QUOTE,         HAX_NORMAL,
+    HAX_DOLLAR,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_COMMAND_END,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_OPEN_BRACKET,
+    HAX_BACKSLASH,     HAX_COMMAND_END,   HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,
+    HAX_NORMAL,        HAX_NORMAL,        HAX_NORMAL,        HAX_OPEN_BRACE,
+    HAX_NORMAL,        HAX_CLOSE_BRACE,   HAX_NORMAL,        HAX_NORMAL,
 };
 
 /*
@@ -105,7 +105,7 @@ static char *	VarNameEnd (char *string);
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_Backslash --
+ * Hax_Backslash --
  *
  *	Figure out how to handle a backslash sequence.
  *
@@ -127,7 +127,7 @@ static char *	VarNameEnd (char *string);
  */
 
 char
-Tcl_Backslash(
+Hax_Backslash(
     char *src,			/* Points to the backslash character of
 				 * a backslash sequence. */
     int *readPtr		/* Fill in with number of characters read
@@ -237,17 +237,17 @@ Tcl_Backslash(
 /*
  *--------------------------------------------------------------
  *
- * TclParseQuotes --
+ * HaxParseQuotes --
  *
  *	This procedure parses a double-quoted string such as a
- *	quoted Tcl command argument or a quoted value in a Tcl
+ *	quoted Hax command argument or a quoted value in a Hax
  *	expression.  This procedure is also used to parse array
  *	element names within parentheses, or anything else that
  *	needs all the substitutions that happen in quotes.
  *
  * Results:
- *	The return value is a standard Tcl result, which is
- *	TCL_OK unless there was an error while parsing the
+ *	The return value is a standard Hax result, which is
+ *	HAX_OK unless there was an error while parsing the
  *	quoted string.  If an error occurs then interp->result
  *	contains a standard error message.  *TermPtr is filled
  *	in with the address of the character just after the
@@ -265,15 +265,15 @@ Tcl_Backslash(
  */
 
 int
-TclParseQuotes(
-    Tcl_Interp *interp,		/* Interpreter to use for nested command
+HaxParseQuotes(
+    Hax_Interp *interp,		/* Interpreter to use for nested command
 				 * evaluations and error messages. */
     char *string,		/* Character just after opening double-
 				 * quote. */
     int termChar,		/* Character that terminates "quoted" string
 				 * (usually double-quote, but sometimes
 				 * right-paren or something else). */
-    int flags,			/* Flags to pass to nested Tcl_Eval calls. */
+    int flags,			/* Flags to pass to nested Hax_Eval calls. */
     char **termPtr,		/* Store address of terminating character
 				 * here. */
     ParseValue *pvPtr		/* Information about where to place
@@ -301,8 +301,8 @@ TclParseQuotes(
 	    *dst = '\0';
 	    pvPtr->next = dst;
 	    *termPtr = src;
-	    return TCL_OK;
-	} else if (CHAR_TYPE(c) == TCL_NORMAL) {
+	    return HAX_OK;
+	} else if (CHAR_TYPE(c) == HAX_NORMAL) {
 	    copy:
 	    *dst = c;
 	    dst++;
@@ -311,9 +311,9 @@ TclParseQuotes(
 	    int length;
 	    char *value;
 
-	    value = Tcl_ParseVar(interp, src-1, termPtr);
+	    value = Hax_ParseVar(interp, src-1, termPtr);
 	    if (value == NULL) {
-		return TCL_ERROR;
+		return HAX_ERROR;
 	    }
 	    src = *termPtr;
 	    length = strlen(value);
@@ -329,8 +329,8 @@ TclParseQuotes(
 	    int result;
 
 	    pvPtr->next = dst;
-	    result = TclParseNestedCmd(interp, src, flags, termPtr, pvPtr);
-	    if (result != TCL_OK) {
+	    result = HaxParseNestedCmd(interp, src, flags, termPtr, pvPtr);
+	    if (result != HAX_OK) {
 		return result;
 	    }
 	    src = *termPtr;
@@ -340,17 +340,17 @@ TclParseQuotes(
 	    int numRead;
 
 	    src--;
-	    *dst = Tcl_Backslash(src, &numRead);
+	    *dst = Hax_Backslash(src, &numRead);
 	    if (*dst != 0) {
 		dst++;
 	    }
 	    src += numRead;
 	    continue;
 	} else if (c == '\0') {
-	    Tcl_ResetResult(interp);
+	    Hax_ResetResult(interp);
 	    sprintf(interp->result, "missing %c", termChar);
 	    *termPtr = string-1;
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	} else {
 	    goto copy;
 	}
@@ -360,14 +360,14 @@ TclParseQuotes(
 /*
  *--------------------------------------------------------------
  *
- * TclParseNestedCmd --
+ * HaxParseNestedCmd --
  *
- *	This procedure parses a nested Tcl command between
+ *	This procedure parses a nested Hax command between
  *	brackets, returning the result of the command.
  *
  * Results:
- *	The return value is a standard Tcl result, which is
- *	TCL_OK unless there was an error while executing the
+ *	The return value is a standard Hax result, which is
+ *	HAX_OK unless there was an error while executing the
  *	nested command.  If an error occurs then interp->result
  *	contains a standard error message.  *TermPtr is filled
  *	in with the address of the character just after the
@@ -386,11 +386,11 @@ TclParseQuotes(
  */
 
 int
-TclParseNestedCmd(
-    Tcl_Interp *interp,		/* Interpreter to use for nested command
+HaxParseNestedCmd(
+    Hax_Interp *interp,		/* Interpreter to use for nested command
 				 * evaluations and error messages. */
     char *string,		/* Character just after opening bracket. */
-    int flags,			/* Flags to pass to nested Tcl_Eval. */
+    int flags,			/* Flags to pass to nested Hax_Eval. */
     char **termPtr,		/* Store address of terminating character
 				 * here. */
     ParseValue *pvPtr		/* Information about where to place
@@ -399,8 +399,8 @@ TclParseNestedCmd(
     int result, length, shortfall;
     Interp *iPtr = (Interp *) interp;
 
-    result = Tcl_Eval(interp, string, flags | TCL_BRACKET_TERM, termPtr);
-    if (result != TCL_OK) {
+    result = Hax_Eval(interp, string, flags | HAX_BRACKET_TERM, termPtr);
+    if (result != HAX_OK) {
 	/*
 	 * The increment below results in slightly cleaner message in
 	 * the errorInfo variable (the close-bracket will appear).
@@ -419,23 +419,23 @@ TclParseNestedCmd(
     }
     strcpy(pvPtr->next, iPtr->result);
     pvPtr->next += length;
-    Tcl_FreeResult(iPtr);
+    Hax_FreeResult(iPtr);
     iPtr->result = iPtr->resultSpace;
     iPtr->resultSpace[0] = '\0';
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *--------------------------------------------------------------
  *
- * TclParseBraces --
+ * HaxParseBraces --
  *
  *	This procedure scans the information between matching
  *	curly braces.
  *
  * Results:
- *	The return value is a standard Tcl result, which is
- *	TCL_OK unless there was an error while parsing string.
+ *	The return value is a standard Hax result, which is
+ *	HAX_OK unless there was an error while parsing string.
  *	If an error occurs then interp->result contains a
  *	standard error message.  *TermPtr is filled
  *	in with the address of the character just after the
@@ -452,8 +452,8 @@ TclParseNestedCmd(
  */
 
 int
-TclParseBraces(
-    Tcl_Interp *interp,		/* Interpreter to use for nested command
+HaxParseBraces(
+    Hax_Interp *interp,		/* Interpreter to use for nested command
 				 * evaluations and error messages. */
     char *string,		/* Character just after opening bracket. */
     char **termPtr,		/* Store address of terminating character
@@ -486,7 +486,7 @@ TclParseBraces(
 	}
 	*dst = c;
 	dst++;
-	if (CHAR_TYPE(c) == TCL_NORMAL) {
+	if (CHAR_TYPE(c) == HAX_NORMAL) {
 	    continue;
 	} else if (c == '{') {
 	    level++;
@@ -509,7 +509,7 @@ TclParseBraces(
 		dst--;
 		src++;
 	    } else {
-		(void) Tcl_Backslash(src-1, &count);
+		(void) Hax_Backslash(src-1, &count);
 		while (count > 1) {
                     if (dst == end) {
                         pvPtr->next = dst;
@@ -524,29 +524,29 @@ TclParseBraces(
 		}
 	    }
 	} else if (c == '\0') {
-	    Tcl_SetResult(interp, "missing close-brace", TCL_STATIC);
+	    Hax_SetResult(interp, "missing close-brace", HAX_STATIC);
 	    *termPtr = string-1;
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
     }
 
     *dst = '\0';
     pvPtr->next = dst;
     *termPtr = src;
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *--------------------------------------------------------------
  *
- * TclParseWords --
+ * HaxParseWords --
  *
  *	This procedure parses one or more words from a command
  *	string and creates argv-style pointers to fully-substituted
  *	copies of those words.
  *
  * Results:
- *	The return value is a standard Tcl result.
+ *	The return value is a standard Hax result.
  *	
  *	*argcPtr is modified to hold a count of the number of words
  *	successfully parsed, which may be 0.  At most maxWords words
@@ -560,7 +560,7 @@ TclParseBraces(
  *	last word.  This is either the command terminator (if
  *	*argcPtr < maxWords), the character just after the last
  *	one in a word (if *argcPtr is maxWords), or the vicinity
- *	of an error (if the result is not TCL_OK).
+ *	of an error (if the result is not HAX_OK).
  *	
  *	The pointers at *argv are filled in with pointers to the
  *	fully-substituted words, and the actual contents of the
@@ -578,12 +578,12 @@ TclParseBraces(
  */
 
 int
-TclParseWords(
-    Tcl_Interp *interp,		/* Interpreter to use for nested command
+HaxParseWords(
+    Hax_Interp *interp,		/* Interpreter to use for nested command
 				 * evaluations and error messages. */
     char *string,		/* First character of word. */
     int flags,			/* Flags to control parsing (same values as
-				 * passed to Tcl_Eval). */
+				 * passed to Hax_Eval). */
     int maxWords,		/* Maximum number of words to parse. */
     char **termPtr,		/* Store address of terminating character
 				 * here. */
@@ -613,7 +613,7 @@ TclParseWords(
 	skipSpace:
 	c = *src;
 	type = CHAR_TYPE(c);
-	while (type == TCL_SPACE) {
+	while (type == HAX_SPACE) {
 	    src++;
 	    c = *src;
 	    type = CHAR_TYPE(c);
@@ -623,7 +623,7 @@ TclParseWords(
 	 * Handle the normal case (i.e. no leading double-quote or brace).
 	 */
 
-	if (type == TCL_NORMAL) {
+	if (type == HAX_NORMAL) {
 	    normalArg:
 	    while (1) {
 		if (dst == pvPtr->end) {
@@ -637,20 +637,20 @@ TclParseWords(
 		    dst = pvPtr->next;
 		}
 	
-		if (type == TCL_NORMAL) {
+		if (type == HAX_NORMAL) {
 		    copy:
 		    *dst = c;
 		    dst++;
 		    src++;
-		} else if (type == TCL_SPACE) {
+		} else if (type == HAX_SPACE) {
 		    goto wordEnd;
-		} else if (type == TCL_DOLLAR) {
+		} else if (type == HAX_DOLLAR) {
 		    int length;
 		    char *value;
 	
-		    value = Tcl_ParseVar(interp, src, termPtr);
+		    value = Hax_ParseVar(interp, src, termPtr);
 		    if (value == NULL) {
-			return TCL_ERROR;
+			return HAX_ERROR;
 		    }
 		    src = *termPtr;
 		    length = strlen(value);
@@ -661,8 +661,8 @@ TclParseWords(
 		    }
 		    strcpy(dst, value);
 		    dst += length;
-		} else if (type == TCL_COMMAND_END) {
-		    if ((c == ']') && !(flags & TCL_BRACKET_TERM)) {
+		} else if (type == HAX_COMMAND_END) {
+		    if ((c == ']') && !(flags & HAX_BRACKET_TERM)) {
 			goto copy;
 		    }
 
@@ -673,19 +673,19 @@ TclParseWords(
 		     */
 
 		    goto wordEnd;
-		} else if (type == TCL_OPEN_BRACKET) {
+		} else if (type == HAX_OPEN_BRACKET) {
 		    pvPtr->next = dst;
-		    result = TclParseNestedCmd(interp, src+1, flags, termPtr,
+		    result = HaxParseNestedCmd(interp, src+1, flags, termPtr,
 			    pvPtr);
-		    if (result != TCL_OK) {
+		    if (result != HAX_OK) {
 			return result;
 		    }
 		    src = *termPtr;
 		    dst = pvPtr->next;
-		} else if (type == TCL_BACKSLASH) {
+		} else if (type == HAX_BACKSLASH) {
 		    int numRead;
     
-		    *dst = Tcl_Backslash(src, &numRead);
+		    *dst = Hax_Backslash(src, &numRead);
 		    if (*dst != 0) {
 			dst++;
 		    }
@@ -702,12 +702,12 @@ TclParseWords(
 	     * Check for the end of the command.
 	     */
 	
-	    if (type == TCL_COMMAND_END) {
-		if (flags & TCL_BRACKET_TERM) {
+	    if (type == HAX_COMMAND_END) {
+		if (flags & HAX_BRACKET_TERM) {
 		    if (c == '\0') {
-			Tcl_SetResult(interp, "missing close-bracket",
-				TCL_STATIC);
-			return TCL_ERROR;
+			Hax_SetResult(interp, "missing close-bracket",
+				HAX_STATIC);
+			return HAX_ERROR;
 		    }
 		} else {
 		    if (c == ']') {
@@ -723,18 +723,18 @@ TclParseWords(
 	     */
 
 	    pvPtr->next = dst;
-	    if (type == TCL_QUOTE) {
-		result = TclParseQuotes(interp, src+1, '"', flags,
+	    if (type == HAX_QUOTE) {
+		result = HaxParseQuotes(interp, src+1, '"', flags,
 			termPtr, pvPtr);
-	    } else if (type == TCL_OPEN_BRACE) {
-		result = TclParseBraces(interp, src+1, termPtr, pvPtr);
-	    } else if ((type == TCL_BACKSLASH) && (src[1] == '\n')) {
+	    } else if (type == HAX_OPEN_BRACE) {
+		result = HaxParseBraces(interp, src+1, termPtr, pvPtr);
+	    } else if ((type == HAX_BACKSLASH) && (src[1] == '\n')) {
 		src += 2;
 		goto skipSpace;
 	    } else {
 		goto normalArg;
 	    }
-	    if (result != TCL_OK) {
+	    if (result != HAX_OK) {
 		return result;
 	    }
 	
@@ -749,15 +749,15 @@ TclParseWords(
 		c = (*termPtr)[2];
 	    }
 	    type = CHAR_TYPE(c);
-	    if ((type != TCL_SPACE) && (type != TCL_COMMAND_END)) {
+	    if ((type != HAX_SPACE) && (type != HAX_COMMAND_END)) {
 		if (*src == '"') {
-		    Tcl_SetResult(interp, "extra characters after close-quote",
-			    TCL_STATIC);
+		    Hax_SetResult(interp, "extra characters after close-quote",
+			    HAX_STATIC);
 		} else {
-		    Tcl_SetResult(interp, "extra characters after close-brace",
-			    TCL_STATIC);
+		    Hax_SetResult(interp, "extra characters after close-brace",
+			    HAX_STATIC);
 		}
-		return TCL_ERROR;
+		return HAX_ERROR;
 	    }
 	    src = *termPtr;
 	    dst = pvPtr->next;
@@ -787,13 +787,13 @@ TclParseWords(
     pvPtr->next = dst;
     *termPtr = src;
     *argcPtr = argc;
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *--------------------------------------------------------------
  *
- * TclExpandParseValue --
+ * HaxExpandParseValue --
  *
  *	This procedure is commonly used as the value of the
  *	expandProc in a ParseValue.  It uses malloc to allocate
@@ -812,7 +812,7 @@ TclParseWords(
  */
 
 void
-TclExpandParseValue(
+HaxExpandParseValue(
     ParseValue *pvPtr,			/* Information about buffer that
 					 * must be expanded.  If the clientData
 					 * in the structure is non-zero, it
@@ -855,9 +855,9 @@ TclExpandParseValue(
 /*
  *----------------------------------------------------------------------
  *
- * TclWordEnd --
+ * HaxWordEnd --
  *
- *	Given a pointer into a Tcl command, find the end of the next
+ *	Given a pointer into a Hax command, find the end of the next
  *	word of the command.
  *
  * Results:
@@ -873,8 +873,8 @@ TclExpandParseValue(
  */
 
 char *
-TclWordEnd(
-    char *start,		/* Beginning of a word of a Tcl command. */
+HaxWordEnd(
+    char *start,		/* Beginning of a word of a Hax command. */
     int nested			/* Zero means this is a top-level command.
 				 * One means this is a nested command (close
 				 * brace is a word terminator). */)
@@ -902,7 +902,7 @@ TclWordEnd(
 	while (braces != 0) {
 	    p++;
 	    while (*p == '\\') {
-		(void) Tcl_Backslash(p, &count);
+		(void) Hax_Backslash(p, &count);
 		p += count;
 	    }
 	    if (*p == '}') {
@@ -920,21 +920,21 @@ TclWordEnd(
      * Handle words that don't start with a brace or double-quote.
      * This code is also invoked if the word starts with a brace or
      * double-quote and there is garbage after the closing brace or
-     * quote.  This is an error as far as Tcl_Eval is concerned, but
+     * quote.  This is an error as far as Hax_Eval is concerned, but
      * for here the garbage is treated as part of the word.
      */
 
     while (1) {
 	if (*p == '[') {
 	    for (p++; *p != ']'; p++) {
-		p = TclWordEnd(p, 1);
+		p = HaxWordEnd(p, 1);
 		if (*p == 0) {
 		    return p;
 		}
 	    }
 	    p++;
 	} else if (*p == '\\') {
-	    (void) Tcl_Backslash(p, &count);
+	    (void) Hax_Backslash(p, &count);
 	    p += count;
 	    if ((*p == 0) && (count == 2) && (p[-1] == '\n')) {
 		return p;
@@ -976,7 +976,7 @@ TclWordEnd(
  * QuoteEnd --
  *
  *	Given a pointer to a string that obeys the parsing conventions
- *	for quoted things in Tcl, find the end of that quoted thing.
+ *	for quoted things in Hax, find the end of that quoted thing.
  *	The actual thing may be a quoted argument or a parenthesized
  *	index name.
  *
@@ -1005,11 +1005,11 @@ QuoteEnd(
 
     while (*p != term) {
 	if (*p == '\\') {
-	    (void) Tcl_Backslash(p, &count);
+	    (void) Hax_Backslash(p, &count);
 	    p += count;
 	} else if (*p == '[') {
 	    for (p++; *p != ']'; p++) {
-		p = TclWordEnd(p, 1);
+		p = HaxWordEnd(p, 1);
 		if (*p == 0) {
 		    return p;
 		}
@@ -1074,7 +1074,7 @@ VarNameEnd(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_ParseVar --
+ * Hax_ParseVar --
  *
  *	Given a string starting with a $ sign, parse off a variable
  *	name and return its value.
@@ -1094,8 +1094,8 @@ VarNameEnd(
  */
 
 char *
-Tcl_ParseVar(
-    Tcl_Interp *interp,			/* Context for looking up variable. */
+Hax_ParseVar(
+    Hax_Interp *interp,			/* Context for looking up variable. */
     char *string,		/* String containing variable name.
 					 * First character must be "$". */
     char **termPtr			/* If non-NULL, points to word to fill
@@ -1131,8 +1131,8 @@ Tcl_ParseVar(
 	name1 = string;
 	while (*string != '}') {
 	    if (*string == 0) {
-		Tcl_SetResult(interp, "missing close-brace for variable name",
-			TCL_STATIC);
+		Hax_SetResult(interp, "missing close-brace for variable name",
+			HAX_STATIC);
 		if (termPtr != 0) {
 		    *termPtr = string;
 		}
@@ -1164,14 +1164,14 @@ Tcl_ParseVar(
 
 	    pv.buffer = pv.next = copyStorage;
 	    pv.end = copyStorage + NUM_CHARS - 1;
-	    pv.expandProc = TclExpandParseValue;
+	    pv.expandProc = HaxExpandParseValue;
 	    pv.clientData = (ClientData) NULL;
-	    if (TclParseQuotes(interp, string+1, ')', 0, &end, &pv)
-		    != TCL_OK) {
+	    if (HaxParseQuotes(interp, string+1, ')', 0, &end, &pv)
+		    != HAX_OK) {
 		char msg[100];
 		sprintf(msg, "\n    (parsing index for array \"%.*s\")",
 			(int)(string-name1), name1);
-		Tcl_AddErrorInfo(interp, msg);
+		Hax_AddErrorInfo(interp, msg);
 		result = NULL;
 		name2 = pv.buffer;
 		if (termPtr != 0) {
@@ -1192,7 +1192,7 @@ Tcl_ParseVar(
     }
     c = *name1End;
     *name1End = 0;
-    result = Tcl_GetVar2(interp, name1, name2, TCL_LEAVE_ERR_MSG);
+    result = Hax_GetVar2(interp, name1, name2, HAX_LEAVE_ERR_MSG);
     *name1End = c;
 
     done:

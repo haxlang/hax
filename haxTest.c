@@ -1,7 +1,7 @@
 /* 
- * tclTest.c --
+ * haxTest.c --
  *
- *	Test driver for TCL.
+ *	Test driver for HAX.
  *
  * Copyright 1987-1991 Regents of the University of California
  * All rights reserved.
@@ -23,10 +23,10 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/tclTest/RCS/tclTest.c,v 1.22 9
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
-#include "tcl.h"
+#include "hax.h"
 
-Tcl_Interp *interp;
-Tcl_CmdBuf buffer;
+Hax_Interp *interp;
+Hax_CmdBuf buffer;
 char dumpFile[100];
 int quitFlag = 0;
 
@@ -37,25 +37,25 @@ char initCmd[] =
 int
 cmdCheckmem(
     ClientData clientData,
-    Tcl_Interp *interp,
+    Hax_Interp *interp,
     int argc,
     char *argv[])
 {
     if (argc != 2) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" fileName\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     strcpy(dumpFile, argv[1]);
     quitFlag = 1;
-    return TCL_OK;
+    return HAX_OK;
 }
 
 	/* ARGSUSED */
 int
 cmdEcho(
     ClientData clientData,
-    Tcl_Interp *interp,
+    Hax_Interp *interp,
     int argc,
     char *argv[])
 {
@@ -80,7 +80,7 @@ cmdEcho(
 	}
     }
     printf("\n");
-    return TCL_OK;
+    return HAX_OK;
 }
 
 int
@@ -89,18 +89,18 @@ main(int argc, char **argv)
     char line[1000], *cmd;
     int result, gotPartial;
 
-    interp = Tcl_CreateInterp();
-#ifdef TCL_MEM_DEBUG
-    Tcl_InitMemory(interp);
+    interp = Hax_CreateInterp();
+#ifdef HAX_MEM_DEBUG
+    Hax_InitMemory(interp);
 #endif
-    Tcl_CreateCommand(interp, "echo", cmdEcho, (ClientData) "echo",
-	    (Tcl_CmdDeleteProc *) NULL);
-    Tcl_CreateCommand(interp, "checkmem", cmdCheckmem, (ClientData) 0,
-	    (Tcl_CmdDeleteProc *) NULL);
-    buffer = Tcl_CreateCmdBuf();
-#ifndef TCL_GENERIC_ONLY
-    result = Tcl_Eval(interp, initCmd, 0, (char **) NULL);
-    if (result != TCL_OK) {
+    Hax_CreateCommand(interp, "echo", cmdEcho, (ClientData) "echo",
+	    (Hax_CmdDeleteProc *) NULL);
+    Hax_CreateCommand(interp, "checkmem", cmdCheckmem, (ClientData) 0,
+	    (Hax_CmdDeleteProc *) NULL);
+    buffer = Hax_CreateCmdBuf();
+#ifndef HAX_GENERIC_ONLY
+    result = Hax_Eval(interp, initCmd, 0, (char **) NULL);
+    if (result != HAX_OK) {
 	printf("%s\n", interp->result);
 	exit(1);
     }
@@ -119,28 +119,28 @@ main(int argc, char **argv)
 	    }
 	    line[0] = 0;
 	}
-	cmd = Tcl_AssembleCmd(buffer, line);
+	cmd = Hax_AssembleCmd(buffer, line);
 	if (cmd == NULL) {
 	    gotPartial = 1;
 	    continue;
 	}
 
 	gotPartial = 0;
-	result = Tcl_RecordAndEval(interp, cmd, 0);
-	if (result == TCL_OK) {
+	result = Hax_RecordAndEval(interp, cmd, 0);
+	if (result == HAX_OK) {
 	    if (*interp->result != 0) {
 		printf("%s\n", interp->result);
 	    }
 	    if (quitFlag) {
-		Tcl_DeleteInterp(interp);
-		Tcl_DeleteCmdBuf(buffer);
-#ifdef TCL_MEM_DEBUG
-		Tcl_DumpActiveMemory(dumpFile);
+		Hax_DeleteInterp(interp);
+		Hax_DeleteCmdBuf(buffer);
+#ifdef HAX_MEM_DEBUG
+		Hax_DumpActiveMemory(dumpFile);
 #endif
 		exit(0);
 	    }
 	} else {
-	    if (result == TCL_ERROR) {
+	    if (result == HAX_ERROR) {
 		printf("Error");
 	    } else {
 		printf("Error %d", result);

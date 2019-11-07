@@ -1,5 +1,5 @@
 /* 
- * tclGet.c --
+ * haxGet.c --
  *
  *	This file contains procedures to convert strings into
  *	other forms, like integers or floating-point numbers or
@@ -19,19 +19,19 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclGet.c,v 1.11 92/02/29 16:13:14 ouster Exp $ SPRITE (Berkeley)";
 #endif /* not lint */
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_GetInt --
+ * Hax_GetInt --
  *
  *	Given a string, produce the corresponding integer value.
  *
  * Results:
- *	The return value is normally TCL_OK;  in this case *intPtr
+ *	The return value is normally HAX_OK;  in this case *intPtr
  *	will be set to the integer value equivalent to string.  If
- *	string is improperly formed then TCL_ERROR is returned and
+ *	string is improperly formed then HAX_ERROR is returned and
  *	an error message will be left in interp->result.
  *
  * Side effects:
@@ -41,8 +41,8 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclGet.c,v 1.11 92/02/29 1
  */
 
 int
-Tcl_GetInt(
-    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+Hax_GetInt(
+    Hax_Interp *interp,		/* Interpreter to use for error reporting. */
     char *string,		/* String containing a (possibly signed)
 				 * integer in a form acceptable to strtol. */
     int *intPtr			/* Place to store converted result. */)
@@ -55,26 +55,26 @@ Tcl_GetInt(
 	end++;
     }
     if ((end == string) || (*end != 0)) {
-	Tcl_AppendResult(interp, "expected integer but got \"", string,
+	Hax_AppendResult(interp, "expected integer but got \"", string,
 		"\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     *intPtr = i;
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_GetDouble --
+ * Hax_GetDouble --
  *
  *	Given a string, produce the corresponding double-precision
  *	floating-point value.
  *
  * Results:
- *	The return value is normally TCL_OK;  in this case *doublePtr
+ *	The return value is normally HAX_OK;  in this case *doublePtr
  *	will be set to the double-precision value equivalent to string.
- *	If string is improperly formed then TCL_ERROR is returned and
+ *	If string is improperly formed then HAX_ERROR is returned and
  *	an error message will be left in interp->result.
  *
  * Side effects:
@@ -84,8 +84,8 @@ Tcl_GetInt(
  */
 
 int
-Tcl_GetDouble(
-    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+Hax_GetDouble(
+    Hax_Interp *interp,		/* Interpreter to use for error reporting. */
     char *string,		/* String containing a floating-point number
 				 * in a form acceptable to strtod. */
     void *doublePtr		/* Place to store converted result. */)
@@ -98,26 +98,26 @@ Tcl_GetDouble(
 	end++;
     }
     if ((end == string) || (*end != 0)) {
-	Tcl_AppendResult(interp, "expected floating-point number but got \"",
+	Hax_AppendResult(interp, "expected floating-point number but got \"",
 		string, "\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     *(double *)doublePtr = d;
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_GetBoolean --
+ * Hax_GetBoolean --
  *
  *	Given a string, return a 0/1 boolean value corresponding
  *	to the string.
  *
  * Results:
- *	The return value is normally TCL_OK;  in this case *boolPtr
+ *	The return value is normally HAX_OK;  in this case *boolPtr
  *	will be set to the 0/1 value equivalent to string.  If
- *	string is improperly formed then TCL_ERROR is returned and
+ *	string is improperly formed then HAX_ERROR is returned and
  *	an error message will be left in interp->result.
  *
  * Side effects:
@@ -127,8 +127,8 @@ Tcl_GetDouble(
  */
 
 int
-Tcl_GetBoolean(
-    Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
+Hax_GetBoolean(
+    Hax_Interp *interp,		/* Interpreter to use for error reporting. */
     char *string,		/* String containing a boolean number
 				 * specified either as 1/0 or true/false or
 				 * yes/no. */
@@ -176,9 +176,9 @@ Tcl_GetBoolean(
 	    *boolPtr = 0;
 	}
     } else {
-	Tcl_AppendResult(interp, "expected boolean value but got \"",
+	Hax_AppendResult(interp, "expected boolean value but got \"",
 		string, "\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    return TCL_OK;
+    return HAX_OK;
 }

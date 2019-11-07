@@ -1,7 +1,7 @@
 /* 
- * tclVar.c --
+ * haxVar.c --
  *
- *	This file contains routines that implement Tcl variables
+ *	This file contains routines that implement Hax variables
  *	(both scalars and arrays).
  *
  *	The implementation of arrays is modelled after an initial
@@ -22,7 +22,7 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclVar.c,v 1.29 93/01/29 11:33:05 ouster Exp $ SPRITE (Berkeley)";
 #endif
 
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
  * The strings below are used to indicate what went wrong when a
@@ -40,32 +40,32 @@ static char *traceActive =	"trace is active on variable";
  */
 
 static  char *		CallTraces (Interp *iPtr, Var *arrayPtr,
-			    Tcl_HashEntry *hPtr, char *part1, char *part2,
+			    Hax_HashEntry *hPtr, char *part1, char *part2,
 			    int flags);
 static void		DeleteSearches (Var *arrayVarPtr);
 static void		DeleteArray (Interp *iPtr, char *arrayName,
 			    Var *varPtr, int flags);
 static Var *		NewVar (int space);
-static ArraySearch *	ParseSearchId (Tcl_Interp *interp,
+static ArraySearch *	ParseSearchId (Hax_Interp *interp,
 			    Var *varPtr, char *varName, char *string);
-static void		VarErrMsg (Tcl_Interp *interp,
+static void		VarErrMsg (Hax_Interp *interp,
 			    char *part1, char *part2, char *operation,
 			    char *reason);
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_GetVar --
+ * Hax_GetVar --
  *
- *	Return the value of a Tcl variable.
+ *	Return the value of a Hax variable.
  *
  * Results:
  *	The return value points to the current value of varName.  If
  *	the variable is not defined or can't be read because of a clash
  *	in array usage then a NULL pointer is returned and an error
- *	message is left in interp->result if the TCL_LEAVE_ERR_MSG
+ *	message is left in interp->result if the HAX_LEAVE_ERR_MSG
  *	flag is set.  Note:  the return value is only valid up until
- *	the next call to Tcl_SetVar or Tcl_SetVar2;  if you depend on
+ *	the next call to Hax_SetVar or Hax_SetVar2;  if you depend on
  *	the value lasting longer than that, then make yourself a private
  *	copy.
  *
@@ -76,12 +76,12 @@ static void		VarErrMsg (Tcl_Interp *interp,
  */
 
 char *
-Tcl_GetVar(
-    Tcl_Interp *interp,		/* Command interpreter in which varName is
+Hax_GetVar(
+    Hax_Interp *interp,		/* Command interpreter in which varName is
 				 * to be looked up. */
     char *varName,		/* Name of a variable in interp. */
-    int flags			/* OR-ed combination of TCL_GLOBAL_ONLY
-				 * or TCL_LEAVE_ERR_MSG bits. */)
+    int flags			/* OR-ed combination of HAX_GLOBAL_ONLY
+				 * or HAX_LEAVE_ERR_MSG bits. */)
 {
     char *p;
 
@@ -104,7 +104,7 @@ Tcl_GetVar(
 	    }
 	    *open = '\0';
 	    *p = '\0';
-	    result = Tcl_GetVar2(interp, varName, open+1, flags);
+	    result = Hax_GetVar2(interp, varName, open+1, flags);
 	    *open = '(';
 	    *p = ')';
 	    return result;
@@ -112,15 +112,15 @@ Tcl_GetVar(
     }
 
     scalar:
-    return Tcl_GetVar2(interp, varName, (char *) NULL, flags);
+    return Hax_GetVar2(interp, varName, (char *) NULL, flags);
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_GetVar2 --
+ * Hax_GetVar2 --
  *
- *	Return the value of a Tcl variable, given a two-part name
+ *	Return the value of a Hax variable, given a two-part name
  *	consisting of array name and element within array.
  *
  * Results:
@@ -128,8 +128,8 @@ Tcl_GetVar(
  *	given by part1 and part2.  If the specified variable doesn't
  *	exist, or if there is a clash in array usage, then NULL is
  *	returned and a message will be left in interp->result if the
- *	TCL_LEAVE_ERR_MSG flag is set.  Note:  the return value is
- *	only valid up until the next call to Tcl_SetVar or Tcl_SetVar2;
+ *	HAX_LEAVE_ERR_MSG flag is set.  Note:  the return value is
+ *	only valid up until the next call to Hax_SetVar or Hax_SetVar2;
  *	if you depend on the value lasting longer than that, then make
  *	yourself a private copy.
  *
@@ -140,17 +140,17 @@ Tcl_GetVar(
  */
 
 char *
-Tcl_GetVar2(
-    Tcl_Interp *interp,		/* Command interpreter in which variable is
+Hax_GetVar2(
+    Hax_Interp *interp,		/* Command interpreter in which variable is
 				 * to be looked up. */
     char *part1,		/* Name of array (if part2 is NULL) or
 				 * name of variable. */
     char *part2,		/* If non-null, gives name of element in
 				 * array. */
-    int flags			/* OR-ed combination of TCL_GLOBAL_ONLY
-				 * or TCL_LEAVE_ERR_MSG bits. */)
+    int flags			/* OR-ed combination of HAX_GLOBAL_ONLY
+				 * or HAX_LEAVE_ERR_MSG bits. */)
 {
-    Tcl_HashEntry *hPtr;
+    Hax_HashEntry *hPtr;
     Var *varPtr;
     Interp *iPtr = (Interp *) interp;
     Var *arrayPtr = NULL;
@@ -159,21 +159,21 @@ Tcl_GetVar2(
      * Lookup the first name.
      */
 
-    if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
-	hPtr = Tcl_FindHashEntry(&iPtr->globalTable, part1);
+    if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	hPtr = Hax_FindHashEntry(&iPtr->globalTable, part1);
     } else {
-	hPtr = Tcl_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
+	hPtr = Hax_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
     }
     if (hPtr == NULL) {
-	if (flags & TCL_LEAVE_ERR_MSG) {
+	if (flags & HAX_LEAVE_ERR_MSG) {
 	    VarErrMsg(interp, part1, part2, "read", noSuchVar);
 	}
 	return NULL;
     }
-    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+    varPtr = (Var *) Hax_GetHashValue(hPtr);
     if (varPtr->flags & VAR_UPVAR) {
 	hPtr = varPtr->value.upvarPtr;
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
 
     /*
@@ -183,25 +183,25 @@ Tcl_GetVar2(
 
     if (part2 != NULL) {
 	if (varPtr->flags & VAR_UNDEFINED) {
-	    if (flags & TCL_LEAVE_ERR_MSG) {
+	    if (flags & HAX_LEAVE_ERR_MSG) {
 		VarErrMsg(interp, part1, part2, "read", noSuchVar);
 	    }
 	    return NULL;
 	} else if (!(varPtr->flags & VAR_ARRAY)) {
-	    if (flags & TCL_LEAVE_ERR_MSG) {
+	    if (flags & HAX_LEAVE_ERR_MSG) {
 		VarErrMsg(interp, part1, part2, "read", needArray);
 	    }
 	    return NULL;
 	}
 	arrayPtr = varPtr;
-	hPtr = Tcl_FindHashEntry(varPtr->value.tablePtr, part2);
+	hPtr = Hax_FindHashEntry(varPtr->value.tablePtr, part2);
 	if (hPtr == NULL) {
-	    if (flags & TCL_LEAVE_ERR_MSG) {
+	    if (flags & HAX_LEAVE_ERR_MSG) {
 		VarErrMsg(interp, part1, part2, "read", noSuchElement);
 	    }
 	    return NULL;
 	}
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
 
     /*
@@ -213,7 +213,7 @@ Tcl_GetVar2(
 	char *msg;
 
 	msg = CallTraces(iPtr, arrayPtr, hPtr, part1, part2,
-		(flags & TCL_GLOBAL_ONLY) | TCL_TRACE_READS);
+		(flags & HAX_GLOBAL_ONLY) | HAX_TRACE_READS);
 	if (msg != NULL) {
 	    VarErrMsg(interp, part1, part2, "read", msg);
 	    return NULL;
@@ -225,10 +225,10 @@ Tcl_GetVar2(
 	 * be around.
 	 */
 
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
     if (varPtr->flags & (VAR_UNDEFINED|VAR_UPVAR|VAR_ARRAY)) {
-	if (flags & TCL_LEAVE_ERR_MSG) {
+	if (flags & HAX_LEAVE_ERR_MSG) {
 	    VarErrMsg(interp, part1, part2, "read", noSuchVar);
 	}
 	return NULL;
@@ -239,7 +239,7 @@ Tcl_GetVar2(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_SetVar --
+ * Hax_SetVar --
  *
  *	Change the value of a variable.
  *
@@ -247,7 +247,7 @@ Tcl_GetVar2(
  *	Returns a pointer to the malloc'ed string holding the new
  *	value of the variable.  The caller should not modify this
  *	string.  If the write operation was disallowed then NULL
- *	is returned;  if the TCL_LEAVE_ERR_MSG flag is set, then
+ *	is returned;  if the HAX_LEAVE_ERR_MSG flag is set, then
  *	an explanatory message will be left in interp->result.
  *
  * Side effects:
@@ -259,15 +259,15 @@ Tcl_GetVar2(
  */
 
 char *
-Tcl_SetVar(
-    Tcl_Interp *interp,		/* Command interpreter in which varName is
+Hax_SetVar(
+    Hax_Interp *interp,		/* Command interpreter in which varName is
 				 * to be looked up. */
     char *varName,		/* Name of a variable in interp. */
     char *newValue,		/* New value for varName. */
     int flags			/* Various flags that tell how to set value:
-				 * any of TCL_GLOBAL_ONLY, TCL_APPEND_VALUE,
-				 * TCL_LIST_ELEMENT, TCL_NO_SPACE, or
-				 * TCL_LEAVE_ERR_MSG. */)
+				 * any of HAX_GLOBAL_ONLY, HAX_APPEND_VALUE,
+				 * HAX_LIST_ELEMENT, HAX_NO_SPACE, or
+				 * HAX_LEAVE_ERR_MSG. */)
 {
     char *p;
 
@@ -290,7 +290,7 @@ Tcl_SetVar(
 	    }
 	    *open = '\0';
 	    *p = '\0';
-	    result = Tcl_SetVar2(interp, varName, open+1, newValue, flags);
+	    result = Hax_SetVar2(interp, varName, open+1, newValue, flags);
 	    *open = '(';
 	    *p = ')';
 	    return result;
@@ -298,13 +298,13 @@ Tcl_SetVar(
     }
 
     scalar:
-    return Tcl_SetVar2(interp, varName, (char *) NULL, newValue, flags);
+    return Hax_SetVar2(interp, varName, (char *) NULL, newValue, flags);
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_SetVar2 --
+ * Hax_SetVar2 --
  *
  *	Given a two-part variable name, which may refer either to a
  *	scalar variable or an element of an array, change the value
@@ -316,7 +316,7 @@ Tcl_SetVar(
  *	value of the variable.  The caller should not modify this
  *	string.  If the write operation was disallowed because an
  *	array was expected but not found (or vice versa), then NULL
- *	is returned;  if the TCL_LEAVE_ERR_MSG flag is set, then
+ *	is returned;  if the HAX_LEAVE_ERR_MSG flag is set, then
  *	an explanatory message will be left in interp->result.
  *
  * Side effects:
@@ -327,19 +327,19 @@ Tcl_SetVar(
  */
 
 char *
-Tcl_SetVar2(
-    Tcl_Interp *interp,		/* Command interpreter in which variable is
+Hax_SetVar2(
+    Hax_Interp *interp,		/* Command interpreter in which variable is
 				 * to be looked up. */
     char *part1,		/* If part2 is NULL, this is name of scalar
 				 * variable.  Otherwise it is name of array. */
     char *part2,		/* Name of an element within array, or NULL. */
     char *newValue,		/* New value for variable. */
     int flags			/* Various flags that tell how to set value:
-				 * any of TCL_GLOBAL_ONLY, TCL_APPEND_VALUE,
-				 * TCL_LIST_ELEMENT, and TCL_NO_SPACE, or
-				 * TCL_LEAVE_ERR_MSG . */)
+				 * any of HAX_GLOBAL_ONLY, HAX_APPEND_VALUE,
+				 * HAX_LIST_ELEMENT, and HAX_NO_SPACE, or
+				 * HAX_LEAVE_ERR_MSG . */)
 {
-    Tcl_HashEntry *hPtr;
+    Hax_HashEntry *hPtr;
     Var *varPtr = NULL;
 				/* Initial value only used to stop compiler
 				 * from complaining; not really needed. */
@@ -351,17 +351,17 @@ Tcl_SetVar2(
      * Lookup the first name.
      */
 
-    if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
-	hPtr = Tcl_CreateHashEntry(&iPtr->globalTable, part1, &new);
+    if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, part1, &new);
     } else {
-	hPtr = Tcl_CreateHashEntry(&iPtr->varFramePtr->varTable,
+	hPtr = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable,
 		part1, &new);
     }
     if (!new) {
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
 	if (varPtr->flags & VAR_UPVAR) {
 	    hPtr = varPtr->value.upvarPtr;
-	    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	    varPtr = (Var *) Hax_GetHashValue(hPtr);
 	}
     }
 
@@ -374,26 +374,26 @@ Tcl_SetVar2(
     if (part2 != NULL) {
 	if (new) {
 	    varPtr = NewVar(0);
-	    Tcl_SetHashValue(hPtr, varPtr);
+	    Hax_SetHashValue(hPtr, varPtr);
 	    varPtr->flags = VAR_ARRAY;
-	    varPtr->value.tablePtr = (Tcl_HashTable *)
-		    ckalloc(sizeof(Tcl_HashTable));
-	    Tcl_InitHashTable(varPtr->value.tablePtr, TCL_STRING_KEYS);
+	    varPtr->value.tablePtr = (Hax_HashTable *)
+		    ckalloc(sizeof(Hax_HashTable));
+	    Hax_InitHashTable(varPtr->value.tablePtr, HAX_STRING_KEYS);
 	} else {
 	    if (varPtr->flags & VAR_UNDEFINED) {
 		varPtr->flags = VAR_ARRAY;
-		varPtr->value.tablePtr = (Tcl_HashTable *)
-			ckalloc(sizeof(Tcl_HashTable));
-		Tcl_InitHashTable(varPtr->value.tablePtr, TCL_STRING_KEYS);
+		varPtr->value.tablePtr = (Hax_HashTable *)
+			ckalloc(sizeof(Hax_HashTable));
+		Hax_InitHashTable(varPtr->value.tablePtr, HAX_STRING_KEYS);
 	    } else if (!(varPtr->flags & VAR_ARRAY)) {
-		if (flags & TCL_LEAVE_ERR_MSG) {
+		if (flags & HAX_LEAVE_ERR_MSG) {
 		    VarErrMsg(interp, part1, part2, "set", needArray);
 		}
 		return NULL;
 	    }
 	    arrayPtr = varPtr;
 	}
-	hPtr = Tcl_CreateHashEntry(varPtr->value.tablePtr, part2, &new);
+	hPtr = Hax_CreateHashEntry(varPtr->value.tablePtr, part2, &new);
     }
 
     /*
@@ -401,8 +401,8 @@ Tcl_SetVar2(
      * for a separating space between list elements).
      */
 
-    if (flags & TCL_LIST_ELEMENT) {
-	length = Tcl_ScanElement(newValue, &listFlags) + 1;
+    if (flags & HAX_LIST_ELEMENT) {
+	length = Hax_ScanElement(newValue, &listFlags) + 1;
     } else {
 	length = strlen(newValue);
     }
@@ -415,19 +415,19 @@ Tcl_SetVar2(
 
     if (new) {
 	varPtr = NewVar(length);
-	Tcl_SetHashValue(hPtr, varPtr);
+	Hax_SetHashValue(hPtr, varPtr);
 	if ((arrayPtr != NULL) && (arrayPtr->searchPtr != NULL)) {
 	    DeleteSearches(arrayPtr);
 	}
     } else {
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
 	if (varPtr->flags & VAR_ARRAY) {
-	    if (flags & TCL_LEAVE_ERR_MSG) {
+	    if (flags & HAX_LEAVE_ERR_MSG) {
 		VarErrMsg(interp, part1, part2, "set", isArray);
 	    }
 	    return NULL;
 	}
-	if (!(flags & TCL_APPEND_VALUE) || (varPtr->flags & VAR_UNDEFINED)) {
+	if (!(flags & HAX_APPEND_VALUE) || (varPtr->flags & VAR_UNDEFINED)) {
 	    varPtr->valueLength = 0;
 	}
     }
@@ -452,7 +452,7 @@ Tcl_SetVar2(
 	newVarPtr->searchPtr = varPtr->searchPtr;
 	newVarPtr->flags = varPtr->flags;
 	strcpy(newVarPtr->value.string, varPtr->value.string);
-	Tcl_SetHashValue(hPtr, newVarPtr);
+	Hax_SetHashValue(hPtr, newVarPtr);
 	ckfree((char *) varPtr);
 	varPtr = newVarPtr;
     }
@@ -462,12 +462,12 @@ Tcl_SetVar2(
      * element or as a string.
      */
 
-    if (flags & TCL_LIST_ELEMENT) {
-	if ((varPtr->valueLength > 0) && !(flags & TCL_NO_SPACE)) {
+    if (flags & HAX_LIST_ELEMENT) {
+	if ((varPtr->valueLength > 0) && !(flags & HAX_NO_SPACE)) {
 	    varPtr->value.string[varPtr->valueLength] = ' ';
 	    varPtr->valueLength++;
 	}
-	varPtr->valueLength += Tcl_ConvertElement(newValue,
+	varPtr->valueLength += Hax_ConvertElement(newValue,
 		varPtr->value.string + varPtr->valueLength, listFlags);
 	varPtr->value.string[varPtr->valueLength] = 0;
     } else {
@@ -485,7 +485,7 @@ Tcl_SetVar2(
 	char *msg;
 
 	msg = CallTraces(iPtr, arrayPtr, hPtr, part1, part2,
-		(flags & TCL_GLOBAL_ONLY) | TCL_TRACE_WRITES);
+		(flags & HAX_GLOBAL_ONLY) | HAX_TRACE_WRITES);
 	if (msg != NULL) {
 	    VarErrMsg(interp, part1, part2, "set", msg);
 	    return NULL;
@@ -497,7 +497,7 @@ Tcl_SetVar2(
 	 * be around.
 	 */
 
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
     return varPtr->value.string;
 }
@@ -505,14 +505,14 @@ Tcl_SetVar2(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_UnsetVar --
+ * Hax_UnsetVar --
  *
  *	Delete a variable, so that it may not be accessed anymore.
  *
  * Results:
  *	Returns 0 if the variable was successfully deleted, -1
  *	if the variable can't be unset.  In the event of an error,
- *	if the TCL_LEAVE_ERR_MSG flag is set then an error message
+ *	if the HAX_LEAVE_ERR_MSG flag is set then an error message
  *	is left in interp->result.
  *
  * Side effects:
@@ -523,21 +523,21 @@ Tcl_SetVar2(
  */
 
 int
-Tcl_UnsetVar(
-    Tcl_Interp *interp,		/* Command interpreter in which varName is
+Hax_UnsetVar(
+    Hax_Interp *interp,		/* Command interpreter in which varName is
 				 * to be looked up. */
     char *varName,		/* Name of a variable in interp.  May be
 				 * either a scalar name or an array name
 				 * or an element in an array. */
     int flags			/* OR-ed combination of any of
-				 * TCL_GLOBAL_ONLY or TCL_LEAVE_ERR_MSG. */)
+				 * HAX_GLOBAL_ONLY or HAX_LEAVE_ERR_MSG. */)
 {
     char *p;
     int result;
 
     /*
      * Figure out whether this is an array reference, then call
-     * Tcl_UnsetVar2 to do all the real work.
+     * Hax_UnsetVar2 to do all the real work.
      */
 
     for (p = varName; *p != '\0'; p++) {
@@ -553,7 +553,7 @@ Tcl_UnsetVar(
 	    }
 	    *open = '\0';
 	    *p = '\0';
-	    result = Tcl_UnsetVar2(interp, varName, open+1, flags);
+	    result = Hax_UnsetVar2(interp, varName, open+1, flags);
 	    *open = '(';
 	    *p = ')';
 	    return result;
@@ -561,20 +561,20 @@ Tcl_UnsetVar(
     }
 
     scalar:
-    return Tcl_UnsetVar2(interp, varName, (char *) NULL, flags);
+    return Hax_UnsetVar2(interp, varName, (char *) NULL, flags);
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_UnsetVar2 --
+ * Hax_UnsetVar2 --
  *
  *	Delete a variable, given a 2-part name.
  *
  * Results:
  *	Returns 0 if the variable was successfully deleted, -1
  *	if the variable can't be unset.  In the event of an error,
- *	if the TCL_LEAVE_ERR_MSG flag is set then an error message
+ *	if the HAX_LEAVE_ERR_MSG flag is set then an error message
  *	is left in interp->result.
  *
  * Side effects:
@@ -586,31 +586,31 @@ Tcl_UnsetVar(
  */
 
 int
-Tcl_UnsetVar2(
-    Tcl_Interp *interp,		/* Command interpreter in which varName is
+Hax_UnsetVar2(
+    Hax_Interp *interp,		/* Command interpreter in which varName is
 				 * to be looked up. */
     char *part1,		/* Name of variable or array. */
     char *part2,		/* Name of element within array or NULL. */
     int flags			/* OR-ed combination of any of
-				 * TCL_GLOBAL_ONLY or TCL_LEAVE_ERR_MSG. */)
+				 * HAX_GLOBAL_ONLY or HAX_LEAVE_ERR_MSG. */)
 {
-    Tcl_HashEntry *hPtr, dummyEntry;
+    Hax_HashEntry *hPtr, dummyEntry;
     Var *varPtr, dummyVar;
     Interp *iPtr = (Interp *) interp;
     Var *arrayPtr = NULL;
 
-    if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
-	hPtr = Tcl_FindHashEntry(&iPtr->globalTable, part1);
+    if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	hPtr = Hax_FindHashEntry(&iPtr->globalTable, part1);
     } else {
-	hPtr = Tcl_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
+	hPtr = Hax_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
     }
     if (hPtr == NULL) {
-	if (flags & TCL_LEAVE_ERR_MSG) {
+	if (flags & HAX_LEAVE_ERR_MSG) {
 	    VarErrMsg(interp, part1, part2, "unset", noSuchVar);
 	}
 	return -1;
     }
-    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+    varPtr = (Var *) Hax_GetHashValue(hPtr);
 
     /*
      * For global variables referenced in procedures, leave the procedure's
@@ -621,7 +621,7 @@ Tcl_UnsetVar2(
 
     if (varPtr->flags & VAR_UPVAR) {
 	hPtr = varPtr->value.upvarPtr;
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
 
     /*
@@ -632,7 +632,7 @@ Tcl_UnsetVar2(
 
     if (part2 != NULL) {
 	if (!(varPtr->flags & VAR_ARRAY)) {
-	    if (flags & TCL_LEAVE_ERR_MSG) {
+	    if (flags & HAX_LEAVE_ERR_MSG) {
 		VarErrMsg(interp, part1, part2, "unset", needArray);
 	    }
 	    return -1;
@@ -641,14 +641,14 @@ Tcl_UnsetVar2(
 	    DeleteSearches(varPtr);
 	}
 	arrayPtr = varPtr;
-	hPtr = Tcl_FindHashEntry(varPtr->value.tablePtr, part2);
+	hPtr = Hax_FindHashEntry(varPtr->value.tablePtr, part2);
 	if (hPtr == NULL) {
-	    if (flags & TCL_LEAVE_ERR_MSG) {
+	    if (flags & HAX_LEAVE_ERR_MSG) {
 		VarErrMsg(interp, part1, part2, "unset", noSuchElement);
 	    }
 	    return -1;
 	}
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
 
     /*
@@ -661,7 +661,7 @@ Tcl_UnsetVar2(
 
     if (varPtr->flags &
 	    (VAR_TRACE_ACTIVE|VAR_ELEMENT_ACTIVE)) {
-	if (flags & TCL_LEAVE_ERR_MSG) {
+	if (flags & HAX_LEAVE_ERR_MSG) {
 	    VarErrMsg(interp, part1, part2, "unset", traceActive);
 	}
 	return -1;
@@ -679,9 +679,9 @@ Tcl_UnsetVar2(
      */
 
     dummyVar = *varPtr;
-    Tcl_SetHashValue(&dummyEntry, &dummyVar);
+    Hax_SetHashValue(&dummyEntry, &dummyVar);
     if (varPtr->upvarUses == 0) {
-	Tcl_DeleteHashEntry(hPtr);
+	Hax_DeleteHashEntry(hPtr);
 	ckfree((char *) varPtr);
     } else {
 	varPtr->flags = VAR_UNDEFINED;
@@ -696,7 +696,7 @@ Tcl_UnsetVar2(
     if ((dummyVar.tracePtr != NULL)
 	    || ((arrayPtr != NULL) && (arrayPtr->tracePtr != NULL))) {
 	(void) CallTraces(iPtr, arrayPtr, &dummyEntry, part1, part2,
-		(flags & TCL_GLOBAL_ONLY) | TCL_TRACE_UNSETS);
+		(flags & HAX_GLOBAL_ONLY) | HAX_TRACE_UNSETS);
 	while (dummyVar.tracePtr != NULL) {
 	    VarTrace *tracePtr = dummyVar.tracePtr;
 	    dummyVar.tracePtr = tracePtr->nextPtr;
@@ -712,10 +712,10 @@ Tcl_UnsetVar2(
 
     if (dummyVar.flags & VAR_ARRAY) {
 	DeleteArray(iPtr, part1, &dummyVar,
-	    (flags & TCL_GLOBAL_ONLY) | TCL_TRACE_UNSETS);
+	    (flags & HAX_GLOBAL_ONLY) | HAX_TRACE_UNSETS);
     }
     if (dummyVar.flags & VAR_UNDEFINED) {
-	if (flags & TCL_LEAVE_ERR_MSG) {
+	if (flags & HAX_LEAVE_ERR_MSG) {
 	    VarErrMsg(interp, part1, part2, "unset", 
 		    (part2 == NULL) ? noSuchVar : noSuchElement);
 	}
@@ -727,14 +727,14 @@ Tcl_UnsetVar2(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_TraceVar --
+ * Hax_TraceVar --
  *
  *	Arrange for reads and/or writes to a variable to cause a
  *	procedure to be invoked, which can monitor the operations
  *	and/or change their actions.
  *
  * Results:
- *	A standard Tcl return value.
+ *	A standard Hax return value.
  *
  * Side effects:
  *	A trace is set up on the variable given by varName, such that
@@ -746,15 +746,15 @@ Tcl_UnsetVar2(
  */
 
 int
-Tcl_TraceVar(
-    Tcl_Interp *interp,		/* Interpreter in which variable is
+Hax_TraceVar(
+    Hax_Interp *interp,		/* Interpreter in which variable is
 				 * to be traced. */
     char *varName,		/* Name of variable;  may end with "(index)"
 				 * to signify an array reference. */
     int flags,			/* OR-ed collection of bits, including any
-				 * of TCL_TRACE_READS, TCL_TRACE_WRITES,
-				 * TCL_TRACE_UNSETS, and TCL_GLOBAL_ONLY. */
-    Tcl_VarTraceProc *proc,	/* Procedure to call when specified ops are
+				 * of HAX_TRACE_READS, HAX_TRACE_WRITES,
+				 * HAX_TRACE_UNSETS, and HAX_GLOBAL_ONLY. */
+    Hax_VarTraceProc *proc,	/* Procedure to call when specified ops are
 				 * invoked upon varName. */
     ClientData clientData	/* Arbitrary argument to pass to proc. */)
 {
@@ -779,7 +779,7 @@ Tcl_TraceVar(
 	    }
 	    *open = '\0';
 	    *p = '\0';
-	    result = Tcl_TraceVar2(interp, varName, open+1, flags,
+	    result = Hax_TraceVar2(interp, varName, open+1, flags,
 		    proc, clientData);
 	    *open = '(';
 	    *p = ')';
@@ -788,21 +788,21 @@ Tcl_TraceVar(
     }
 
     scalar:
-    return Tcl_TraceVar2(interp, varName, (char *) NULL, flags,
+    return Hax_TraceVar2(interp, varName, (char *) NULL, flags,
 	    proc, clientData);
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_TraceVar2 --
+ * Hax_TraceVar2 --
  *
  *	Arrange for reads and/or writes to a variable to cause a
  *	procedure to be invoked, which can monitor the operations
  *	and/or change their actions.
  *
  * Results:
- *	A standard Tcl return value.
+ *	A standard Hax return value.
  *
  * Side effects:
  *	A trace is set up on the variable given by part1 and part2, such
@@ -814,21 +814,21 @@ Tcl_TraceVar(
  */
 
 int
-Tcl_TraceVar2(
-    Tcl_Interp *interp,		/* Interpreter in which variable is
+Hax_TraceVar2(
+    Hax_Interp *interp,		/* Interpreter in which variable is
 				 * to be traced. */
     char *part1,		/* Name of scalar variable or array. */
     char *part2,		/* Name of element within array;  NULL means
 				 * trace applies to scalar variable or array
 				 * as-a-whole. */
     int flags,			/* OR-ed collection of bits, including any
-				 * of TCL_TRACE_READS, TCL_TRACE_WRITES,
-				 * TCL_TRACE_UNSETS, and TCL_GLOBAL_ONLY. */
-    Tcl_VarTraceProc *proc,	/* Procedure to call when specified ops are
+				 * of HAX_TRACE_READS, HAX_TRACE_WRITES,
+				 * HAX_TRACE_UNSETS, and HAX_GLOBAL_ONLY. */
+    Hax_VarTraceProc *proc,	/* Procedure to call when specified ops are
 				 * invoked upon varName. */
     ClientData clientData	/* Arbitrary argument to pass to proc. */)
 {
-    Tcl_HashEntry *hPtr;
+    Hax_HashEntry *hPtr;
     Var *varPtr = NULL;		/* Initial value only used to stop compiler
 				 * from complaining; not really needed. */
     Interp *iPtr = (Interp *) interp;
@@ -839,16 +839,16 @@ Tcl_TraceVar2(
      * Locate the variable, making a new (undefined) one if necessary.
      */
 
-    if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
-	hPtr = Tcl_CreateHashEntry(&iPtr->globalTable, part1, &new);
+    if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, part1, &new);
     } else {
-	hPtr = Tcl_CreateHashEntry(&iPtr->varFramePtr->varTable, part1, &new);
+	hPtr = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable, part1, &new);
     }
     if (!new) {
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
 	if (varPtr->flags & VAR_UPVAR) {
 	    hPtr = varPtr->value.upvarPtr;
-	    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	    varPtr = (Var *) Hax_GetHashValue(hPtr);
 	}
     }
 
@@ -862,23 +862,23 @@ Tcl_TraceVar2(
     if (part2 != NULL) {
 	if (new) {
 	    varPtr = NewVar(0);
-	    Tcl_SetHashValue(hPtr, varPtr);
+	    Hax_SetHashValue(hPtr, varPtr);
 	    varPtr->flags = VAR_ARRAY;
-	    varPtr->value.tablePtr = (Tcl_HashTable *)
-		    ckalloc(sizeof(Tcl_HashTable));
-	    Tcl_InitHashTable(varPtr->value.tablePtr, TCL_STRING_KEYS);
+	    varPtr->value.tablePtr = (Hax_HashTable *)
+		    ckalloc(sizeof(Hax_HashTable));
+	    Hax_InitHashTable(varPtr->value.tablePtr, HAX_STRING_KEYS);
 	} else {
 	    if (varPtr->flags & VAR_UNDEFINED) {
 		varPtr->flags = VAR_ARRAY;
-		varPtr->value.tablePtr = (Tcl_HashTable *)
-			ckalloc(sizeof(Tcl_HashTable));
-		Tcl_InitHashTable(varPtr->value.tablePtr, TCL_STRING_KEYS);
+		varPtr->value.tablePtr = (Hax_HashTable *)
+			ckalloc(sizeof(Hax_HashTable));
+		Hax_InitHashTable(varPtr->value.tablePtr, HAX_STRING_KEYS);
 	    } else if (!(varPtr->flags & VAR_ARRAY)) {
 		iPtr->result = needArray;
-		return TCL_ERROR;
+		return HAX_ERROR;
 	    }
 	}
-	hPtr = Tcl_CreateHashEntry(varPtr->value.tablePtr, part2, &new);
+	hPtr = Hax_CreateHashEntry(varPtr->value.tablePtr, part2, &new);
     }
 
     if (new) {
@@ -887,9 +887,9 @@ Tcl_TraceVar2(
 	}
 	varPtr = NewVar(0);
 	varPtr->flags = VAR_UNDEFINED;
-	Tcl_SetHashValue(hPtr, varPtr);
+	Hax_SetHashValue(hPtr, varPtr);
     } else {
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
 
     /*
@@ -900,16 +900,16 @@ Tcl_TraceVar2(
     tracePtr->traceProc = proc;
     tracePtr->clientData = clientData;
     tracePtr->flags = flags &
-	    (TCL_TRACE_READS|TCL_TRACE_WRITES|TCL_TRACE_UNSETS);
+	    (HAX_TRACE_READS|HAX_TRACE_WRITES|HAX_TRACE_UNSETS);
     tracePtr->nextPtr = varPtr->tracePtr;
     varPtr->tracePtr = tracePtr;
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_UntraceVar --
+ * Hax_UntraceVar --
  *
  *	Remove a previously-created trace for a variable.
  *
@@ -925,15 +925,15 @@ Tcl_TraceVar2(
  */
 
 void
-Tcl_UntraceVar(
-    Tcl_Interp *interp,		/* Interpreter containing traced variable. */
+Hax_UntraceVar(
+    Hax_Interp *interp,		/* Interpreter containing traced variable. */
     char *varName,		/* Name of variable;  may end with "(index)"
 				 * to signify an array reference. */
     int flags,			/* OR-ed collection of bits describing
 				 * current trace, including any of
-				 * TCL_TRACE_READS, TCL_TRACE_WRITES,
-				 * TCL_TRACE_UNSETS, and TCL_GLOBAL_ONLY. */
-    Tcl_VarTraceProc *proc,	/* Procedure assocated with trace. */
+				 * HAX_TRACE_READS, HAX_TRACE_WRITES,
+				 * HAX_TRACE_UNSETS, and HAX_GLOBAL_ONLY. */
+    Hax_VarTraceProc *proc,	/* Procedure assocated with trace. */
     ClientData clientData	/* Arbitrary argument to pass to proc. */)
 {
     char *p;
@@ -956,7 +956,7 @@ Tcl_UntraceVar(
 	    }
 	    *open = '\0';
 	    *p = '\0';
-	    Tcl_UntraceVar2(interp, varName, open+1, flags, proc, clientData);
+	    Hax_UntraceVar2(interp, varName, open+1, flags, proc, clientData);
 	    *open = '(';
 	    *p = ')';
 	    return;
@@ -964,13 +964,13 @@ Tcl_UntraceVar(
     }
 
     scalar:
-    Tcl_UntraceVar2(interp, varName, (char *) NULL, flags, proc, clientData);
+    Hax_UntraceVar2(interp, varName, (char *) NULL, flags, proc, clientData);
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_UntraceVar2 --
+ * Hax_UntraceVar2 --
  *
  *	Remove a previously-created trace for a variable.
  *
@@ -986,55 +986,55 @@ Tcl_UntraceVar(
  */
 
 void
-Tcl_UntraceVar2(
-    Tcl_Interp *interp,		/* Interpreter containing traced variable. */
+Hax_UntraceVar2(
+    Hax_Interp *interp,		/* Interpreter containing traced variable. */
     char *part1,		/* Name of variable or array. */
     char *part2,		/* Name of element within array;  NULL means
 				 * trace applies to scalar variable or array
 				 * as-a-whole. */
     int flags,			/* OR-ed collection of bits describing
 				 * current trace, including any of
-				 * TCL_TRACE_READS, TCL_TRACE_WRITES,
-				 * TCL_TRACE_UNSETS, and TCL_GLOBAL_ONLY. */
-    Tcl_VarTraceProc *proc,	/* Procedure assocated with trace. */
+				 * HAX_TRACE_READS, HAX_TRACE_WRITES,
+				 * HAX_TRACE_UNSETS, and HAX_GLOBAL_ONLY. */
+    Hax_VarTraceProc *proc,	/* Procedure assocated with trace. */
     ClientData clientData	/* Arbitrary argument to pass to proc. */)
 {
     VarTrace *tracePtr;
     VarTrace *prevPtr;
     Var *varPtr;
     Interp *iPtr = (Interp *) interp;
-    Tcl_HashEntry *hPtr;
+    Hax_HashEntry *hPtr;
     ActiveVarTrace *activePtr;
 
     /*
      * First, lookup the variable.
      */
 
-    if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
-	hPtr = Tcl_FindHashEntry(&iPtr->globalTable, part1);
+    if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	hPtr = Hax_FindHashEntry(&iPtr->globalTable, part1);
     } else {
-	hPtr = Tcl_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
+	hPtr = Hax_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
     }
     if (hPtr == NULL) {
 	return;
     }
-    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+    varPtr = (Var *) Hax_GetHashValue(hPtr);
     if (varPtr->flags & VAR_UPVAR) {
 	hPtr = varPtr->value.upvarPtr;
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
     if (part2 != NULL) {
 	if (!(varPtr->flags & VAR_ARRAY)) {
 	    return;
 	}
-	hPtr = Tcl_FindHashEntry(varPtr->value.tablePtr, part2);
+	hPtr = Hax_FindHashEntry(varPtr->value.tablePtr, part2);
 	if (hPtr == NULL) {
 	    return;
 	}
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
 
-    flags &= (TCL_TRACE_READS | TCL_TRACE_WRITES | TCL_TRACE_UNSETS);
+    flags &= (HAX_TRACE_READS | HAX_TRACE_WRITES | HAX_TRACE_UNSETS);
     for (tracePtr = varPtr->tracePtr, prevPtr = NULL; ;
 	    prevPtr = tracePtr, tracePtr = tracePtr->nextPtr) {
 	if (tracePtr == NULL) {
@@ -1069,7 +1069,7 @@ Tcl_UntraceVar2(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_VarTraceInfo --
+ * Hax_VarTraceInfo --
  *
  *	Return the clientData value associated with a trace on a
  *	variable.  This procedure can also be used to step through
@@ -1093,12 +1093,12 @@ Tcl_UntraceVar2(
  */
 
 ClientData
-Tcl_VarTraceInfo(
-    Tcl_Interp *interp,		/* Interpreter containing variable. */
+Hax_VarTraceInfo(
+    Hax_Interp *interp,		/* Interpreter containing variable. */
     char *varName,		/* Name of variable;  may end with "(index)"
 				 * to signify an array reference. */
-    int flags,			/* 0 or TCL_GLOBAL_ONLY. */
-    Tcl_VarTraceProc *proc,	/* Procedure assocated with trace. */
+    int flags,			/* 0 or HAX_GLOBAL_ONLY. */
+    Hax_VarTraceProc *proc,	/* Procedure assocated with trace. */
     ClientData prevClientData	/* If non-NULL, gives last value returned
 				 * by this procedure, so this call will
 				 * return the next trace after that one.
@@ -1126,7 +1126,7 @@ Tcl_VarTraceInfo(
 	    }
 	    *open = '\0';
 	    *p = '\0';
-	    result = Tcl_VarTraceInfo2(interp, varName, open+1, flags, proc,
+	    result = Hax_VarTraceInfo2(interp, varName, open+1, flags, proc,
 		prevClientData);
 	    *open = '(';
 	    *p = ')';
@@ -1135,20 +1135,20 @@ Tcl_VarTraceInfo(
     }
 
     scalar:
-    return Tcl_VarTraceInfo2(interp, varName, (char *) NULL, flags, proc,
+    return Hax_VarTraceInfo2(interp, varName, (char *) NULL, flags, proc,
 	    prevClientData);
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_VarTraceInfo2 --
+ * Hax_VarTraceInfo2 --
  *
- *	Same as Tcl_VarTraceInfo, except takes name in two pieces
+ *	Same as Hax_VarTraceInfo, except takes name in two pieces
  *	instead of one.
  *
  * Results:
- *	Same as Tcl_VarTraceInfo.
+ *	Same as Hax_VarTraceInfo.
  *
  * Side effects:
  *	None.
@@ -1157,14 +1157,14 @@ Tcl_VarTraceInfo(
  */
 
 ClientData
-Tcl_VarTraceInfo2(
-    Tcl_Interp *interp,		/* Interpreter containing variable. */
+Hax_VarTraceInfo2(
+    Hax_Interp *interp,		/* Interpreter containing variable. */
     char *part1,		/* Name of variable or array. */
     char *part2,		/* Name of element within array;  NULL means
 				 * trace applies to scalar variable or array
 				 * as-a-whole. */
-    int flags,			/* 0 or TCL_GLOBAL_ONLY. */
-    Tcl_VarTraceProc *proc,	/* Procedure assocated with trace. */
+    int flags,			/* 0 or HAX_GLOBAL_ONLY. */
+    Hax_VarTraceProc *proc,	/* Procedure assocated with trace. */
     ClientData prevClientData	/* If non-NULL, gives last value returned
 				 * by this procedure, so this call will
 				 * return the next trace after that one.
@@ -1174,34 +1174,34 @@ Tcl_VarTraceInfo2(
     VarTrace *tracePtr;
     Var *varPtr;
     Interp *iPtr = (Interp *) interp;
-    Tcl_HashEntry *hPtr;
+    Hax_HashEntry *hPtr;
 
     /*
      * First, lookup the variable.
      */
 
-    if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
-	hPtr = Tcl_FindHashEntry(&iPtr->globalTable, part1);
+    if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	hPtr = Hax_FindHashEntry(&iPtr->globalTable, part1);
     } else {
-	hPtr = Tcl_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
+	hPtr = Hax_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
     }
     if (hPtr == NULL) {
 	return NULL;
     }
-    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+    varPtr = (Var *) Hax_GetHashValue(hPtr);
     if (varPtr->flags & VAR_UPVAR) {
 	hPtr = varPtr->value.upvarPtr;
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
     if (part2 != NULL) {
 	if (!(varPtr->flags & VAR_ARRAY)) {
 	    return NULL;
 	}
-	hPtr = Tcl_FindHashEntry(varPtr->value.tablePtr, part2);
+	hPtr = Hax_FindHashEntry(varPtr->value.tablePtr, part2);
 	if (hPtr == NULL) {
 	    return NULL;
 	}
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
     }
 
     /*
@@ -1229,13 +1229,13 @@ Tcl_VarTraceInfo2(
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_SetCmd --
+ * Hax_SetCmd --
  *
- *	This procedure is invoked to process the "set" Tcl command.
+ *	This procedure is invoked to process the "set" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result value.
+ *	A standard Hax result value.
  *
  * Side effects:
  *	A variable's value may be changed.
@@ -1245,47 +1245,47 @@ Tcl_VarTraceInfo2(
 
 	/* ARGSUSED */
 int
-Tcl_SetCmd(
+Hax_SetCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,	/* Current interpreter. */
+    Hax_Interp *interp,	/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
     if (argc == 2) {
 	char *value;
 
-	value = Tcl_GetVar(interp, argv[1], TCL_LEAVE_ERR_MSG);
+	value = Hax_GetVar(interp, argv[1], HAX_LEAVE_ERR_MSG);
 	if (value == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	interp->result = value;
-	return TCL_OK;
+	return HAX_OK;
     } else if (argc == 3) {
 	char *result;
 
-	result = Tcl_SetVar(interp, argv[1], argv[2], TCL_LEAVE_ERR_MSG);
+	result = Hax_SetVar(interp, argv[1], argv[2], HAX_LEAVE_ERR_MSG);
 	if (result == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	interp->result = result;
-	return TCL_OK;
+	return HAX_OK;
     } else {
-	Tcl_AppendResult(interp, "wrong # args: should be \"",
+	Hax_AppendResult(interp, "wrong # args: should be \"",
 		argv[0], " varName ?newValue?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_UnsetCmd --
+ * Hax_UnsetCmd --
  *
- *	This procedure is invoked to process the "unset" Tcl command.
+ *	This procedure is invoked to process the "unset" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result value.
+ *	A standard Hax result value.
  *
  * Side effects:
  *	See the user documentation.
@@ -1295,37 +1295,37 @@ Tcl_SetCmd(
 
 	/* ARGSUSED */
 int
-Tcl_UnsetCmd(
+Hax_UnsetCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
     int i;
 
     if (argc < 2) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"",
+	Hax_AppendResult(interp, "wrong # args: should be \"",
 		argv[0], " varName ?varName ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     for (i = 1; i < argc; i++) {
-	if (Tcl_UnsetVar(interp, argv[i], TCL_LEAVE_ERR_MSG) != 0) {
-	    return TCL_ERROR;
+	if (Hax_UnsetVar(interp, argv[i], HAX_LEAVE_ERR_MSG) != 0) {
+	    return HAX_ERROR;
 	}
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_AppendCmd --
+ * Hax_AppendCmd --
  *
- *	This procedure is invoked to process the "append" Tcl command.
+ *	This procedure is invoked to process the "append" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result value.
+ *	A standard Hax result value.
  *
  * Side effects:
  *	A variable's value may be changed.
@@ -1335,9 +1335,9 @@ Tcl_UnsetCmd(
 
 	/* ARGSUSED */
 int
-Tcl_AppendCmd(
+Hax_AppendCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -1346,32 +1346,32 @@ Tcl_AppendCmd(
 					 * the compiler from complaining) */
 
     if (argc < 3) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"",
+	Hax_AppendResult(interp, "wrong # args: should be \"",
 		argv[0], " varName value ?value ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
     for (i = 2; i < argc; i++) {
-	result = Tcl_SetVar(interp, argv[1], argv[i],
-		TCL_APPEND_VALUE|TCL_LEAVE_ERR_MSG);
+	result = Hax_SetVar(interp, argv[1], argv[i],
+		HAX_APPEND_VALUE|HAX_LEAVE_ERR_MSG);
 	if (result == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
     }
     interp->result = result;
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_LappendCmd --
+ * Hax_LappendCmd --
  *
- *	This procedure is invoked to process the "lappend" Tcl command.
+ *	This procedure is invoked to process the "lappend" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result value.
+ *	A standard Hax result value.
  *
  * Side effects:
  *	A variable's value may be changed.
@@ -1381,9 +1381,9 @@ Tcl_AppendCmd(
 
 	/* ARGSUSED */
 int
-Tcl_LappendCmd(
+Hax_LappendCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -1392,32 +1392,32 @@ Tcl_LappendCmd(
 					 * the compiler from complaining) */
 
     if (argc < 3) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"",
+	Hax_AppendResult(interp, "wrong # args: should be \"",
 		argv[0], " varName value ?value ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
     for (i = 2; i < argc; i++) {
-	result = Tcl_SetVar(interp, argv[1], argv[i],
-		TCL_APPEND_VALUE|TCL_LIST_ELEMENT|TCL_LEAVE_ERR_MSG);
+	result = Hax_SetVar(interp, argv[1], argv[i],
+		HAX_APPEND_VALUE|HAX_LIST_ELEMENT|HAX_LEAVE_ERR_MSG);
 	if (result == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
     }
     interp->result = result;
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_ArrayCmd --
+ * Hax_ArrayCmd --
  *
- *	This procedure is invoked to process the "array" Tcl command.
+ *	This procedure is invoked to process the "array" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result value.
+ *	A standard Hax result value.
  *
  * Side effects:
  *	See the user documentation.
@@ -1427,22 +1427,22 @@ Tcl_LappendCmd(
 
 	/* ARGSUSED */
 int
-Tcl_ArrayCmd(
+Hax_ArrayCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
     int length;
     char c;
     Var *varPtr;
-    Tcl_HashEntry *hPtr;
+    Hax_HashEntry *hPtr;
     Interp *iPtr = (Interp *) interp;
 
     if (argc < 3) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"",
+	Hax_AppendResult(interp, "wrong # args: should be \"",
 		argv[0], " option arrayName ?arg ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
     /*
@@ -1450,19 +1450,19 @@ Tcl_ArrayCmd(
      */
 
     if (iPtr->varFramePtr == NULL) {
-	hPtr = Tcl_FindHashEntry(&iPtr->globalTable, argv[2]);
+	hPtr = Hax_FindHashEntry(&iPtr->globalTable, argv[2]);
     } else {
-	hPtr = Tcl_FindHashEntry(&iPtr->varFramePtr->varTable, argv[2]);
+	hPtr = Hax_FindHashEntry(&iPtr->varFramePtr->varTable, argv[2]);
     }
     if (hPtr == NULL) {
 	notArray:
-	Tcl_AppendResult(interp, "\"", argv[2], "\" isn't an array",
+	Hax_AppendResult(interp, "\"", argv[2], "\" isn't an array",
 		(char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+    varPtr = (Var *) Hax_GetHashValue(hPtr);
     if (varPtr->flags & VAR_UPVAR) {
-	varPtr = (Var *) Tcl_GetHashValue(varPtr->value.upvarPtr);
+	varPtr = (Var *) Hax_GetHashValue(varPtr->value.upvarPtr);
     }
     if (!(varPtr->flags & VAR_ARRAY)) {
 	goto notArray;
@@ -1478,42 +1478,42 @@ Tcl_ArrayCmd(
 	ArraySearch *searchPtr;
 
 	if (argc != 4) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " anymore arrayName searchId\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	searchPtr = ParseSearchId(interp, varPtr, argv[2], argv[3]);
 	if (searchPtr == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	while (1) {
 	    Var *varPtr2;
 
 	    if (searchPtr->nextEntry != NULL) {
-		varPtr2 = (Var *) Tcl_GetHashValue(searchPtr->nextEntry);
+		varPtr2 = (Var *) Hax_GetHashValue(searchPtr->nextEntry);
 		if (!(varPtr2->flags & VAR_UNDEFINED)) {
 		    break;
 		}
 	    }
-	    searchPtr->nextEntry = Tcl_NextHashEntry(&searchPtr->search);
+	    searchPtr->nextEntry = Hax_NextHashEntry(&searchPtr->search);
 	    if (searchPtr->nextEntry == NULL) {
 		interp->result = "0";
-		return TCL_OK;
+		return HAX_OK;
 	    }
 	}
 	interp->result = "1";
-	return TCL_OK;
+	return HAX_OK;
     } else if ((c == 'd') && (strncmp(argv[1], "donesearch", length) == 0)) {
 	ArraySearch *searchPtr, *prevPtr;
 
 	if (argc != 4) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " donesearch arrayName searchId\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	searchPtr = ParseSearchId(interp, varPtr, argv[2], argv[3]);
 	if (searchPtr == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	if (varPtr->searchPtr == searchPtr) {
 	    varPtr->searchPtr = searchPtr->nextPtr;
@@ -1528,71 +1528,71 @@ Tcl_ArrayCmd(
 	ckfree((char *) searchPtr);
     } else if ((c == 'n') && (strncmp(argv[1], "names", length) == 0)
 	    && (length >= 2)) {
-	Tcl_HashSearch search;
+	Hax_HashSearch search;
 	Var *varPtr2;
 
 	if (argc != 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " names arrayName\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
-	for (hPtr = Tcl_FirstHashEntry(varPtr->value.tablePtr, &search);
-		hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-	    varPtr2 = (Var *) Tcl_GetHashValue(hPtr);
+	for (hPtr = Hax_FirstHashEntry(varPtr->value.tablePtr, &search);
+		hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
+	    varPtr2 = (Var *) Hax_GetHashValue(hPtr);
 	    if (varPtr2->flags & VAR_UNDEFINED) {
 		continue;
 	    }
-	    Tcl_AppendElement(interp,
-		    Tcl_GetHashKey(varPtr->value.tablePtr, hPtr), 0);
+	    Hax_AppendElement(interp,
+		    Hax_GetHashKey(varPtr->value.tablePtr, hPtr), 0);
 	}
     } else if ((c == 'n') && (strncmp(argv[1], "nextelement", length) == 0)
 	    && (length >= 2)) {
 	ArraySearch *searchPtr;
-	Tcl_HashEntry *hPtr;
+	Hax_HashEntry *hPtr;
 
 	if (argc != 4) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " nextelement arrayName searchId\"",
 		    (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	searchPtr = ParseSearchId(interp, varPtr, argv[2], argv[3]);
 	if (searchPtr == NULL) {
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	while (1) {
 	    Var *varPtr2;
 
 	    hPtr = searchPtr->nextEntry;
 	    if (hPtr == NULL) {
-		hPtr = Tcl_NextHashEntry(&searchPtr->search);
+		hPtr = Hax_NextHashEntry(&searchPtr->search);
 		if (hPtr == NULL) {
-		    return TCL_OK;
+		    return HAX_OK;
 		}
 	    } else {
 		searchPtr->nextEntry = NULL;
 	    }
-	    varPtr2 = (Var *) Tcl_GetHashValue(hPtr);
+	    varPtr2 = (Var *) Hax_GetHashValue(hPtr);
 	    if (!(varPtr2->flags & VAR_UNDEFINED)) {
 		break;
 	    }
 	}
-	interp->result = Tcl_GetHashKey(varPtr->value.tablePtr, hPtr);
+	interp->result = Hax_GetHashKey(varPtr->value.tablePtr, hPtr);
     } else if ((c == 's') && (strncmp(argv[1], "size", length) == 0)
 	    && (length >= 2)) {
-	Tcl_HashSearch search;
+	Hax_HashSearch search;
 	Var *varPtr2;
 	int size;
 
 	if (argc != 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " size arrayName\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	size = 0;
-	for (hPtr = Tcl_FirstHashEntry(varPtr->value.tablePtr, &search);
-		hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-	    varPtr2 = (Var *) Tcl_GetHashValue(hPtr);
+	for (hPtr = Hax_FirstHashEntry(varPtr->value.tablePtr, &search);
+		hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
+	    varPtr2 = (Var *) Hax_GetHashValue(hPtr);
 	    if (varPtr2->flags & VAR_UNDEFINED) {
 		continue;
 	    }
@@ -1604,46 +1604,46 @@ Tcl_ArrayCmd(
 	ArraySearch *searchPtr;
 
 	if (argc != 3) {
-	    Tcl_AppendResult(interp, "wrong # args: should be \"",
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " startsearch arrayName\"", (char *) NULL);
-	    return TCL_ERROR;
+	    return HAX_ERROR;
 	}
 	searchPtr = (ArraySearch *) ckalloc(sizeof(ArraySearch));
 	if (varPtr->searchPtr == NULL) {
 	    searchPtr->id = 1;
-	    Tcl_AppendResult(interp, "s-1-", argv[2], (char *) NULL);
+	    Hax_AppendResult(interp, "s-1-", argv[2], (char *) NULL);
 	} else {
 	    char string[20];
 
 	    searchPtr->id = varPtr->searchPtr->id + 1;
 	    sprintf(string, "%d", searchPtr->id);
-	    Tcl_AppendResult(interp, "s-", string, "-", argv[2],
+	    Hax_AppendResult(interp, "s-", string, "-", argv[2],
 		    (char *) NULL);
 	}
 	searchPtr->varPtr = varPtr;
-	searchPtr->nextEntry = Tcl_FirstHashEntry(varPtr->value.tablePtr,
+	searchPtr->nextEntry = Hax_FirstHashEntry(varPtr->value.tablePtr,
 		&searchPtr->search);
 	searchPtr->nextPtr = varPtr->searchPtr;
 	varPtr->searchPtr = searchPtr;
     } else {
-	Tcl_AppendResult(interp, "bad option \"", argv[1],
+	Hax_AppendResult(interp, "bad option \"", argv[1],
 		"\": should be anymore, donesearch, names, nextelement, ",
 		"size, or startsearch", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_GlobalCmd --
+ * Hax_GlobalCmd --
  *
- *	This procedure is invoked to process the "global" Tcl command.
+ *	This procedure is invoked to process the "global" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result value.
+ *	A standard Hax result value.
  *
  * Side effects:
  *	See the user documentation.
@@ -1653,66 +1653,66 @@ Tcl_ArrayCmd(
 
 	/* ARGSUSED */
 int
-Tcl_GlobalCmd(
+Hax_GlobalCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
     Var *varPtr, *gVarPtr;
     Interp *iPtr = (Interp *) interp;
-    Tcl_HashEntry *hPtr, *hPtr2;
+    Hax_HashEntry *hPtr, *hPtr2;
     int new;
 
     if (argc < 2) {
-	Tcl_AppendResult((Tcl_Interp *) iPtr, "wrong # args: should be \"",
+	Hax_AppendResult((Hax_Interp *) iPtr, "wrong # args: should be \"",
 		argv[0], " varName ?varName ...?\"", (char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     if (iPtr->varFramePtr == NULL) {
-	return TCL_OK;
+	return HAX_OK;
     }
 
     for (argc--, argv++; argc > 0; argc--, argv++) {
-	hPtr = Tcl_CreateHashEntry(&iPtr->globalTable, *argv, &new);
+	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, *argv, &new);
 	if (new) {
 	    gVarPtr = NewVar(0);
 	    gVarPtr->flags |= VAR_UNDEFINED;
-	    Tcl_SetHashValue(hPtr, gVarPtr);
+	    Hax_SetHashValue(hPtr, gVarPtr);
 	} else {
-	    gVarPtr = (Var *) Tcl_GetHashValue(hPtr);
+	    gVarPtr = (Var *) Hax_GetHashValue(hPtr);
 	}
-	hPtr2 = Tcl_CreateHashEntry(&iPtr->varFramePtr->varTable, *argv, &new);
+	hPtr2 = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable, *argv, &new);
 	if (!new) {
 	    Var *varPtr;
-	    varPtr = (Var *) Tcl_GetHashValue(hPtr2);
+	    varPtr = (Var *) Hax_GetHashValue(hPtr2);
 	    if (varPtr->flags & VAR_UPVAR) {
 		continue;
 	    } else {
-		Tcl_AppendResult((Tcl_Interp *) iPtr, "variable \"", *argv,
+		Hax_AppendResult((Hax_Interp *) iPtr, "variable \"", *argv,
 		    "\" already exists", (char *) NULL);
-		return TCL_ERROR;
+		return HAX_ERROR;
 	    }
 	}
 	varPtr = NewVar(0);
 	varPtr->flags |= VAR_UPVAR;
 	varPtr->value.upvarPtr = hPtr;
 	gVarPtr->upvarUses++;
-	Tcl_SetHashValue(hPtr2, varPtr);
+	Hax_SetHashValue(hPtr2, varPtr);
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * Tcl_UpvarCmd --
+ * Hax_UpvarCmd --
  *
- *	This procedure is invoked to process the "upvar" Tcl command.
+ *	This procedure is invoked to process the "upvar" Hax command.
  *	See the user documentation for details on what it does.
  *
  * Results:
- *	A standard Tcl result value.
+ *	A standard Hax result value.
  *
  * Side effects:
  *	See the user documentation.
@@ -1722,9 +1722,9 @@ Tcl_GlobalCmd(
 
 	/* ARGSUSED */
 int
-Tcl_UpvarCmd(
+Hax_UpvarCmd(
     ClientData dummy,			/* Not used. */
-    Tcl_Interp *interp,			/* Current interpreter. */
+    Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
@@ -1732,26 +1732,26 @@ Tcl_UpvarCmd(
     int result;
     CallFrame *framePtr;
     Var *varPtr = NULL;
-    Tcl_HashTable *upVarTablePtr;
-    Tcl_HashEntry *hPtr, *hPtr2;
+    Hax_HashTable *upVarTablePtr;
+    Hax_HashEntry *hPtr, *hPtr2;
     int new;
     Var *upVarPtr;
 
     if (argc < 3) {
 	upvarSyntax:
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" ?level? otherVar localVar ?otherVar localVar ...?\"",
 		(char *) NULL);
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
 
     /*
      * Find the hash table containing the variable being referenced.
      */
 
-    result = TclGetFrame(interp, argv[1], &framePtr);
+    result = HaxGetFrame(interp, argv[1], &framePtr);
     if (result == -1) {
-	return TCL_ERROR;
+	return HAX_ERROR;
     }
     argc -= result+1;
     argv += result+1;
@@ -1773,47 +1773,47 @@ Tcl_UpvarCmd(
      */
 
     while (argc > 0) {
-        hPtr = Tcl_CreateHashEntry(upVarTablePtr, argv[0], &new);
+        hPtr = Hax_CreateHashEntry(upVarTablePtr, argv[0], &new);
         if (new) {
             upVarPtr = NewVar(0);
             upVarPtr->flags |= VAR_UNDEFINED;
-            Tcl_SetHashValue(hPtr, upVarPtr);
+            Hax_SetHashValue(hPtr, upVarPtr);
         } else {
-            upVarPtr = (Var *) Tcl_GetHashValue(hPtr);
+            upVarPtr = (Var *) Hax_GetHashValue(hPtr);
 	    if (upVarPtr->flags & VAR_UPVAR) {
 		hPtr = upVarPtr->value.upvarPtr;
-		upVarPtr = (Var *) Tcl_GetHashValue(hPtr);
+		upVarPtr = (Var *) Hax_GetHashValue(hPtr);
 	    }
         }
 
-        hPtr2 = Tcl_CreateHashEntry(&iPtr->varFramePtr->varTable,
+        hPtr2 = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable,
                     argv[1], &new);
         if (!new) {
-            Tcl_AppendResult((Tcl_Interp *) iPtr, "variable \"", argv[1],
+            Hax_AppendResult((Hax_Interp *) iPtr, "variable \"", argv[1],
                 "\" already exists", (char *) NULL);
-            return TCL_ERROR;
+            return HAX_ERROR;
         }
         varPtr = NewVar(0);
         varPtr->flags |= VAR_UPVAR;
         varPtr->value.upvarPtr = hPtr;
         upVarPtr->upvarUses++;
-        Tcl_SetHashValue(hPtr2, varPtr);
+        Hax_SetHashValue(hPtr2, varPtr);
 
         argc -= 2;
         argv += 2;
     }
-    return TCL_OK;
+    return HAX_OK;
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * TclDeleteVars --
+ * HaxDeleteVars --
  *
  *	This procedure is called to recycle all the storage space
  *	associated with a table of variables.  For this procedure
  *	to work correctly, it must not be possible for any of the
- *	variable in the table to be accessed from Tcl commands
+ *	variable in the table to be accessed from Hax commands
  *	(e.g. from trace procedures).
  *
  * Results:
@@ -1827,23 +1827,23 @@ Tcl_UpvarCmd(
  */
 
 void
-TclDeleteVars(
+HaxDeleteVars(
     Interp *iPtr,		/* Interpreter to which variables belong. */
-    Tcl_HashTable *tablePtr	/* Hash table containing variables to
+    Hax_HashTable *tablePtr	/* Hash table containing variables to
 				 * delete. */)
 {
-    Tcl_HashSearch search;
-    Tcl_HashEntry *hPtr;
+    Hax_HashSearch search;
+    Hax_HashEntry *hPtr;
     Var *varPtr;
     int flags, globalFlag;
 
-    flags = TCL_TRACE_UNSETS;
+    flags = HAX_TRACE_UNSETS;
     if (tablePtr == &iPtr->globalTable) {
-	flags |= TCL_INTERP_DESTROYED | TCL_GLOBAL_ONLY;
+	flags |= HAX_INTERP_DESTROYED | HAX_GLOBAL_ONLY;
     }
-    for (hPtr = Tcl_FirstHashEntry(tablePtr, &search); hPtr != NULL;
-	    hPtr = Tcl_NextHashEntry(&search)) {
-	varPtr = (Var *) Tcl_GetHashValue(hPtr);
+    for (hPtr = Hax_FirstHashEntry(tablePtr, &search); hPtr != NULL;
+	    hPtr = Hax_NextHashEntry(&search)) {
+	varPtr = (Var *) Hax_GetHashValue(hPtr);
 
 	/*
 	 * For global/upvar variables referenced in procedures, free up the
@@ -1857,13 +1857,13 @@ TclDeleteVars(
 	if (varPtr->flags & VAR_UPVAR) {
 	    hPtr = varPtr->value.upvarPtr;
 	    ckfree((char *) varPtr);
-	    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+	    varPtr = (Var *) Hax_GetHashValue(hPtr);
 	    varPtr->upvarUses--;
 	    if ((varPtr->upvarUses != 0) || !(varPtr->flags & VAR_UNDEFINED)
 		    || (varPtr->tracePtr != NULL)) {
 		continue;
 	    }
-	    globalFlag = TCL_GLOBAL_ONLY;
+	    globalFlag = HAX_GLOBAL_ONLY;
 	}
 
 	/*
@@ -1876,7 +1876,7 @@ TclDeleteVars(
 
 	if (varPtr->tracePtr != NULL) {
 	    (void) CallTraces(iPtr, (Var *) NULL, hPtr,
-		    Tcl_GetHashKey(tablePtr, hPtr), (char *) NULL,
+		    Hax_GetHashKey(tablePtr, hPtr), (char *) NULL,
 		    flags | globalFlag);
 	    while (varPtr->tracePtr != NULL) {
 		VarTrace *tracePtr = varPtr->tracePtr;
@@ -1885,15 +1885,15 @@ TclDeleteVars(
 	    }
 	}
 	if (varPtr->flags & VAR_ARRAY) {
-	    DeleteArray(iPtr, Tcl_GetHashKey(tablePtr, hPtr), varPtr,
+	    DeleteArray(iPtr, Hax_GetHashKey(tablePtr, hPtr), varPtr,
 		    flags | globalFlag);
 	}
 	if (globalFlag) {
-	    Tcl_DeleteHashEntry(hPtr);
+	    Hax_DeleteHashEntry(hPtr);
 	}
 	ckfree((char *) varPtr);
     }
-    Tcl_DeleteHashTable(tablePtr);
+    Hax_DeleteHashTable(tablePtr);
 }
 
 /*
@@ -1928,15 +1928,15 @@ CallTraces(
 					 * contains the variable, or NULL if
 					 * the variable isn't an element of an
 					 * array. */
-    Tcl_HashEntry *hPtr,		/* Hash table entry corresponding to
+    Hax_HashEntry *hPtr,		/* Hash table entry corresponding to
 					 * variable whose traces are to be
 					 * invoked. */
     char *part1, char *part2,		/* Variable's two-part name. */
     int flags				/* Flags to pass to trace procedures:
 					 * indicates what's happening to
 					 * variable, plus other stuff like
-					 * TCL_GLOBAL_ONLY and
-					 * TCL_INTERP_DESTROYED. */)
+					 * HAX_GLOBAL_ONLY and
+					 * HAX_INTERP_DESTROYED. */)
 {
     Var *varPtr;
     VarTrace *tracePtr;
@@ -1950,7 +1950,7 @@ CallTraces(
      * variable, don't call them again.
      */
 
-    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+    varPtr = (Var *) Hax_GetHashValue(hPtr);
     if (varPtr->flags & VAR_TRACE_ACTIVE) {
 	return NULL;
     }
@@ -1973,9 +1973,9 @@ CallTraces(
 		continue;
 	    }
 	    result = (*tracePtr->traceProc)(tracePtr->clientData,
-		    (Tcl_Interp *) iPtr, part1, part2, flags);
+		    (Hax_Interp *) iPtr, part1, part2, flags);
 	    if (result != NULL) {
-		if (flags & TCL_TRACE_UNSETS) {
+		if (flags & HAX_TRACE_UNSETS) {
 		    result = NULL;
 		} else {
 		    goto done;
@@ -1988,8 +1988,8 @@ CallTraces(
      * Invoke traces on the variable itself.
      */
 
-    if (flags & TCL_TRACE_UNSETS) {
-	flags |= TCL_TRACE_DESTROYED;
+    if (flags & HAX_TRACE_UNSETS) {
+	flags |= HAX_TRACE_DESTROYED;
     }
     for (tracePtr = varPtr->tracePtr; tracePtr != NULL;
 	    tracePtr = active.nextTracePtr) {
@@ -1998,9 +1998,9 @@ CallTraces(
 	    continue;
 	}
 	result = (*tracePtr->traceProc)(tracePtr->clientData,
-		(Tcl_Interp *) iPtr, part1, part2, flags);
+		(Hax_Interp *) iPtr, part1, part2, flags);
 	if (result != NULL) {
-	    if (flags & TCL_TRACE_UNSETS) {
+	    if (flags & HAX_TRACE_UNSETS) {
 		result = NULL;
 	    } else {
 		goto done;
@@ -2019,7 +2019,7 @@ CallTraces(
     if (arrayPtr != NULL) {
 	arrayPtr->flags = savedArrayFlags;
     }
-    varPtr = (Var *) Tcl_GetHashValue(hPtr);
+    varPtr = (Var *) Hax_GetHashValue(hPtr);
     varPtr->flags &= ~VAR_TRACE_ACTIVE;
     iPtr->activeTracePtr = active.nextPtr;
     return result;
@@ -2090,7 +2090,7 @@ NewVar(
 
 static ArraySearch *
 ParseSearchId(
-    Tcl_Interp *interp,		/* Interpreter containing variable. */
+    Hax_Interp *interp,		/* Interpreter containing variable. */
     Var *varPtr,		/* Array variable search is for. */
     char *varName,		/* Name of array variable that search is
 				 * supposed to be for. */
@@ -2109,7 +2109,7 @@ ParseSearchId(
 
     if ((string[0] != 's') || (string[1] != '-')) {
 	syntax:
-	Tcl_AppendResult(interp, "illegal search identifier \"", string,
+	Hax_AppendResult(interp, "illegal search identifier \"", string,
 		"\"", (char *) NULL);
 	return NULL;
     }
@@ -2118,7 +2118,7 @@ ParseSearchId(
 	goto syntax;
     }
     if (strcmp(end+1, varName) != 0) {
-	Tcl_AppendResult(interp, "search identifier \"", string,
+	Hax_AppendResult(interp, "search identifier \"", string,
 		"\" isn't for variable \"", varName, "\"", (char *) NULL);
 	return NULL;
     }
@@ -2134,7 +2134,7 @@ ParseSearchId(
 	    return searchPtr;
 	}
     }
-    Tcl_AppendResult(interp, "couldn't find search \"", string, "\"",
+    Hax_AppendResult(interp, "couldn't find search \"", string, "\"",
 	    (char *) NULL);
     return NULL;
 }
@@ -2198,21 +2198,21 @@ DeleteArray(
 					 * callbacks). */
     Var *varPtr,			/* Pointer to variable structure. */
     int flags				/* Flags to pass to CallTraces:
-					 * TCL_TRACE_UNSETS and sometimes
-					 * TCL_INTERP_DESTROYED and/or
-					 * TCL_GLOBAL_ONLY. */)
+					 * HAX_TRACE_UNSETS and sometimes
+					 * HAX_INTERP_DESTROYED and/or
+					 * HAX_GLOBAL_ONLY. */)
 {
-    Tcl_HashSearch search;
-    Tcl_HashEntry *hPtr;
+    Hax_HashSearch search;
+    Hax_HashEntry *hPtr;
     Var *elPtr;
 
     DeleteSearches(varPtr);
-    for (hPtr = Tcl_FirstHashEntry(varPtr->value.tablePtr, &search);
-	    hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-	elPtr = (Var *) Tcl_GetHashValue(hPtr);
+    for (hPtr = Hax_FirstHashEntry(varPtr->value.tablePtr, &search);
+	    hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
+	elPtr = (Var *) Hax_GetHashValue(hPtr);
 	if (elPtr->tracePtr != NULL) {
 	    (void) CallTraces(iPtr, (Var *) NULL, hPtr, arrayName,
-		    Tcl_GetHashKey(varPtr->value.tablePtr, hPtr), flags);
+		    Hax_GetHashKey(varPtr->value.tablePtr, hPtr), flags);
 	    while (elPtr->tracePtr != NULL) {
 		VarTrace *tracePtr = elPtr->tracePtr;
 		elPtr->tracePtr = tracePtr->nextPtr;
@@ -2224,7 +2224,7 @@ DeleteArray(
 	}
 	ckfree((char *) elPtr);
     }
-    Tcl_DeleteHashTable(varPtr->value.tablePtr);
+    Hax_DeleteHashTable(varPtr->value.tablePtr);
     ckfree((char *) varPtr->value.tablePtr);
 }
 
@@ -2249,16 +2249,16 @@ DeleteArray(
 
 static void
 VarErrMsg(
-    Tcl_Interp *interp,		/* Interpreter in which to record message. */
+    Hax_Interp *interp,		/* Interpreter in which to record message. */
     char *part1, char *part2,	/* Variable's two-part name. */
     char *operation,		/* String describing operation that failed,
 				 * e.g. "read", "set", or "unset". */
     char *reason		/* String describing why operation failed. */)
 {
-    Tcl_ResetResult(interp);
-    Tcl_AppendResult(interp, "can't ", operation, " \"", part1, (char *) NULL);
+    Hax_ResetResult(interp);
+    Hax_AppendResult(interp, "can't ", operation, " \"", part1, (char *) NULL);
     if (part2 != NULL) {
-	Tcl_AppendResult(interp, "(", part2, ")", (char *) NULL);
+	Hax_AppendResult(interp, "(", part2, ")", (char *) NULL);
     }
-    Tcl_AppendResult(interp, "\": ", reason, (char *) NULL);
+    Hax_AppendResult(interp, "\": ", reason, (char *) NULL);
 }

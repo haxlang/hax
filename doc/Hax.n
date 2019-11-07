@@ -7,94 +7,96 @@
 '\" the suitability of this material for any purpose.  It is
 '\" provided "as is" without express or implied warranty.
 '\" 
-'\" $Header: /user6/ouster/tcl/man/RCS/Tcl.n,v 1.105 93/01/31 15:35:41 ouster Exp $ SPRITE (Berkeley)
+'\" $Header: /user6/ouster/tcl/man/RCS/Hax.n,v 1.105 93/01/31 15:35:41 ouster Exp $ SPRITE (Berkeley)
 '
 .so man.macros
 .de UL
 \\$1\l'|0\(ul'\\$2
 ..
-.HS Tcl tcl
+.HS Hax hax
 .BS
 .SH NAME
-Tcl \- overview of tool command language facilities
+Hax \- overview of tool command language facilities
 .BE
 
 .SH INTRODUCTION
 .PP
+Hax is a small-footprint Tcl interpreter forked from Tcl 6.7.
 Tcl stands for ``tool command language'' and is pronounced ``tickle.''
-It is actually two things:
+.PP
+Hax is actually two things:
 a language and a library.
-First, Tcl is a simple textual language,
+First, Hax is a simple textual language,
 intended primarily for issuing commands to interactive programs such
 as text editors, debuggers, illustrators, and shells.  It has
 a simple syntax and is also programmable, so
-Tcl users can write command procedures to provide more powerful
+Hax users can write command procedures to provide more powerful
 commands than those in the built-in set.
 .PP
-Second, Tcl is a library package that can be embedded in application
-programs.  The Tcl library consists of a parser for the Tcl
-language, routines to implement the Tcl built-in commands, and
-procedures that allow each application to extend Tcl with additional
+Second, Hax is a library package that can be embedded in application
+programs.  The Hax library consists of a parser for the Hax
+language, routines to implement the Hax built-in commands, and
+procedures that allow each application to extend Hax with additional
 commands specific to that application.  The application program
-generates Tcl commands and passes them to the Tcl parser for
+generates Hax commands and passes them to the Hax parser for
 execution.  Commands may be generated
 by reading characters from an input
 source, or by associating command strings with elements of the
 application's user interface, such as menu entries, buttons, or
 keystrokes.
-When the Tcl library receives commands it parses them
+When the Hax library receives commands it parses them
 into component fields and executes built-in commands directly.
 For commands implemented by the
-application, Tcl calls back to the application to execute the
+application, Hax calls back to the application to execute the
 commands.  In many cases commands will invoke recursive invocations
-of the Tcl interpreter by passing in additional strings to execute
+of the Hax interpreter by passing in additional strings to execute
 (procedures, looping commands, and conditional commands all work
 in this way).
 .PP
-An application program gains three advantages by using Tcl for
-its command language.  First, Tcl provides a standard syntax:  once
-users know Tcl, they will be able to issue commands easily
-to any Tcl-based application.  Second, Tcl provides programmability.
-All a Tcl application needs to do is to implement a few
-application-specific low-level commands.  Tcl provides many utility
+An application program gains three advantages by using Hax for
+its command language.  First, Hax provides a standard syntax:  once
+users know Hax, they will be able to issue commands easily
+to any Hax-based application.  Second, Hax provides programmability.
+All a Hax application needs to do is to implement a few
+application-specific low-level commands.  Hax provides many utility
 commands plus a general programming interface for building up
-complex command procedures.  By using Tcl, applications need not
-re-implement these features.  Third, Tcl can be used as
+complex command procedures.  By using Hax, applications need not
+re-implement these features.  Third, Hax can be used as
 .VS
 a common language for communicating between applications.
-Inter-application communication is not built into the Tcl core
+Inter-application communication is not built into the Hax core
 described here, but various add-on libraries, such as the Tk toolkit,
 allow applications to issue commands to each other.
 This makes it possible for applications to work together in much
 more powerful ways than was previously possible.
 .VE
 .PP
-This manual page focuses primarily on the Tcl language.  It describes
+This manual page focuses primarily on the Hax language.  It describes
 the language syntax and the built-in commands that will be available in
-any application based on Tcl.  The individual library
+any application based on Hax.  The individual library
 procedures are described in more detail in separate manual pages, one
 per procedure.
 
 .SH "INTERPRETERS"
 .PP
-The central data structure in Tcl is an interpreter (C type
-``Tcl_Interp'').  An interpreter consists of a set of command
+The central data structure in Hax is an interpreter (C type
+``Hax_Interp'').  An interpreter consists of a set of command
 bindings, a set of variable values, and a few other miscellaneous
-pieces of state.  Each Tcl command is interpreted in the context
+pieces of state.  Each Hax command is interpreted in the context
 of a particular interpreter.
-Some Tcl-based applications will maintain
+Some Hax-based applications will maintain
 multiple interpreters simultaneously, each associated with a
 different widget or portion of the application.
 Interpreters are relatively lightweight structures.  They can
 be created and deleted quickly, so application programmers should feel free to
 use multiple interpreters if that simplifies the application.
-Eventually Tcl will provide a mechanism for sending Tcl commands
+Eventually Hax will provide a mechanism for sending Hax commands
 and results back and forth between interpreters, even if the
 interpreters are managed by different processes.
 
 .SH "DATA TYPES"
 .PP
-Tcl supports only one type of data:  strings.  All commands,
+Hax supports only one type of data:  strings.  All commands,
 all arguments to commands, all command results, and all variable values
 are strings.
 Where commands require numeric arguments or return numeric results,
@@ -102,25 +104,25 @@ the arguments and results are passed as strings.
 Many commands expect their string arguments to have certain formats,
 but this interpretation is
 up to the individual commands.  For example, arguments often contain
-Tcl command strings, which may get executed as part of the commands.
-The easiest way to understand the Tcl interpreter is to remember that
-everything is just an operation on a string.  In many cases Tcl constructs
+Hax command strings, which may get executed as part of the commands.
+The easiest way to understand the Hax interpreter is to remember that
+everything is just an operation on a string.  In many cases Hax constructs
 will look similar to more structured constructs from other languages.
-However, the Tcl constructs
+However, the Hax constructs
 are not structured at all; they are just strings of characters, and this
 gives them a different behavior than the structures they may look like.
 .PP
-Although the exact interpretation of a Tcl string depends on who is
+Although the exact interpretation of a Hax string depends on who is
 doing the interpretation, there are three common forms that strings
 take:  commands, expressions, and lists.  The major sections below
 discuss these three forms in more detail.
 
 .SH "BASIC COMMAND SYNTAX"
 .PP
-The Tcl language has syntactic similarities to both the Unix shells
+The Hax language has syntactic similarities to both the Unix shells
 and Lisp.  However, the interpretation of commands is different
-in Tcl than in either of those other two systems.
-A Tcl command string consists of one or more commands separated
+in Hax than in either of those other two systems.
+A Hax command string consists of one or more commands separated
 by newline characters or semi-colons.
 Each command consists of a collection of fields separated by
 white space (spaces or tabs).
@@ -130,27 +132,27 @@ that command.  For example, the command
 .DS
 \fBset a 22\fR
 .DE
-has three fields:  the first, \fBset\fR, is the name of a Tcl command, and
+has three fields:  the first, \fBset\fR, is the name of a Hax command, and
 the last two, \fBa\fR and \fB22\fR, will be passed as arguments to
 the \fBset\fR command.  The command name may refer either to a built-in
-Tcl command, an application-specific command bound in with the library
-procedure \fBTcl_CreateCommand\fR, or a command procedure defined with the
+Hax command, an application-specific command bound in with the library
+procedure \fBHax_CreateCommand\fR, or a command procedure defined with the
 \fBproc\fR built-in command.
 Arguments are passed literally as
 text strings.  Individual commands may interpret those strings in any
 fashion they wish.  The \fBset\fR command, for example, will treat its
 first argument as the name of a variable and its second argument as a
 string value to assign to that variable.  For other commands arguments
-may be interpreted as integers, lists, file names, or Tcl commands.
+may be interpreted as integers, lists, file names, or Hax commands.
 .PP
 .VS
 Command names should normally be typed completely (e.g. no abbreviations).
-However, if the Tcl interpreter cannot locate a command it invokes a
+However, if the Hax interpreter cannot locate a command it invokes a
 special command named \fBunknown\fR which attempts to find or create
 the command.
 For example, at many sites \fBunknown\fR will search
 through library directories for the desired command and create it
-as a Tcl procedure if it is found.
+as a Hax procedure if it is found.
 The \fBunknown\fR command often provides automatic completion of
 abbreviated commands, but usually only for commands that were typed
 interactively.
@@ -166,7 +168,7 @@ If the first non-blank character in a command is \fB#\fR, then everything
 from the \fB#\fR up through the next newline character is treated as
 a comment and ignored.  When comments are embedded inside nested
 commands (e.g. fields enclosed in braces) they must have properly-matched
-braces (this is necessary because when Tcl parses the top-level command
+braces (this is necessary because when Hax parses the top-level command
 it doesn't yet know that the nested field will be used as a command so
 it cannot process the nested comment character as a comment).
 
@@ -195,14 +197,14 @@ interpretation in the parsing of that field.
 .PP
 Curly braces may also be used for grouping arguments.  They are
 similar to quotes except for two differences.  First, they nest;
-this makes them easier to use for complicated arguments like nested Tcl
+this makes them easier to use for complicated arguments like nested Hax
 command strings.  Second, the substitutions described below for
 commands, variables, and backslashes do \fInot\fR occur in arguments
 enclosed in braces, so braces can be used to prevent substitutions
 where they are undesirable.
 If an argument field
 begins with a left brace, then the argument ends at the matching
-right brace.  Tcl will strip off the outermost layer of braces
+right brace.  Hax will strip off the outermost layer of braces
 and pass the information between the braces to the command without
 any further modification.  For example, in the command
 .DS
@@ -218,7 +220,7 @@ the newline will be
 included in the argument field along with any other characters up to the
 matching brace or quote.  For example, the \fBeval\fR command
 takes one
-argument, which is a command string; \fBeval\fR invokes the Tcl
+argument, which is a command string; \fBeval\fR invokes the Hax
 interpreter to execute the command string.  The command
 .DS
 \fBeval {
@@ -238,7 +240,7 @@ variable substitution; see below).
 If an open bracket occurs in a field of a command, then
 command substitution occurs (except for fields enclosed in
 braces).  All of the text up to the matching
-close bracket is treated as a Tcl command and executed immediately.
+close bracket is treated as a Hax command and executed immediately.
 Then the result of that command is substituted for the bracketed
 text.  For example, consider the command
 .DS
@@ -366,7 +368,7 @@ Backslashes may be used to insert non-printing characters into
 command fields and also to insert special characters like
 braces and brackets into fields
 without them being interpreted specially as described above.
-The backslash sequences understood by the Tcl interpreter are
+The backslash sequences understood by the Hax interpreter are
 listed below.  In each case, the backslash
 sequence is replaced by the given character:
 .TP 20
@@ -435,7 +437,7 @@ the second argument to \fBset\fR will be ``\fB{x[\0yza\fR''.
 .PP
 If a backslash is followed by something other than one of the options
 described above, then the backslash is transmitted to the argument
-field without any special processing, and the Tcl scanner continues
+field without any special processing, and the Hax scanner continues
 normal processing with the next character.  For example, in the
 command
 .DS
@@ -504,12 +506,12 @@ and ignored.
 .SH "EXPRESSIONS"
 .VS
 .PP
-The second major interpretation applied to strings in Tcl is
+The second major interpretation applied to strings in Hax is
 as expressions.  Several commands, such as \fBexpr\fR, \fBfor\fR,
 and \fBif\fR, treat one or more of their arguments as expressions
-and call the Tcl expression processors (\fBTcl_ExprLong\fR,
-\fBTcl_ExprBoolean\fR, etc.) to evaluate them.
-The operators permitted in Tcl expressions are a subset of
+and call the Hax expression processors (\fBHax_ExprLong\fR,
+\fBHax_ExprBoolean\fR, etc.) to evaluate them.
+The operators permitted in Hax expressions are a subset of
 the operators permitted in C expressions, and they have the
 same meaning and precedence as the corresponding C operators.
 Expressions almost always yield numeric results
@@ -519,11 +521,11 @@ For example, the expression
 \fB8.2 + 6\fR
 .DE
 evaluates to 14.2.
-Tcl expressions differ from C expressions in the way that
-operands are specified, and in that Tcl expressions support
+Hax expressions differ from C expressions in the way that
+operands are specified, and in that Hax expressions support
 non-numeric operands and string comparisons.
 .PP
-A Tcl expression consists of a combination of operands, operators,
+A Hax expression consists of a combination of operands, operators,
 and parentheses.
 White space may be used between the operands and operators and
 parentheses; it is ignored by the expression processor.
@@ -546,7 +548,7 @@ Operands may be specified in any of the following ways:
 .IP [1]
 As an numeric value, either integer or floating-point.
 .IP [2]
-As a Tcl variable, using standard \fB$\fR notation.
+As a Hax variable, using standard \fB$\fR notation.
 The variable's value will be used as the operand.
 .IP [3]
 As a string enclosed in double-quotes.
@@ -558,7 +560,7 @@ As a string enclosed in braces.
 The characters between the open brace and matching close brace
 will be used as the operand without any substitutions.
 .IP [5]
-As a Tcl command enclosed in brackets.
+As a Hax command enclosed in brackets.
 The command will be executed and its result will be used as
 the operand.
 .LP
@@ -659,7 +661,7 @@ All internal computations involving integers are done with the C type
 \fIlong\fP, and all internal computations involving floating-point are
 done with the C type \fIdouble\fP.
 When converting a string to floating-point, exponent overflow is
-detected and results in a Tcl error.
+detected and results in a Hax error.
 For conversion to integer from string, detection of overflow depends
 on the behavior of some routines in the local C library, so it should
 be regarded as unreliable.
@@ -700,14 +702,14 @@ the second operand is converted to the string ``18''.
 .PP
 In general it is safest to enclose an expression in braces when
 entering it in a command:  otherwise, if the expression contains
-any white space then the Tcl interpreter will split it
+any white space then the Hax interpreter will split it
 among several arguments.  For example, the command
 .DS C
 \fBexpr $a + $b\fR
 .DE
 results in three arguments being passed to \fBexpr\fR:  \fB$a\fR,
 \fB+\fR, and \fB$b\fR.  In addition, if the expression isn't in braces
-then the Tcl interpreter will perform variable and command substitution
+then the Hax interpreter will perform variable and command substitution
 immediately (it will happen in the command parser rather than in
 the expression parser).  In many cases the expression is being
 passed to a command that will evaluate the expression later (or
@@ -740,7 +742,7 @@ evaluated, which is the desired result.
 
 .SH LISTS
 .PP
-The third major way that strings are interpreted in Tcl is as lists.
+The third major way that strings are interpreted in Hax is as lists.
 A list is just a string with a list-like structure
 consisting of fields separated by white space.  For example, the
 string
@@ -768,9 +770,9 @@ when the third element is extracted from the list, the result is
 the outermost layer of braces).  Command substitution and
 variable substitution are never
 made on a list (at least, not by the list-processing commands; the
-list can always be passed to the Tcl interpreter for evaluation).
+list can always be passed to the Hax interpreter for evaluation).
 .PP
-The Tcl commands \fBconcat\fR, \fBforeach\fR, 
+The Hax commands \fBconcat\fR, \fBforeach\fR, 
 .VS
 \fBlappend\fR, \fBlindex\fR, \fBlinsert\fR, \fBlist\fR, \fBllength\fR,
 \fBlrange\fR, \fBlreplace\fR, \fBlsearch\fR, and \fBlsort\fR allow
@@ -782,7 +784,7 @@ functions.
 .SH "REGULAR EXPRESSIONS"
 .VS
 .PP
-Tcl provides two commands that support string matching using
+Hax provides two commands that support string matching using
 \fBegrep\fR-style regular expressions: \fBregexp\fR and \fBregsub\fR.
 Regular expressions are implemented using Henry Spencer's package,
 and the description of regular expressions below is copied verbatim
@@ -856,14 +858,14 @@ to less-preferred alternatives.)
 Each command produces two results:  a code and a string.  The
 code indicates whether the command completed successfully or not,
 and the string gives additional information.  The valid codes are
-defined in tcl.h, and are:
+defined in hax.h, and are:
 .RS
 .TP 20
-\fBTCL_OK\fR
+\fBHAX_OK\fR
 This is the normal return code, and indicates that the command completed
 successfully.  The string gives the command's return value.
 .TP 20
-\fBTCL_ERROR\fR
+\fBHAX_ERROR\fR
 Indicates that an error occurred; the string gives a message describing
 the error.
 .VS
@@ -876,72 +878,72 @@ See the section BUILT-IN VARIABLES below for more information.
 .VE
 .VE
 .TP 20
-\fBTCL_RETURN\fR
+\fBHAX_RETURN\fR
 Indicates that the \fBreturn\fR command has been invoked, and that the
 current procedure (or top-level command or \fBsource\fR command)
 should return immediately.  The
 string gives the return value for the procedure or command.
 .TP 20
-\fBTCL_BREAK\fR
+\fBHAX_BREAK\fR
 Indicates that the \fBbreak\fR command has been invoked, so the
 innermost loop should abort immediately.  The string should always
 be empty.
 .TP 20
-\fBTCL_CONTINUE\fR
+\fBHAX_CONTINUE\fR
 Indicates that the \fBcontinue\fR command has been invoked, so the
 innermost loop should go on to the next iteration.  The string
 should always be empty.
 .RE
-Tcl programmers do not normally need to think about return codes,
-since TCL_OK is almost always returned.  If anything else is returned
-by a command, then the Tcl interpreter immediately stops processing
+Hax programmers do not normally need to think about return codes,
+since HAX_OK is almost always returned.  If anything else is returned
+by a command, then the Hax interpreter immediately stops processing
 commands and returns to its caller.  If there are several nested
-invocations of the Tcl interpreter in progress, then each nested
+invocations of the Hax interpreter in progress, then each nested
 command will usually return the error to its caller, until eventually
 the error is reported to the top-level application code.  The
 application will then display the error message for the user.
 .PP
 In a few cases, some commands will handle certain ``error'' conditions
 themselves and not return them upwards.  For example, the \fBfor\fR
-command checks for the TCL_BREAK code; if it occurs, then \fBfor\fR
-stops executing the body of the loop and returns TCL_OK to its
-caller.  The \fBfor\fR command also handles TCL_CONTINUE codes and the
-procedure interpreter handles TCL_RETURN codes.  The \fBcatch\fR
-command allows Tcl programs to catch errors and handle them without
+command checks for the HAX_BREAK code; if it occurs, then \fBfor\fR
+stops executing the body of the loop and returns HAX_OK to its
+caller.  The \fBfor\fR command also handles HAX_CONTINUE codes and the
+procedure interpreter handles HAX_RETURN codes.  The \fBcatch\fR
+command allows Hax programs to catch errors and handle them without
 aborting command interpretation any further.
 
 .SH PROCEDURES
 .PP
-Tcl allows you to extend the command interface by defining
-procedures.  A Tcl procedure can be invoked just like any other Tcl
+Hax allows you to extend the command interface by defining
+procedures.  A Hax procedure can be invoked just like any other Hax
 command (it has a name and it receives one or more arguments).
 The only difference is that its body isn't a piece of C code linked
 into the program; it is a string containing one or more other
-Tcl commands.  See the \fBproc\fR command for information on
+Hax commands.  See the \fBproc\fR command for information on
 how to define procedures and what happens when they are invoked.
 
 .SH VARIABLES \- SCALARS AND ARRAYS
 .VS
 .PP
-Tcl allows the definition of variables and the use of their values
+Hax allows the definition of variables and the use of their values
 either through \fB$\fR-style variable substitution, the \fBset\fR
 command, or a few other mechanisms.
 Variables need not be declared:  a new variable will automatically
 be created each time a new variable name is used.
 .PP
-Tcl supports two types of variables:  scalars and arrays.
+Hax supports two types of variables:  scalars and arrays.
 A scalar variable has a single value, whereas an array variable
 can have any number of elements, each with a name (called
 its ``index'') and a value.
 Array indexes may be arbitrary strings; they need not be numeric.
-Parentheses are used refer to array elements in Tcl commands.
+Parentheses are used refer to array elements in Hax commands.
 For example, the command
 .DS C
 \fBset x(first) 44\fR
 .DE
 will modify the element of \fBx\fR whose index is \fBfirst\fR
 so that its new value is \fB44\fR.
-Two-dimensional arrays can be simulated in Tcl by using indexes
+Two-dimensional arrays can be simulated in Hax by using indexes
 that contain multiple concatenated values.
 For example, the commands
 .DS C
@@ -950,7 +952,7 @@ For example, the commands
 .DE
 set the elements of \fBa\fR whose indexes are \fB2,3\fR and \fB3,6\fR.
 .PP
-In general, array elements may be used anywhere in Tcl that scalar
+In general, array elements may be used anywhere in Hax that scalar
 variables may be used.
 If an array is defined with a particular name, then there may
 not be a scalar variable with the same name.
@@ -976,12 +978,12 @@ procedure (this is somewhat analogous to \fBextern\fR in C).
 
 .SH "BUILT-IN COMMANDS"
 .PP
-The Tcl library provides the following built-in commands, which will
-be available in any application using Tcl.  In addition to these
+The Hax library provides the following built-in commands, which will
+be available in any application using Hax.  In addition to these
 built-in commands, there may be additional commands defined by each
-application, plus commands defined as Tcl procedures.
+application, plus commands defined as Hax procedures.
 In the command syntax descriptions below, words in boldface are
-literals that you type verbatim to Tcl.
+literals that you type verbatim to Hax.
 Words in italics are meta-symbols; they serve as names for any of
 a range of values that you can type.
 Optional arguments or groups of arguments are indicated by enclosing them
@@ -1068,7 +1070,7 @@ searches to be underway simultaneously for the same array.
 .TP
 \fBbreak\fR
 This command may be invoked only inside the body of a loop command
-such as \fBfor\fR or \fBforeach\fR or \fBwhile\fR.  It returns a TCL_BREAK code
+such as \fBfor\fR or \fBforeach\fR or \fBwhile\fR.  It returns a HAX_BREAK code
 to signal the innermost containing loop command to return immediately.
 .TP
 \fBcase\fI string \fR?\fBin\fR? \fIpatList body \fR?\fIpatList body \fR...?
@@ -1076,7 +1078,7 @@ to signal the innermost containing loop command to return immediately.
 \fBcase\fI string \fR?\fBin\fR? {\fIpatList body \fR?\fIpatList body \fR...?}
 Match \fIstring\fR against each of the \fIpatList\fR arguments
 in order.  If one matches, then evaluate the following \fIbody\fR argument
-by passing it recursively to the Tcl interpreter, and return the result
+by passing it recursively to the Hax interpreter, and return the result
 of that evaluation.  Each \fIpatList\fR argument consists of a single
 pattern or list of patterns.  Each pattern may contain any of the wild-cards
 described under \fBstring match\fR.  If a \fIpatList\fR
@@ -1133,14 +1135,14 @@ will return \fB2\fR.
 .TP
 \fBcatch\fI command \fR?\fIvarName\fR?
 The \fBcatch\fR command may be used to prevent errors from aborting
-command interpretation.  \fBCatch\fR calls the Tcl interpreter recursively
-to execute \fIcommand\fR, and always returns a TCL_OK code, regardless of
+command interpretation.  \fBCatch\fR calls the Hax interpreter recursively
+to execute \fIcommand\fR, and always returns a HAX_OK code, regardless of
 any errors that might occur while executing \fIcommand\fR.  The return
 value from \fBcatch\fR is a decimal string giving the
-code returned by the Tcl interpreter after executing \fIcommand\fR.
-This will be \fB0\fR (TCL_OK) if there were no errors in \fIcommand\fR; otherwise
+code returned by the Hax interpreter after executing \fIcommand\fR.
+This will be \fB0\fR (HAX_OK) if there were no errors in \fIcommand\fR; otherwise
 it will have a non-zero value corresponding to one of the exceptional
-return codes (see tcl.h for the definitions of code values).  If the
+return codes (see hax.h for the definitions of code values).  If the
 \fIvarName\fR argument is given, then it gives the name of a variable;
 \fBcatch\fR will set the value of the variable to the string returned
 from \fIcommand\fR (either a result or an error message).
@@ -1151,7 +1153,7 @@ Change the current working directory to \fIdirName\fR, or to the
 home directory (as specified in the HOME environment variable) if
 \fIdirName\fR is not given.
 If \fIdirName\fR starts with a tilde, then tilde-expansion is
-done as described for \fBTcl_TildeSubst\fR.
+done as described for \fBHax_TildeSubst\fR.
 Returns an empty string.
 This command can potentially be disruptive to an application,
 so it may be removed in some applications.
@@ -1186,7 +1188,7 @@ as its result.
 \fBcontinue\fR
 This command may be invoked only inside the body of a loop command
 such as \fBfor\fR or \fBforeach\fR or \fBwhile\fR.  It
-returns a  TCL_CONTINUE code
+returns a  HAX_CONTINUE code
 to signal the innermost containing loop command to skip the
 remainder of the loop's body
 but continue with the next iteration of the loop.
@@ -1202,7 +1204,7 @@ channels.
 .VE
 .TP
 \fBerror \fImessage\fR ?\fIinfo\fR? ?\fIcode\fR?
-Returns a TCL_ERROR code, which causes command interpretation to be
+Returns a HAX_ERROR code, which causes command interpretation to be
 unwound.  \fIMessage\fR is a string that is returned to the application
 to indicate what went wrong.
 .RS
@@ -1211,10 +1213,10 @@ If the \fIinfo\fR argument is provided and is non-empty,
 it is used to initialize the global variable \fBerrorInfo\fR.
 \fBerrorInfo\fR is used to accumulate a stack trace of what
 was in progress when an error occurred; as nested commands unwind,
-the Tcl interpreter adds information to \fBerrorInfo\fR.  If the
+the Hax interpreter adds information to \fBerrorInfo\fR.  If the
 \fIinfo\fR argument is present, it is used to initialize
 \fBerrorInfo\fR and the first increment of unwind information
-will not be added by the Tcl interpreter.  In other
+will not be added by the Hax interpreter.  In other
 words, the command containing the \fBerror\fR command will not appear
 in \fBerrorInfo\fR; in its place will be \fIinfo\fR.
 This feature is most useful in conjunction with the \fBcatch\fR command:
@@ -1236,17 +1238,17 @@ such information is available; see the section BUILT-IN VARIABLES
 below for information on the proper format for the variable.
 If the \fIcode\fR argument is not
 present, then \fBerrorCode\fR is automatically reset to
-``NONE'' by the Tcl interpreter as part of processing the
+``NONE'' by the Hax interpreter as part of processing the
 error generated by the command.
 .VE
 .RE
 .TP
 \fBeval \fIarg \fR?\fIarg ...\fR?
-\fBEval\fR takes one or more arguments, which together comprise a Tcl
-command (or collection of Tcl commands separated by newlines in the
+\fBEval\fR takes one or more arguments, which together comprise a Hax
+command (or collection of Hax commands separated by newlines in the
 usual way).  \fBEval\fR concatenates all its arguments in the same
 fashion as the \fBconcat\fR command, passes the concatenated string to the
-Tcl interpreter recursively, and returns the result of that
+Hax interpreter recursively, and returns the result of that
 evaluation (or any error generated by it).
 .TP
 \fBexec \fIarg \fR?\fIarg ...\fR?
@@ -1277,7 +1279,7 @@ output.
 If the last character of the result or error message
 is a newline then that character is deleted from the result
 or error message for consistency with normal
-Tcl return values.
+Hax return values.
 .PP
 If an \fIarg\fR has the value ``>'' then the
 following argument is taken as the name of a file and
@@ -1331,7 +1333,7 @@ the result as a string.  See the section EXPRESSIONS above.
 .VS
 Operate on a file or a file name.  \fIName\fR is the name of a file;
 if it starts with a tilde, then tilde substitution is done before
-executing the command (see the manual entry for \fBTcl_TildeSubst\fR
+executing the command (see the manual entry for \fBHax_TildeSubst\fR
 for details).
 \fIOption\fR indicates what to do with the file name.  Any unique
 abbreviation for \fIoption\fR is acceptable.  The valid options are:
@@ -1462,16 +1464,16 @@ This command returns an empty string.
 \fBfor \fIstart test next body\fR
 \fBFor\fR is a looping command, similar in structure to the C
 \fBfor\fR statement.  The \fIstart\fR, \fInext\fR, and
-\fIbody\fR arguments must be Tcl command strings, and \fItest\fR
+\fIbody\fR arguments must be Hax command strings, and \fItest\fR
 is an expression string.
-The \fBfor\fR command first invokes the Tcl interpreter to
+The \fBfor\fR command first invokes the Hax interpreter to
 execute \fIstart\fR.  Then it repeatedly evaluates \fItest\fR as
-an expression; if the result is non-zero it invokes the Tcl
-interpreter on \fIbody\fR, then invokes the Tcl interpreter on \fInext\fR,
+an expression; if the result is non-zero it invokes the Hax
+interpreter on \fIbody\fR, then invokes the Hax interpreter on \fInext\fR,
 then repeats the loop.  The command terminates when \fItest\fR evaluates
 to 0.  If a \fBcontinue\fR command is invoked within \fIbody\fR then
 any remaining commands in the current execution of \fIbody\fR are skipped;
-processing continues by invoking the Tcl interpreter on \fInext\fR, then
+processing continues by invoking the Hax interpreter on \fInext\fR, then
 evaluating \fItest\fR, and so on.  If a \fBbreak\fR command is invoked
 within \fIbody\fR
 or \fInext\fR,
@@ -1484,10 +1486,10 @@ corresponding statements in C.
 \fBforeach \fIvarname list body\fR
 In this command, \fIvarname\fR is the name of a variable, \fIlist\fR
 is a list of values to assign to \fIvarname\fR, and \fIbody\fR is a
-collection of Tcl commands.  For each field in \fIlist\fR (in order
+collection of Hax commands.  For each field in \fIlist\fR (in order
 from left to right), \fBforeach\fR assigns the contents of the
 field to \fIvarname\fR (as if the \fBlindex\fR command had been used
-to extract the field), then calls the Tcl interpreter to execute
+to extract the field), then calls the Hax interpreter to execute
 \fIbody\fR.  The \fBbreak\fR and \fBcontinue\fR statements may be
 invoked inside \fIbody\fR, with the same effect as in the \fBfor\fR
 command.  \fBForeach\fR returns an empty string.
@@ -1547,7 +1549,7 @@ exactly: an abbreviation will not be accepted.
 .VE
 .TP
 \fBglobal \fIvarname \fR?\fIvarname ...\fR?
-This command is ignored unless a Tcl procedure is being interpreted.
+This command is ignored unless a Hax procedure is being interpreted.
 If so, then it declares the given \fIvarname\fR's to be global variables
 rather than local ones.  For the duration of the current procedure
 (and only while executing in the current procedure), any reference to
@@ -1555,7 +1557,7 @@ any of the \fIvarname\fRs will be bound to a global variable instead
 of a local one.
 .TP
 \fBhistory \fR?\fIoption\fR? ?\fIarg arg ...\fR?
-Note:  this command may not be available in all Tcl-based applications.
+Note:  this command may not be available in all Hax-based applications.
 Typically, only those that receive command input in a typescript
 form will support history.
 The \fBhistory\fR command performs one of several operations related to
@@ -1697,7 +1699,7 @@ added to the history list a different event specifier would be
 needed.
 History revision occurs even when \fBhistory\fR is invoked
 indirectly from the current event (e.g. a user types a command
-that invokes a Tcl procedure that invokes \fBhistory\fR):  the
+that invokes a Hax procedure that invokes \fBhistory\fR):  the
 top-level command whose execution eventually resulted in a
 \fBhistory\fR command is replaced.
 If you wish to invoke commands like \fBhistory words\fR without
@@ -1713,7 +1715,7 @@ The \fIif\fR command evaluates \fIexpr1\fR as an expression (in the
 same way that \fBexpr\fR evaluates its argument).  The value of the
 expression must be numeric; if it
 is non-zero then \fIbody1\fR is executed by passing it to the
-Tcl interpreter.
+Hax interpreter.
 Otherwise \fIexpr2\fR is evaluated as an expression and if it is non-zero
 then \fBbody2\fR is executed, and so on.
 If none of the expressions evaluates to non-zero then \fIbodyN\fR is
@@ -1739,18 +1741,18 @@ and also returned as result.
 .VE
 .TP
 \fBinfo \fIoption \fR?\fIarg arg ...\fR?
-Provide information about various internals to the Tcl interpreter.
+Provide information about various internals to the Hax interpreter.
 The legal \fIoption\fR's (which may be abbreviated) are:
 .RS
 .TP
 \fBinfo args \fIprocname\fR
 Returns a list containing the names of the arguments to procedure
 \fIprocname\fR, in order.  \fIProcname\fR must be the name of a
-Tcl command procedure.
+Hax command procedure.
 .TP
 \fBinfo body \fIprocname\fR
 Returns the body of procedure \fIprocname\fR.  \fIProcname\fR must be
-the name of a Tcl command procedure.
+the name of a Hax command procedure.
 .TP
 \fBinfo cmdcount\fR
 Returns a count of the total number of commands that have been invoked
@@ -1758,7 +1760,7 @@ in this interpreter.
 .TP
 \fBinfo commands \fR?\fIpattern\fR?
 If \fIpattern\fR isn't specified, returns a list of names of all the
-Tcl commands, including both the built-in commands written in C and
+Hax commands, including both the built-in commands written in C and
 the command procedures defined using the \fBproc\fR command.
 If \fIpattern\fR is specified, only those names matching \fIpattern\fR
 are returned.  Matching is determined using the same rules as for
@@ -1766,7 +1768,7 @@ are returned.  Matching is determined using the same rules as for
 .TP
 \fBinfo complete \fIcommand\fR
 .VS
-Returns 1 if \fIcommand\fR is a complete Tcl command in the sense of
+Returns 1 if \fIcommand\fR is a complete Hax command in the sense of
 having no unclosed quotes, braces, brackets or array element names,
 If the command doesn't appear to be complete then 0 is returned.
 This command is typically used in line-oriented input environments
@@ -1776,7 +1778,7 @@ lines have been typed to complete the command.
 .VE
 .TP
 \fBinfo default \fIprocname arg varname\fR
-\fIProcname\fR must be the name of a Tcl command procedure and \fIarg\fR
+\fIProcname\fR must be the name of a Hax command procedure and \fIarg\fR
 must be the name of an argument to that procedure.  If \fIarg\fR
 doesn't have a default value then the command returns \fB0\fR.
 Otherwise it returns \fB1\fR and places the default value of \fIarg\fR
@@ -1809,18 +1811,18 @@ levels mean.
 .TP
 \fBinfo library\fR
 .VS
-Returns the name of the library directory in which standard Tcl
+Returns the name of the library directory in which standard Hax
 scripts are stored.
-The default value for the library is compiled into Tcl, but it
+The default value for the library is compiled into Hax, but it
 .VS
-may be overridden by setting the TCL_LIBRARY environment variable.
-If there is no TCL_LIBRARY variable and no compiled-in value then
+may be overridden by setting the HAX_LIBRARY environment variable.
+If there is no HAX_LIBRARY variable and no compiled-in value then
 and error is generated.
 .VE
 See the \fBlibrary\fR manual entry for details of the facilities
-provided by the Tcl script library.
+provided by the Hax script library.
 Normally each application will have its own application-specific
-script library in addition to the Tcl script library;  I suggest that
+script library in addition to the Hax script library;  I suggest that
 each application set a global variable with a name like
 .VS
 \fB$\fIapp\fB_library\fR (where \fIapp\fR is the application's name)
@@ -1842,22 +1844,22 @@ are returned.  Matching is determined using the same rules as for
 .TP
 \fBinfo procs \fR?\fIpattern\fR?
 If \fIpattern\fR isn't specified, returns a list of all the
-names of Tcl command procedures.
+names of Hax command procedures.
 If \fIpattern\fR is specified, only those names matching \fIpattern\fR
 are returned.  Matching is determined using the same rules as for
 \fBstring match\fR.
 .TP
 \fBinfo script\fR
 .VS
-If a Tcl script file is currently being evaluated (i.e. there is a
-call to \fBTcl_EvalFile\fR active or there is an active invocation
+If a Hax script file is currently being evaluated (i.e. there is a
+call to \fBHax_EvalFile\fR active or there is an active invocation
 of the \fBsource\fR command), then this command returns the name
 of the innermost file being processed.  Otherwise the command returns an
 empty string.
 .VE
 .TP
 \fBinfo tclversion\fR
-Returns the version number for this version of Tcl in the form \fIx.y\fR,
+Returns the version number for this version of Hax in the form \fIx.y\fR,
 where changes to \fIx\fR represent major changes with probable
 incompatibilities and changes to \fIy\fR represent small enhancements and
 bug fixes that retain backward compatibility.
@@ -1873,7 +1875,7 @@ are returned.  Matching is determined using the same rules as for
 .TP
 \fBjoin \fIlist \fR?\fIjoinString\fR?
 .VS
-The \fIlist\fR argument must be a valid Tcl list.
+The \fIlist\fR argument must be a valid Hax list.
 This command returns the string
 formed by joining all of the elements of \fIlist\fR together with
 \fIjoinString\fR separating each adjacent pair of elements.
@@ -1895,10 +1897,10 @@ more efficient than ``\fBset a [concat $a [list $b]]\fR'' when
 \fB$a\fR is long.
 .TP
 \fBlindex \fIlist index\fR
-Treats \fIlist\fR as a Tcl list and returns the \fIindex\fR'th element
+Treats \fIlist\fR as a Hax list and returns the \fIindex\fR'th element
 from it (0 refers to the first element of the list).
 In extracting the element, \fIlindex\fR observes the same rules
-concerning braces and quotes and backslashes as the Tcl command
+concerning braces and quotes and backslashes as the Hax command
 interpreter; however, variable
 substitution and command substitution do not occur.
 If \fIindex\fR is negative or greater than or equal to the number
@@ -1947,7 +1949,7 @@ Treats \fIlist\fR as a list and returns a decimal string giving
 the number of elements in it.
 .TP
 \fBlrange \fIlist first last
-\fIList\fR must be a valid Tcl list.  This command will
+\fIList\fR must be a valid Hax list.  This command will
 return a new list consisting of elements
 \fIfirst\fR through \fIlast\fR, inclusive.
 \fILast\fR may be \fBend\fR (or any
@@ -2004,7 +2006,7 @@ that may be used in future invocations
 of commands like \fBread\fR, \fBputs\fR, and \fBclose\fR.
 \fIFileName\fR gives the name of the file to open; if it starts with
 a tilde then tilde substitution is performed as described for
-\fBTcl_TildeSubst\fR.
+\fBHax_TildeSubst\fR.
 If the first character of \fIfileName\fR is ``|'' then the
 remaining characters of \fIfileName\fR are treated as a command
 pipeline to invoke, in the same style as for \fBexec\fR.
@@ -2053,11 +2055,11 @@ current standard input unless overridden by the command.
 .VE
 .TP
 \fBproc \fIname args body\fR
-The \fBproc\fR command creates a new Tcl command procedure,
+The \fBproc\fR command creates a new Hax command procedure,
 \fIname\fR, replacing
 any existing command there may have been by that name.  Whenever the
 new command is invoked, the contents of \fIbody\fR will be executed
-by the Tcl interpreter.  \fIArgs\fR specifies the formal arguments to the
+by the Hax interpreter.  \fIArgs\fR specifies the formal arguments to the
 procedure.  It consists of a list, possibly empty, each of whose
 elements specifies
 one argument.  Each argument specifier is also a list with either
@@ -2113,7 +2115,7 @@ If no \fIfileId\fR is specified then it defaults to \fBstdout\fR.
 but this feature may be suppressed by specifying the \fB\-nonewline\fR
 switch.
 .VE
-Output to files is buffered internally by Tcl; the \fBflush\fR
+Output to files is buffered internally by Hax; the \fBflush\fR
 command may be used to force buffered characters to be output.
 .TP
 \fBpwd\fR
@@ -2198,7 +2200,7 @@ Additional backslashes may be used in \fIsubSpec\fR to prevent special
 interpretation of ``&'' or ``\e0'' or ``\e\fIn\fR'' or
 backslash.
 The use of backslashes in \fIsubSpec\fR tends to interact badly
-with the Tcl parser's use of backslashes, so it's generally
+with the Hax parser's use of backslashes, so it's generally
 safest to enclose \fIsubSpec\fR in braces if it includes
 backslashes.
 If the \fB\-all\fR argument is specified, then all ranges in
@@ -2294,7 +2296,7 @@ or local variable of the procedure, unless the \fIglobal\fR command
 has been invoked to declare \fIvarname\fR to be global.
 .TP
 \fBsource \fIfileName\fR
-Read file \fIfileName\fR and pass the contents to the Tcl interpreter
+Read file \fIfileName\fR and pass the contents to the Hax interpreter
 as a sequence of commands to execute in the normal fashion.  The return
 value of \fBsource\fR is the return value of the last command executed
 from the file.  If an error occurs in executing the contents of the
@@ -2303,7 +2305,7 @@ If a \fBreturn\fR command is invoked from within the file, the remainder of
 the file will be skipped and the \fBsource\fR command will return
 normally with the result from the \fBreturn\fR command.
 If \fIfileName\fR starts with a tilde, then it is tilde-substituted
-as described in the \fBTcl_TildeSubst\fR manual entry.
+as described in the \fBHax_TildeSubst\fR manual entry.
 .TP
 \fBsplit \fIstring \fR?\fIsplitChars\fR?
 Returns a list created by splitting \fIstring\fR at each character
@@ -2446,7 +2448,7 @@ channels.
 .VE
 .TP
 \fBtime \fIcommand\fR ?\fIcount\fR?
-This command will call the Tcl interpreter \fIcount\fR
+This command will call the Hax interpreter \fIcount\fR
 times to execute \fIcommand\fR (or once if \fIcount\fR isn't
 specified).  It will then return a string of the form
 .RS
@@ -2460,7 +2462,7 @@ Time is measured in elapsed time, not CPU time.
 .TP
 \fBtrace \fIoption\fR ?\fIarg arg ...\fR?
 .VS
-Cause Tcl commands to be executed whenever certain operations are
+Cause Hax commands to be executed whenever certain operations are
 invoked.  At present, only variable tracing is implemented. The
 legal \fIoption\fR's (which may be abbreviated) are:
 .RS
@@ -2513,7 +2515,7 @@ defined above.
 .LP
 \fICommand\fR executes in the same context as the code that invoked
 the traced operation:  if the variable was accessed as part of a
-Tcl procedure, then \fIcommand\fR will have access to the same
+Hax procedure, then \fIcommand\fR will have access to the same
 local variables as code in the procedure.  This context may be
 different than the context in which the trace was created.
 If \fIcommand\fR invokes a procedure (which it normally does) then
@@ -2592,10 +2594,10 @@ the result of the command will be an empty string.
 .RE
 .TP
 \fBunknown \fIcmdName \fR?\fIarg arg ...\fR?
-This command doesn't actually exist as part of Tcl, but Tcl will
+This command doesn't actually exist as part of Hax, but Hax will
 invoke it if it does exist.
-If the Tcl interpreter encounters a command name for which there
-is not a defined command, then Tcl checks for the existence of
+If the Hax interpreter encounters a command name for which there
+is not a defined command, then Hax checks for the existence of
 a command named \fBunknown\fR.
 If there is no such command, then the interpeter returns an
 error.
@@ -2648,7 +2650,7 @@ In the above example, suppose \fBc\fR invokes the command
 .DS
 \fBuplevel 1 {set x 43; d}
 .DE
-where \fBd\fR is another Tcl procedure.  The \fBset\fR command will
+where \fBd\fR is another Hax procedure.  The \fBset\fR command will
 modify the variable \fBx\fR in \fBb\fR's context, and \fBd\fR will execute
 at level 3, as if called from \fBb\fR.  If it in turn executes
 the command
@@ -2660,8 +2662,8 @@ context:  the procedure \fBc\fR does not appear to be on the call stack
 when \fBd\fR is executing.  The command ``\fBinfo level\fR'' may
 be used to obtain the level of the current procedure.
 \fBUplevel\fR makes it possible to implement new control
-constructs as Tcl procedures (for example, \fBuplevel\fR could
-be used to implement the \fBwhile\fR construct as a Tcl procedure).
+constructs as Hax procedures (for example, \fBuplevel\fR could
+be used to implement the \fBwhile\fR construct as a Hax procedure).
 .RE
 .TP
 \fBupvar \fR?\fIlevel\fR? \fIotherVar myVar \fR?\fIotherVar myVar \fR...?
@@ -2688,7 +2690,7 @@ array.
 .LP
 The \fBupvar\fR command simplifies the implementation of call-by-name
 procedure calling and also makes it easier to build new control constructs
-as Tcl procedures.
+as Hax procedures.
 For example, consider the following procedure:
 .DS
 .ta 1c 2c 3c
@@ -2710,7 +2712,7 @@ to access the variable in the caller's procedure frame.
 The \fIwhile\fR command evaluates \fItest\fR as an expression
 (in the same way that \fBexpr\fR evaluates its argument).
 The value of the expression must be numeric; if it is non-zero
-then \fIbody\fR is executed by passing it to the Tcl interpreter.
+then \fIbody\fR is executed by passing it to the Hax interpreter.
 Once \fIbody\fR has been executed then \fItest\fR is evaluated
 again, and the process repeats until eventually \fItest\fR
 evaluates to a zero numeric value.  \fBContinue\fR
@@ -2724,13 +2726,13 @@ always returns an empty string.
 .SH "BUILT-IN VARIABLES"
 .PP
 The following global variables are created and managed automatically
-by the Tcl library.  Except where noted below, these variables should
+by the Hax library.  Except where noted below, these variables should
 normally be treated as read-only by application-specific code and by users.
 .TP
 \fBenv\fR
 .br
 .VS
-This variable is maintained by Tcl as an array
+This variable is maintained by Hax as an array
 whose elements are the environment variables for the process.
 Reading an element will return the value of the corresponding
 environment variable.
@@ -2741,7 +2743,7 @@ Unsetting an element of \fBenv\fR will remove the corresponding
 environment variable.
 Changes to the \fBenv\fR array will affect the environment
 passed to children by commands like \fBexec\fR.
-If the entire \fBenv\fR array is unset then Tcl will stop
+If the entire \fBenv\fR array is unset then Hax will stop
 monitoring \fBenv\fR accesses and will not update environment
 variables.
 .TP
@@ -2749,11 +2751,11 @@ variables.
 After an error has occurred, this variable will be set to hold
 additional information about the error in a form that is easy
 to process with programs.
-\fBerrorCode\fR consists of a Tcl list with one or more elements.
+\fBerrorCode\fR consists of a Hax list with one or more elements.
 The first element of the list identifies a general class of
 errors, and determines the format of the rest of the list.
 The following formats for \fBerrorCode\fR are used by the
-Tcl core; individual applications may define additional formats.
+Hax core; individual applications may define additional formats.
 .RS
 .TP
 \fBCHILDKILLED\fI pid sigName msg\fR
@@ -2803,9 +2805,9 @@ message corresponding to \fIerrName\fR, such as
 ``no such file or directory'' for the \fBENOENT\fR case.
 .PP
 To set \fBerrorCode\fR, applications should use library
-procedures such as \fBTcl_SetErrorCode\fR and
-\fBTcl_UnixError\fR, or they may invoke the \fBerror\fR command.
-If one of these methods hasn't been used, then the Tcl
+procedures such as \fBHax_SetErrorCode\fR and
+\fBHax_UnixError\fR, or they may invoke the \fBerror\fR command.
+If one of these methods hasn't been used, then the Hax
 interpreter will reset the variable to \fBNONE\fR after
 the next error.
 .RE
@@ -2813,15 +2815,15 @@ the next error.
 .TP
 \fBerrorInfo\fR
 After an error has occurred, this string will contain one or more lines
-identifying the Tcl commands and procedures that were being executed
+identifying the Hax commands and procedures that were being executed
 when the most recent error occurred.
 Its contents take the form of a stack trace showing the various
-nested Tcl commands that had been invoked at the time of the error.
+nested Hax commands that had been invoked at the time of the error.
 
 .SH AUTHOR
 John Ousterhout, University of California at Berkeley (ouster@sprite.berkeley.edu)
 .sp
-Many people have contributed to Tcl in various ways, but the following
+Many people have contributed to Hax in various ways, but the following
 people have made unusually large contributions:
 .sp
 .nf

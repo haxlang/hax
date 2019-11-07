@@ -32,7 +32,7 @@
  * 2019-11-07 Remove superfluous break in switch()
  * 2019-11-07 Rename regex functions to disable clash with libc
  */
-#include "tclInt.h"
+#include "haxInt.h"
 
 /*
  * The "internal use only" fields in regexp.h are present to pass info from

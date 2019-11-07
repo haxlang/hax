@@ -10,29 +10,29 @@
 '\" $Header: /user6/ouster/tcl/man/RCS/ExprLong.3,v 1.6 93/01/31 15:35:33 ouster Exp $ SPRITE (Berkeley)
 '\" 
 .so man.macros
-.HS Tcl_ExprLong tcl
+.HS Hax_ExprLong hax
 .BS
 .SH NAME
-Tcl_ExprLong, Tcl_ExprDouble, Tcl_ExprBool, Tcl_ExprString \- evaluate an expression
+Hax_ExprLong, Hax_ExprDouble, Hax_ExprBool, Hax_ExprString \- evaluate an expression
 .SH SYNOPSIS
 .nf
-\fB#include <tcl.h>\fR
+\fB#include <hax.h>\fR
 .VS
 .sp
 int
-\fBTcl_ExprLong\fR(\fIinterp, string, longPtr\fR)
+\fBHax_ExprLong\fR(\fIinterp, string, longPtr\fR)
 .sp
 int
-\fBTcl_ExprDouble\fR(\fIinterp, string, doublePtr\fR)
+\fBHax_ExprDouble\fR(\fIinterp, string, doublePtr\fR)
 .sp
 int
-\fBTcl_ExprBoolean\fR(\fIinterp, string, booleanPtr\fR)
+\fBHax_ExprBoolean\fR(\fIinterp, string, booleanPtr\fR)
 .sp
 int
-\fBTcl_ExprString\fR(\fIinterp, string\fR)
+\fBHax_ExprString\fR(\fIinterp, string\fR)
 .SH ARGUMENTS
-.AS Tcl_Interp *booleanPtr
-.AP Tcl_Interp *interp in
+.AS Hax_Interp *booleanPtr
+.AP Hax_Interp *interp in
 Interpreter in whose context to evaluate \fIstring\fR.
 .AP char *string in
 Expression to be evaluated.  Must be in writable memory (the expression
@@ -56,45 +56,45 @@ the result in one of four different forms.
 The expression is given by the \fIstring\fR argument, and it
 can have any of the forms accepted by the \fBexpr\fR command.
 The \fIinterp\fR argument refers to an interpreter used to
-evaluate the expression (e.g. for variables and nested Tcl
+evaluate the expression (e.g. for variables and nested Hax
 commands) and to return error information.  \fIInterp->result\fR
 is assumed to be initialized in the standard fashion when any
 of the procedures are invoked.
 .PP
 For all of these procedures the return value is a standard
-Tcl result:  \fBTCL_OK\fR means the expression was succesfully
-evaluated, and \fBTCL_ERROR\fR means that an error occurred while
-evaluating the expression.  If \fBTCL_ERROR\fR is returned then
+Hax result:  \fBHAX_OK\fR means the expression was succesfully
+evaluated, and \fBHAX_ERROR\fR means that an error occurred while
+evaluating the expression.  If \fBHAX_ERROR\fR is returned then
 \fIinterp->result\fR will hold a message describing the error.
-If an error occurs while executing a Tcl command embedded in
+If an error occurs while executing a Hax command embedded in
 \fIstring\fR, then that error will be returned.
 .PP
 If the expression is successfully evaluated, then its value will
 be returned in one of four forms, depending on which procedure
 is invoked.
-\fBTcl_ExprLong\fR stores an integer value at \fI*longPtr\fR.
+\fBHax_ExprLong\fR stores an integer value at \fI*longPtr\fR.
 If the expression's actual value was a floating-point number,
 then it is truncated to an integer.
 If the expression's actual value was a non-numeric string then
 an error is returned.
 .PP
-\fBTcl_ExprDouble\fR stores a floating-point value at \fI*doublePtr\fR.
+\fBHax_ExprDouble\fR stores a floating-point value at \fI*doublePtr\fR.
 If the expression's actual value was an integer, it is converted to
 floating-point.
 If the expression's actual value was a non-numeric string then
 an error is returned.
 .PP
-\fBTcl_ExprBoolean\fR stores a 0/1 integer value at \fI*booleanPtr\fR.
+\fBHax_ExprBoolean\fR stores a 0/1 integer value at \fI*booleanPtr\fR.
 If the expression's actual value was an integer or floating-point
-number, then \fBTcl_ExprBoolean\fR stores 0 at \fI*booleanPtr\fR if
+number, then \fBHax_ExprBoolean\fR stores 0 at \fI*booleanPtr\fR if
 the value was zero and 1 otherwise.
 If the expression's actual value was a non-numeric string then
 an error is returned.
 .PP
-\fBTcl_ExprString\fR returns the value of the expression as a
+\fBHax_ExprString\fR returns the value of the expression as a
 string stored in \fIinterp->result\fR.
 If the expression's actual value was an integer or floating-point
-number, then \fBTcl_ExprString\fR converts it to string (using \fBsprintf\fR
+number, then \fBHax_ExprString\fR converts it to string (using \fBsprintf\fR
 with a ``%d'' or ``%g'' converter).
 
 .SH KEYWORDS

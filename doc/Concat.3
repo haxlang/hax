@@ -10,16 +10,16 @@
 '\" $Header: /user6/ouster/tcl/man/RCS/Concat.3,v 1.4 93/01/31 15:35:29 ouster Exp $ SPRITE (Berkeley)
 '\" 
 .so man.macros
-.HS Tcl_Concat tcl
+.HS Hax_Concat hax
 .BS
 .SH NAME
-Tcl_Concat \- concatenate a collection of strings
+Hax_Concat \- concatenate a collection of strings
 .SH SYNOPSIS
 .nf
-\fB#include <tcl.h>\fR
+\fB#include <hax.h>\fR
 .sp
 char *
-\fBTcl_Concat\fR(\fIargc, argv\fR)
+\fBHax_Concat\fR(\fIargc, argv\fR)
 .SH ARGUMENTS
 .AP int argc in
 Number of strings.
@@ -29,18 +29,18 @@ Array of strings to concatenate.  Must have \fIargc\fR entries.
 
 .SH DESCRIPTION
 .PP
-\fBTcl_Concat\fR is a utility procedure used by several of the
-Tcl commands.  Given a collection of strings, it concatenates
+\fBHax_Concat\fR is a utility procedure used by several of the
+Hax commands.  Given a collection of strings, it concatenates
 them together into a single string, with the original strings
 separated by spaces.  This procedure behaves differently than
-\fBTcl_Merge\fR, in that the arguments are simply concatenated:
+\fBHax_Merge\fR, in that the arguments are simply concatenated:
 no effort is made to ensure proper list structure.
 .VS
 However, in most common usage the arguments will all be proper
 lists themselves;  if this is true, then the result will also have
 proper list structure.
 .PP
-\fBTcl_Concat\fR eliminates leading and trailing white space as it
+\fBHax_Concat\fR eliminates leading and trailing white space as it
 copies strings from \fBargv\fR to the result.  If an element of
 \fBargv\fR consists of nothing but white space, then that string
 is ignored entirely.  This white-space removal was added to make

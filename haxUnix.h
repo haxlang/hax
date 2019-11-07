@@ -1,11 +1,11 @@
 /*
- * tclUnix.h --
+ * haxUnix.h --
  *
  *	This file reads in UNIX-related header files and sets up
- *	UNIX-related macros for Tcl's UNIX core.  It should be the
+ *	UNIX-related macros for Hax's UNIX core.  It should be the
  *	only file that contains #ifdefs to handle different flavors
  *	of UNIX.  This file sets up the union of all UNIX-related
- *	things needed by any of the Tcl core files.
+ *	things needed by any of the Hax core files.
  *
  *	The material in this file was originally contributed by
  *	Karl Lehenbauer, Mark Diekhans and Peter da Silva.
@@ -22,8 +22,8 @@
  * $Header: /user6/ouster/tcl/RCS/tclUnix.h,v 1.31 92/12/23 16:49:17 ouster Exp $ SPRITE (Berkeley)
  */
 
-#ifndef _TCLUNIX
-#define _TCLUNIX
+#ifndef _HAXUNIX
+#define _HAXUNIX
 
 #include <errno.h>
 #include <fcntl.h>
@@ -58,4 +58,4 @@
 
 extern char **environ;
 
-#endif /* _TCLUNIX */
+#endif /* _HAXUNIX */

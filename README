@@ -1,7 +1,12 @@
 Hax
 ========================================================================
 
-Hax is a stand-alone small-footprint Tcl interpreter forked from Tcl 6.7.
+Hax is a small-footprint Tcl interpreter forked from Tcl 6.7.
+
+A distinguished property of Hax is that it can be used in a freestanding
+environment, without libc and any other libraries. Hax contains a
+builtin support for Software Emulated Floats. Hax is suitable for
+embedding into restricted environments suchs as bootloaders and kernels.
 
 Tcl is a programming language by John Ousterhout, a professor of
 computer science at University of California at Berkeley.
@@ -14,24 +19,24 @@ License BSD.
 This directory contains the sources and documentation for Hax, an
 embeddable tool command language.
 
-For an introduction to the facilities provided by Hax, your best
-bet is to retrieve the ``Tcl and the Tk Toolkit'' (1994) book. Another
-possibility is to see the paper ``Tcl:  An Embeddable Command
-Language'', in the Proceedings of the 1990 Winter USENIX Conference.
-However, the book and the paper correspond to different versions of Tcl
-(respectively 7.3 and around 3.0), so some details may not be correct.
+For an introduction to the facilities provided by Hax, your best bet
+is to retrieve the ``Tcl and the Tk Toolkit'' (1994) book. Another
+possibility is to see the paper ``Tcl: An Embeddable Command Language'',
+in the Proceedings of the 1990 Winter USENIX Conference. However, the
+book and the paper correspond to different versions of Tcl (respectively
+7.3 and around 3.0), so some details may not be correct.
 
 2. Documentation
 ------------------------------------------------------------------------
 
-The "doc" subdirectory contains a complete set of manual entries
-for Hax.  Files with extension ".3" are for C library procedures
-provided by Hax; files with extension ".n" describe the core Hax
-commands. The file "doc/Tcl.n" gives an overall description of the
-Hax language and describes the core Hax commands (most of this
-material is now available in a more palatable form in the book draft).
-To print any of the man pages, cd to the "doc" directory and invoke your
-favorite variant of troff using the normal -man macros, for example
+The "doc" subdirectory contains a complete set of manual entries for
+Hax. Files with extension ".3" are for C library procedures provided
+by Hax; files with extension ".n" describe the core Hax commands. The
+file "doc/Hax.n" gives an overall description of the Hax language and
+describes the core Hax commands (most of this material is now available
+in a more palatable form in the book draft). To print any of the man
+pages, cd to the "doc" directory and invoke your favorite variant of
+troff using the normal -man macros, for example
 
                 ditroff -man <file>
 
@@ -44,29 +49,28 @@ To compile Hax on any of the configurations listed above, or systems
 similar to them, do the following:
 
     (a) Configure the Makefile in this directory according to the
-    instructions at the beginning of the file.  In particular, if
+    instructions at the beginning of the file. In particular, if
     you're not going to install the library in the suggested place
-    (/usr/local/lib/tcl) you need to reset the TCL_LIBRARY variable.
-    You may also want to change CC, CFLAGS, LDFLAGS, etc.
+    (/usr/local/lib/hax) you need to reset the HAX_LIBRARY variable. You
+    may also want to change CC, CFLAGS, LDFLAGS, etc.
 
-    (b) Type "make" to compile the library.  This will create the
-    Hax library in "libtcl.a".  The Makefile should work without any
+    (b) Type "make" to compile the library. This will create the
+    Hax library in "libhax.a". The Makefile should work without any
     modifications but you may wish to personalize it, e.g. to turn on
     compiler optimization.
 
-    (c) Type "make install" to install Hax binaries and script files
-    in standard places.  You'll need write permission on /usr/local
-    to do this.  See the Makefile for details on where things get
-    installed.
+    (c) Type "make install" to install Hax binaries and script files in
+    standard places. You'll need write permission on /usr/local to do
+    this. See the Makefile for details on where things get installed.
 
-    (d) Type "make tclTest", which will create a simple test program
-    that you can use to try out the Hax facilities.  TclTest is
-    just a main-program sandwich around the Hax library.  It reads
-    standard input until it reaches the end of a line where parentheses
-    and backslashes are balanced, then sends everything it's read to the
-    Hax interpreter.  When the Hax interpreter returns, tclTest
-    prints the return value or error message.  TclTest defines a few
-    other additional commands, most notably:
+    (d) Type "make haxTest", which will create a simple test program
+    that you can use to try out the Hax facilities. HaxTest is just a
+    main-program sandwich around the Hax library. It reads standard
+    input until it reaches the end of a line where parentheses and
+    backslashes are balanced, then sends everything it's read to the
+    Hax interpreter. When the Hax interpreter returns, haxTest prints
+    the return value or error message. HaxTest defines a few other
+    additional commands, most notably:
 
                         echo arg arg ...
 
@@ -76,20 +80,20 @@ similar to them, do the following:
 4. Test suite
 ------------------------------------------------------------------------
 
-There is a relatively complete test suite for all of the Tcl core in
-the subdirectory "tests".  To use it just type "make test" in this
-directory.  You should then see a printout of the test files processed.
-If any errors occur, you'll see a much more substantial printout for
-each error. See the README file in the "tests" directory for more
-information on the test suite.
+There is a relatively complete test suite for all of the Hax core in the
+subdirectory "tests". To use it just type "make test" in this directory.
+You should then see a printout of the test files processed. If any
+errors occur, you'll see a much more substantial printout for each
+error. See the README file in the "tests" directory for more information
+on the test suite.
 
 5. Compiling on non-UNIX systems
 ------------------------------------------------------------------------
 
-The Tcl features that depend on system calls peculiar to UNIX (stat,
-fork, exec, times, etc.) are now separate from the main body of Tcl,
-which only requires a few generic library procedures such as malloc and
-strcpy.  Thus it should be relatively easy to compile Tcl for these
+The Hax features that depend on system calls peculiar to UNIX (stat,
+fork, exec, times, etc.) are now separate from the main body of Hax,
+which only requires a few generic library procedures such as malloc
+and strcpy. Thus it should be relatively easy to compile Hax for these
 machines, although a number of UNIX-specific commands will be absent
-(e.g. exec, time, and glob).  See the comments at the top of Makefile
-for information on how to compile without the UNIX features.
+(e.g. exec, time, and glob). See the comments at the top of Makefile for
+information on how to compile without the UNIX features.
