@@ -7,7 +7,7 @@
 # commands are available), change the OBJS line below so it doesn't
 # include ${UNIX_OBJS}.  Also, add the switch "-DHAX_GENERIC_ONLY" to
 # CFLAGS.  Lastly, you'll have to provide your own replacement for the
-# "panic" procedure (see haxPanic.c for what the current one does).
+# "Hax_Panic" procedure (see haxPanic.c for what the current one does).
 
 # 2. If you want to put Hax-related information in non-standard places,
 # change the following definitions below to reflect where you want

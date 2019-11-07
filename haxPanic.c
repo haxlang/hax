@@ -1,7 +1,7 @@
 /* 
- * panic.c --
+ * haxPanic.c --
  *
- *	Source code for the "panic" library procedure for Hax;
+ *	Source code for the "Hax_Panic" library procedure for Hax;
  *	individual applications will probably override this with
  *	an application-specific panic procedure.
  *
@@ -26,7 +26,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/panic.c,v 1.3 91/10/10 11:
 /*
  *----------------------------------------------------------------------
  *
- * panic --
+ * Hax_Panic --
  *
  *	Print an error message and kill the process.
  *
@@ -41,7 +41,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/panic.c,v 1.3 91/10/10 11:
 
 	/* VARARGS ARGSUSED */
 void
-panic(
+Hax_Panic(
     char *format,		/* Format string, suitable for passing to
 				 * fprintf. */
     ...				/* Additional arguments (variable in number)

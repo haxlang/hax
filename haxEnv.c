@@ -425,7 +425,7 @@ EnvTraceProc(
 
 	if ((flags & (HAX_TRACE_UNSETS|HAX_TRACE_DESTROYED))
 		!= (HAX_TRACE_UNSETS|HAX_TRACE_DESTROYED)) {
-	    panic("EnvTraceProc called with confusing arguments");
+	    Hax_Panic("EnvTraceProc called with confusing arguments");
 	}
 	eiPtr = firstInterpPtr;
 	if (eiPtr->interp == interp) {
@@ -434,7 +434,7 @@ EnvTraceProc(
 	    for (prevPtr = eiPtr, eiPtr = eiPtr->nextPtr; ;
 		    prevPtr = eiPtr, eiPtr = eiPtr->nextPtr) {
 		if (eiPtr == NULL) {
-		    panic("EnvTraceProc couldn't find interpreter");
+		    Hax_Panic("EnvTraceProc couldn't find interpreter");
 		}
 		if (eiPtr->interp == interp) {
 		    prevPtr->nextPtr = eiPtr->nextPtr;

@@ -388,7 +388,7 @@ Hax_DetachPids(
 	    }
 	    goto nextPid;
 	}
-	panic("Hax_Detach couldn't find process");
+	Hax_Panic("Hax_Detach couldn't find process");
 
 	nextPid:
 	continue;

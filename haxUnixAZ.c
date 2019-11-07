@@ -1090,7 +1090,7 @@ Hax_OpenCmd(
     fd = fileno(filePtr->f);
     HaxMakeFileTable(iPtr, fd);
     if (iPtr->filePtrArray[fd] != NULL) {
-	panic("Hax_OpenCmd found file already open");
+	Hax_Panic("Hax_OpenCmd found file already open");
     }
     iPtr->filePtrArray[fd] = filePtr;
     sprintf(interp->result, "file%d", fd);

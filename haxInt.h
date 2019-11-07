@@ -629,7 +629,7 @@ extern char *		haxRegexpError;
  *----------------------------------------------------------------
  */
 
-extern void		panic(char *format, ...);
+extern void		Hax_Panic(char *format, ...);
 extern regexp *		HaxCompileRegexp (Hax_Interp *interp,
 			    char *string);
 extern void		HaxCopyAndCollapse (int count, char *src,

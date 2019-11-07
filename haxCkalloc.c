@@ -124,7 +124,7 @@ ValidateMemory (
         fflush (stderr);  /* In case name pointer is bad. */
         fprintf (stderr, "%d bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
-        panic ("Memory validation failure");
+        Hax_Panic ("Memory validation failure");
     }
 
     hiPtr = (unsigned char *)memHeaderP->body + memHeaderP->length;
@@ -146,7 +146,7 @@ ValidateMemory (
         fflush (stderr);  /* In case name pointer is bad. */
         fprintf (stderr, "%d bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
-        panic ("Memory validation failure");
+        Hax_Panic ("Memory validation failure");
     }
 
     if (nukeGuards) {
@@ -247,7 +247,7 @@ Hax_DbCkalloc(
     if (result == NULL) {
         fflush(stdout);
         dump_memory_info(stderr);
-        panic("unable to alloc %d bytes, %s line %d", size, file, 
+        Hax_Panic("unable to alloc %d bytes, %s line %d", size, file, 
               line);
     }
 
@@ -526,7 +526,7 @@ Hax_Ckalloc (
 
         result = malloc(size);
         if (result == NULL) 
-                panic("unable to alloc %d bytes", size);
+                Hax_Panic("unable to alloc %d bytes", size);
         return result;
 }
 

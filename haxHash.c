@@ -139,7 +139,7 @@ Hax_DeleteHashEntry(
     } else {
 	for (prevPtr = *entryPtr->bucketPtr; ; prevPtr = prevPtr->nextPtr) {
 	    if (prevPtr == NULL) {
-		panic("malformed bucket chain in Hax_DeleteHashEntry");
+		Hax_Panic("malformed bucket chain in Hax_DeleteHashEntry");
 	    }
 	    if (prevPtr->nextPtr == entryPtr) {
 		prevPtr->nextPtr = entryPtr->nextPtr;
@@ -791,7 +791,7 @@ ArrayCreate(
  *	on a table that has been deleted.
  *
  * Results:
- *	If panic returns (which it shouldn't) this procedure returns
+ *	If Hax_Panic returns (which it shouldn't) this procedure returns
  *	NULL.
  *
  * Side effects:
@@ -806,7 +806,7 @@ BogusFind(
     Hax_HashTable *tablePtr,	/* Table in which to lookup entry. */
     char *key			/* Key to use to find matching entry. */)
 {
-    panic("called Hax_FindHashEntry on deleted table");
+    Hax_Panic("called Hax_FindHashEntry on deleted table");
     return NULL;
 }
 
@@ -819,7 +819,7 @@ BogusFind(
  *	on a table that has been deleted.
  *
  * Results:
- *	If panic returns (which it shouldn't) this procedure returns
+ *	If Hax_Panic returns (which it shouldn't) this procedure returns
  *	NULL.
  *
  * Side effects:
@@ -837,7 +837,7 @@ BogusCreate(
     int *newPtr			/* Store info here telling whether a new
 				 * entry was created. */)
 {
-    panic("called Hax_CreateHashEntry on deleted table");
+    Hax_Panic("called Hax_CreateHashEntry on deleted table");
     return NULL;
 }
 

@@ -2220,7 +2220,7 @@ DeleteArray(
 	    }
 	}
 	if (elPtr->flags & VAR_SEARCHES_POSSIBLE) {
-	    panic("DeleteArray found searches on array alement!");
+	    Hax_Panic("DeleteArray found searches on array alement!");
 	}
 	ckfree((char *) elPtr);
     }
