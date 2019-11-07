@@ -29,6 +29,7 @@
  * 2019-11-07 Remove another compat definition of strcspn()
  * 2019-11-07 Switch to ANSI function definitions
  * 2019-11-07 Change FAIL() to standard do {} while(0) form
+ * 2019-11-07 Remove superfluous break in switch()
  */
 #include "tclInt.h"
 
@@ -891,7 +892,6 @@ char *prog)
 					return(0);
 			}
 			/* NOTREACHED */
-			break;
 		case CLOSE+1:
 		case CLOSE+2:
 		case CLOSE+3:
@@ -920,7 +920,6 @@ char *prog)
 					return(0);
 			}
 			/* NOTREACHED */
-			break;
 		case BRANCH: {
 				char *save;
 
@@ -969,16 +968,11 @@ char *prog)
 				return(0);
 			}
 			/* NOTREACHED */
-			break;
 		case END:
 			return(1);	/* Success! */
-			/* NOTREACHED */
-			break;
 		default:
 			regerror("memory corruption");
 			return(0);
-			/* NOTREACHED */
-			break;
 		}
 
 		scan = next;
