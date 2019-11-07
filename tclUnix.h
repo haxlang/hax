@@ -26,20 +26,6 @@
 #ifndef _TCLUNIX
 #define _TCLUNIX
 
-/*
- * The following #defines are used to distinguish between different
- * UNIX systems.  These #defines are normally set by the "config" script
- * based on information it gets by looking in the include and library
- * areas.  The defaults below are for BSD-based systems like SunOS
- * or Ultrix.
- *
- * TCL_SYS_WAIT_H -		1 means there exists an include file
- *				<sys/wait.h> that defines constants related
- *				to the results of "wait".
- */
-
-#define TCL_SYS_WAIT_H 1
-
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -52,38 +38,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <time.h>
-#if TCL_SYS_WAIT_H
-#   include <sys/wait.h>
-#endif
-
-/*
- * Supply definitions for macros to query wait status, if not already
- * defined in header files above.
- */
-
-#ifndef WIFEXITED
-#   define WIFEXITED(stat)  (((*((int *) &(stat))) & 0xff) == 0)
-#endif
-
-#ifndef WEXITSTATUS
-#   define WEXITSTATUS(stat) (((*((int *) &(stat))) >> 8) & 0xff)
-#endif
-
-#ifndef WIFSIGNALED
-#   define WIFSIGNALED(stat) (((*((int *) &(stat)))) && ((*((int *) &(stat))) == ((*((int *) &(stat))) & 0x00ff)))
-#endif
-
-#ifndef WTERMSIG
-#   define WTERMSIG(stat)    ((*((int *) &(stat))) & 0x7f)
-#endif
-
-#ifndef WIFSTOPPED
-#   define WIFSTOPPED(stat)  (((*((int *) &(stat))) & 0xff) == 0177)
-#endif
-
-#ifndef WSTOPSIG
-#   define WSTOPSIG(stat)    (((*((int *) &(stat))) >> 8) & 0xff)
-#endif
+#include <sys/wait.h>
 
 /*
  * Supply macros for seek offsets, if they're not already provided by
