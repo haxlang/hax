@@ -5,8 +5,7 @@
  *	UNIX-related macros for Tcl's UNIX core.  It should be the
  *	only file that contains #ifdefs to handle different flavors
  *	of UNIX.  This file sets up the union of all UNIX-related
- *	things needed by any of the Tcl core files.  This file
- *	depends on configuration #defines in tclConfig.h
+ *	things needed by any of the Tcl core files.
  *
  *	The material in this file was originally contributed by
  *	Karl Lehenbauer, Mark Diekhans and Peter da Silva.
