@@ -1621,7 +1621,7 @@ CleanupChildren(
 {
     int result = TCL_OK;
     int i, pid, length;
-    WAIT_STATUS_TYPE waitStatus;
+    int waitStatus;
 
     for (i = 0; i < numPids; i++) {
 	pid = Tcl_WaitPids(1, &pidPtr[i], (int *) &waitStatus);

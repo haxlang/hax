@@ -34,7 +34,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUnixUtil.c,v 1.19 93/01
 
 typedef struct {
     int pid;			/* Process id of child. */
-    WAIT_STATUS_TYPE status;	/* Status returned when child exited or
+    int status;			/* Status returned when child exited or
 				 * suspended. */
     int flags;			/* Various flag bits;  see below for
 				 * definitions. */
@@ -257,7 +257,7 @@ Tcl_WaitPids(
     int i, count, pid;
     WaitInfo *waitPtr;
     int anyProcesses;
-    WAIT_STATUS_TYPE status;
+    int status;
 
     while (1) {
 	/*

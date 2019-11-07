@@ -43,10 +43,6 @@
  * TCL_SYS_WAIT_H -		1 means there exists an include file
  *				<sys/wait.h> that defines constants related
  *				to the results of "wait".
- * TCL_UNION_WAIT -		1 means that the "wait" system call returns
- *				a structure of type "union wait" (e.g. BSD
- *				systems).  0 means "wait" returns an int
- *				(e.g. System V and POSIX).
  * TCL_PID_T -			1 means that <sys/types> defines the type
  *				pid_t.  0 means that it doesn't.
  * TCL_UID_T -			1 means that <sys/types> defines the type
@@ -57,7 +53,6 @@
 #define TCL_SYS_ERRLIST 1
 #define TCL_SYS_TIME_H 1
 #define TCL_SYS_WAIT_H 1
-#define TCL_UNION_WAIT 0
 #define TCL_PID_T 1
 #define TCL_UID_T 1
 
@@ -78,17 +73,6 @@
 #endif
 #if TCL_SYS_WAIT_H
 #   include <sys/wait.h>
-#endif
-
-/*
- * The type of the status returned by wait varies from UNIX system
- * to UNIX system.  The macro below defines it:
- */
-
-#if TCL_UNION_WAIT
-#   define WAIT_STATUS_TYPE union wait
-#else
-#   define WAIT_STATUS_TYPE int
 #endif
 
 /*
