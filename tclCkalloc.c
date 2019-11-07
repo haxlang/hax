@@ -332,7 +332,7 @@ Tcl_DbCkfree(
     /*
      * Since header ptr is zero, body offset will be size
      */
-    memp = (struct mem_header *)(((char *) ptr) - (int)memp->body);
+    memp = (struct mem_header *)(((char *) ptr) - (long)memp->body);
 
     if (alloc_tracing)
         fprintf(stderr, "ckfree %lx %ld %s %d\n", memp->body, 
@@ -407,7 +407,7 @@ Tcl_DbCkrealloc(
 	/* ARGSUSED */
 static int
 MemoryCmd (
-    char       *clientData,
+    ClientData  clientData,
     Tcl_Interp *interp,
     int         argc,
     char      **argv)
