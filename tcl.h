@@ -200,14 +200,16 @@ EXTERN void		Tcl_ValidateAllMemory (char *file,
  */
 
 #define Tcl_FreeResult(interp)					\
-    if ((interp)->freeProc != 0) {				\
-	if ((interp)->freeProc == (Tcl_FreeProc *) free) {	\
-	    ckfree((interp)->result);				\
-	} else {						\
-	    (*(interp)->freeProc)((interp)->result);		\
+    do {							\
+	if ((interp)->freeProc != 0) {				\
+	    if ((interp)->freeProc == (Tcl_FreeProc *) free) {	\
+		ckfree((interp)->result);			\
+	    } else {						\
+		(*(interp)->freeProc)((interp)->result);	\
+	    }							\
+	    (interp)->freeProc = 0;				\
 	}							\
-	(interp)->freeProc = 0;					\
-    }
+    } while (0)
 
 /*
  * Exported Tcl procedures:
