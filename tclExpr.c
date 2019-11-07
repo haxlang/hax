@@ -1236,7 +1236,7 @@ Tcl_ExprDouble(
     Tcl_Interp *interp,			/* Context in which to evaluate the
 					 * expression. */
     char *string,			/* Expression to evaluate. */
-    double *ptr				/* Where to store result. */)
+    void *ptr				/* Where to store result. */)
 {
     Value value;
     int result;
@@ -1244,9 +1244,9 @@ Tcl_ExprDouble(
     result = ExprTopLevel(interp, string, &value);
     if (result == TCL_OK) {
 	if (value.type == TYPE_INT) {
-	    *ptr = value.intValue;
+	    *(double *)ptr = value.intValue;
 	} else if (value.type == TYPE_DOUBLE) {
-	    *ptr = value.doubleValue;
+	    *(double *)ptr = value.doubleValue;
 	} else {
 	    interp->result = "expression didn't have numeric value";
 	    result = TCL_ERROR;

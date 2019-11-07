@@ -88,7 +88,7 @@ Tcl_GetDouble(
     Tcl_Interp *interp,		/* Interpreter to use for error reporting. */
     char *string,		/* String containing a floating-point number
 				 * in a form acceptable to strtod. */
-    double *doublePtr		/* Place to store converted result. */)
+    void *doublePtr		/* Place to store converted result. */)
 {
     char *end;
     double d;
@@ -102,7 +102,7 @@ Tcl_GetDouble(
 		string, "\"", (char *) NULL);
 	return TCL_ERROR;
     }
-    *doublePtr = d;
+    *(double *)doublePtr = d;
     return TCL_OK;
 }
 

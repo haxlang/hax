@@ -256,7 +256,7 @@ EXTERN int		Tcl_EvalFile (Tcl_Interp *interp,
 EXTERN int		Tcl_ExprBoolean (Tcl_Interp *interp,
 			    char *string, int *ptr);
 EXTERN int		Tcl_ExprDouble (Tcl_Interp *interp,
-			    char *string, double *ptr);
+			    char *string, void *ptr);
 EXTERN int		Tcl_ExprLong (Tcl_Interp *interp,
 			    char *string, long *ptr);
 EXTERN int		Tcl_ExprString (Tcl_Interp *interp,
@@ -265,7 +265,7 @@ EXTERN int		Tcl_Fork (void);
 EXTERN int		Tcl_GetBoolean (Tcl_Interp *interp,
 			    char *string, int *boolPtr);
 EXTERN int		Tcl_GetDouble (Tcl_Interp *interp,
-			    char *string, double *doublePtr);
+			    char *string, void *doublePtr);
 EXTERN int		Tcl_GetInt (Tcl_Interp *interp,
 			    char *string, int *intPtr);
 EXTERN char *		Tcl_GetVar (Tcl_Interp *interp,
