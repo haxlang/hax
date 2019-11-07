@@ -36,9 +36,6 @@
  * TCL_GETTOD -			1 means there exists a library procedure
  *				"gettimeofday" (e.g. BSD systems).  0 means
  *				have to use "times" instead.
- * TCL_GETWD -			1 means there exists a library procedure
- *				"getwd" (e.g. BSD systems).  0 means
- *				have to use "getcwd" instead.
  * TCL_SYS_ERRLIST -		1 means that the array sys_errlist is
  *				defined as part of the C library.
  * TCL_SYS_TIME_H -		1 means there exists an include file
@@ -57,7 +54,6 @@
  */
 
 #define TCL_GETTOD 1
-#define TCL_GETWD 1
 #define TCL_SYS_ERRLIST 1
 #define TCL_SYS_TIME_H 1
 #define TCL_SYS_WAIT_H 1

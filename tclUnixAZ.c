@@ -1151,13 +1151,6 @@ Tcl_PwdCmd(
 	return TCL_ERROR;
     }
     if (currentDir == NULL) {
-#if TCL_GETWD
-	if (getwd(buffer) == NULL) {
-	    Tcl_AppendResult(interp, "error getting working directory name: ",
-		    buffer, (char *) NULL);
-	    return TCL_ERROR;
-	}
-#else
 	if (getcwd(buffer, MAXPATHLEN) == NULL) {
 	    if (errno == ERANGE) {
 		interp->result = "working directory name is too long";
@@ -1168,7 +1161,6 @@ Tcl_PwdCmd(
 	    }
 	    return TCL_ERROR;
 	}
-#endif
 	currentDir = (char *) ckalloc((unsigned) (strlen(buffer) + 1));
 	strcpy(currentDir, buffer);
     }
