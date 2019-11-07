@@ -127,7 +127,7 @@ Tcl_RegexpCmd(
 	string = argPtr[1];
     }
     tclRegexpError = NULL;
-    match = regexec(regexpPtr, string);
+    match = RegExec(regexpPtr, string);
     if (string != argPtr[1]) {
 	ckfree(string);
     }
@@ -276,7 +276,7 @@ Tcl_RegsubCmd(
     flags = 0;
     for (p = string; *p != 0; ) {
 	tclRegexpError = NULL;
-	match = regexec(regexpPtr, p);
+	match = RegExec(regexpPtr, p);
 	if (tclRegexpError != NULL) {
 	    Tcl_AppendResult(interp, "error while matching pattern: ",
 		    tclRegexpError, (char *) NULL);

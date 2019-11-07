@@ -168,7 +168,7 @@ Tcl_RecordAndEval(
     Tcl_Interp *interp,		/* Token for interpreter in which command
 				 * will be executed. */
     char *cmd,			/* Command to record. */
-    int flags			/* Additional flags to pass to Tcl_Eval. 
+    int flags			/* Additional flags to pass to Tcl_Eval.
 				 * TCL_NO_EVAL means only record: don't
 				 * execute command. */)
 {

@@ -43,7 +43,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUtil.c,v 1.66 92/10/21 
 
 /*
  * The variable below is set to NULL before invoking regexp functions
- * and checked after those functions.  If an error occurred then regerror
+ * and checked after those functions.  If an error occurred then RegError
  * will set the variable to point to a (static) error message.  This
  * mechanism unfortunately does not support multi-threading, but then
  * neither does the rest of the regexp facilities.
@@ -1395,7 +1395,7 @@ TclCompileRegexp(
      */
 
     tclRegexpError = NULL;
-    result = regcomp(string);
+    result = RegComp(string);
     if (tclRegexpError != NULL) {
 	Tcl_AppendResult(interp,
 	    "couldn't compile regular expression pattern: ",
@@ -1421,7 +1421,7 @@ TclCompileRegexp(
 /*
  *----------------------------------------------------------------------
  *
- * regerror --
+ * RegError --
  *
  *	This procedure is invoked by the Henry Spencer's regexp code
  *	when an error occurs.  It saves the error message so it can
@@ -1437,7 +1437,7 @@ TclCompileRegexp(
  */
 
 void
-regerror(
+RegError(
     char *string			/* Error message. */)
 {
     tclRegexpError = string;
