@@ -33,14 +33,11 @@
  * areas.  The defaults below are for BSD-based systems like SunOS
  * or Ultrix.
  *
- * TCL_SYS_ERRLIST -		1 means that the array sys_errlist is
- *				defined as part of the C library.
  * TCL_SYS_WAIT_H -		1 means there exists an include file
  *				<sys/wait.h> that defines constants related
  *				to the results of "wait".
  */
 
-#define TCL_SYS_ERRLIST 1
 #define TCL_SYS_WAIT_H 1
 
 #include <errno.h>
