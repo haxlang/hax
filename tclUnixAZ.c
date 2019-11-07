@@ -567,7 +567,6 @@ Tcl_FileCmd(
 	    goto not3Args;
 	}
 	statOp = 0;
-#ifdef S_IFLNK
     /*
      * This option is only included if symbolic links exist on this system
      * (in which case S_IFLNK should be defined).
@@ -590,7 +589,6 @@ Tcl_FileCmd(
 	linkValue[linkLength] = 0;
 	Tcl_SetResult(interp, linkValue, TCL_VOLATILE);
 	return TCL_OK;
-#endif
     } else if ((c == 's') && (strncmp(argv[1], "size", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 3) {
@@ -633,9 +631,7 @@ Tcl_FileCmd(
 		"\": should be atime, dirname, executable, exists, ",
 		"extension, isdirectory, isfile, lstat, mtime, owned, ",
 		"readable, ",
-#ifdef S_IFLNK
 		"readlink, ",
-#endif
 		"root, size, stat, tail, type, ",
 		"or writable",
 		(char *) NULL);
