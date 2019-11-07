@@ -35,15 +35,12 @@
  *
  * TCL_SYS_ERRLIST -		1 means that the array sys_errlist is
  *				defined as part of the C library.
- * TCL_SYS_TIME_H -		1 means there exists an include file
- *				<sys/time.h> (e.g. BSD derivatives).
  * TCL_SYS_WAIT_H -		1 means there exists an include file
  *				<sys/wait.h> that defines constants related
  *				to the results of "wait".
  */
 
 #define TCL_SYS_ERRLIST 1
-#define TCL_SYS_TIME_H 1
 #define TCL_SYS_WAIT_H 1
 
 #include <errno.h>
@@ -56,11 +53,8 @@
 #include <dirent.h>
 #include <sys/file.h>
 #include <sys/stat.h>
-#if TCL_SYS_TIME_H
-#   include <sys/time.h>
-#else
-#   include <time.h>
-#endif
+#include <sys/time.h>
+#include <time.h>
 #if TCL_SYS_WAIT_H
 #   include <sys/wait.h>
 #endif
