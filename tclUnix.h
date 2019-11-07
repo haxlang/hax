@@ -41,23 +41,6 @@
 #include <sys/wait.h>
 
 /*
- * Supply macros for seek offsets, if they're not already provided by
- * an include file.
- */
-
-#ifndef SEEK_SET
-#   define SEEK_SET 0
-#endif
-
-#ifndef SEEK_CUR
-#   define SEEK_CUR 1
-#endif
-
-#ifndef SEEK_END
-#   define SEEK_END 2
-#endif
-
-/*
  * Define access mode constants if they aren't already defined.
  */
 
