@@ -91,16 +91,6 @@ test cd-4.4 {errors in cd command} {
 test cd-5.1 {errors in pwd command} {
     list [catch {pwd a} msg] $msg
 } {1 {wrong # args: should be "pwd"}}
-exec mkdir cd.dir/child
-cd cd.dir/child
-exec chmod 111 ..
-if {$user != "root"} {
-    test cd-5.2 {errors in pwd command} {
-	catch pwd msg
-    } 1
-}
-cd $cwd
-exec chmod 775 cd.dir
 
 catch {exec rm -rf cd.dir}
 format ""
