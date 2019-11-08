@@ -28,9 +28,9 @@
  */
 
 #ifdef __cplusplus
-#   define EXTERN extern "C"
+#   define HAX_EXTERN extern "C"
 #else
-#   define EXTERN extern
+#   define HAX_EXTERN extern
 #endif
 
 /*
@@ -172,14 +172,14 @@ typedef char *(Hax_VarTraceProc) (ClientData clientData,
 
 #ifdef HAX_MEM_DEBUG
 
-EXTERN char *		Hax_DbCkalloc (unsigned int size,
+HAX_EXTERN char *	Hax_DbCkalloc (unsigned int size,
 			    char *file, int line);
-EXTERN int		Hax_DbCkfree (char *ptr,
+HAX_EXTERN int		Hax_DbCkfree (char *ptr,
 			    char *file, int line);
-EXTERN char *		Hax_DbCkrealloc (char *ptr,
+HAX_EXTERN char *	Hax_DbCkrealloc (char *ptr,
 			    unsigned int size, char *file, int line);
-EXTERN int		Hax_DumpActiveMemory (char *fileName);
-EXTERN void		Hax_ValidateAllMemory (char *file,
+HAX_EXTERN int		Hax_DumpActiveMemory (char *fileName);
+HAX_EXTERN void		Hax_ValidateAllMemory (char *file,
 			    int line);
 #  define ckalloc(x) Hax_DbCkalloc(x, __FILE__, __LINE__)
 #  define ckfree(x)  Hax_DbCkfree(x, __FILE__, __LINE__)
@@ -215,119 +215,119 @@ EXTERN void		Hax_ValidateAllMemory (char *file,
  * Exported Hax procedures:
  */
 
-EXTERN void		Hax_AppendElement (Hax_Interp *interp,
+HAX_EXTERN void		Hax_AppendElement (Hax_Interp *interp,
 			    char *string, int noSep);
-EXTERN void		Hax_AppendResult (Hax_Interp *interp, ...);
-EXTERN char *		Hax_AssembleCmd (Hax_CmdBuf buffer,
+HAX_EXTERN void		Hax_AppendResult (Hax_Interp *interp, ...);
+HAX_EXTERN char *	Hax_AssembleCmd (Hax_CmdBuf buffer,
 			    char *string);
-EXTERN void		Hax_AddErrorInfo (Hax_Interp *interp,
+HAX_EXTERN void		Hax_AddErrorInfo (Hax_Interp *interp,
 			    char *message);
-EXTERN char		Hax_Backslash (char *src,
+HAX_EXTERN char		Hax_Backslash (char *src,
 			    int *readPtr);
-EXTERN int		Hax_CommandComplete(char *cmd);
-EXTERN char *		Hax_Concat (int argc, char **argv);
-EXTERN int		Hax_ConvertElement (char *src,
+HAX_EXTERN int		Hax_CommandComplete(char *cmd);
+HAX_EXTERN char *	Hax_Concat (int argc, char **argv);
+HAX_EXTERN int		Hax_ConvertElement (char *src,
 			    char *dst, int flags);
-EXTERN Hax_CmdBuf	Hax_CreateCmdBuf (void);
-EXTERN void		Hax_CreateCommand (Hax_Interp *interp,
+HAX_EXTERN Hax_CmdBuf	Hax_CreateCmdBuf (void);
+HAX_EXTERN void		Hax_CreateCommand (Hax_Interp *interp,
 			    char *cmdName, Hax_CmdProc *proc,
 			    ClientData clientData,
 			    Hax_CmdDeleteProc *deleteProc);
-EXTERN Hax_Interp *	Hax_CreateInterp (void);
-EXTERN int		Hax_CreatePipeline (Hax_Interp *interp,
+HAX_EXTERN Hax_Interp *	Hax_CreateInterp (void);
+HAX_EXTERN int		Hax_CreatePipeline (Hax_Interp *interp,
 			    int argc, char **argv, int **pidArrayPtr,
 			    int *inPipePtr, int *outPipePtr,
 			    int *errFilePtr);
-EXTERN Hax_Trace	Hax_CreateTrace (Hax_Interp *interp,
+HAX_EXTERN Hax_Trace	Hax_CreateTrace (Hax_Interp *interp,
 			    int level, Hax_CmdTraceProc *proc,
 			    ClientData clientData);
-EXTERN void		Hax_DeleteCmdBuf (Hax_CmdBuf buffer);
-EXTERN int		Hax_DeleteCommand (Hax_Interp *interp,
+HAX_EXTERN void		Hax_DeleteCmdBuf (Hax_CmdBuf buffer);
+HAX_EXTERN int		Hax_DeleteCommand (Hax_Interp *interp,
 			    char *cmdName);
-EXTERN void		Hax_DeleteInterp (Hax_Interp *interp);
-EXTERN void		Hax_DeleteTrace (Hax_Interp *interp,
+HAX_EXTERN void		Hax_DeleteInterp (Hax_Interp *interp);
+HAX_EXTERN void		Hax_DeleteTrace (Hax_Interp *interp,
 			    Hax_Trace trace);
-EXTERN void		Hax_DetachPids (int numPids, int *pidPtr);
-EXTERN char *		Hax_ErrnoId (void);
-EXTERN int		Hax_Eval (Hax_Interp *interp, char *cmd,
+HAX_EXTERN void		Hax_DetachPids (int numPids, int *pidPtr);
+HAX_EXTERN char *	Hax_ErrnoId (void);
+HAX_EXTERN int		Hax_Eval (Hax_Interp *interp, char *cmd,
 			    int flags, char **termPtr);
-EXTERN int		Hax_EvalFile (Hax_Interp *interp,
+HAX_EXTERN int		Hax_EvalFile (Hax_Interp *interp,
 			    char *fileName);
-EXTERN int		Hax_ExprBoolean (Hax_Interp *interp,
+HAX_EXTERN int		Hax_ExprBoolean (Hax_Interp *interp,
 			    char *string, int *ptr);
-EXTERN int		Hax_ExprDouble (Hax_Interp *interp,
+HAX_EXTERN int		Hax_ExprDouble (Hax_Interp *interp,
 			    char *string, void *ptr);
-EXTERN int		Hax_ExprLong (Hax_Interp *interp,
+HAX_EXTERN int		Hax_ExprLong (Hax_Interp *interp,
 			    char *string, long *ptr);
-EXTERN int		Hax_ExprString (Hax_Interp *interp,
+HAX_EXTERN int		Hax_ExprString (Hax_Interp *interp,
 			    char *string);
-EXTERN int		Hax_Fork (void);
-EXTERN int		Hax_GetBoolean (Hax_Interp *interp,
+HAX_EXTERN int		Hax_Fork (void);
+HAX_EXTERN int		Hax_GetBoolean (Hax_Interp *interp,
 			    char *string, int *boolPtr);
-EXTERN int		Hax_GetDouble (Hax_Interp *interp,
+HAX_EXTERN int		Hax_GetDouble (Hax_Interp *interp,
 			    char *string, void *doublePtr);
-EXTERN int		Hax_GetInt (Hax_Interp *interp,
+HAX_EXTERN int		Hax_GetInt (Hax_Interp *interp,
 			    char *string, int *intPtr);
-EXTERN char *		Hax_GetVar (Hax_Interp *interp,
+HAX_EXTERN char *	Hax_GetVar (Hax_Interp *interp,
 			    char *varName, int flags);
-EXTERN char *		Hax_GetVar2 (Hax_Interp *interp,
+HAX_EXTERN char *	Hax_GetVar2 (Hax_Interp *interp,
 			    char *part1, char *part2, int flags);
-EXTERN int		Hax_GlobalEval (Hax_Interp *interp,
+HAX_EXTERN int		Hax_GlobalEval (Hax_Interp *interp,
 			    char *command);
-EXTERN void		Hax_InitHistory (Hax_Interp *interp);
-EXTERN void		Hax_InitMemory (Hax_Interp *interp);
-EXTERN char *		Hax_Merge (int argc, char **argv);
-EXTERN char *		Hax_ParseVar (Hax_Interp *interp,
+HAX_EXTERN void		Hax_InitHistory (Hax_Interp *interp);
+HAX_EXTERN void		Hax_InitMemory (Hax_Interp *interp);
+HAX_EXTERN char *	Hax_Merge (int argc, char **argv);
+HAX_EXTERN char *	Hax_ParseVar (Hax_Interp *interp,
 			    char *string, char **termPtr);
-EXTERN int		Hax_RecordAndEval (Hax_Interp *interp,
+HAX_EXTERN int		Hax_RecordAndEval (Hax_Interp *interp,
 			    char *cmd, int flags);
-EXTERN void		Hax_ResetResult (Hax_Interp *interp);
+HAX_EXTERN void		Hax_ResetResult (Hax_Interp *interp);
 #define Hax_Return Hax_SetResult
-EXTERN int		Hax_ScanElement (char *string,
+HAX_EXTERN int		Hax_ScanElement (char *string,
 			    int *flagPtr);
-EXTERN void		Hax_SetErrorCode (Hax_Interp *interp, ...);
-EXTERN void		Hax_SetResult (Hax_Interp *interp,
+HAX_EXTERN void		Hax_SetErrorCode (Hax_Interp *interp, ...);
+HAX_EXTERN void		Hax_SetResult (Hax_Interp *interp,
 			    char *string, Hax_FreeProc *freeProc);
-EXTERN char *		Hax_SetVar (Hax_Interp *interp,
+HAX_EXTERN char *	Hax_SetVar (Hax_Interp *interp,
 			    char *varName, char *newValue, int flags);
-EXTERN char *		Hax_SetVar2 (Hax_Interp *interp,
+HAX_EXTERN char *	Hax_SetVar2 (Hax_Interp *interp,
 			    char *part1, char *part2, char *newValue,
 			    int flags);
-EXTERN char *		Hax_SignalId (int sig);
-EXTERN char *		Hax_SignalMsg (int sig);
-EXTERN int		Hax_SplitList (Hax_Interp *interp,
+HAX_EXTERN char *	Hax_SignalId (int sig);
+HAX_EXTERN char *	Hax_SignalMsg (int sig);
+HAX_EXTERN int		Hax_SplitList (Hax_Interp *interp,
 			    char *list, int *argcPtr, char ***argvPtr);
-EXTERN int		Hax_StringMatch (char *string,
+HAX_EXTERN int		Hax_StringMatch (char *string,
 			    char *pattern);
-EXTERN char *		Hax_TildeSubst (Hax_Interp *interp,
+HAX_EXTERN char *	Hax_TildeSubst (Hax_Interp *interp,
 			    char *name);
-EXTERN int		Hax_TraceVar (Hax_Interp *interp,
+HAX_EXTERN int		Hax_TraceVar (Hax_Interp *interp,
 			    char *varName, int flags, Hax_VarTraceProc *proc,
 			    ClientData clientData);
-EXTERN int		Hax_TraceVar2 (Hax_Interp *interp,
+HAX_EXTERN int		Hax_TraceVar2 (Hax_Interp *interp,
 			    char *part1, char *part2, int flags,
 			    Hax_VarTraceProc *proc, ClientData clientData);
-EXTERN char *		Hax_UnixError (Hax_Interp *interp);
-EXTERN int		Hax_UnsetVar (Hax_Interp *interp,
+HAX_EXTERN char *	Hax_UnixError (Hax_Interp *interp);
+HAX_EXTERN int		Hax_UnsetVar (Hax_Interp *interp,
 			    char *varName, int flags);
-EXTERN int		Hax_UnsetVar2 (Hax_Interp *interp,
+HAX_EXTERN int		Hax_UnsetVar2 (Hax_Interp *interp,
 			    char *part1, char *part2, int flags);
-EXTERN void		Hax_UntraceVar (Hax_Interp *interp,
+HAX_EXTERN void		Hax_UntraceVar (Hax_Interp *interp,
 			    char *varName, int flags, Hax_VarTraceProc *proc,
 			    ClientData clientData);
-EXTERN void		Hax_UntraceVar2 (Hax_Interp *interp,
+HAX_EXTERN void		Hax_UntraceVar2 (Hax_Interp *interp,
 			    char *part1, char *part2, int flags,
 			    Hax_VarTraceProc *proc, ClientData clientData);
-EXTERN int		Hax_VarEval (Hax_Interp *interp, ...);
-EXTERN ClientData	Hax_VarTraceInfo (Hax_Interp *interp,
+HAX_EXTERN int		Hax_VarEval (Hax_Interp *interp, ...);
+HAX_EXTERN ClientData	Hax_VarTraceInfo (Hax_Interp *interp,
 			    char *varName, int flags,
 			    Hax_VarTraceProc *procPtr,
 			    ClientData prevClientData);
-EXTERN ClientData	Hax_VarTraceInfo2 (Hax_Interp *interp,
+HAX_EXTERN ClientData	Hax_VarTraceInfo2 (Hax_Interp *interp,
 			    char *part1, char *part2, int flags,
 			    Hax_VarTraceProc *procPtr,
 			    ClientData prevClientData);
-EXTERN int		Hax_WaitPids (int numPids, int *pidPtr,
+HAX_EXTERN int		Hax_WaitPids (int numPids, int *pidPtr,
 			    int *statusPtr);
 
 #endif /* _HAX */
