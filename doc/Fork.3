@@ -129,21 +129,7 @@ If this situation occurs, it means that a process has been
 created without calling \fBHax_Fork\fR and that its exit
 status is about to be lost.
 .PP
-\fBHax_WaitPids\fR defines wait statuses to have type \fIint\fR,
-which is correct for POSIX and many variants of UNIX. 
-Some BSD-based UNIX systems still use type \fIunion wait\fR for
-wait statuses;  it should be safe to cast a pointer to a
-\fIunion wait\fR structure to \fI(int *)\fR before passing
-it to \fBHax_WaitPids\fR as in the following code:
-.nf
-.RS
-
-\fBunion wait status;
-int pid1, pid2;
-\&...
-pid2 = Hax_WaitPids(1, &pid1, (int *) &status);\fR
-.RE
-.fi
+\fBHax_WaitPids\fR defines wait statuses to have type \fIint\fR.
 
 .SH KEYWORDS
 background, child, detach, fork, process, status, wait
