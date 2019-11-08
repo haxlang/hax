@@ -131,17 +131,17 @@ typedef struct Hax_HashSearch {
  * Exported procedures:
  */
 
-extern void		Hax_DeleteHashEntry (
-			    Hax_HashEntry *entryPtr);
-extern void		Hax_DeleteHashTable (
-			    Hax_HashTable *tablePtr);
-extern Hax_HashEntry *	Hax_FirstHashEntry (
-			    Hax_HashTable *tablePtr,
-			    Hax_HashSearch *searchPtr);
-extern char *		Hax_HashStats (Hax_HashTable *tablePtr);
-extern void		Hax_InitHashTable (Hax_HashTable *tablePtr,
-			    int keyType);
-extern Hax_HashEntry *	Hax_NextHashEntry (
-			    Hax_HashSearch *searchPtr);
+HAX_EXTERN void			Hax_DeleteHashEntry (
+				    Hax_HashEntry *entryPtr);
+HAX_EXTERN void			Hax_DeleteHashTable (
+				    Hax_HashTable *tablePtr);
+HAX_EXTERN Hax_HashEntry *	Hax_FirstHashEntry (
+				    Hax_HashTable *tablePtr,
+				    Hax_HashSearch *searchPtr);
+HAX_EXTERN char *		Hax_HashStats (Hax_HashTable *tablePtr);
+HAX_EXTERN void			Hax_InitHashTable (Hax_HashTable *tablePtr,
+				    int keyType);
+HAX_EXTERN Hax_HashEntry *	Hax_NextHashEntry (
+				    Hax_HashSearch *searchPtr);
 
 #endif /* _HAXHASH */
