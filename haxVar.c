@@ -29,11 +29,11 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclVar.c,v 1.29 93/01/29 1
  * variable access is denied.
  */
 
-static char *noSuchVar =	"no such variable";
-static char *isArray =		"variable is array";
-static char *needArray =	"variable isn't array";
-static char *noSuchElement =	"no such element in array";
-static char *traceActive =	"trace is active on variable";
+static const char *noSuchVar =		"no such variable";
+static const char *isArray =		"variable is array";
+static const char *needArray =		"variable isn't array";
+static const char *noSuchElement =	"no such element in array";
+static const char *traceActive =	"trace is active on variable";
 
 /*
  * Forward references to procedures defined later in this file:
@@ -166,7 +166,8 @@ Hax_GetVar2(
     }
     if (hPtr == NULL) {
 	if (flags & HAX_LEAVE_ERR_MSG) {
-	    VarErrMsg(interp, part1, part2, "read", noSuchVar);
+	    VarErrMsg(interp, part1, part2, (char *) "read",
+		(char *) noSuchVar);
 	}
 	return NULL;
     }
@@ -184,12 +185,14 @@ Hax_GetVar2(
     if (part2 != NULL) {
 	if (varPtr->flags & VAR_UNDEFINED) {
 	    if (flags & HAX_LEAVE_ERR_MSG) {
-		VarErrMsg(interp, part1, part2, "read", noSuchVar);
+		VarErrMsg(interp, part1, part2, (char *) "read",
+		    (char *) noSuchVar);
 	    }
 	    return NULL;
 	} else if (!(varPtr->flags & VAR_ARRAY)) {
 	    if (flags & HAX_LEAVE_ERR_MSG) {
-		VarErrMsg(interp, part1, part2, "read", needArray);
+		VarErrMsg(interp, part1, part2, (char *) "read",
+		    (char *) needArray);
 	    }
 	    return NULL;
 	}
@@ -197,7 +200,8 @@ Hax_GetVar2(
 	hPtr = Hax_FindHashEntry(varPtr->value.tablePtr, part2);
 	if (hPtr == NULL) {
 	    if (flags & HAX_LEAVE_ERR_MSG) {
-		VarErrMsg(interp, part1, part2, "read", noSuchElement);
+		VarErrMsg(interp, part1, part2, (char *) "read",
+		    (char *) noSuchElement);
 	    }
 	    return NULL;
 	}
@@ -215,7 +219,7 @@ Hax_GetVar2(
 	msg = CallTraces(iPtr, arrayPtr, hPtr, part1, part2,
 		(flags & HAX_GLOBAL_ONLY) | HAX_TRACE_READS);
 	if (msg != NULL) {
-	    VarErrMsg(interp, part1, part2, "read", msg);
+	    VarErrMsg(interp, part1, part2, (char *) "read", msg);
 	    return NULL;
 	}
 
@@ -229,7 +233,8 @@ Hax_GetVar2(
     }
     if (varPtr->flags & (VAR_UNDEFINED|VAR_UPVAR|VAR_ARRAY)) {
 	if (flags & HAX_LEAVE_ERR_MSG) {
-	    VarErrMsg(interp, part1, part2, "read", noSuchVar);
+	    VarErrMsg(interp, part1, part2, (char *) "read",
+		(char *) noSuchVar);
 	}
 	return NULL;
     }
@@ -344,7 +349,7 @@ Hax_SetVar2(
 				/* Initial value only used to stop compiler
 				 * from complaining; not really needed. */
     Interp *iPtr = (Interp *) interp;
-    int length, new, listFlags;
+    int length, newPtr, listFlags;
     Var *arrayPtr = NULL;
 
     /*
@@ -352,12 +357,12 @@ Hax_SetVar2(
      */
 
     if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
-	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, part1, &new);
+	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, part1, &newPtr);
     } else {
 	hPtr = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable,
-		part1, &new);
+		part1, &newPtr);
     }
-    if (!new) {
+    if (!newPtr) {
 	varPtr = (Var *) Hax_GetHashValue(hPtr);
 	if (varPtr->flags & VAR_UPVAR) {
 	    hPtr = varPtr->value.upvarPtr;
@@ -372,7 +377,7 @@ Hax_SetVar2(
      */
 
     if (part2 != NULL) {
-	if (new) {
+	if (newPtr) {
 	    varPtr = NewVar(0);
 	    Hax_SetHashValue(hPtr, varPtr);
 	    varPtr->flags = VAR_ARRAY;
@@ -387,13 +392,14 @@ Hax_SetVar2(
 		Hax_InitHashTable(varPtr->value.tablePtr, HAX_STRING_KEYS);
 	    } else if (!(varPtr->flags & VAR_ARRAY)) {
 		if (flags & HAX_LEAVE_ERR_MSG) {
-		    VarErrMsg(interp, part1, part2, "set", needArray);
+		    VarErrMsg(interp, part1, part2, (char *) "set",
+			(char *) needArray);
 		}
 		return NULL;
 	    }
 	    arrayPtr = varPtr;
 	}
-	hPtr = Hax_CreateHashEntry(varPtr->value.tablePtr, part2, &new);
+	hPtr = Hax_CreateHashEntry(varPtr->value.tablePtr, part2, &newPtr);
     }
 
     /*
@@ -413,7 +419,7 @@ Hax_SetVar2(
      * append operation.
      */
 
-    if (new) {
+    if (newPtr) {
 	varPtr = NewVar(length);
 	Hax_SetHashValue(hPtr, varPtr);
 	if ((arrayPtr != NULL) && (arrayPtr->searchPtr != NULL)) {
@@ -423,7 +429,8 @@ Hax_SetVar2(
 	varPtr = (Var *) Hax_GetHashValue(hPtr);
 	if (varPtr->flags & VAR_ARRAY) {
 	    if (flags & HAX_LEAVE_ERR_MSG) {
-		VarErrMsg(interp, part1, part2, "set", isArray);
+		VarErrMsg(interp, part1, part2, (char *) "set",
+		    (char *) isArray);
 	    }
 	    return NULL;
 	}
@@ -487,7 +494,7 @@ Hax_SetVar2(
 	msg = CallTraces(iPtr, arrayPtr, hPtr, part1, part2,
 		(flags & HAX_GLOBAL_ONLY) | HAX_TRACE_WRITES);
 	if (msg != NULL) {
-	    VarErrMsg(interp, part1, part2, "set", msg);
+	    VarErrMsg(interp, part1, part2, (char *) "set", (char *) msg);
 	    return NULL;
 	}
 
@@ -606,7 +613,8 @@ Hax_UnsetVar2(
     }
     if (hPtr == NULL) {
 	if (flags & HAX_LEAVE_ERR_MSG) {
-	    VarErrMsg(interp, part1, part2, "unset", noSuchVar);
+	    VarErrMsg(interp, part1, part2, (char *) "unset",
+		(char *) noSuchVar);
 	}
 	return -1;
     }
@@ -633,7 +641,8 @@ Hax_UnsetVar2(
     if (part2 != NULL) {
 	if (!(varPtr->flags & VAR_ARRAY)) {
 	    if (flags & HAX_LEAVE_ERR_MSG) {
-		VarErrMsg(interp, part1, part2, "unset", needArray);
+		VarErrMsg(interp, part1, part2, (char *) "unset",
+		    (char *) needArray);
 	    }
 	    return -1;
 	}
@@ -644,7 +653,8 @@ Hax_UnsetVar2(
 	hPtr = Hax_FindHashEntry(varPtr->value.tablePtr, part2);
 	if (hPtr == NULL) {
 	    if (flags & HAX_LEAVE_ERR_MSG) {
-		VarErrMsg(interp, part1, part2, "unset", noSuchElement);
+		VarErrMsg(interp, part1, part2, (char *) "unset",
+		    (char *) noSuchElement);
 	    }
 	    return -1;
 	}
@@ -662,7 +672,8 @@ Hax_UnsetVar2(
     if (varPtr->flags &
 	    (VAR_TRACE_ACTIVE|VAR_ELEMENT_ACTIVE)) {
 	if (flags & HAX_LEAVE_ERR_MSG) {
-	    VarErrMsg(interp, part1, part2, "unset", traceActive);
+	    VarErrMsg(interp, part1, part2, (char *) "unset",
+		(char *) traceActive);
 	}
 	return -1;
     }
@@ -716,8 +727,8 @@ Hax_UnsetVar2(
     }
     if (dummyVar.flags & VAR_UNDEFINED) {
 	if (flags & HAX_LEAVE_ERR_MSG) {
-	    VarErrMsg(interp, part1, part2, "unset", 
-		    (part2 == NULL) ? noSuchVar : noSuchElement);
+	    VarErrMsg(interp, part1, part2, (char *) "unset",
+		(part2 == NULL) ? (char *) noSuchVar : (char *) noSuchElement);
 	}
 	return -1;
     }
@@ -833,18 +844,19 @@ Hax_TraceVar2(
 				 * from complaining; not really needed. */
     Interp *iPtr = (Interp *) interp;
     VarTrace *tracePtr;
-    int new;
+    int newPtr;
 
     /*
      * Locate the variable, making a new (undefined) one if necessary.
      */
 
     if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
-	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, part1, &new);
+	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, part1, &newPtr);
     } else {
-	hPtr = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable, part1, &new);
+	hPtr = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable, part1,
+		    &newPtr);
     }
-    if (!new) {
+    if (!newPtr) {
 	varPtr = (Var *) Hax_GetHashValue(hPtr);
 	if (varPtr->flags & VAR_UPVAR) {
 	    hPtr = varPtr->value.upvarPtr;
@@ -860,7 +872,7 @@ Hax_TraceVar2(
      */
 
     if (part2 != NULL) {
-	if (new) {
+	if (newPtr) {
 	    varPtr = NewVar(0);
 	    Hax_SetHashValue(hPtr, varPtr);
 	    varPtr->flags = VAR_ARRAY;
@@ -874,14 +886,14 @@ Hax_TraceVar2(
 			ckalloc(sizeof(Hax_HashTable));
 		Hax_InitHashTable(varPtr->value.tablePtr, HAX_STRING_KEYS);
 	    } else if (!(varPtr->flags & VAR_ARRAY)) {
-		iPtr->result = needArray;
+		iPtr->result = (char *) needArray;
 		return HAX_ERROR;
 	    }
 	}
-	hPtr = Hax_CreateHashEntry(varPtr->value.tablePtr, part2, &new);
+	hPtr = Hax_CreateHashEntry(varPtr->value.tablePtr, part2, &newPtr);
     }
 
-    if (new) {
+    if (newPtr) {
 	if ((part2 != NULL) && (varPtr->searchPtr != NULL)) {
 	    DeleteSearches(varPtr);
 	}
@@ -1497,11 +1509,11 @@ Hax_ArrayCmd(
 	    }
 	    searchPtr->nextEntry = Hax_NextHashEntry(&searchPtr->search);
 	    if (searchPtr->nextEntry == NULL) {
-		interp->result = "0";
+		interp->result = (char *) "0";
 		return HAX_OK;
 	    }
 	}
-	interp->result = "1";
+	interp->result = (char *) "1";
 	return HAX_OK;
     } else if ((c == 'd') && (strncmp(argv[1], "donesearch", length) == 0)) {
 	ArraySearch *searchPtr, *prevPtr;
@@ -1662,7 +1674,7 @@ Hax_GlobalCmd(
     Var *varPtr, *gVarPtr;
     Interp *iPtr = (Interp *) interp;
     Hax_HashEntry *hPtr, *hPtr2;
-    int new;
+    int newPtr;
 
     if (argc < 2) {
 	Hax_AppendResult((Hax_Interp *) iPtr, "wrong # args: should be \"",
@@ -1674,16 +1686,17 @@ Hax_GlobalCmd(
     }
 
     for (argc--, argv++; argc > 0; argc--, argv++) {
-	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, *argv, &new);
-	if (new) {
+	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, *argv, &newPtr);
+	if (newPtr) {
 	    gVarPtr = NewVar(0);
 	    gVarPtr->flags |= VAR_UNDEFINED;
 	    Hax_SetHashValue(hPtr, gVarPtr);
 	} else {
 	    gVarPtr = (Var *) Hax_GetHashValue(hPtr);
 	}
-	hPtr2 = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable, *argv, &new);
-	if (!new) {
+	hPtr2 = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable, *argv,
+		    &newPtr);
+	if (!newPtr) {
 	    Var *varPtr;
 	    varPtr = (Var *) Hax_GetHashValue(hPtr2);
 	    if (varPtr->flags & VAR_UPVAR) {
@@ -1734,7 +1747,7 @@ Hax_UpvarCmd(
     Var *varPtr = NULL;
     Hax_HashTable *upVarTablePtr;
     Hax_HashEntry *hPtr, *hPtr2;
-    int new;
+    int newPtr;
     Var *upVarPtr;
 
     if (argc < 3) {
@@ -1773,8 +1786,8 @@ Hax_UpvarCmd(
      */
 
     while (argc > 0) {
-        hPtr = Hax_CreateHashEntry(upVarTablePtr, argv[0], &new);
-        if (new) {
+        hPtr = Hax_CreateHashEntry(upVarTablePtr, argv[0], &newPtr);
+        if (newPtr) {
             upVarPtr = NewVar(0);
             upVarPtr->flags |= VAR_UNDEFINED;
             Hax_SetHashValue(hPtr, upVarPtr);
@@ -1787,8 +1800,8 @@ Hax_UpvarCmd(
         }
 
         hPtr2 = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable,
-                    argv[1], &new);
-        if (!new) {
+                    argv[1], &newPtr);
+        if (!newPtr) {
             Hax_AppendResult((Hax_Interp *) iPtr, "variable \"", argv[1],
                 "\" already exists", (char *) NULL);
             return HAX_ERROR;
@@ -2220,7 +2233,7 @@ DeleteArray(
 	    }
 	}
 	if (elPtr->flags & VAR_SEARCHES_POSSIBLE) {
-	    Hax_Panic("DeleteArray found searches on array alement!");
+	    Hax_Panic((char *) "DeleteArray found searches on array alement!");
 	}
 	ckfree((char *) elPtr);
     }

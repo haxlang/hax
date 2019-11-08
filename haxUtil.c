@@ -245,11 +245,13 @@ HaxFindElement(
 
 	    case 0:
 		if (openBraces != 0) {
-		    Hax_SetResult(interp, "unmatched open brace in list",
+		    Hax_SetResult(interp,
+			    (char *) "unmatched open brace in list",
 			    HAX_STATIC);
 		    return HAX_ERROR;
 		} else if (inQuotes) {
-		    Hax_SetResult(interp, "unmatched open quote in list",
+		    Hax_SetResult(interp,
+			    (char *) "unmatched open quote in list",
 			    HAX_STATIC);
 		    return HAX_ERROR;
 		}
@@ -389,7 +391,7 @@ Hax_SplitList(
 	}
 	if (i >= size) {
 	    ckfree((char *) argv);
-	    Hax_SetResult(interp, "internal error in Hax_SplitList",
+	    Hax_SetResult(interp, (char *) "internal error in Hax_SplitList",
 		    HAX_STATIC);
 	    return HAX_ERROR;
 	}
@@ -480,7 +482,7 @@ Hax_ScanElement(
     nestingLevel = 0;
     flags = 0;
     if (string == NULL) {
-	string = "";
+	string = (char *) "";
     }
     p = string;
     if ((*p == '{') || (*p == '"') || (*p == 0)) {
@@ -570,7 +572,7 @@ Hax_ConvertElement(
      */
 
     if (src == NULL) {
-	src = "";
+	src = (char *) "";
     }
     if ((flags & USE_BRACES) && !(flags & HAX_DONT_USE_BRACES)) {
 	*p = '{';
@@ -1173,19 +1175,19 @@ SetupAppendBuffer(
     }
     totalSpace = newSpace + iPtr->appendUsed;
     if (totalSpace >= iPtr->appendAvl) {
-	char *new;
+	char *newPtr;
 
 	if (totalSpace < 100) {
 	    totalSpace = 200;
 	} else {
 	    totalSpace *= 2;
 	}
-	new = (char *) ckalloc((unsigned) totalSpace);
-	strcpy(new, iPtr->result);
+	newPtr = (char *) ckalloc((unsigned) totalSpace);
+	strcpy(newPtr, iPtr->result);
 	if (iPtr->appendResult != NULL) {
 	    ckfree(iPtr->appendResult);
 	}
-	iPtr->appendResult = new;
+	iPtr->appendResult = newPtr;
 	iPtr->appendAvl = totalSpace;
     } else if (iPtr->result != iPtr->appendResult) {
 	strcpy(iPtr->appendResult, iPtr->result);
@@ -1273,7 +1275,7 @@ Hax_SetErrorCode(
 	if (string == NULL) {
 	    break;
 	}
-	(void) Hax_SetVar2((Hax_Interp *) iPtr, "errorCode",
+	(void) Hax_SetVar2((Hax_Interp *) iPtr, (char *) "errorCode",
 		(char *) NULL, string, flags);
 	flags |= HAX_APPEND_VALUE;
     }

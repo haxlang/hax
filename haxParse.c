@@ -524,7 +524,7 @@ HaxParseBraces(
 		}
 	    }
 	} else if (c == '\0') {
-	    Hax_SetResult(interp, "missing close-brace", HAX_STATIC);
+	    Hax_SetResult(interp, (char *) "missing close-brace", HAX_STATIC);
 	    *termPtr = string-1;
 	    return HAX_ERROR;
 	}
@@ -705,7 +705,7 @@ HaxParseWords(
 	    if (type == HAX_COMMAND_END) {
 		if (flags & HAX_BRACKET_TERM) {
 		    if (c == '\0') {
-			Hax_SetResult(interp, "missing close-bracket",
+			Hax_SetResult(interp, (char *) "missing close-bracket",
 				HAX_STATIC);
 			return HAX_ERROR;
 		    }
@@ -751,10 +751,12 @@ HaxParseWords(
 	    type = CHAR_TYPE(c);
 	    if ((type != HAX_SPACE) && (type != HAX_COMMAND_END)) {
 		if (*src == '"') {
-		    Hax_SetResult(interp, "extra characters after close-quote",
+		    Hax_SetResult(interp,
+			    (char *) "extra characters after close-quote",
 			    HAX_STATIC);
 		} else {
-		    Hax_SetResult(interp, "extra characters after close-brace",
+		    Hax_SetResult(interp,
+			    (char *) "extra characters after close-brace",
 			    HAX_STATIC);
 		}
 		return HAX_ERROR;
@@ -822,7 +824,7 @@ HaxExpandParseValue(
 					 * to allocate. */)
 {
     int newSpace;
-    char *new;
+    char *newBuf;
 
     /*
      * Either double the size of the buffer or add enough new space
@@ -835,20 +837,20 @@ HaxExpandParseValue(
     } else {
 	newSpace += newSpace;
     }
-    new = (char *) ckalloc((unsigned) newSpace);
+    newBuf = (char *) ckalloc((unsigned) newSpace);
 
     /*
      * Copy from old buffer to new, free old buffer if needed, and
-     * mark new buffer as malloc-ed.
+     * mark newBuf buffer as malloc-ed.
      */
 
-    memcpy(new, pvPtr->buffer, pvPtr->next - pvPtr->buffer);
-    pvPtr->next = new + (pvPtr->next - pvPtr->buffer);
+    memcpy(newBuf, pvPtr->buffer, pvPtr->next - pvPtr->buffer);
+    pvPtr->next = newBuf + (pvPtr->next - pvPtr->buffer);
     if (pvPtr->clientData != 0) {
 	ckfree(pvPtr->buffer);
     }
-    pvPtr->buffer = new;
-    pvPtr->end = new + newSpace - 1;
+    pvPtr->buffer = newBuf;
+    pvPtr->end = newBuf + newSpace - 1;
     pvPtr->clientData = (ClientData) 1;
 }
 
@@ -1131,7 +1133,8 @@ Hax_ParseVar(
 	name1 = string;
 	while (*string != '}') {
 	    if (*string == 0) {
-		Hax_SetResult(interp, "missing close-brace for variable name",
+		Hax_SetResult(interp,
+			(char *) "missing close-brace for variable name",
 			HAX_STATIC);
 		if (termPtr != 0) {
 		    *termPtr = string;
@@ -1151,7 +1154,7 @@ Hax_ParseVar(
 	    if (termPtr != 0) {
 		*termPtr = string;
 	    }
-	    return "$";
+	    return (char *) "$";
 	}
 	name1End = string;
 	if (*string == '(') {
@@ -1188,7 +1191,7 @@ Hax_ParseVar(
     }
 
     if (((Interp *) interp)->noEval) {
-	return "";
+	return (char *) "";
     }
     c = *name1End;
     *name1End = 0;

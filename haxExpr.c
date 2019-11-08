@@ -150,7 +150,7 @@ int precTable[] = {
  * Mapping from operator numbers to strings;  used for error messages.
  */
 
-char *operatorStrings[] = {
+const char *operatorStrings[] = {
     "VALUE", "(", ")", "END", "UNKNOWN", "5", "6", "7",
     "*", "/", "%", "+", "-", "<<", ">>", "<", ">", "<=",
     ">=", "==", "!=", "&", "^", "|", "&&", "||", "?", ":",
@@ -339,15 +339,18 @@ ExprLex(
 		    Hax_ResetResult(interp);
 		    if (valuePtr->doubleValue == 0.0) {
 			interp->result =
-				"floating-point value too small to represent";
+				(char *) "floating-point value too small to "
+				    "represent";
 		    } else {
 			interp->result =
-				"floating-point value too large to represent";
+				(char *) "floating-point value too large to "
+				    "represent";
 		    }
 		    return HAX_ERROR;
 		}
 		if (term2 == infoPtr->expr) {
-		    interp->result = "poorly-formed floating-point value";
+		    interp->result =
+			(char *) "poorly-formed floating-point value";
 		    return HAX_ERROR;
 		}
 		valuePtr->type = TYPE_DOUBLE;
@@ -578,7 +581,7 @@ ExprGetValue(
     Interp *iPtr = (Interp *) interp;
     Value value2;			/* Second operand for current
 					 * operator.  */
-    int operator;			/* Current operator (either unary
+    int op;				/* Current operator (either unary
 					 * or binary). */
     int badType;			/* Type of offending argument;  used
 					 * for error messages. */
@@ -630,13 +633,13 @@ ExprGetValue(
 	     * Process unary operators.
 	     */
 
-	    operator = infoPtr->token;
+	    op = infoPtr->token;
 	    result = ExprGetValue(interp, infoPtr, precTable[infoPtr->token],
 		    valuePtr);
 	    if (result != HAX_OK) {
 		goto done;
 	    }
-	    switch (operator) {
+	    switch (op) {
 		case UNARY_MINUS:
 		    if (valuePtr->type == TYPE_INT) {
 			valuePtr->intValue = -valuePtr->intValue;
@@ -693,17 +696,17 @@ ExprGetValue(
 	}
     }
     while (1) {
-	operator = infoPtr->token;
+	op = infoPtr->token;
 	value2.pv.next = value2.pv.buffer;
-	if ((operator < MULT) || (operator >= UNARY_MINUS)) {
-	    if ((operator == END) || (operator == CLOSE_PAREN)) {
+	if ((op < MULT) || (op >= UNARY_MINUS)) {
+	    if ((op == END) || (op == CLOSE_PAREN)) {
 		result = HAX_OK;
 		goto done;
 	    } else {
 		goto syntaxError;
 	    }
 	}
-	if (precTable[operator] <= prec) {
+	if (precTable[op] <= prec) {
 	    result = HAX_OK;
 	    goto done;
 	}
@@ -714,7 +717,7 @@ ExprGetValue(
 	 * second operand:  just parse.  Same style for ?: pairs.
 	 */
 
-	if ((operator == AND) || (operator == OR) || (operator == QUESTY)) {
+	if ((op == AND) || (op == OR) || (op == QUESTY)) {
 	    if (valuePtr->type == TYPE_DOUBLE) {
 		valuePtr->intValue = valuePtr->doubleValue != 0;
 		valuePtr->type = TYPE_INT;
@@ -722,16 +725,16 @@ ExprGetValue(
 		badType = TYPE_STRING;
 		goto illegalType;
 	    }
-	    if (((operator == AND) && !valuePtr->intValue)
-		    || ((operator == OR) && valuePtr->intValue)) {
+	    if (((op == AND) && !valuePtr->intValue)
+		    || ((op == OR) && valuePtr->intValue)) {
 		iPtr->noEval++;
-		result = ExprGetValue(interp, infoPtr, precTable[operator],
+		result = ExprGetValue(interp, infoPtr, precTable[op],
 			&value2);
 		iPtr->noEval--;
-	    } else if (operator == QUESTY) {
+	    } else if (op == QUESTY) {
 		if (valuePtr->intValue != 0) {
 		    valuePtr->pv.next = valuePtr->pv.buffer;
-		    result = ExprGetValue(interp, infoPtr, precTable[operator],
+		    result = ExprGetValue(interp, infoPtr, precTable[op],
 			    valuePtr);
 		    if (result != HAX_OK) {
 			goto done;
@@ -741,12 +744,12 @@ ExprGetValue(
 		    }
 		    value2.pv.next = value2.pv.buffer;
 		    iPtr->noEval++;
-		    result = ExprGetValue(interp, infoPtr, precTable[operator],
+		    result = ExprGetValue(interp, infoPtr, precTable[op],
 			    &value2);
 		    iPtr->noEval--;
 		} else {
 		    iPtr->noEval++;
-		    result = ExprGetValue(interp, infoPtr, precTable[operator],
+		    result = ExprGetValue(interp, infoPtr, precTable[op],
 			    &value2);
 		    iPtr->noEval--;
 		    if (result != HAX_OK) {
@@ -756,15 +759,15 @@ ExprGetValue(
 			goto syntaxError;
 		    }
 		    valuePtr->pv.next = valuePtr->pv.buffer;
-		    result = ExprGetValue(interp, infoPtr, precTable[operator],
+		    result = ExprGetValue(interp, infoPtr, precTable[op],
 			    valuePtr);
 		}
 	    } else {
-		result = ExprGetValue(interp, infoPtr, precTable[operator],
+		result = ExprGetValue(interp, infoPtr, precTable[op],
 			&value2);
 	    }
 	} else {
-	    result = ExprGetValue(interp, infoPtr, precTable[operator],
+	    result = ExprGetValue(interp, infoPtr, precTable[op],
 		    &value2);
 	}
 	if (result != HAX_OK) {
@@ -783,7 +786,7 @@ ExprGetValue(
 	 * if necessary.
 	 */
 
-	switch (operator) {
+	switch (op) {
 
 	    /*
 	     * For the operators below, no strings are allowed and
@@ -882,7 +885,7 @@ ExprGetValue(
 	     */
 
 	    default:
-		interp->result = "unknown operator in expression";
+		interp->result = (char *) "unknown operator in expression";
 		result = HAX_ERROR;
 		goto done;
 	}
@@ -894,7 +897,7 @@ ExprGetValue(
 	 * error.
 	 */
 
-	switch (operator) {
+	switch (op) {
 	    case MULT:
 		if (valuePtr->type == TYPE_INT) {
 		    valuePtr->intValue *= value2.intValue;
@@ -906,7 +909,7 @@ ExprGetValue(
 		if (valuePtr->type == TYPE_INT) {
 		    if (value2.intValue == 0) {
 			divideByZero:
-			interp->result = "divide by zero";
+			interp->result = (char *) "divide by zero";
 			result = HAX_ERROR;
 			goto done;
 		    }
@@ -1065,7 +1068,8 @@ ExprGetValue(
 		break;
 
 	    case COLON:
-		interp->result = "can't have : operator without ? first";
+		interp->result =
+		    (char *) "can't have : operator without ? first";
 		result = HAX_ERROR;
 		goto done;
 	}
@@ -1087,7 +1091,7 @@ ExprGetValue(
     illegalType:
     Hax_AppendResult(interp, "can't use ", (badType == TYPE_DOUBLE) ?
 	    "floating-point value" : "non-numeric string",
-	    " as operand of \"", operatorStrings[operator], "\"",
+	    " as operand of \"", operatorStrings[op], "\"",
 	    (char *) NULL);
     result = HAX_ERROR;
     goto done;
@@ -1221,7 +1225,7 @@ Hax_ExprLong(
 	} else if (value.type == TYPE_DOUBLE) {
 	    *ptr = value.doubleValue;
 	} else {
-	    interp->result = "expression didn't have numeric value";
+	    interp->result = (char *) "expression didn't have numeric value";
 	    result = HAX_ERROR;
 	}
     }
@@ -1248,7 +1252,7 @@ Hax_ExprDouble(
 	} else if (value.type == TYPE_DOUBLE) {
 	    *(double *)ptr = value.doubleValue;
 	} else {
-	    interp->result = "expression didn't have numeric value";
+	    interp->result = (char *) "expression didn't have numeric value";
 	    result = HAX_ERROR;
 	}
     }
@@ -1275,7 +1279,7 @@ Hax_ExprBoolean(
 	} else if (value.type == TYPE_DOUBLE) {
 	    *ptr = value.doubleValue != 0.0;
 	} else {
-	    interp->result = "expression didn't have numeric value";
+	    interp->result = (char *) "expression didn't have numeric value";
 	    result = HAX_ERROR;
 	}
     }

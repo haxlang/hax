@@ -93,9 +93,9 @@ main(int argc, char **argv)
 #ifdef HAX_MEM_DEBUG
     Hax_InitMemory(interp);
 #endif
-    Hax_CreateCommand(interp, "echo", cmdEcho, (ClientData) "echo",
+    Hax_CreateCommand(interp, (char *) "echo", cmdEcho, (ClientData) "echo",
 	    (Hax_CmdDeleteProc *) NULL);
-    Hax_CreateCommand(interp, "checkmem", cmdCheckmem, (ClientData) 0,
+    Hax_CreateCommand(interp, (char *) "checkmem", cmdCheckmem, (ClientData) 0,
 	    (Hax_CmdDeleteProc *) NULL);
     buffer = Hax_CreateCmdBuf();
 #ifndef HAX_GENERIC_ONLY

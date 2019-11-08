@@ -522,11 +522,11 @@ void *
 Hax_Ckalloc (
     unsigned int size)
 {
-        char *result;
+        void *result;
 
         result = malloc(size);
         if (result == NULL) 
-                Hax_Panic("unable to alloc %d bytes", size);
+                Hax_Panic((char *) "unable to alloc %d bytes", size);
         return result;
 }
 

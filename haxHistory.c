@@ -99,7 +99,7 @@ static void		MakeSpace (HistoryEvent *hPtr, int size);
 static void		RevCommand (Interp *iPtr, char *string);
 static void		RevResult (Interp *iPtr, char *string);
 static int		SubsAndEval (Interp *iPtr, char *cmd,
-			    char *old, char *new);
+			    char *oldStr, char *newStr);
 
 /*
  *----------------------------------------------------------------------
@@ -137,8 +137,8 @@ Hax_InitHistory(
     }
     iPtr->curEvent = 0;
     iPtr->curEventNum = 0;
-    Hax_CreateCommand((Hax_Interp *) iPtr, "history", Hax_HistoryCmd,
-	    (ClientData) NULL, (void (*)()) NULL);
+    Hax_CreateCommand((Hax_Interp *) iPtr, (char *) "history", Hax_HistoryCmd,
+	    (ClientData) NULL, (Hax_CmdDeleteProc *) NULL);
 }
 
 /*
@@ -319,7 +319,7 @@ Hax_HistoryCmd(
 		    " event ?event?\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	eventPtr = GetEvent(iPtr, argc==2 ? "-1" : argv[2]);
+	eventPtr = GetEvent(iPtr, argc==2 ? (char *) "-1" : argv[2]);
 	if (eventPtr == NULL) {
 	    return HAX_ERROR;
 	}
@@ -328,7 +328,7 @@ Hax_HistoryCmd(
 	return HAX_OK;
     } else if ((c == 'i') && (strncmp(argv[1], "info", length)) == 0) {
 	int count, indx, i;
-	char *newline;
+	const char *newline;
 
 	if ((argc != 2) && (argc != 3)) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -463,7 +463,7 @@ Hax_HistoryCmd(
 		    " redo ?event?\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	eventPtr = GetEvent(iPtr, argc==2 ? "-1" : argv[2]);
+	eventPtr = GetEvent(iPtr, argc==2 ? (char *) "-1" : argv[2]);
 	if (eventPtr == NULL) {
 	    return HAX_ERROR;
 	}
@@ -475,7 +475,7 @@ Hax_HistoryCmd(
 		    " substitute old new ?event?\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	eventPtr = GetEvent(iPtr, argc==4 ? "-1" : argv[4]);
+	eventPtr = GetEvent(iPtr, argc==4 ? (char *) "-1" : argv[4]);
 	if (eventPtr == NULL) {
 	    return HAX_ERROR;
 	}
@@ -488,7 +488,7 @@ Hax_HistoryCmd(
 		    " words num-num/pat ?event?\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	eventPtr = GetEvent(iPtr, argc==3 ? "-1" : argv[3]);
+	eventPtr = GetEvent(iPtr, argc==3 ? (char *) "-1" : argv[3]);
 	if (eventPtr == NULL) {
 	    return HAX_ERROR;
 	}
@@ -898,8 +898,8 @@ SubsAndEval(
     Interp *iPtr,		/* Interpreter in which to execute
 				 * new command. */
     char *cmd,			/* Command in which to substitute. */
-    char *old,			/* String to search for in command. */
-    char *new			/* Replacement string for "old". */)
+    char *oldStr,		/* String to search for in command. */
+    char *newStr		/* Replacement string for "old". */)
 {
     char *src, *dst, *newCmd;
     int count, oldLength, newLength, length, result;
@@ -910,12 +910,12 @@ SubsAndEval(
      * doesn't appear in the original command).
      */
 
-    oldLength = strlen(old);
-    newLength = strlen(new);
+    oldLength = strlen(oldStr);
+    newLength = strlen(newStr);
     src = cmd;
     count = 0;
     while (1) {
-	src = strstr(src, old);
+	src = strstr(src, oldStr);
 	if (src == NULL) {
 	    break;
 	}
@@ -923,7 +923,7 @@ SubsAndEval(
 	count++;
     }
     if (count == 0) {
-	Hax_AppendResult((Hax_Interp *) iPtr, "\"", old,
+	Hax_AppendResult((Hax_Interp *) iPtr, "\"", oldStr,
 		"\" doesn't appear in event", (char *) NULL);
 	return HAX_ERROR;
     }
@@ -936,14 +936,14 @@ SubsAndEval(
     newCmd = (char *) ckalloc((unsigned) (length + 1));
     dst = newCmd;
     while (1) {
-	src = strstr(cmd, old);
+	src = strstr(cmd, oldStr);
 	if (src == NULL) {
 	    strcpy(dst, cmd);
 	    break;
 	}
 	strncpy(dst, cmd, src-cmd);
 	dst += src-cmd;
-	strcpy(dst, new);
+	strcpy(dst, newStr);
 	dst += newLength;
 	cmd = src + oldLength;
     }

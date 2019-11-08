@@ -31,6 +31,7 @@
  * 2019-11-07 Change FAIL() to standard do {} while(0) form
  * 2019-11-07 Remove superfluous break in switch()
  * 2019-11-07 Rename regex functions to disable clash with libc
+ * 2019-11-08 Correct build issued with a C++ compiler (g++, clang++)
  */
 #include "haxInt.h"
 
@@ -204,7 +205,7 @@ RegComp(char *exp)
 	int flags;
 
 	if (exp == NULL)
-		FAIL("NULL argument");
+		FAIL((char *) "NULL argument");
 
 	/* First pass: determine size, legality. */
 	regparse = exp;
@@ -217,12 +218,12 @@ RegComp(char *exp)
 
 	/* Small enough for pointer-storage convention? */
 	if (regsize >= 32767L)		/* Probably could be 65535L. */
-		FAIL("regexp too big");
+		FAIL((char *) "regexp too big");
 
 	/* Allocate space. */
 	r = (regexp *)ckalloc(sizeof(regexp) + (unsigned)regsize);
 	if (r == NULL)
-		FAIL("out of space");
+		FAIL((char *) "out of space");
 
 	/* Second pass: emit code. */
 	regparse = exp;
@@ -296,7 +297,7 @@ int *flagp)
 	/* Make an OPEN node, if parenthesized. */
 	if (paren) {
 		if (regnpar >= NSUBEXP)
-			FAIL("too many ()");
+			FAIL((char *) "too many ()");
 		parno = regnpar;
 		regnpar++;
 		ret = RegNode(OPEN+parno);
@@ -335,12 +336,12 @@ int *flagp)
 
 	/* Check for proper termination. */
 	if (paren && *regparse++ != ')') {
-		FAIL("unmatched ()");
+		FAIL((char *) "unmatched ()");
 	} else if (!paren && *regparse != '\0') {
 		if (*regparse == ')') {
-			FAIL("unmatched ()");
+			FAIL((char *) "unmatched ()");
 		} else
-			FAIL("junk on end");	/* "Can't happen". */
+			FAIL((char *) "junk on end");	/* "Can't happen". */
 		/* NOTREACHED */
 	}
 
@@ -411,7 +412,7 @@ int *flagp)
 	}
 
 	if (!(flags&HASWIDTH) && op != '?')
-		FAIL("*+ operand could be empty");
+		FAIL((char *) "*+ operand could be empty");
 	*flagp = (op != '+') ? (WORST|SPSTART) : (WORST|HASWIDTH);
 
 	if (op == '*' && (flags&SIMPLE))
@@ -442,7 +443,7 @@ int *flagp)
 	}
 	regparse++;
 	if (ISMULT(*regparse))
-		FAIL("nested *?+");
+		FAIL((char *) "nested *?+");
 
 	return(ret);
 }
@@ -495,7 +496,7 @@ int *flagp)
 						clss = UCHARAT(regparse-2)+1;
 						classend = UCHARAT(regparse);
 						if (clss > classend+1)
-							FAIL("invalid [] range");
+							FAIL((char *) "invalid [] range");
 						for (; clss <= classend; clss++)
 							RegC(clss);
 						regparse++;
@@ -505,7 +506,7 @@ int *flagp)
 			}
 			RegC('\0');
 			if (*regparse != ']')
-				FAIL("unmatched []");
+				FAIL((char *) "unmatched []");
 			regparse++;
 			*flagp |= HASWIDTH|SIMPLE;
 		}
@@ -519,18 +520,18 @@ int *flagp)
 	case '\0':
 	case '|':
 	case ')':
-		FAIL("internal urp");	/* Supposed to be caught earlier. */
+		FAIL((char *) "internal urp");	/* Supposed to be caught earlier. */
 		/* NOTREACHED */
 		break;
 	case '?':
 	case '+':
 	case '*':
-		FAIL("?+* follows nothing");
+		FAIL((char *) "?+* follows nothing");
 		/* NOTREACHED */
 		break;
 	case '\\':
 		if (*regparse == '\0')
-			FAIL("trailing \\");
+			FAIL((char *) "trailing \\");
 		ret = RegNode(EXACTLY);
 		RegC(*regparse++);
 		RegC('\0');
@@ -543,7 +544,7 @@ int *flagp)
 			regparse--;
 			len = strcspn(regparse, META);
 			if (len <= 0)
-				FAIL("internal disaster");
+				FAIL((char *) "internal disaster");
 			ender = *(regparse+len);
 			if (len > 1 && ISMULT(ender))
 				len--;		/* Back off clear of ?+* operand. */
@@ -715,13 +716,13 @@ char *string)
 
 	/* Be paranoid... */
 	if (prog == NULL || string == NULL) {
-		RegError("NULL parameter");
+		RegError((char *) "NULL parameter");
 		return(0);
 	}
 
 	/* Check validity of program. */
 	if (UCHARAT(prog->program) != MAGIC) {
-		RegError("corrupted program");
+		RegError((char *) "corrupted program");
 		return(0);
 	}
 
@@ -972,7 +973,7 @@ char *prog)
 		case END:
 			return(1);	/* Success! */
 		default:
-			RegError("memory corruption");
+			RegError((char *) "memory corruption");
 			return(0);
 		}
 
@@ -983,7 +984,7 @@ char *prog)
 	 * We get here only if there's trouble -- normally "case END" is
 	 * the terminating point.
 	 */
-	RegError("corrupted pointers");
+	RegError((char *) "corrupted pointers");
 	return(0);
 }
 
@@ -1024,7 +1025,7 @@ char *p)
 		}
 		break;
 	default:		/* Oh dear.  Called inappropriately. */
-		RegError("internal foulup");
+		RegError((char *) "internal foulup");
 		count = 0;	/* Best compromise. */
 		break;
 	}
@@ -1176,7 +1177,7 @@ char *op)
 		p = "PLUS";
 		break;
 	default:
-		RegError("corrupted opcode");
+		RegError((char *) "corrupted opcode");
 		break;
 	}
 	if (p != NULL)

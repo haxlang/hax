@@ -137,7 +137,7 @@ Hax_RegexpCmd(
 	return HAX_ERROR;
     }
     if (!match) {
-	interp->result = "0";
+	interp->result = (char *) "0";
 	return HAX_OK;
     }
 
@@ -148,7 +148,7 @@ Hax_RegexpCmd(
 
     argc -= 2;
     if (argc > NSUBEXP) {
-	interp->result = "too many substring variables";
+	interp->result = (char *) "too many substring variables";
 	return HAX_ERROR;
     }
     for (i = 0; i < argc; i++) {
@@ -156,9 +156,9 @@ Hax_RegexpCmd(
 
 	if (regexpPtr->startp[i] == NULL) {
 	    if (indices) {
-		result = Hax_SetVar(interp, argPtr[i+2], "-1 -1", 0);
+		result = Hax_SetVar(interp, argPtr[i+2], (char *) "-1 -1", 0);
 	    } else {
-		result = Hax_SetVar(interp, argPtr[i+2], "", 0);
+		result = Hax_SetVar(interp, argPtr[i+2], (char *) "", 0);
 	    }
 	} else {
 	    if (indices) {
@@ -182,7 +182,7 @@ Hax_RegexpCmd(
 	    return HAX_ERROR;
 	}
     }
-    interp->result = "1";
+    interp->result = (char *) "1";
     return HAX_OK;
 }
 
@@ -389,7 +389,7 @@ Hax_RegsubCmd(
      */
 
     if (p == string) {
-	interp->result = "0";
+	interp->result = (char *) "0";
 	result = HAX_OK;
 	goto done;
     }
@@ -404,7 +404,7 @@ Hax_RegsubCmd(
 	    goto cantSet;
 	}
     }
-    interp->result = "1";
+    interp->result = (char *) "1";
     result = HAX_OK;
 
     done:
@@ -442,7 +442,7 @@ Hax_RenameCmd(
     Command *cmdPtr;
     Interp *iPtr = (Interp *) interp;
     Hax_HashEntry *hPtr;
-    int new;
+    int newPtr;
 
     if (argc != 3) {
 	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -471,7 +471,7 @@ Hax_RenameCmd(
     }
     cmdPtr = (Command *) Hax_GetHashValue(hPtr);
     Hax_DeleteHashEntry(hPtr);
-    hPtr = Hax_CreateHashEntry(&iPtr->commandTable, argv[2], &new);
+    hPtr = Hax_CreateHashEntry(&iPtr->commandTable, argv[2], &newPtr);
     Hax_SetHashValue(hPtr, cmdPtr);
     return HAX_OK;
 }
@@ -597,7 +597,7 @@ Hax_ScanCmd(
 	    continue;
 	}
 	if (numFields == MAX_FIELDS) {
-	    interp->result = "too many fields to scan";
+	    interp->result = (char *) "too many fields to scan";
 	    return HAX_ERROR;
 	}
 	curField = &fields[numFields];
@@ -621,7 +621,8 @@ Hax_ScanCmd(
 	    case 'c':
                 if (widthSpecified) {
                     interp->result = 
-                         "field width may not be specified in %c conversion";
+                         (char *) "field width may not be specified in %c "
+			    "conversion";
                     return HAX_ERROR;
                 }
 		curField->fmt = 'c';
@@ -658,7 +659,8 @@ Hax_ScanCmd(
 
     if (numFields != (argc-3)) {
 	interp->result =
-		"different numbers of variable names and field specifiers";
+		(char *) "different numbers of variable names and field "
+		    "specifiers";
 	return HAX_ERROR;
     }
 
@@ -783,7 +785,7 @@ Hax_SplitCmd(
     char *elementStart;
 
     if (argc == 2) {
-	splitChars = " \n\t\r";
+	splitChars = (char *) " \n\t\r";
     } else if (argc == 3) {
 	splitChars = argv[2];
     } else {
@@ -875,11 +877,11 @@ Hax_StringCmd(
 	}
 	match = strcmp(argv[2], argv[3]);
 	if (match > 0) {
-	    interp->result = "1";
+	    interp->result = (char *) "1";
 	} else if (match < 0) {
-	    interp->result = "-1";
+	    interp->result = (char *) "-1";
 	} else {
-	    interp->result = "0";
+	    interp->result = (char *) "0";
 	}
 	return HAX_OK;
     } else if ((c == 'f') && (strncmp(argv[1], "first", length) == 0)) {
@@ -948,9 +950,9 @@ Hax_StringCmd(
 	    return HAX_ERROR;
 	}
 	if (Hax_StringMatch(argv[3], argv[2]) != 0) {
-	    interp->result = "1";
+	    interp->result = (char *) "1";
 	} else {
-	    interp->result = "0";
+	    interp->result = (char *) "0";
 	}
 	return HAX_OK;
     } else if ((c == 'r') && (strncmp(argv[1], "range", length) == 0)) {
@@ -1036,7 +1038,7 @@ Hax_StringCmd(
 	if (argc == 4) {
 	    trimChars = argv[3];
 	} else if (argc == 3) {
-	    trimChars = " \t\n\r";
+	    trimChars = (char *) " \t\n\r";
 	} else {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " ", argv[1], " string ?chars?\"", (char *) NULL);
@@ -1073,12 +1075,12 @@ Hax_StringCmd(
     } else if ((c == 't') && (strncmp(argv[1], "trimleft", length) == 0)
 	    && (length > 4)) {
 	left = 1;
-	argv[1] = "trimleft";
+	argv[1] = (char *) "trimleft";
 	goto trim;
     } else if ((c == 't') && (strncmp(argv[1], "trimright", length) == 0)
 	    && (length > 4)) {
 	right = 1;
-	argv[1] = "trimright";
+	argv[1] = (char *) "trimright";
 	goto trim;
     } else {
 	Hax_AppendResult(interp, "bad option \"", argv[1],
@@ -1216,7 +1218,7 @@ Hax_TraceCmd(
 	    && (length >= 2)) {
 	ClientData clientData;
 	char ops[4], *p;
-	char *prefix = "{";
+	char *prefix = (char *) "{";
 
 	if (argc != 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"",
@@ -1245,7 +1247,7 @@ Hax_TraceCmd(
 	    Hax_AppendElement(interp, ops, 1);
 	    Hax_AppendElement(interp, tvarPtr->command, 0);
 	    Hax_AppendResult(interp, "}", (char *) NULL);
-	    prefix = " {";
+	    prefix = (char *) " {";
 	}
     } else {
 	Hax_AppendResult(interp, "bad option \"", argv[1],
@@ -1309,7 +1311,7 @@ TraceVarProc(
 	 */
 
 	if (name2 == NULL) {
-	    name2 = "";
+	    name2 = (char *) "";
 	}
 	cmdLength = tvarPtr->length + Hax_ScanElement(name1, &flags1) +
 		Hax_ScanElement(name2, &flags2) + 5;
@@ -1344,7 +1346,7 @@ TraceVarProc(
 
 	if (interp->freeProc == 0) {
 	    dummy.freeProc = (Hax_FreeProc *) 0;
-	    dummy.result = "";
+	    dummy.result = (char *) "";
 	    Hax_SetResult((Hax_Interp *) &dummy, interp->result, HAX_VOLATILE);
 	} else {
 	    dummy.freeProc = interp->freeProc;
@@ -1355,7 +1357,7 @@ TraceVarProc(
 	    ckfree(cmdPtr);
 	}
 	if (code != HAX_OK) {
-	    result = "access disallowed by trace command";
+	    result = (char *) "access disallowed by trace command";
 	    Hax_ResetResult(interp);		/* Must clear error state. */
 	}
 	Hax_FreeResult(interp);

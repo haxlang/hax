@@ -116,7 +116,7 @@ HaxSetupEnv(
      * writes and unsets to that array.
      */
 
-    (void) Hax_UnsetVar2(interp, "env", (char *) NULL, HAX_GLOBAL_ONLY);
+    (void) Hax_UnsetVar2(interp, (char *) "env", (char *) NULL, HAX_GLOBAL_ONLY);
     for (i = 0; ; i++) {
 	char *p, *p2;
 
@@ -128,10 +128,10 @@ HaxSetupEnv(
 	    /* Empty loop body. */
 	}
 	*p2 = 0;
-	(void) Hax_SetVar2(interp, "env", p, p2+1, HAX_GLOBAL_ONLY);
+	(void) Hax_SetVar2(interp, (char *) "env", p, p2+1, HAX_GLOBAL_ONLY);
 	*p2 = '=';
     }
-    Hax_TraceVar2(interp, "env", (char *) NULL,
+    Hax_TraceVar2(interp, (char *) "env", (char *) NULL,
 	    HAX_GLOBAL_ONLY | HAX_TRACE_WRITES | HAX_TRACE_UNSETS,
 	    EnvTraceProc, (ClientData) NULL);
 }
@@ -267,7 +267,7 @@ SetEnv(
      */
 
     for (eiPtr= firstInterpPtr; eiPtr != NULL; eiPtr = eiPtr->nextPtr) {
-	(void) Hax_SetVar2(eiPtr->interp, "env", (char *) name,
+	(void) Hax_SetVar2(eiPtr->interp, (char *) "env", (char *) name,
 		p+1, HAX_GLOBAL_ONLY);
     }
 }
@@ -319,7 +319,7 @@ PutEnv(
     if (nameLength == 0) {
 	return 0;
     }
-    name = ckalloc(nameLength+1);
+    name = (char *) ckalloc(nameLength+1);
     memcpy(name, string, nameLength);
     name[nameLength] = 0;
     SetEnv(name, value+1);
@@ -377,7 +377,7 @@ UnsetEnv(
      */
 
     for (eiPtr = firstInterpPtr; eiPtr != NULL; eiPtr = eiPtr->nextPtr) {
-	(void) Hax_UnsetVar2(eiPtr->interp, "env", (char *) name,
+	(void) Hax_UnsetVar2(eiPtr->interp, (char *) "env", (char *) name,
 		HAX_GLOBAL_ONLY);
     }
 }
@@ -425,7 +425,7 @@ EnvTraceProc(
 
 	if ((flags & (HAX_TRACE_UNSETS|HAX_TRACE_DESTROYED))
 		!= (HAX_TRACE_UNSETS|HAX_TRACE_DESTROYED)) {
-	    Hax_Panic("EnvTraceProc called with confusing arguments");
+	    Hax_Panic((char *) "EnvTraceProc called with confusing arguments");
 	}
 	eiPtr = firstInterpPtr;
 	if (eiPtr->interp == interp) {
@@ -434,7 +434,8 @@ EnvTraceProc(
 	    for (prevPtr = eiPtr, eiPtr = eiPtr->nextPtr; ;
 		    prevPtr = eiPtr, eiPtr = eiPtr->nextPtr) {
 		if (eiPtr == NULL) {
-		    Hax_Panic("EnvTraceProc couldn't find interpreter");
+		    Hax_Panic(
+			(char *) "EnvTraceProc couldn't find interpreter");
 		}
 		if (eiPtr->interp == interp) {
 		    prevPtr->nextPtr = eiPtr->nextPtr;
@@ -451,7 +452,8 @@ EnvTraceProc(
      */
 
     if (flags & HAX_TRACE_WRITES) {
-	SetEnv(name2, Hax_GetVar2(interp, "env", name2, HAX_GLOBAL_ONLY));
+	SetEnv(name2,
+	    Hax_GetVar2(interp, (char *) "env", name2, HAX_GLOBAL_ONLY));
     }
 
     if (flags & HAX_TRACE_UNSETS) {

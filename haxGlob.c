@@ -164,7 +164,7 @@ DoGlob(
     char c;
     char *openBrace, *closeBrace;
     int gotSpecial, result;
-    char *separator;
+    const char *separator;
 
     /*
      * Figure out whether we'll need to add a slash between the directory
@@ -224,7 +224,7 @@ DoGlob(
 
 	if (closeBrace == NULL) {
 	    Hax_ResetResult(interp);
-	    interp->result = "unmatched open-brace in file name";
+	    interp->result = (char *) "unmatched open-brace in file name";
 	    return HAX_ERROR;
 	}
 	remLength = strlen(rem) + 1;
@@ -274,7 +274,7 @@ DoGlob(
 	 */
 
 	if (*dir == '\0') {
-	    dirName = ".";
+	    dirName = (char *) ".";
 	} else {
 	    dirName = dir;
 	}
@@ -315,7 +315,7 @@ DoGlob(
 	    if (Hax_StringMatch(entryPtr->d_name, pattern)) {
 		int nameLength = strlen(entryPtr->d_name);
 		if (*p == 0) {
-		    AppendResult(interp, dir, separator, entryPtr->d_name,
+		    AppendResult(interp, dir, (char *) separator, entryPtr->d_name,
 			    nameLength);
 		} else {
 		    if ((l1+nameLength+2) <= STATIC_SIZE) {
@@ -348,7 +348,7 @@ DoGlob(
      */
 
     if (*p == 0) {
-	AppendResult(interp, dir, separator, rem, p-rem);
+	AppendResult(interp, dir, (char *) separator, rem, p-rem);
     } else {
 	int l1, l2;
 	char *newDir;
@@ -539,21 +539,21 @@ Hax_GlobCmd(
 	    }
 	}
 	if (*thisName == '/') {
-	    result = DoGlob(interp, "/", thisName+1);
+	    result = DoGlob(interp, (char *) "/", thisName+1);
 	} else {
-	    result = DoGlob(interp, "", thisName);
+	    result = DoGlob(interp, (char *) "", thisName);
 	}
 	if (result != HAX_OK) {
 	    return result;
 	}
     }
     if ((*interp->result == 0) && !noComplain) {
-	char *sep = "";
+	const char *sep = "";
 
 	Hax_AppendResult(interp, "no files matched glob pattern",
 		(argc == 2) ? " \"" : "s \"", (char *) NULL);
 	for (i = 1; i < argc; i++) {
-	    Hax_AppendResult(interp, sep, argv[i], (char *) NULL);
+	    Hax_AppendResult(interp, (char *) sep, argv[i], (char *) NULL);
 	    sep = " ";
 	}
 	Hax_AppendResult(interp, "\"", (char *) NULL);

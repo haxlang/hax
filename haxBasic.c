@@ -27,7 +27,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclBasic.c,v 1.133 92/08/2
  */
 
 typedef struct {
-    char *name;			/* Name of command. */
+    const char *name;		/* Name of command. */
     Hax_CmdProc *proc;		/* Procedure that executes command. */
 } CmdInfo;
 
@@ -177,12 +177,12 @@ Hax_CreateInterp(void)
      */
 
     for (cmdInfoPtr = builtInCmds; cmdInfoPtr->name != NULL; cmdInfoPtr++) {
-	int new;
+	int newPtr;
 	Hax_HashEntry *hPtr;
 
 	hPtr = Hax_CreateHashEntry(&iPtr->commandTable,
-		cmdInfoPtr->name, &new);
-	if (new) {
+		(char *) cmdInfoPtr->name, &newPtr);
+	if (newPtr) {
 	    cmdPtr = (Command *) ckalloc(sizeof(Command));
 	    cmdPtr->proc = cmdInfoPtr->proc;
 	    cmdPtr->clientData = (ClientData) NULL;
@@ -343,10 +343,10 @@ Hax_CreateCommand(
     Interp *iPtr = (Interp *) interp;
     Command *cmdPtr;
     Hax_HashEntry *hPtr;
-    int new;
+    int newPtr;
 
-    hPtr = Hax_CreateHashEntry(&iPtr->commandTable, cmdName, &new);
-    if (!new) {
+    hPtr = Hax_CreateHashEntry(&iPtr->commandTable, cmdName, &newPtr);
+    if (!newPtr) {
 	/*
 	 * Command already exists:  delete the old one.
 	 */
@@ -477,7 +477,7 @@ Hax_Eval(
     char *cmdStart;			/* Points to first non-blank char. in
 					 * command (used in calling trace
 					 * procedures). */
-    char *ellipsis = "";		/* Used in setting errorInfo variable;
+    const char *ellipsis = "";		/* Used in setting errorInfo variable;
 					 * set to "..." to indicate that not
 					 * all of offending command is included
 					 * in errorInfo.  "" means that the
@@ -503,7 +503,8 @@ Hax_Eval(
     iPtr->numLevels++;
     if (iPtr->numLevels > MAX_NESTING_DEPTH) {
 	iPtr->numLevels--;
-	iPtr->result =  "too many nested calls to Hax_Eval (infinite loop?)";
+	iPtr->result =
+	    (char *) "too many nested calls to Hax_Eval (infinite loop?)";
 	return HAX_ERROR;
     }
 
@@ -659,7 +660,7 @@ Hax_Eval(
 	if (hPtr == NULL) {
 	    int i;
 
-	    hPtr = Hax_FindHashEntry(&iPtr->commandTable, "unknown");
+	    hPtr = Hax_FindHashEntry(&iPtr->commandTable, (char *) "unknown");
 	    if (hPtr == NULL) {
 		Hax_ResetResult(interp);
 		Hax_AppendResult(interp, "invalid command name: \"",
@@ -670,7 +671,7 @@ Hax_Eval(
 	    for (i = argc; i >= 0; i--) {
 		argv[i+1] = argv[i];
 	    }
-	    argv[0] = "unknown";
+	    argv[0] = (char *) "unknown";
 	    argc++;
 	}
 	cmdPtr = (Command *) Hax_GetHashValue(hPtr);
@@ -729,13 +730,14 @@ Hax_Eval(
 	if ((result != HAX_OK) && (result != HAX_ERROR)) {
 	    Hax_ResetResult(interp);
 	    if (result == HAX_BREAK) {
-		iPtr->result = "invoked \"break\" outside of a loop";
+		iPtr->result = (char *) "invoked \"break\" outside of a loop";
 	    } else if (result == HAX_CONTINUE) {
-		iPtr->result = "invoked \"continue\" outside of a loop";
+		iPtr->result =
+		    (char *) "invoked \"continue\" outside of a loop";
 	    } else {
 		iPtr->result = iPtr->resultSpace;
-		sprintf(iPtr->resultSpace, "command returned bad code: %d",
-			result);
+		sprintf(iPtr->resultSpace,
+		    (char *) "command returned bad code: %d", result);
 	    }
 	    result = HAX_ERROR;
 	}
@@ -939,8 +941,8 @@ Hax_AddErrorInfo(
      */
 
     if (!(iPtr->flags & ERR_IN_PROGRESS)) {
-	Hax_SetVar2(interp, "errorInfo", (char *) NULL, interp->result,
-		HAX_GLOBAL_ONLY);
+	Hax_SetVar2(interp, (char *) "errorInfo", (char *) NULL,
+		interp->result, HAX_GLOBAL_ONLY);
 	iPtr->flags |= ERR_IN_PROGRESS;
 
 	/*
@@ -949,11 +951,11 @@ Hax_AddErrorInfo(
 	 */
 
 	if (!(iPtr->flags & ERROR_CODE_SET)) {
-	    (void) Hax_SetVar2(interp, "errorCode", (char *) NULL, "NONE",
-		    HAX_GLOBAL_ONLY);
+	    (void) Hax_SetVar2(interp, (char *) "errorCode", (char *) NULL,
+		    (char *) "NONE", HAX_GLOBAL_ONLY);
 	}
     }
-    Hax_SetVar2(interp, "errorInfo", (char *) NULL, message,
+    Hax_SetVar2(interp, (char *) "errorInfo", (char *) NULL, message,
 	    HAX_GLOBAL_ONLY|HAX_APPEND_VALUE);
 }
 
@@ -1007,16 +1009,16 @@ Hax_VarEval(
 	}
 	length = strlen(string);
 	if ((spaceUsed + length) > spaceAvl) {
-	    char *new;
+	    char *newPtr;
 
 	    spaceAvl = spaceUsed + length;
 	    spaceAvl += spaceAvl/2;
-	    new = ckalloc((unsigned) spaceAvl);
-	    memcpy(new, cmd, spaceUsed);
+	    newPtr = (char *) ckalloc((unsigned) spaceAvl);
+	    memcpy(newPtr, cmd, spaceUsed);
 	    if (cmd != fixedSpace) {
 		ckfree(cmd);
 	    }
-	    cmd = new;
+	    cmd = newPtr;
 	}
 	strcpy(cmd + spaceUsed, string);
 	spaceUsed += length;

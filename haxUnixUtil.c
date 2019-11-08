@@ -388,7 +388,7 @@ Hax_DetachPids(
 	    }
 	    goto nextPid;
 	}
-	Hax_Panic("Hax_Detach couldn't find process");
+	Hax_Panic((char *) "Hax_Detach couldn't find process");
 
 	nextPid:
 	continue;
@@ -513,7 +513,7 @@ Hax_CreatePipeline(
     for (i = 0; i < argc; i++) {
 	if ((argv[i][0] == '|') && ((argv[i][1] == 0))) {
 	    if ((i == (lastBar+1)) || (i == (argc-1))) {
-		interp->result = "illegal use of | in command";
+		interp->result = (char *) "illegal use of | in command";
 		return -1;
 	    }
 	    lastBar = i;
@@ -546,7 +546,7 @@ Hax_CreatePipeline(
 	i--;			/* Process new arg from same position. */
     }
     if (argc == 0) {
-	interp->result =  "didn't specify command to execute";
+	interp->result = (char *) "didn't specify command to execute";
 	return -1;
     }
 
@@ -721,7 +721,7 @@ Hax_CreatePipeline(
 		    || ((outputId != -1) && (dup2(outputId, 1) == -1))
 		    || ((errorId != -1) && (dup2(errorId, 2) == -1))) {
 		char *err;
-		err = "forked process couldn't set up input/output\n";
+		err = (char *) "forked process couldn't set up input/output\n";
 		write(errorId < 0 ? 2 : errorId, err, strlen(err));
 		_exit(1);
 	    }
@@ -828,9 +828,9 @@ cleanup:
  */
 
 char *
-Hax_UnixError(interp)
-    Hax_Interp *interp;		/* Interpreter whose $errorCode variable
-				 * is to be changed. */
+Hax_UnixError(
+    Hax_Interp *interp		/* Interpreter whose $errorCode variable
+				 * is to be changed. */)
 {
     char *id, *msg;
 
@@ -860,11 +860,11 @@ Hax_UnixError(interp)
  */
 
 void
-HaxMakeFileTable(iPtr, index)
-    Interp *iPtr;		/* Interpreter whose table of files is
+HaxMakeFileTable(
+    Interp *iPtr,		/* Interpreter whose table of files is
 				 * to be manipulated. */
-    int index;			/* Make sure table is large enough to
-				 * hold at least this index. */
+    int index			/* Make sure table is large enough to
+				 * hold at least this index. */)
 {
     /*
      * If the table doesn't even exist, then create it and initialize
@@ -955,11 +955,11 @@ HaxMakeFileTable(iPtr, index)
  */
 
 int
-HaxGetOpenFile(interp, string, filePtrPtr)
-    Hax_Interp *interp;		/* Interpreter in which to find file. */
-    char *string;		/* String that identifies file. */
-    OpenFile **filePtrPtr;	/* Address of word in which to store pointer
-				 * to structure about open file. */
+HaxGetOpenFile(
+    Hax_Interp *interp,		/* Interpreter in which to find file. */
+    char *string,		/* String that identifies file. */
+    OpenFile **filePtrPtr	/* Address of word in which to store pointer
+				 * to structure about open file. */)
 {
     int fd = 0;			/* Initial value needed only to stop compiler
 				 * warnings. */

@@ -78,7 +78,7 @@ Hax_CdCmd(
     if (argc == 2) {
 	dirName = argv[1];
     } else {
-	dirName = "~";
+	dirName = (char *) "~";
     }
     dirName = Hax_TildeSubst(interp, dirName);
     if (dirName == NULL) {
@@ -204,9 +204,9 @@ Hax_EofCmd(
 	return HAX_ERROR;
     }
     if (feof(filePtr->f)) {
-	interp->result = "1";
+	interp->result = (char *) "1";
     } else {
-	interp->result = "0";
+	interp->result = (char *) "0";
     }
     return HAX_OK;
 }
@@ -399,7 +399,7 @@ Hax_FileCmd(
     }
     if ((c == 'd') && (strncmp(argv[1], "dirname", length) == 0)) {
 	if (argc != 3) {
-	    argv[1] = "dirname";
+	    argv[1] = (char *) "dirname";
 	    not3Args:
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " ", argv[1], " name\"", (char *) NULL);
@@ -407,9 +407,9 @@ Hax_FileCmd(
 	}
 	p = strrchr(fileName, '/');
 	if (p == NULL) {
-	    interp->result = ".";
+	    interp->result = (char *) ".";
 	} else if (p == fileName) {
-	    interp->result = "/";
+	    interp->result = (char *) "/";
 	} else {
 	    *p = 0;
 	    Hax_SetResult(interp, fileName, HAX_VOLATILE);
@@ -421,7 +421,7 @@ Hax_FileCmd(
 	char *lastSlash;
 
 	if (argc != 3) {
-	    argv[1] = "rootname";
+	    argv[1] = (char *) "rootname";
 	    goto not3Args;
 	}
 	p = strrchr(fileName, '.');
@@ -439,7 +439,7 @@ Hax_FileCmd(
 	char *lastSlash;
 
 	if (argc != 3) {
-	    argv[1] = "extension";
+	    argv[1] = (char *) "extension";
 	    goto not3Args;
 	}
 	p = strrchr(fileName, '.');
@@ -451,7 +451,7 @@ Hax_FileCmd(
     } else if ((c == 't') && (strncmp(argv[1], "tail", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 3) {
-	    argv[1] = "tail";
+	    argv[1] = (char *) "tail";
 	    goto not3Args;
 	}
 	p = strrchr(fileName, '/');
@@ -474,20 +474,20 @@ Hax_FileCmd(
     if ((c == 'r') && (strncmp(argv[1], "readable", length) == 0)
 	    && (length >= 5)) {
 	if (argc != 3) {
-	    argv[1] = "readable";
+	    argv[1] = (char *) "readable";
 	    goto not3Args;
 	}
 	mode = R_OK;
 	checkAccess:
 	if (access(fileName, mode) == -1) {
-	    interp->result = "0";
+	    interp->result = (char *) "0";
 	} else {
-	    interp->result = "1";
+	    interp->result = (char *) "1";
 	}
 	return HAX_OK;
     } else if ((c == 'w') && (strncmp(argv[1], "writable", length) == 0)) {
 	if (argc != 3) {
-	    argv[1] = "writable";
+	    argv[1] = (char *) "writable";
 	    goto not3Args;
 	}
 	mode = W_OK;
@@ -495,7 +495,7 @@ Hax_FileCmd(
     } else if ((c == 'e') && (strncmp(argv[1], "executable", length) == 0)
 	    && (length >= 3)) {
 	if (argc != 3) {
-	    argv[1] = "executable";
+	    argv[1] = (char *) "executable";
 	    goto not3Args;
 	}
 	mode = X_OK;
@@ -503,7 +503,7 @@ Hax_FileCmd(
     } else if ((c == 'e') && (strncmp(argv[1], "exists", length) == 0)
 	    && (length >= 3)) {
 	if (argc != 3) {
-	    argv[1] = "exists";
+	    argv[1] = (char *) "exists";
 	    goto not3Args;
 	}
 	mode = F_OK;
@@ -516,7 +516,7 @@ Hax_FileCmd(
 
     if ((c == 'a') && (strncmp(argv[1], "atime", length) == 0)) {
 	if (argc != 3) {
-	    argv[1] = "atime";
+	    argv[1] = (char *) "atime";
 	    goto not3Args;
 	}
 	if (stat(fileName, &statBuf) == -1) {
@@ -527,14 +527,14 @@ Hax_FileCmd(
     } else if ((c == 'i') && (strncmp(argv[1], "isdirectory", length) == 0)
 	    && (length >= 3)) {
 	if (argc != 3) {
-	    argv[1] = "isdirectory";
+	    argv[1] = (char *) "isdirectory";
 	    goto not3Args;
 	}
 	statOp = 2;
     } else if ((c == 'i') && (strncmp(argv[1], "isfile", length) == 0)
 	    && (length >= 3)) {
 	if (argc != 3) {
-	    argv[1] = "isfile";
+	    argv[1] = (char *) "isfile";
 	    goto not3Args;
 	}
 	statOp = 1;
@@ -553,7 +553,7 @@ Hax_FileCmd(
 	return StoreStatData(interp, argv[3], &statBuf);
     } else if ((c == 'm') && (strncmp(argv[1], "mtime", length) == 0)) {
 	if (argc != 3) {
-	    argv[1] = "mtime";
+	    argv[1] = (char *) "mtime";
 	    goto not3Args;
 	}
 	if (stat(fileName, &statBuf) == -1) {
@@ -563,7 +563,7 @@ Hax_FileCmd(
 	return HAX_OK;
     } else if ((c == 'o') && (strncmp(argv[1], "owned", length) == 0)) {
 	if (argc != 3) {
-	    argv[1] = "owned";
+	    argv[1] = (char *) "owned";
 	    goto not3Args;
 	}
 	statOp = 0;
@@ -577,7 +577,7 @@ Hax_FileCmd(
 	int linkLength;
 
 	if (argc != 3) {
-	    argv[1] = "readlink";
+	    argv[1] = (char *) "readlink";
 	    goto not3Args;
 	}
 	linkLength = readlink(fileName, linkValue, sizeof(linkValue) - 1);
@@ -592,7 +592,7 @@ Hax_FileCmd(
     } else if ((c == 's') && (strncmp(argv[1], "size", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 3) {
-	    argv[1] = "size";
+	    argv[1] = (char *) "size";
 	    goto not3Args;
 	}
 	if (stat(fileName, &statBuf) == -1) {
@@ -618,7 +618,7 @@ Hax_FileCmd(
     } else if ((c == 't') && (strncmp(argv[1], "type", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 3) {
-	    argv[1] = "type";
+	    argv[1] = (char *) "type";
 	    goto not3Args;
 	}
 	if (lstat(fileName, &statBuf) == -1) {
@@ -638,7 +638,7 @@ Hax_FileCmd(
 	return HAX_ERROR;
     }
     if (stat(fileName, &statBuf) == -1) {
-	interp->result = "0";
+	interp->result = (char *) "0";
 	return HAX_OK;
     }
     switch (statOp) {
@@ -653,9 +653,9 @@ Hax_FileCmd(
 	    break;
     }
     if (mode) {
-	interp->result = "1";
+	interp->result = (char *) "1";
     } else {
-	interp->result = "0";
+	interp->result = (char *) "0";
     }
     return HAX_OK;
 }
@@ -690,56 +690,60 @@ StoreStatData(
     char string[30];
 
     sprintf(string, "%ld", (long)statPtr->st_dev);
-    if (Hax_SetVar2(interp, varName, "dev", string, HAX_LEAVE_ERR_MSG)
+    if (Hax_SetVar2(interp, varName, (char *) "dev", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
     sprintf(string, "%lu", (unsigned long)statPtr->st_ino);
-    if (Hax_SetVar2(interp, varName, "ino", string, HAX_LEAVE_ERR_MSG)
+    if (Hax_SetVar2(interp, varName, (char *) "ino", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
     sprintf(string, "%d", statPtr->st_mode);
-    if (Hax_SetVar2(interp, varName, "mode", string, HAX_LEAVE_ERR_MSG)
+    if (Hax_SetVar2(interp, varName, (char *) "mode", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
     sprintf(string, "%d", statPtr->st_nlink);
-    if (Hax_SetVar2(interp, varName, "nlink", string, HAX_LEAVE_ERR_MSG)
+    if (Hax_SetVar2(interp, varName, (char *) "nlink", string,
+	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
     sprintf(string, "%d", statPtr->st_uid);
-    if (Hax_SetVar2(interp, varName, "uid", string, HAX_LEAVE_ERR_MSG)
+    if (Hax_SetVar2(interp, varName, (char *) "uid", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
     sprintf(string, "%d", statPtr->st_gid);
-    if (Hax_SetVar2(interp, varName, "gid", string, HAX_LEAVE_ERR_MSG)
+    if (Hax_SetVar2(interp, varName, (char *) "gid", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
     sprintf(string, "%ld", statPtr->st_size);
-    if (Hax_SetVar2(interp, varName, "size", string, HAX_LEAVE_ERR_MSG)
+    if (Hax_SetVar2(interp, varName, (char *) "size", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
     sprintf(string, "%ld", statPtr->st_atime);
-    if (Hax_SetVar2(interp, varName, "atime", string, HAX_LEAVE_ERR_MSG)
+    if (Hax_SetVar2(interp, varName, (char *) "atime", string,
+	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
     sprintf(string, "%ld", statPtr->st_mtime);
-    if (Hax_SetVar2(interp, varName, "mtime", string, HAX_LEAVE_ERR_MSG)
+    if (Hax_SetVar2(interp, varName, (char *) "mtime", string,
+	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
     sprintf(string, "%ld", statPtr->st_ctime);
-    if (Hax_SetVar2(interp, varName, "ctime", string, HAX_LEAVE_ERR_MSG)
+    if (Hax_SetVar2(interp, varName, (char *) "ctime", string,
+	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    if (Hax_SetVar2(interp, varName, "type",
+    if (Hax_SetVar2(interp, varName, (char *) "type",
 	    GetFileType((int) statPtr->st_mode), HAX_LEAVE_ERR_MSG) == NULL) {
 	return HAX_ERROR;
     }
@@ -768,21 +772,21 @@ GetFileType(
     int mode)
 {
     if (S_ISREG(mode)) {
-	return "file";
+	return (char *) "file";
     } else if (S_ISDIR(mode)) {
-	return "directory";
+	return (char *) "directory";
     } else if (S_ISCHR(mode)) {
-	return "characterSpecial";
+	return (char *) "characterSpecial";
     } else if (S_ISBLK(mode)) {
-	return "blockSpecial";
+	return (char *) "blockSpecial";
     } else if (S_ISFIFO(mode)) {
-	return "fifo";
+	return (char *) "fifo";
     } else if (S_ISLNK(mode)) {
-	return "link";
+	return (char *) "link";
     } else if (S_ISSOCK(mode)) {
-	return "socket";
+	return (char *) "socket";
     }
-    return "unknown";
+    return (char *) "unknown";
 }
 
 /*
@@ -970,7 +974,7 @@ Hax_OpenCmd(
     OpenFile *filePtr;
 
     if (argc == 2) {
-	access = "r";
+	access = (char *) "r";
     } else if (argc == 3) {
 	access = argv[2];
     } else {
@@ -1090,7 +1094,7 @@ Hax_OpenCmd(
     fd = fileno(filePtr->f);
     HaxMakeFileTable(iPtr, fd);
     if (iPtr->filePtrArray[fd] != NULL) {
-	Hax_Panic("Hax_OpenCmd found file already open");
+	Hax_Panic((char *) "Hax_OpenCmd found file already open");
     }
     iPtr->filePtrArray[fd] = filePtr;
     sprintf(interp->result, "file%d", fd);
@@ -1149,7 +1153,7 @@ Hax_PwdCmd(
     if (currentDir == NULL) {
 	if (getcwd(buffer, MAXPATHLEN) == NULL) {
 	    if (errno == ERANGE) {
-		interp->result = "working directory name is too long";
+		interp->result = (char *) "working directory name is too long";
 	    } else {
 		Hax_AppendResult(interp,
 			"error getting working directory name: ",
@@ -1220,7 +1224,7 @@ Hax_PutsCmd(
 	newline = 0;
     }
     if (i == (argc-1)) {
-	fileId = "stdout";
+	fileId = (char *) "stdout";
     } else {
 	fileId = argv[i];
 	i++;

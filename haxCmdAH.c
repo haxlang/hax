@@ -122,7 +122,7 @@ Hax_CaseCmd(
 	char *p;
 
 	if (i == (caseArgc-1)) {
-	    interp->result = "extra case pattern with no body";
+	    interp->result = (char *) "extra case pattern with no body";
 	    result = HAX_ERROR;
 	    goto cleanup;
 	}
@@ -230,7 +230,8 @@ Hax_CatchCmd(
     result = Hax_Eval(interp, argv[1], 0, (char **) NULL);
     if (argc == 3) {
 	if (Hax_SetVar(interp, argv[2], interp->result, 0) == NULL) {
-	    Hax_SetResult(interp, "couldn't save command result in variable",
+	    Hax_SetResult(interp,
+		    (char *) "couldn't save command result in variable",
 		    HAX_STATIC);
 	    return HAX_ERROR;
 	}
@@ -346,7 +347,7 @@ Hax_ErrorCmd(
 	iPtr->flags |= ERR_ALREADY_LOGGED;
     }
     if (argc == 4) {
-	Hax_SetVar2(interp, "errorCode", (char *) NULL, argv[3],
+	Hax_SetVar2(interp, (char *) "errorCode", (char *) NULL, argv[3],
 		HAX_GLOBAL_ONLY);
 	iPtr->flags |= ERROR_CODE_SET;
     }
@@ -478,7 +479,8 @@ Hax_ForCmd(
     result = Hax_Eval(interp, argv[1], 0, (char **) NULL);
     if (result != HAX_OK) {
 	if (result == HAX_ERROR) {
-	    Hax_AddErrorInfo(interp, "\n    (\"for\" initial command)");
+	    Hax_AddErrorInfo(interp,
+		(char *) "\n    (\"for\" initial command)");
 	}
 	return result;
     }
@@ -506,7 +508,8 @@ Hax_ForCmd(
 	    break;
 	} else if (result != HAX_OK) {
 	    if (result == HAX_ERROR) {
-		Hax_AddErrorInfo(interp, "\n    (\"for\" loop-end command)");
+		Hax_AddErrorInfo(interp,
+		    (char *) "\n    (\"for\" loop-end command)");
 	    }
 	    return result;
 	}
@@ -565,7 +568,8 @@ Hax_ForeachCmd(
     }
     for (i = 0; i < listArgc; i++) {
 	if (Hax_SetVar(interp, argv[1], listArgv[i], 0) == NULL) {
-	    Hax_SetResult(interp, "couldn't set loop variable", HAX_STATIC);
+	    Hax_SetResult(interp, (char *) "couldn't set loop variable",
+		    HAX_STATIC);
 	    result = HAX_ERROR;
 	    break;
 	}
@@ -840,7 +844,8 @@ Hax_FormatCmd(
 		break;
 	    case 0:
 		interp->result =
-			"format string ended in middle of field specifier";
+			(char *) "format string ended in middle of field "
+			    "specifier";
 		goto fmtError;
 	    default:
 		sprintf(interp->result, "bad field specifier \"%c\"", *format);
@@ -905,7 +910,7 @@ Hax_FormatCmd(
     return HAX_OK;
 
     notEnoughArgs:
-    interp->result = "not enough arguments for all format specifiers";
+    interp->result = (char *) "not enough arguments for all format specifiers";
     fmtError:
     if (dstSpace != HAX_RESULT_SIZE) {
 	ckfree(dst);

@@ -193,7 +193,7 @@ HaxGetFrame(
     CallFrame *framePtr;
 
     if (iPtr->varFramePtr == NULL) {
-	iPtr->result = "already at top level";
+	iPtr->result = (char *) "already at top level";
 	return -1;
     }
 
@@ -510,10 +510,10 @@ InterpProc(
 		iPtr->errorLine);
 	Hax_AddErrorInfo(interp, msg);
     } else if (result == HAX_BREAK) {
-	iPtr->result = "invoked \"break\" outside of a loop";
+	iPtr->result = (char *) "invoked \"break\" outside of a loop";
 	result = HAX_ERROR;
     } else if (result == HAX_CONTINUE) {
-	iPtr->result = "invoked \"continue\" outside of a loop";
+	iPtr->result = (char *) "invoked \"continue\" outside of a loop";
 	result = HAX_ERROR;
     }
 

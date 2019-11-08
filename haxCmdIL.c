@@ -163,7 +163,7 @@ Hax_IncrCmd(
     }
     if (Hax_GetInt(interp, oldString, &value) != HAX_OK) {
 	Hax_AddErrorInfo(interp,
-		"\n    (reading value of variable to increment)");
+		(char *) "\n    (reading value of variable to increment)");
 	return HAX_ERROR;
     }
     if (argc == 2) {
@@ -173,7 +173,7 @@ Hax_IncrCmd(
 
 	if (Hax_GetInt(interp, argv[2], &increment) != HAX_OK) {
 	    Hax_AddErrorInfo(interp,
-		    "\n    (reading increment)");
+		    (char *) "\n    (reading increment)");
 	    return HAX_ERROR;
 	}
 	value += increment;
@@ -292,9 +292,9 @@ Hax_InfoCmd(
 	    return HAX_ERROR;
 	}
 	if (Hax_CommandComplete(argv[2])) {
-	    interp->result = "1";
+	    interp->result = (char *) "1";
 	} else {
-	    interp->result = "0";
+	    interp->result = (char *) "0";
 	}
 	return HAX_OK;
     } else if ((c == 'd') && (strncmp(argv[1], "default", length)) == 0) {
@@ -325,13 +325,13 @@ Hax_InfoCmd(
 				argv[4], "\"", (char *) NULL);
 			return HAX_ERROR;
 		    }
-		    iPtr->result = "1";
+		    iPtr->result = (char *) "1";
 		} else {
-		    if (Hax_SetVar((Hax_Interp *) iPtr, argv[4], "", 0)
+		    if (Hax_SetVar((Hax_Interp *) iPtr, argv[4], (char *) "", 0)
 			    == NULL) {
 			goto defStoreError;
 		    }
-		    iPtr->result = "0";
+		    iPtr->result = (char *) "0";
 		}
 		return HAX_OK;
 	    }
@@ -357,7 +357,7 @@ Hax_InfoCmd(
 
 	    if (strchr(argv[2], '(') != NULL) {
 		noVar:
-		iPtr->result = "0";
+		iPtr->result = (char *) "0";
 		return HAX_OK;
 	    }
 	    if (iPtr->varFramePtr == NULL) {
@@ -376,7 +376,7 @@ Hax_InfoCmd(
 		goto noVar;
 	    }
 	}
-	iPtr->result = "1";
+	iPtr->result = (char *) "1";
 	return HAX_OK;
     } else if ((c == 'g') && (strncmp(argv[1], "globals", length) == 0)) {
 	char *name;
@@ -403,7 +403,7 @@ Hax_InfoCmd(
 	    && (length >= 2)) {
 	if (argc == 2) {
 	    if (iPtr->varFramePtr == NULL) {
-		iPtr->result = "0";
+		iPtr->result = (char *) "0";
 	    } else {
 		sprintf(iPtr->result, "%d", iPtr->varFramePtr->level);
 	    }
@@ -450,9 +450,10 @@ Hax_InfoCmd(
 	interp->result = getenv("HAX_LIBRARY");
 	if (interp->result == NULL) {
 #ifdef HAX_LIBRARY
-	    interp->result = HAX_LIBRARY;
+	    interp->result = (char *) HAX_LIBRARY;
 #else
-	    interp->result = "there is no Hax library at this installation";
+	    interp->result =
+		(char *) "there is no Hax library at this installation";
 	    return HAX_ERROR;
 #endif
 	}
@@ -594,7 +595,7 @@ Hax_JoinCmd(
     int listArgc, i;
 
     if (argc == 2) {
-	joinString = " ";
+	joinString = (char *) " ";
     } else if (argc == 3) {
 	joinString = argv[2];
     } else {

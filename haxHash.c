@@ -139,7 +139,8 @@ Hax_DeleteHashEntry(
     } else {
 	for (prevPtr = *entryPtr->bucketPtr; ; prevPtr = prevPtr->nextPtr) {
 	    if (prevPtr == NULL) {
-		Hax_Panic("malformed bucket chain in Hax_DeleteHashEntry");
+		Hax_Panic(
+		    (char *) "malformed bucket chain in Hax_DeleteHashEntry");
 	    }
 	    if (prevPtr->nextPtr == entryPtr) {
 		prevPtr->nextPtr = entryPtr->nextPtr;
@@ -806,7 +807,7 @@ BogusFind(
     Hax_HashTable *tablePtr,	/* Table in which to lookup entry. */
     char *key			/* Key to use to find matching entry. */)
 {
-    Hax_Panic("called Hax_FindHashEntry on deleted table");
+    Hax_Panic((char *) "called Hax_FindHashEntry on deleted table");
     return NULL;
 }
 
@@ -837,7 +838,7 @@ BogusCreate(
     int *newPtr			/* Store info here telling whether a new
 				 * entry was created. */)
 {
-    Hax_Panic("called Hax_CreateHashEntry on deleted table");
+    Hax_Panic((char *) "called Hax_CreateHashEntry on deleted table");
     return NULL;
 }
 
