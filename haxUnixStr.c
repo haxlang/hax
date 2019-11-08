@@ -119,7 +119,8 @@ Hax_ErrnoId(void)
 #ifdef ECONNRESET
 	case ECONNRESET: return (char *) "ECONNRESET";
 #endif
-#if defined(EDEADLK) && (!defined(EWOULDBLOCK) || (EDEADLK != EWOULDBLOCK))
+#if defined(EDEADLK) && (!defined(EWOULDBLOCK) || (EDEADLK != EWOULDBLOCK)) \
+	&& (!defined(EDEADLOCK) || (EDEADLK != EDEADLOCK))
 	case EDEADLK: return (char *) "EDEADLK";
 #endif
 #ifdef EDEADLOCK
