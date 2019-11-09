@@ -809,7 +809,7 @@ Hax_FormatCmd(
 	    case 'u':
 	    case 'x':
 	    case 'X':
-		if (Hax_GetInt(interp, *curArg, (int *) &oneWordValue)
+		if (Hax_GetLong(interp, *curArg, (long *) &oneWordValue)
 			!= HAX_OK) {
 		    goto fmtError;
 		}
@@ -820,7 +820,7 @@ Hax_FormatCmd(
 		size = strlen(*curArg);
 		break;
 	    case 'c':
-		if (Hax_GetInt(interp, *curArg, (int *) &oneWordValue)
+		if (Hax_GetLong(interp, *curArg, (long *) &oneWordValue)
 			!= HAX_OK) {
 		    goto fmtError;
 		}

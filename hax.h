@@ -258,7 +258,9 @@ HAX_EXTERN int		Hax_ExprBoolean (Hax_Interp *interp,
 HAX_EXTERN int		Hax_ExprDouble (Hax_Interp *interp,
 			    char *string, void *ptr);
 HAX_EXTERN int		Hax_ExprLong (Hax_Interp *interp,
-			    char *string, long *ptr);
+			    char *string, long int *ptr);
+HAX_EXTERN int		Hax_ExprLongLong (Hax_Interp *interp,
+			    char *string, long long int *ptr);
 HAX_EXTERN int		Hax_ExprString (Hax_Interp *interp,
 			    char *string);
 HAX_EXTERN int		Hax_Fork (void);
@@ -268,6 +270,10 @@ HAX_EXTERN int		Hax_GetDouble (Hax_Interp *interp,
 			    char *string, void *doublePtr);
 HAX_EXTERN int		Hax_GetInt (Hax_Interp *interp,
 			    char *string, int *intPtr);
+HAX_EXTERN int		Hax_GetLong (Hax_Interp *interp,
+			    char *string, long int *longPtr);
+HAX_EXTERN int		Hax_GetLongLong (Hax_Interp *interp,
+			    char *string, long long int *llongPtr);
 HAX_EXTERN char *	Hax_GetVar (Hax_Interp *interp,
 			    char *varName, int flags);
 HAX_EXTERN char *	Hax_GetVar2 (Hax_Interp *interp,

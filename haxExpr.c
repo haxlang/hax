@@ -46,13 +46,13 @@ int errno;
 #define STATIC_STRING_SPACE 150
 
 typedef struct {
-    long intValue;		/* Integer value, if any. */
+    long long int llongValue;	/* Integer value, if any. */
     double  doubleValue;	/* Floating-point value, if any. */
     ParseValue pv;		/* Used to hold a string value, if any. */
     char staticSpace[STATIC_STRING_SPACE];
 				/* Storage for small strings;  large ones
 				 * are malloc-ed. */
-    int type;			/* Type of value:  TYPE_INT, TYPE_DOUBLE,
+    int type;			/* Type of value:  TYPE_LLONG, TYPE_DOUBLE,
 				 * or TYPE_STRING. */
 } Value;
 
@@ -60,7 +60,7 @@ typedef struct {
  * Valid values for type:
  */
 
-#define TYPE_INT	0
+#define TYPE_LLONG	0
 #define TYPE_DOUBLE	1
 #define TYPE_STRING	2
 
@@ -210,9 +210,9 @@ ExprParseString(
     if (((c >= '0') && (c <= '9')) || (c == '-') || (c == '.')) {
 	char *term;
 
-	valuePtr->type = TYPE_INT;
+	valuePtr->type = TYPE_LLONG;
 	errno = 0;
-	valuePtr->intValue = strtol(string, &term, 0);
+	valuePtr->llongValue = strtol(string, &term, 0);
 	c = *term;
 	if ((c == '\0') && (errno != ERANGE)) {
 	    return HAX_OK;
@@ -326,9 +326,9 @@ ExprLex(
 	     */
 
 	    infoPtr->token = VALUE;
-	    valuePtr->type = TYPE_INT;
+	    valuePtr->type = TYPE_LLONG;
 	    errno = 0;
-	    valuePtr->intValue = strtoul(p, &term, 0);
+	    valuePtr->llongValue = strtoul(p, &term, 0);
 	    c = *term;
 	    if ((c == '.') || (c == 'e') || (c == 'E') || (errno == ERANGE)) {
 		char *term2;
@@ -373,8 +373,8 @@ ExprLex(
 		return HAX_ERROR;
 	    }
 	    if (((Interp *) interp)->noEval) {
-		valuePtr->type = TYPE_INT;
-		valuePtr->intValue = 0;
+		valuePtr->type = TYPE_LLONG;
+		valuePtr->llongValue = 0;
 		return HAX_OK;
 	    }
 	    return ExprParseString(interp, var, valuePtr);
@@ -388,8 +388,8 @@ ExprLex(
 	    }
 	    infoPtr->expr++;
 	    if (((Interp *) interp)->noEval) {
-		valuePtr->type = TYPE_INT;
-		valuePtr->intValue = 0;
+		valuePtr->type = TYPE_LLONG;
+		valuePtr->llongValue = 0;
 		Hax_ResetResult(interp);
 		return HAX_OK;
 	    }
@@ -641,8 +641,8 @@ ExprGetValue(
 	    }
 	    switch (op) {
 		case UNARY_MINUS:
-		    if (valuePtr->type == TYPE_INT) {
-			valuePtr->intValue = -valuePtr->intValue;
+		    if (valuePtr->type == TYPE_LLONG) {
+			valuePtr->llongValue = -valuePtr->llongValue;
 		    } else if (valuePtr->type == TYPE_DOUBLE){
 			valuePtr->doubleValue = -valuePtr->doubleValue;
 		    } else {
@@ -651,28 +651,28 @@ ExprGetValue(
 		    } 
 		    break;
 		case NOT:
-		    if (valuePtr->type == TYPE_INT) {
-			valuePtr->intValue = !valuePtr->intValue;
+		    if (valuePtr->type == TYPE_LLONG) {
+			valuePtr->llongValue = !valuePtr->llongValue;
 		    } else if (valuePtr->type == TYPE_DOUBLE) {
 			/*
 			 * Theoretically, should be able to use
-			 * "!valuePtr->intValue", but apparently some
+			 * "!valuePtr->llongValue", but apparently some
 			 * compilers can't handle it.
 			 */
 			if (valuePtr->doubleValue == 0.0) {
-			    valuePtr->intValue = 1;
+			    valuePtr->llongValue = 1;
 			} else {
-			    valuePtr->intValue = 0;
+			    valuePtr->llongValue = 0;
 			}
-			valuePtr->type = TYPE_INT;
+			valuePtr->type = TYPE_LLONG;
 		    } else {
 			badType = valuePtr->type;
 			goto illegalType;
 		    }
 		    break;
 		case BIT_NOT:
-		    if (valuePtr->type == TYPE_INT) {
-			valuePtr->intValue = ~valuePtr->intValue;
+		    if (valuePtr->type == TYPE_LLONG) {
+			valuePtr->llongValue = ~valuePtr->llongValue;
 		    } else {
 			badType  = valuePtr->type;
 			goto illegalType;
@@ -719,20 +719,20 @@ ExprGetValue(
 
 	if ((op == AND) || (op == OR) || (op == QUESTY)) {
 	    if (valuePtr->type == TYPE_DOUBLE) {
-		valuePtr->intValue = valuePtr->doubleValue != 0;
-		valuePtr->type = TYPE_INT;
+		valuePtr->llongValue = valuePtr->doubleValue != 0;
+		valuePtr->type = TYPE_LLONG;
 	    } else if (valuePtr->type == TYPE_STRING) {
 		badType = TYPE_STRING;
 		goto illegalType;
 	    }
-	    if (((op == AND) && !valuePtr->intValue)
-		    || ((op == OR) && valuePtr->intValue)) {
+	    if (((op == AND) && !valuePtr->llongValue)
+		    || ((op == OR) && valuePtr->llongValue)) {
 		iPtr->noEval++;
 		result = ExprGetValue(interp, infoPtr, precTable[op],
 			&value2);
 		iPtr->noEval--;
 	    } else if (op == QUESTY) {
-		if (valuePtr->intValue != 0) {
+		if (valuePtr->llongValue != 0) {
 		    valuePtr->pv.next = valuePtr->pv.buffer;
 		    result = ExprGetValue(interp, infoPtr, precTable[op],
 			    valuePtr);
@@ -800,13 +800,13 @@ ExprGetValue(
 		    goto illegalType;
 		}
 		if (valuePtr->type == TYPE_DOUBLE) {
-		    if (value2.type == TYPE_INT) {
-			value2.doubleValue = value2.intValue;
+		    if (value2.type == TYPE_LLONG) {
+			value2.doubleValue = value2.llongValue;
 			value2.type = TYPE_DOUBLE;
 		    }
 		} else if (value2.type == TYPE_DOUBLE) {
-		    if (valuePtr->type == TYPE_INT) {
-			valuePtr->doubleValue = valuePtr->intValue;
+		    if (valuePtr->type == TYPE_LLONG) {
+			valuePtr->doubleValue = valuePtr->llongValue;
 			valuePtr->type = TYPE_DOUBLE;
 		    }
 		}
@@ -818,10 +818,10 @@ ExprGetValue(
 
 	    case MOD: case LEFT_SHIFT: case RIGHT_SHIFT:
 	    case BIT_AND: case BIT_XOR: case BIT_OR:
-		 if (valuePtr->type != TYPE_INT) {
+		 if (valuePtr->type != TYPE_LLONG) {
 		     badType = valuePtr->type;
 		     goto illegalType;
-		 } else if (value2.type != TYPE_INT) {
+		 } else if (value2.type != TYPE_LLONG) {
 		     badType = value2.type;
 		     goto illegalType;
 		 }
@@ -844,13 +844,13 @@ ExprGetValue(
 			ExprMakeString(valuePtr);
 		    }
 		} else if (valuePtr->type == TYPE_DOUBLE) {
-		    if (value2.type == TYPE_INT) {
-			value2.doubleValue = value2.intValue;
+		    if (value2.type == TYPE_LLONG) {
+			value2.doubleValue = value2.llongValue;
 			value2.type = TYPE_DOUBLE;
 		    }
 		} else if (value2.type == TYPE_DOUBLE) {
-		     if (valuePtr->type == TYPE_INT) {
-			valuePtr->doubleValue = valuePtr->intValue;
+		     if (valuePtr->type == TYPE_LLONG) {
+			valuePtr->doubleValue = valuePtr->llongValue;
 			valuePtr->type = TYPE_DOUBLE;
 		    }
 		}
@@ -899,21 +899,21 @@ ExprGetValue(
 
 	switch (op) {
 	    case MULT:
-		if (valuePtr->type == TYPE_INT) {
-		    valuePtr->intValue *= value2.intValue;
+		if (valuePtr->type == TYPE_LLONG) {
+		    valuePtr->llongValue *= value2.llongValue;
 		} else {
 		    valuePtr->doubleValue *= value2.doubleValue;
 		}
 		break;
 	    case DIVIDE:
-		if (valuePtr->type == TYPE_INT) {
-		    if (value2.intValue == 0) {
+		if (valuePtr->type == TYPE_LLONG) {
+		    if (value2.llongValue == 0) {
 			divideByZero:
 			interp->result = (char *) "divide by zero";
 			result = HAX_ERROR;
 			goto done;
 		    }
-		    valuePtr->intValue /= value2.intValue;
+		    valuePtr->llongValue /= value2.llongValue;
 		} else {
 		    if (value2.doubleValue == 0.0) {
 			goto divideByZero;
@@ -922,27 +922,27 @@ ExprGetValue(
 		}
 		break;
 	    case MOD:
-		if (value2.intValue == 0) {
+		if (value2.llongValue == 0) {
 		    goto divideByZero;
 		}
-		valuePtr->intValue %= value2.intValue;
+		valuePtr->llongValue %= value2.llongValue;
 		break;
 	    case PLUS:
-		if (valuePtr->type == TYPE_INT) {
-		    valuePtr->intValue += value2.intValue;
+		if (valuePtr->type == TYPE_LLONG) {
+		    valuePtr->llongValue += value2.llongValue;
 		} else {
 		    valuePtr->doubleValue += value2.doubleValue;
 		}
 		break;
 	    case MINUS:
-		if (valuePtr->type == TYPE_INT) {
-		    valuePtr->intValue -= value2.intValue;
+		if (valuePtr->type == TYPE_LLONG) {
+		    valuePtr->llongValue -= value2.llongValue;
 		} else {
 		    valuePtr->doubleValue -= value2.doubleValue;
 		}
 		break;
 	    case LEFT_SHIFT:
-		valuePtr->intValue <<= value2.intValue;
+		valuePtr->llongValue <<= value2.llongValue;
 		break;
 	    case RIGHT_SHIFT:
 		/*
@@ -951,99 +951,99 @@ ExprGetValue(
 		 * where ">>" won't do it by default.
 		 */
 
-		if (valuePtr->intValue < 0) {
-		    valuePtr->intValue =
-			    ~((~valuePtr->intValue) >> value2.intValue);
+		if (valuePtr->llongValue < 0) {
+		    valuePtr->llongValue =
+			    ~((~valuePtr->llongValue) >> value2.llongValue);
 		} else {
-		    valuePtr->intValue >>= value2.intValue;
+		    valuePtr->llongValue >>= value2.llongValue;
 		}
 		break;
 	    case LESS:
-		if (valuePtr->type == TYPE_INT) {
-		    valuePtr->intValue =
-			valuePtr->intValue < value2.intValue;
+		if (valuePtr->type == TYPE_LLONG) {
+		    valuePtr->llongValue =
+			valuePtr->llongValue < value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			valuePtr->doubleValue < value2.doubleValue;
 		} else {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) < 0;
 		}
-		valuePtr->type = TYPE_INT;
+		valuePtr->type = TYPE_LLONG;
 		break;
 	    case GREATER:
-		if (valuePtr->type == TYPE_INT) {
-		    valuePtr->intValue =
-			valuePtr->intValue > value2.intValue;
+		if (valuePtr->type == TYPE_LLONG) {
+		    valuePtr->llongValue =
+			valuePtr->llongValue > value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			valuePtr->doubleValue > value2.doubleValue;
 		} else {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) > 0;
 		}
-		valuePtr->type = TYPE_INT;
+		valuePtr->type = TYPE_LLONG;
 		break;
 	    case LEQ:
-		if (valuePtr->type == TYPE_INT) {
-		    valuePtr->intValue =
-			valuePtr->intValue <= value2.intValue;
+		if (valuePtr->type == TYPE_LLONG) {
+		    valuePtr->llongValue =
+			valuePtr->llongValue <= value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			valuePtr->doubleValue <= value2.doubleValue;
 		} else {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) <= 0;
 		}
-		valuePtr->type = TYPE_INT;
+		valuePtr->type = TYPE_LLONG;
 		break;
 	    case GEQ:
-		if (valuePtr->type == TYPE_INT) {
-		    valuePtr->intValue =
-			valuePtr->intValue >= value2.intValue;
+		if (valuePtr->type == TYPE_LLONG) {
+		    valuePtr->llongValue =
+			valuePtr->llongValue >= value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			valuePtr->doubleValue >= value2.doubleValue;
 		} else {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) >= 0;
 		}
-		valuePtr->type = TYPE_INT;
+		valuePtr->type = TYPE_LLONG;
 		break;
 	    case EQUAL:
-		if (valuePtr->type == TYPE_INT) {
-		    valuePtr->intValue =
-			valuePtr->intValue == value2.intValue;
+		if (valuePtr->type == TYPE_LLONG) {
+		    valuePtr->llongValue =
+			valuePtr->llongValue == value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			valuePtr->doubleValue == value2.doubleValue;
 		} else {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) == 0;
 		}
-		valuePtr->type = TYPE_INT;
+		valuePtr->type = TYPE_LLONG;
 		break;
 	    case NEQ:
-		if (valuePtr->type == TYPE_INT) {
-		    valuePtr->intValue =
-			valuePtr->intValue != value2.intValue;
+		if (valuePtr->type == TYPE_LLONG) {
+		    valuePtr->llongValue =
+			valuePtr->llongValue != value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			valuePtr->doubleValue != value2.doubleValue;
 		} else {
-		    valuePtr->intValue =
+		    valuePtr->llongValue =
 			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) != 0;
 		}
-		valuePtr->type = TYPE_INT;
+		valuePtr->type = TYPE_LLONG;
 		break;
 	    case BIT_AND:
-		valuePtr->intValue &= value2.intValue;
+		valuePtr->llongValue &= value2.llongValue;
 		break;
 	    case BIT_XOR:
-		valuePtr->intValue ^= value2.intValue;
+		valuePtr->llongValue ^= value2.llongValue;
 		break;
 	    case BIT_OR:
-		valuePtr->intValue |= value2.intValue;
+		valuePtr->llongValue |= value2.llongValue;
 		break;
 
 	    /*
@@ -1054,17 +1054,17 @@ ExprGetValue(
 
 	    case AND:
 		if (value2.type == TYPE_DOUBLE) {
-		    value2.intValue = value2.doubleValue != 0;
-		    value2.type = TYPE_INT;
+		    value2.llongValue = value2.doubleValue != 0;
+		    value2.type = TYPE_LLONG;
 		}
-		valuePtr->intValue = valuePtr->intValue && value2.intValue;
+		valuePtr->llongValue = valuePtr->llongValue && value2.llongValue;
 		break;
 	    case OR:
 		if (value2.type == TYPE_DOUBLE) {
-		    value2.intValue = value2.doubleValue != 0;
-		    value2.type = TYPE_INT;
+		    value2.llongValue = value2.doubleValue != 0;
+		    value2.type = TYPE_LLONG;
 		}
-		valuePtr->intValue = valuePtr->intValue || value2.intValue;
+		valuePtr->llongValue = valuePtr->llongValue || value2.llongValue;
 		break;
 
 	    case COLON:
@@ -1102,8 +1102,8 @@ ExprGetValue(
  *
  * ExprMakeString --
  *
- *	Convert a value from int or double representation to
- *	a string.
+ *	Convert a value from int or long long int or double
+ *	representation to a string.
  *
  * Results:
  *	The information at *valuePtr gets converted to string
@@ -1125,8 +1125,8 @@ ExprMakeString(
     if (shortfall > 0) {
 	(*valuePtr->pv.expandProc)(&valuePtr->pv, shortfall);
     }
-    if (valuePtr->type == TYPE_INT) {
-	sprintf(valuePtr->pv.buffer, "%ld", valuePtr->intValue);
+    if (valuePtr->type == TYPE_LLONG) {
+	sprintf(valuePtr->pv.buffer, "%lld", valuePtr->llongValue);
     } else if (valuePtr->type == TYPE_DOUBLE) {
 	sprintf(valuePtr->pv.buffer, "%g", valuePtr->doubleValue);
     }
@@ -1189,7 +1189,8 @@ ExprTopLevel(
 /*
  *--------------------------------------------------------------
  *
- * Hax_ExprLong, Hax_ExprDouble, Hax_ExprBoolean --
+ * Hax_ExprLong, Hax_ExprLongLong, Hax_ExprDouble,
+ * Hax_ExprBoolean --
  *
  *	Procedures to evaluate an expression and return its value
  *	in a particular form.
@@ -1220,8 +1221,35 @@ Hax_ExprLong(
 
     result = ExprTopLevel(interp, string, &value);
     if (result == HAX_OK) {
-	if (value.type == TYPE_INT) {
-	    *ptr = value.intValue;
+	if (value.type == TYPE_LLONG) {
+	    *ptr = value.llongValue;
+	} else if (value.type == TYPE_DOUBLE) {
+	    *ptr = value.doubleValue;
+	} else {
+	    interp->result = (char *) "expression didn't have numeric value";
+	    result = HAX_ERROR;
+	}
+    }
+    if (value.pv.buffer != value.staticSpace) {
+	ckfree(value.pv.buffer);
+    }
+    return result;
+}
+
+int
+Hax_ExprLongLong(
+    Hax_Interp *interp,			/* Context in which to evaluate the
+					 * expression. */
+    char *string,			/* Expression to evaluate. */
+    long long int *ptr			/* Where to store result. */)
+{
+    Value value;
+    int result;
+
+    result = ExprTopLevel(interp, string, &value);
+    if (result == HAX_OK) {
+	if (value.type == TYPE_LLONG) {
+	    *ptr = value.llongValue;
 	} else if (value.type == TYPE_DOUBLE) {
 	    *ptr = value.doubleValue;
 	} else {
@@ -1247,8 +1275,8 @@ Hax_ExprDouble(
 
     result = ExprTopLevel(interp, string, &value);
     if (result == HAX_OK) {
-	if (value.type == TYPE_INT) {
-	    *(double *)ptr = value.intValue;
+	if (value.type == TYPE_LLONG) {
+	    *(double *)ptr = value.llongValue;
 	} else if (value.type == TYPE_DOUBLE) {
 	    *(double *)ptr = value.doubleValue;
 	} else {
@@ -1274,8 +1302,8 @@ Hax_ExprBoolean(
 
     result = ExprTopLevel(interp, string, &value);
     if (result == HAX_OK) {
-	if (value.type == TYPE_INT) {
-	    *ptr = value.intValue != 0;
+	if (value.type == TYPE_LLONG) {
+	    *ptr = value.llongValue != 0;
 	} else if (value.type == TYPE_DOUBLE) {
 	    *ptr = value.doubleValue != 0.0;
 	} else {
@@ -1319,8 +1347,8 @@ Hax_ExprString(
 
     result = ExprTopLevel(interp, string, &value);
     if (result == HAX_OK) {
-	if (value.type == TYPE_INT) {
-	    sprintf(interp->result, "%ld", value.intValue);
+	if (value.type == TYPE_LLONG) {
+	    sprintf(interp->result, "%lld", value.llongValue);
 	} else if (value.type == TYPE_DOUBLE) {
 	    sprintf(interp->result, "%g", value.doubleValue);
 	} else {

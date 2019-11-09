@@ -658,7 +658,7 @@ only one of \fB[a]\fR or \fB[b]\fR will actually be evaluated,
 depending on the value of \fB$v\fP.
 .PP
 All internal computations involving integers are done with the C type
-\fIlong\fP, and all internal computations involving floating-point are
+\fIlong long int\fP, and all internal computations involving floating-point are
 done with the C type \fIdouble\fP.
 When converting a string to floating-point, exponent overflow is
 detected and results in a Hax error.
@@ -689,7 +689,7 @@ or floating-point when it can.
 If one of the operands of a comparison is a string and the other
 has a numeric value, the numeric operand is converted back to
 a string using the C \fIsprintf\fP format specifier
-\fB%d\fR for integers and \fB%g\fR for floating-point values.
+\fB%lld\fR for integers and \fB%g\fR for floating-point values.
 For example, the expressions
 .DS
 \fB"0x03" > "2"\fR

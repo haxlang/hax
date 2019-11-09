@@ -640,13 +640,13 @@ extern void		HaxExpandParseValue (ParseValue *pvPtr,
 			    int needed);
 extern int		HaxFindElement (Hax_Interp *interp,
 			    char *list, char **elementPtr, char **nextPtr,
-			    int *sizePtr, int *bracePtr);
+			    long int *sizePtr, int *bracePtr);
 extern Proc *		HaxFindProc (Interp *iPtr,
 			    char *procName);
 extern int		HaxGetFrame (Hax_Interp *interp,
 			    char *string, CallFrame **framePtrPtr);
 extern int		HaxGetListIndex (Hax_Interp *interp,
-			    char *string, int *indexPtr);
+			    char *string, long int *indexPtr);
 extern int		HaxGetOpenFile (Hax_Interp *interp,
 			    char *string, OpenFile **filePtrPtr);
 extern Proc *		HaxIsProc (Command *cmdPtr);

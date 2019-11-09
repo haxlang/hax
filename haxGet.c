@@ -66,6 +66,92 @@ Hax_GetInt(
 /*
  *----------------------------------------------------------------------
  *
+ * Hax_GetLong --
+ *
+ *	Given a string, produce the corresponding long integer
+ *	value.
+ *
+ * Results:
+ *	The return value is normally HAX_OK;  in this case *llongPtr
+ *	will be set to the integer value equivalent to string.  If
+ *	string is improperly formed then HAX_ERROR is returned and
+ *	an error message will be left in interp->result.
+ *
+ * Side effects:
+ *	None.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Hax_GetLong(
+    Hax_Interp *interp,		/* Interpreter to use for error reporting. */
+    char *string,		/* String containing a (possibly signed)
+				 * integer in a form acceptable to strtol. */
+    long int *longPtr		/* Place to store converted result. */)
+{
+    char *end;
+    long int i;
+
+    i = strtol(string, &end, 0);
+    while ((*end != '\0') && isspace(*end)) {
+	end++;
+    }
+    if ((end == string) || (*end != 0)) {
+	Hax_AppendResult(interp, "expected integer but got \"", string,
+		"\"", (char *) NULL);
+	return HAX_ERROR;
+    }
+    *longPtr = i;
+    return HAX_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Hax_GetLongLong --
+ *
+ *	Given a string, produce the corresponding long long integer
+ *	value.
+ *
+ * Results:
+ *	The return value is normally HAX_OK;  in this case *llongPtr
+ *	will be set to the integer value equivalent to string.  If
+ *	string is improperly formed then HAX_ERROR is returned and
+ *	an error message will be left in interp->result.
+ *
+ * Side effects:
+ *	None.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Hax_GetLongLong(
+    Hax_Interp *interp,		/* Interpreter to use for error reporting. */
+    char *string,		/* String containing a (possibly signed)
+				 * integer in a form acceptable to strtol. */
+    long long int *llongPtr	/* Place to store converted result. */)
+{
+    char *end;
+    long long int i;
+
+    i = strtoll(string, &end, 0);
+    while ((*end != '\0') && isspace(*end)) {
+	end++;
+    }
+    if ((end == string) || (*end != 0)) {
+	Hax_AppendResult(interp, "expected integer but got \"", string,
+		"\"", (char *) NULL);
+	return HAX_ERROR;
+    }
+    *llongPtr = i;
+    return HAX_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
  * Hax_GetDouble --
  *
  *	Given a string, produce the corresponding double-precision

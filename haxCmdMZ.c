@@ -910,14 +910,14 @@ Hax_StringCmd(
 	sprintf(interp->result, "%d", match);
 	return HAX_OK;
     } else if ((c == 'i') && (strncmp(argv[1], "index", length) == 0)) {
-	int index;
+	long int index;
 
 	if (argc != 4) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " index string charIndex\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	if (Hax_GetInt(interp, argv[3], &index) != HAX_OK) {
+	if (Hax_GetLong(interp, argv[3], &index) != HAX_OK) {
 	    return HAX_ERROR;
 	}
 	if ((index >= 0) && (index < strlen(argv[2]))) {
@@ -956,7 +956,7 @@ Hax_StringCmd(
 	}
 	return HAX_OK;
     } else if ((c == 'r') && (strncmp(argv[1], "range", length) == 0)) {
-	int first, last, stringLength;
+	long int first, last, stringLength;
 
 	if (argc != 5) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -964,14 +964,14 @@ Hax_StringCmd(
 	    return HAX_ERROR;
 	}
 	stringLength = strlen(argv[2]);
-	if (Hax_GetInt(interp, argv[3], &first) != HAX_OK) {
+	if (Hax_GetLong(interp, argv[3], &first) != HAX_OK) {
 	    return HAX_ERROR;
 	}
 	if ((*argv[4] == 'e')
 		&& (strncmp(argv[4], "end", strlen(argv[4])) == 0)) {
 	    last = stringLength-1;
 	} else {
-	    if (Hax_GetInt(interp, argv[4], &last) != HAX_OK) {
+	    if (Hax_GetLong(interp, argv[4], &last) != HAX_OK) {
 		Hax_ResetResult(interp);
 		Hax_AppendResult(interp,
 			"expected integer or \"end\" but got \"",

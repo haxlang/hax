@@ -147,7 +147,7 @@ Hax_IncrCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
-    int value;
+    long long int value;
     char *oldString, *result;
     char newString[30];
 
@@ -161,7 +161,7 @@ Hax_IncrCmd(
     if (oldString == NULL) {
 	return HAX_ERROR;
     }
-    if (Hax_GetInt(interp, oldString, &value) != HAX_OK) {
+    if (Hax_GetLongLong(interp, oldString, &value) != HAX_OK) {
 	Hax_AddErrorInfo(interp,
 		(char *) "\n    (reading value of variable to increment)");
 	return HAX_ERROR;
@@ -169,16 +169,16 @@ Hax_IncrCmd(
     if (argc == 2) {
 	value += 1;
     } else {
-	int increment;
+	long long int increment;
 
-	if (Hax_GetInt(interp, argv[2], &increment) != HAX_OK) {
+	if (Hax_GetLongLong(interp, argv[2], &increment) != HAX_OK) {
 	    Hax_AddErrorInfo(interp,
 		    (char *) "\n    (reading increment)");
 	    return HAX_ERROR;
 	}
 	value += increment;
     }
-    sprintf(newString, "%d", value);
+    sprintf(newString, "%lld", value);
     result = Hax_SetVar(interp, argv[1], newString, HAX_LEAVE_ERR_MSG);
     if (result == NULL) {
 	return HAX_ERROR;
@@ -644,14 +644,15 @@ Hax_LindexCmd(
     char **argv				/* Argument strings. */)
 {
     char *p, *element;
-    int index, size, parenthesized, result;
+    int parenthesized, result;
+    long int index, size;
 
     if (argc != 3) {
 	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list index\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (Hax_GetInt(interp, argv[2], &index) != HAX_OK) {
+    if (Hax_GetLong(interp, argv[2], &index) != HAX_OK) {
 	return HAX_ERROR;
     }
     if (index < 0) {
@@ -706,14 +707,15 @@ Hax_LinsertCmd(
     char **argv				/* Argument strings. */)
 {
     char *p, *element, savedChar;
-    int i, index, count, result, size;
+    int i, count, result;
+    long int index, size;
 
     if (argc < 4) {
 	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list index element ?element ...?\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (Hax_GetInt(interp, argv[2], &index) != HAX_OK) {
+    if (Hax_GetLong(interp, argv[2], &index) != HAX_OK) {
 	return HAX_ERROR;
     }
 
@@ -825,7 +827,7 @@ Hax_LlengthCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
-    int count, result;
+    long int count, result;
     char *element, *p;
 
     if (argc != 2) {
@@ -834,7 +836,7 @@ Hax_LlengthCmd(
 	return HAX_ERROR;
     }
     for (count = 0, p = argv[1]; *p != 0 ; count++) {
-	result = HaxFindElement(interp, p, &element, &p, (int *) NULL,
+	result = HaxFindElement(interp, p, &element, &p, (long int *) NULL,
 		(int *) NULL);
 	if (result != HAX_OK) {
 	    return result;
@@ -843,7 +845,7 @@ Hax_LlengthCmd(
 	    break;
 	}
     }
-    sprintf(interp->result, "%d", count);
+    sprintf(interp->result, "%ld", count);
     return HAX_OK;
 }
 
@@ -872,7 +874,7 @@ Hax_LrangeCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
-    int first, last, result;
+    long int first, last, result;
     char *begin, *end, c, *dummy;
     int count;
 
@@ -881,7 +883,7 @@ Hax_LrangeCmd(
 		" list first last\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (Hax_GetInt(interp, argv[2], &first) != HAX_OK) {
+    if (Hax_GetLong(interp, argv[2], &first) != HAX_OK) {
 	return HAX_ERROR;
     }
     if (first < 0) {
@@ -890,7 +892,7 @@ Hax_LrangeCmd(
     if ((*argv[3] == 'e') && (strncmp(argv[3], "end", strlen(argv[3])) == 0)) {
 	last = 1000000;
     } else {
-	if (Hax_GetInt(interp, argv[3], &last) != HAX_OK) {
+	if (Hax_GetLong(interp, argv[3], &last) != HAX_OK) {
 	    Hax_ResetResult(interp);
 	    Hax_AppendResult(interp,
 		    "expected integer or \"end\" but got \"",
@@ -907,8 +909,8 @@ Hax_LrangeCmd(
      */
 
     for (count = 0, begin = argv[1]; count < first; count++) {
-	result = HaxFindElement(interp, begin, &dummy, &begin, (int *) NULL,
-		(int *) NULL);
+	result = HaxFindElement(interp, begin, &dummy, &begin,
+		(long int *) NULL, (int *) NULL);
 	if (result != HAX_OK) {
 	    return result;
 	}
@@ -918,7 +920,7 @@ Hax_LrangeCmd(
     }
     for (count = first, end = begin; (count <= last) && (*end != 0);
 	    count++) {
-	result = HaxFindElement(interp, end, &dummy, &end, (int *) NULL,
+	result = HaxFindElement(interp, end, &dummy, &end, (long int *) NULL,
 		(int *) NULL);
 	if (result != HAX_OK) {
 	    return result;
@@ -965,14 +967,15 @@ Hax_LreplaceCmd(
     char **argv				/* Argument strings. */)
 {
     char *p1, *p2, *element, savedChar, *dummy;
-    int i, first, last, count, result, size;
+    long int i, first, last, count, size;
+    int result;
 
     if (argc < 4) {
 	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" list first last ?element element ...?\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (Hax_GetInt(interp, argv[2], &first) != HAX_OK) {
+    if (Hax_GetLong(interp, argv[2], &first) != HAX_OK) {
 	return HAX_ERROR;
     }
     if (HaxGetListIndex(interp, argv[3], &last) != HAX_OK) {
@@ -1014,7 +1017,7 @@ Hax_LreplaceCmd(
      */
 
     for (p2 = p1 ; (count <= last) && (*p2 != 0); count++) {
-	result = HaxFindElement(interp, p2, &dummy, &p2, (int *) NULL,
+	result = HaxFindElement(interp, p2, &dummy, &p2, (long int *) NULL,
 		(int *) NULL);
 	if (result != HAX_OK) {
 	    return result;

@@ -103,7 +103,7 @@ HaxFindElement(
 				 * after all white space following end of
 				 * argument (i.e. next argument or end of
 				 * list). */
-    int *sizePtr,		/* If non-zero, fill in with size of
+    long int *sizePtr,		/* If non-zero, fill in with size of
 				 * element. */
     int *bracePtr		/* If non-zero fill in with non-zero/zero
 				 * to indicate that arg was/wasn't
@@ -112,7 +112,7 @@ HaxFindElement(
     char *p;
     int openBraces = 0;
     int inQuotes = 0;
-    int size;
+    long int size;
 
     /*
      * Skim off leading white space and check for an opening brace or
@@ -190,10 +190,10 @@ HaxFindElement(
 	     */
 
 	    case '\\': {
-		int size;
+		int sizeb;
 
-		(void) Hax_Backslash(p, &size);
-		p += size - 1;
+		(void) Hax_Backslash(p, &sizeb);
+		p += sizeb - 1;
 		break;
 	    }
 
@@ -361,7 +361,8 @@ Hax_SplitList(
 {
     char **argv;
     char *p;
-    int size, i, result, elSize, brace;
+    int result, brace;
+    long int size, i, elSize;
     char *element;
 
     /*
@@ -1310,10 +1311,10 @@ int
 HaxGetListIndex(
     Hax_Interp *interp,			/* Interpreter for error reporting. */
     char *string,			/* String containing list index. */
-    int *indexPtr			/* Where to store index. */)
+    long int *indexPtr			/* Where to store index. */)
 {
     if (isdigit(*string) || (*string == '-')) {
-	if (Hax_GetInt(interp, string, indexPtr) != HAX_OK) {
+	if (Hax_GetLong(interp, string, indexPtr) != HAX_OK) {
 	    return HAX_ERROR;
 	}
 	if (*indexPtr < 0) {

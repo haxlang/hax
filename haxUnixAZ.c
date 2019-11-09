@@ -689,12 +689,12 @@ StoreStatData(
 {
     char string[30];
 
-    sprintf(string, "%ld", (long)statPtr->st_dev);
+    sprintf(string, "%lld", (long long int) statPtr->st_dev);
     if (Hax_SetVar2(interp, varName, (char *) "dev", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%lu", (unsigned long)statPtr->st_ino);
+    sprintf(string, "%lld", (long long int) statPtr->st_ino);
     if (Hax_SetVar2(interp, varName, (char *) "ino", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
@@ -704,7 +704,7 @@ StoreStatData(
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%d", statPtr->st_nlink);
+    sprintf(string, "%lld", (long long int) statPtr->st_nlink);
     if (Hax_SetVar2(interp, varName, (char *) "nlink", string,
 	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
@@ -720,24 +720,24 @@ StoreStatData(
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%ld", statPtr->st_size);
+    sprintf(string, "%lld", (long long int) statPtr->st_size);
     if (Hax_SetVar2(interp, varName, (char *) "size", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%ld", statPtr->st_atime);
+    sprintf(string, "%lld", (long long int) statPtr->st_atime);
     if (Hax_SetVar2(interp, varName, (char *) "atime", string,
 	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%ld", statPtr->st_mtime);
+    sprintf(string, "%lld", (long long int) statPtr->st_mtime);
     if (Hax_SetVar2(interp, varName, (char *) "mtime", string,
 	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%ld", statPtr->st_ctime);
+    sprintf(string, "%lld", (long long int) statPtr->st_ctime);
     if (Hax_SetVar2(interp, varName, (char *) "ctime", string,
 	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
@@ -1282,7 +1282,7 @@ Hax_ReadCmd(
     char **argv				/* Argument strings. */)
 {
     OpenFile *filePtr;
-    int bytesLeft, bytesRead, count;
+    long int bytesLeft, bytesRead, count;
 #define READ_BUF_SIZE 4096
     char buffer[READ_BUF_SIZE+1];
     int newline, i;
@@ -1315,11 +1315,11 @@ Hax_ReadCmd(
      */
 
     if ((argc >= (i + 2)) && isdigit(argv[i+1][0])) {
-	if (Hax_GetInt(interp, argv[i+1], &bytesLeft) != HAX_OK) {
+	if (Hax_GetLong(interp, argv[i+1], &bytesLeft) != HAX_OK) {
 	    return HAX_ERROR;
 	}
     } else {
-	bytesLeft = 1<<30;
+	bytesLeft = 1LL<<62;
 
 	/*
 	 * The code below provides backward compatibility for an
@@ -1396,7 +1396,8 @@ Hax_SeekCmd(
     char **argv				/* Argument strings. */)
 {
     OpenFile *filePtr;
-    int offset, mode;
+    long long int offset;
+    int mode;
 
     if ((argc != 3) && (argc != 4)) {
 	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -1406,7 +1407,7 @@ Hax_SeekCmd(
     if (HaxGetOpenFile(interp, argv[1], &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
-    if (Hax_GetInt(interp, argv[2], &offset) != HAX_OK) {
+    if (Hax_GetLongLong(interp, argv[2], &offset) != HAX_OK) {
 	return HAX_ERROR;
     }
     mode = SEEK_SET;
@@ -1428,7 +1429,7 @@ Hax_SeekCmd(
 	    return HAX_ERROR;
 	}
     }
-    if (fseek(filePtr->f, (long) offset, mode) == -1) {
+    if (fseeko(filePtr->f, offset, mode) == -1) {
 	Hax_AppendResult(interp, "error during seek: ",
 		Hax_UnixError(interp), (char *) NULL);
 	clearerr(filePtr->f);
@@ -1506,7 +1507,7 @@ Hax_TellCmd(
     if (HaxGetOpenFile(interp, argv[1], &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
-    sprintf(interp->result, "%ld", ftell(filePtr->f));
+    sprintf(interp->result, "%lld", (long long int) ftello(filePtr->f));
     return HAX_OK;
 }
 
@@ -1535,7 +1536,7 @@ Hax_TimeCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
-    int count, i, result;
+    long long int count, i, result;
     double timePer;
     struct timeval start, stop;
     struct timezone tz;
@@ -1544,7 +1545,7 @@ Hax_TimeCmd(
     if (argc == 2) {
 	count = 1;
     } else if (argc == 3) {
-	if (Hax_GetInt(interp, argv[2], &count) != HAX_OK) {
+	if (Hax_GetLongLong(interp, argv[2], &count) != HAX_OK) {
 	    return HAX_ERROR;
 	}
     } else {
