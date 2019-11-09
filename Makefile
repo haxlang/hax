@@ -50,13 +50,14 @@ LDFLAGS	=
 
 PREFIX ?=	/usr/local
 HAX_LIBRARY ?=	lib/hax
+BIN_DIR ?=	bin
 LIB_DIR ?=	lib
 INCLUDE_DIR ?=	include
 MAN_DIR ?=	man
 MAN3_DIR ?=	$(MAN_DIR)/man3
 MANN_DIR ?=	$(MAN_DIR)/mann
 
-all: libhax.a
+all: libhax.a haxsh
 
 GENERIC_OBJS =	haxRegexp.o haxAssem.o haxBasic.o haxCkalloc.o \
 	haxCmdAH.o haxCmdIL.o haxCmdMZ.o haxExpr.o haxGet.o \
@@ -74,15 +75,18 @@ libhax.a: $(OBJS)
 	$(AR) cr $@ $(OBJS)
 	$(RANLIB) $@
 
-haxTest: haxTest.o libhax.a
-	$(CC) $(LDFLAGS) -o $@ haxTest.o libhax.a
+haxsh: haxsh.o libhax.a
+	$(CC) $(LDFLAGS) -o $@ haxsh.o libhax.a
 
 install: libhax.a
+	install -d $(DESTDIR)$(PREFIX)/$(BIN_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(HAX_LIBRARY)
 	install -d $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(MAN3_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(MANN_DIR)
+
+	install haxsh $(DESTDIR)$(PREFIX)/$(BIN_DIR)
 
 	cd library; for i in *.tcl; do \
 		install $$i $(DESTDIR)$(PREFIX)/$(HAX_LIBRARY); \
@@ -112,11 +116,11 @@ install: libhax.a
 		install Hax_library.n $(DESTDIR)$(PREFIX)/$(MANN_DIR); \
 		rm -f Hax_library.n
 
-test: haxTest
-	( echo cd tests ; echo source all ) | ./haxTest
+test: haxsh
+	( echo cd tests ; echo source all ) | ./haxsh
 
 clean:
-	rm -f $(OBJS) libhax.a haxTest.o haxTest
+	rm -f $(OBJS) libhax.a haxsh.o haxsh
 
 $(OBJS): hax.h haxHash.h haxInt.h
 $(UNIX_OJBS): haxUnix.h
