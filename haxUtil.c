@@ -175,7 +175,7 @@ HaxFindElement(
 			/* null body */
 		    }
 		    Hax_ResetResult(interp);
-		    sprintf(interp->result,
+		    Hax_sprintf(interp->result,
 			    "list element in braces followed by \"%.*s\" instead of space",
 			    (int)(p2-p), p);
 		    return HAX_ERROR;
@@ -232,7 +232,7 @@ HaxFindElement(
 			/* null body */
 		    }
 		    Hax_ResetResult(interp);
-		    sprintf(interp->result,
+		    Hax_sprintf(interp->result,
 			    "list element in quotes followed by \"%.*s\" %s",
 			    (int)(p2-p), p, "instead of space");
 		    return HAX_ERROR;

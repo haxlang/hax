@@ -38,6 +38,9 @@
 #ifndef _REGEXP
 #include "haxRegexp.h"
 #endif
+#ifndef _HAXCOMPAT
+#include "haxCompat.h"
+#endif
 
 #include <ctype.h>
 #include <stdlib.h>

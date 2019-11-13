@@ -1610,7 +1610,7 @@ Hax_ArrayCmd(
 	    }
 	    size++;
 	}
-	sprintf(interp->result, "%d", size);
+	Hax_sprintf(interp->result, "%d", size);
     } else if ((c == 's') && (strncmp(argv[1], "startsearch", length) == 0)
 	    && (length >= 2)) {
 	ArraySearch *searchPtr;
@@ -1628,7 +1628,7 @@ Hax_ArrayCmd(
 	    char string[20];
 
 	    searchPtr->id = varPtr->searchPtr->id + 1;
-	    sprintf(string, "%d", searchPtr->id);
+	    Hax_sprintf(string, "%d", searchPtr->id);
 	    Hax_AppendResult(interp, "s-", string, "-", argv[2],
 		    (char *) NULL);
 	}

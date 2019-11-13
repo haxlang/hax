@@ -736,7 +736,7 @@ Hax_Eval(
 		    (char *) "invoked \"continue\" outside of a loop";
 	    } else {
 		iPtr->result = iPtr->resultSpace;
-		sprintf(iPtr->resultSpace,
+		Hax_sprintf(iPtr->resultSpace,
 		    (char *) "command returned bad code: %d", result);
 	    }
 	    result = HAX_ERROR;
@@ -784,10 +784,10 @@ Hax_Eval(
 	}
 
 	if (!(iPtr->flags & ERR_IN_PROGRESS)) {
-	    sprintf(copyStorage, "\n    while executing\n\"%.*s%s\"",
+	    Hax_sprintf(copyStorage, "\n    while executing\n\"%.*s%s\"",
 		    numChars, cmdStart, ellipsis);
 	} else {
-	    sprintf(copyStorage, "\n    invoked from within\n\"%.*s%s\"",
+	    Hax_sprintf(copyStorage, "\n    invoked from within\n\"%.*s%s\"",
 		    numChars, cmdStart, ellipsis);
 	}
 	Hax_AddErrorInfo(interp, copyStorage);

@@ -162,7 +162,7 @@ Hax_RegexpCmd(
 	    }
 	} else {
 	    if (indices) {
-		sprintf(info, "%ld %ld", regexpPtr->startp[i] - string,
+		Hax_sprintf(info, "%ld %ld", regexpPtr->startp[i] - string,
 			regexpPtr->endp[i] - string - 1);
 		result = Hax_SetVar(interp, argPtr[i+2], info, 0);
 	    } else {
@@ -650,7 +650,7 @@ Hax_ScanCmd(
 		break;
 
 	    default:
-		sprintf(interp->result, "bad scan conversion character \"%c\"",
+		Hax_sprintf(interp->result, "bad scan conversion character \"%c\"",
 			*fmt);
 		return HAX_ERROR;
 	}
@@ -710,7 +710,7 @@ Hax_ScanCmd(
 	    char string[120];
 
 	    case 'd':
-		sprintf(string, "%d", *((int *) curField->location));
+		Hax_sprintf(string, "%d", *((int *) curField->location));
 		if (Hax_SetVar(interp, argv[i+3], string, 0) == NULL) {
 		    storeError:
 		    Hax_AppendResult(interp,
@@ -722,7 +722,7 @@ Hax_ScanCmd(
 		break;
 
 	    case 'c':
-		sprintf(string, "%d", *((char *) curField->location) & 0xff);
+		Hax_sprintf(string, "%d", *((char *) curField->location) & 0xff);
 		if (Hax_SetVar(interp, argv[i+3], string, 0) == NULL) {
 		    goto storeError;
 		}
@@ -736,14 +736,14 @@ Hax_ScanCmd(
 		break;
 
 	    case 'F':
-		sprintf(string, "%g", *((double *) curField->location));
+		Hax_sprintf(string, "%g", *((double *) curField->location));
 		if (Hax_SetVar(interp, argv[i+3], string, 0) == NULL) {
 		    goto storeError;
 		}
 		break;
 
 	    case 'f':
-		sprintf(string, "%g", *((float *) curField->location));
+		Hax_sprintf(string, "%g", *((float *) curField->location));
 		if (Hax_SetVar(interp, argv[i+3], string, 0) == NULL) {
 		    goto storeError;
 		}
@@ -751,7 +751,7 @@ Hax_ScanCmd(
 	}
     }
     ckfree(results);
-    sprintf(interp->result, "%d", numScanned);
+    Hax_sprintf(interp->result, "%d", numScanned);
     return HAX_OK;
 }
 
@@ -907,7 +907,7 @@ Hax_StringCmd(
 		}
 	    }
 	}
-	sprintf(interp->result, "%d", match);
+	Hax_sprintf(interp->result, "%d", match);
 	return HAX_OK;
     } else if ((c == 'i') && (strncmp(argv[1], "index", length) == 0)) {
 	long int index;
@@ -941,7 +941,7 @@ Hax_StringCmd(
 		    " length string\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	sprintf(interp->result, "%lu", (unsigned long)strlen(argv[2]));
+	Hax_sprintf(interp->result, "%lu", (unsigned long)strlen(argv[2]));
 	return HAX_OK;
     } else if ((c == 'm') && (strncmp(argv[1], "match", length) == 0)) {
 	if (argc != 4) {
@@ -1417,7 +1417,7 @@ Hax_WhileCmd(
 	} else if (result != HAX_OK) {
 	    if (result == HAX_ERROR) {
 		char msg[60];
-		sprintf(msg, "\n    (\"while\" body line %d)",
+		Hax_sprintf(msg, "\n    (\"while\" body line %d)",
 			interp->errorLine);
 		Hax_AddErrorInfo(interp, msg);
 	    }

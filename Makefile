@@ -66,7 +66,7 @@ GENERIC_OBJS =	haxRegexp.o haxAssem.o haxBasic.o haxCkalloc.o \
 
 UNIX_OBJS = haxEnv.o haxGlob.o haxUnixAZ.o haxUnixStr.o haxUnixUtil.o
 
-COMPAT_OBJS =
+COMPAT_OBJS = haxCompat.o
 
 OBJS = $(GENERIC_OBJS) $(UNIX_OBJS) $(COMPAT_OBJS)
 

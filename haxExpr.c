@@ -219,7 +219,7 @@ ExprParseString(
 	}
 	if ((c == '.') || (c == 'e') || (c == 'E') || (errno == ERANGE)) {
 	    errno = 0;
-	    valuePtr->doubleValue = strtod(string, &term);
+	    valuePtr->doubleValue = Hax_strtod(string, &term);
 	    if (errno == ERANGE) {
 		Hax_ResetResult(interp);
 		if (valuePtr->doubleValue == 0.0) {
@@ -334,7 +334,7 @@ ExprLex(
 		char *term2;
 
 		errno = 0;
-		valuePtr->doubleValue = strtod(p, &term2);
+		valuePtr->doubleValue = Hax_strtod(p, &term2);
 		if (errno == ERANGE) {
 		    Hax_ResetResult(interp);
 		    if (valuePtr->doubleValue == 0.0) {
@@ -1126,9 +1126,9 @@ ExprMakeString(
 	(*valuePtr->pv.expandProc)(&valuePtr->pv, shortfall);
     }
     if (valuePtr->type == TYPE_LLONG) {
-	sprintf(valuePtr->pv.buffer, "%lld", valuePtr->llongValue);
+	Hax_sprintf(valuePtr->pv.buffer, "%lld", valuePtr->llongValue);
     } else if (valuePtr->type == TYPE_DOUBLE) {
-	sprintf(valuePtr->pv.buffer, "%g", valuePtr->doubleValue);
+	Hax_sprintf(valuePtr->pv.buffer, "%g", valuePtr->doubleValue);
     }
     valuePtr->type = TYPE_STRING;
 }
@@ -1348,9 +1348,9 @@ Hax_ExprString(
     result = ExprTopLevel(interp, string, &value);
     if (result == HAX_OK) {
 	if (value.type == TYPE_LLONG) {
-	    sprintf(interp->result, "%lld", value.llongValue);
+	    Hax_sprintf(interp->result, "%lld", value.llongValue);
 	} else if (value.type == TYPE_DOUBLE) {
-	    sprintf(interp->result, "%g", value.doubleValue);
+	    Hax_sprintf(interp->result, "%g", value.doubleValue);
 	} else {
 	    if (value.pv.buffer != value.staticSpace) {
 		interp->result = value.pv.buffer;

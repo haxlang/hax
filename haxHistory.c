@@ -359,7 +359,7 @@ Hax_HistoryCmd(
 	    if (*cur == '\0') {
 		continue;		/* No command recorded here. */
 	    }
-	    sprintf(serial, "%6d  ", iPtr->curEventNum + 1 - (count - i));
+	    Hax_sprintf(serial, "%6d  ", iPtr->curEventNum + 1 - (count - i));
 	    Hax_AppendResult(interp, newline, serial, (char *) NULL);
 	    newline = "\n";
 
@@ -455,7 +455,7 @@ Hax_HistoryCmd(
 		    " nextid\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	sprintf(iPtr->result, "%d", iPtr->curEventNum+1);
+	Hax_sprintf(iPtr->result, "%d", iPtr->curEventNum+1);
 	return HAX_OK;
     } else if ((c == 'r') && (strncmp(argv[1], "redo", length)) == 0) {
 	if (argc > 3) {

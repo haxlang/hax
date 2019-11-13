@@ -136,7 +136,7 @@ Hax_EvalFile(
 	 * Record information telling where the error occurred.
 	 */
 
-	sprintf(msg, "\n    (file \"%.150s\" line %d)", fileName,
+	Hax_sprintf(msg, "\n    (file \"%.150s\" line %d)", fileName,
 		interp->errorLine);
 	Hax_AddErrorInfo(interp, msg);
     }
@@ -730,7 +730,7 @@ Hax_CreatePipeline(
 		close(i);
 	    }
 	    execvp(execName, &argv[firstArg]);
-	    sprintf(errSpace, "couldn't find \"%.150s\" to execute\n",
+	    Hax_sprintf(errSpace, "couldn't find \"%.150s\" to execute\n",
 		    argv[firstArg]);
 	    write(2, errSpace, strlen(errSpace));
 	    _exit(1);

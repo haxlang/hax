@@ -1155,7 +1155,7 @@ char *op)
 	case OPEN+7:
 	case OPEN+8:
 	case OPEN+9:
-		sprintf(buf+strlen(buf), "OPEN%d", OP(op)-OPEN);
+		Hax_sprintf(buf+strlen(buf), "OPEN%d", OP(op)-OPEN);
 		p = NULL;
 		break;
 	case CLOSE+1:
@@ -1167,7 +1167,7 @@ char *op)
 	case CLOSE+7:
 	case CLOSE+8:
 	case CLOSE+9:
-		sprintf(buf+strlen(buf), "CLOSE%d", OP(op)-CLOSE);
+		Hax_sprintf(buf+strlen(buf), "CLOSE%d", OP(op)-CLOSE);
 		p = NULL;
 		break;
 	case STAR:

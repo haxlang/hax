@@ -178,7 +178,7 @@ Hax_IncrCmd(
 	}
 	value += increment;
     }
-    sprintf(newString, "%lld", value);
+    Hax_sprintf(newString, "%lld", value);
     result = Hax_SetVar(interp, argv[1], newString, HAX_LEAVE_ERR_MSG);
     if (result == NULL) {
 	return HAX_ERROR;
@@ -266,7 +266,7 @@ Hax_InfoCmd(
 		    " cmdcount\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	sprintf(iPtr->result, "%d", iPtr->cmdCount);
+	Hax_sprintf(iPtr->result, "%d", iPtr->cmdCount);
 	return HAX_OK;
     } else if ((c == 'c') && (strncmp(argv[1], "commands", length) == 0)
 	    && (length >= 4)) {
@@ -405,7 +405,7 @@ Hax_InfoCmd(
 	    if (iPtr->varFramePtr == NULL) {
 		iPtr->result = (char *) "0";
 	    } else {
-		sprintf(iPtr->result, "%d", iPtr->varFramePtr->level);
+		Hax_sprintf(iPtr->result, "%d", iPtr->varFramePtr->level);
 	    }
 	    return HAX_OK;
 	} else if (argc == 3) {
@@ -845,7 +845,7 @@ Hax_LlengthCmd(
 	    break;
 	}
     }
-    sprintf(interp->result, "%ld", count);
+    Hax_sprintf(interp->result, "%ld", count);
     return HAX_OK;
 }
 
@@ -1107,7 +1107,7 @@ Hax_LsearchCmd(
 	    break;
 	}
     }
-    sprintf(interp->result, "%d", match);
+    Hax_sprintf(interp->result, "%d", match);
     ckfree((char *) listArgv);
     return HAX_OK;
 }

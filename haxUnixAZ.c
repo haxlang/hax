@@ -522,7 +522,7 @@ Hax_FileCmd(
 	if (stat(fileName, &statBuf) == -1) {
 	    goto badStat;
 	}
-	sprintf(interp->result, "%ld", statBuf.st_atime);
+	Hax_sprintf(interp->result, "%ld", statBuf.st_atime);
 	return HAX_OK;
     } else if ((c == 'i') && (strncmp(argv[1], "isdirectory", length) == 0)
 	    && (length >= 3)) {
@@ -559,7 +559,7 @@ Hax_FileCmd(
 	if (stat(fileName, &statBuf) == -1) {
 	    goto badStat;
 	}
-	sprintf(interp->result, "%ld", statBuf.st_mtime);
+	Hax_sprintf(interp->result, "%ld", statBuf.st_mtime);
 	return HAX_OK;
     } else if ((c == 'o') && (strncmp(argv[1], "owned", length) == 0)) {
 	if (argc != 3) {
@@ -598,7 +598,7 @@ Hax_FileCmd(
 	if (stat(fileName, &statBuf) == -1) {
 	    goto badStat;
 	}
-	sprintf(interp->result, "%ld", statBuf.st_size);
+	Hax_sprintf(interp->result, "%ld", statBuf.st_size);
 	return HAX_OK;
     } else if ((c == 's') && (strncmp(argv[1], "stat", length) == 0)
 	    && (length >= 2)) {
@@ -689,55 +689,55 @@ StoreStatData(
 {
     char string[30];
 
-    sprintf(string, "%lld", (long long int) statPtr->st_dev);
+    Hax_sprintf(string, "%lld", (long long int) statPtr->st_dev);
     if (Hax_SetVar2(interp, varName, (char *) "dev", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%lld", (long long int) statPtr->st_ino);
+    Hax_sprintf(string, "%lld", (long long int) statPtr->st_ino);
     if (Hax_SetVar2(interp, varName, (char *) "ino", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%d", statPtr->st_mode);
+    Hax_sprintf(string, "%d", statPtr->st_mode);
     if (Hax_SetVar2(interp, varName, (char *) "mode", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%lld", (long long int) statPtr->st_nlink);
+    Hax_sprintf(string, "%lld", (long long int) statPtr->st_nlink);
     if (Hax_SetVar2(interp, varName, (char *) "nlink", string,
 	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%d", statPtr->st_uid);
+    Hax_sprintf(string, "%d", statPtr->st_uid);
     if (Hax_SetVar2(interp, varName, (char *) "uid", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%d", statPtr->st_gid);
+    Hax_sprintf(string, "%d", statPtr->st_gid);
     if (Hax_SetVar2(interp, varName, (char *) "gid", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%lld", (long long int) statPtr->st_size);
+    Hax_sprintf(string, "%lld", (long long int) statPtr->st_size);
     if (Hax_SetVar2(interp, varName, (char *) "size", string, HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%lld", (long long int) statPtr->st_atime);
+    Hax_sprintf(string, "%lld", (long long int) statPtr->st_atime);
     if (Hax_SetVar2(interp, varName, (char *) "atime", string,
 	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%lld", (long long int) statPtr->st_mtime);
+    Hax_sprintf(string, "%lld", (long long int) statPtr->st_mtime);
     if (Hax_SetVar2(interp, varName, (char *) "mtime", string,
 	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
 	return HAX_ERROR;
     }
-    sprintf(string, "%lld", (long long int) statPtr->st_ctime);
+    Hax_sprintf(string, "%lld", (long long int) statPtr->st_ctime);
     if (Hax_SetVar2(interp, varName, (char *) "ctime", string,
 	    HAX_LEAVE_ERR_MSG)
 	    == NULL) {
@@ -938,7 +938,7 @@ Hax_GetsCmd(
     }
 
     if (argc == 3) {
-	sprintf(interp->result, "%d", totalCount);
+	Hax_sprintf(interp->result, "%d", totalCount);
     }
     return HAX_OK;
 }
@@ -1097,7 +1097,7 @@ Hax_OpenCmd(
 	Hax_Panic((char *) "Hax_OpenCmd found file already open");
     }
     iPtr->filePtrArray[fd] = filePtr;
-    sprintf(interp->result, "file%d", fd);
+    Hax_sprintf(interp->result, "file%d", fd);
     return HAX_OK;
 
     error:
@@ -1507,7 +1507,7 @@ Hax_TellCmd(
     if (HaxGetOpenFile(interp, argv[1], &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
-    sprintf(interp->result, "%lld", (long long int) ftello(filePtr->f));
+    Hax_sprintf(interp->result, "%lld", (long long int) ftello(filePtr->f));
     return HAX_OK;
 }
 
@@ -1559,7 +1559,7 @@ Hax_TimeCmd(
 	if (result != HAX_OK) {
 	    if (result == HAX_ERROR) {
 		char msg[60];
-		sprintf(msg, "\n    (\"time\" body line %d)",
+		Hax_sprintf(msg, "\n    (\"time\" body line %d)",
 			interp->errorLine);
 		Hax_AddErrorInfo(interp, msg);
 	    }
@@ -1572,7 +1572,8 @@ Hax_TimeCmd(
     timePer = micros;
 
     Hax_ResetResult(interp);
-    sprintf(interp->result, "%.0f microseconds per iteration", timePer/count);
+    Hax_sprintf(interp->result, "%.0f microseconds per iteration",
+	timePer/count);
     return HAX_OK;
 }
 
@@ -1630,9 +1631,9 @@ CleanupChildren(
 	    char msg1[20], msg2[20];
 
 	    result = HAX_ERROR;
-	    sprintf(msg1, "%d", pid);
+	    Hax_sprintf(msg1, "%d", pid);
 	    if (WIFEXITED(waitStatus)) {
-		sprintf(msg2, "%d", WEXITSTATUS(waitStatus));
+		Hax_sprintf(msg2, "%d", WEXITSTATUS(waitStatus));
 		Hax_SetErrorCode(interp, "CHILDSTATUS", msg1, msg2,
 			(char *) NULL);
 	    } else if (WIFSIGNALED(waitStatus)) {

@@ -348,7 +348,7 @@ HaxParseQuotes(
 	    continue;
 	} else if (c == '\0') {
 	    Hax_ResetResult(interp);
-	    sprintf(interp->result, "missing %c", termChar);
+	    Hax_sprintf(interp->result, "missing %c", termChar);
 	    *termPtr = string-1;
 	    return HAX_ERROR;
 	} else {
@@ -1172,7 +1172,7 @@ Hax_ParseVar(
 	    if (HaxParseQuotes(interp, string+1, ')', 0, &end, &pv)
 		    != HAX_OK) {
 		char msg[100];
-		sprintf(msg, "\n    (parsing index for array \"%.*s\")",
+		Hax_sprintf(msg, "\n    (parsing index for array \"%.*s\")",
 			(int)(string-name1), name1);
 		Hax_AddErrorInfo(interp, msg);
 		result = NULL;

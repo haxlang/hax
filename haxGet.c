@@ -179,7 +179,7 @@ Hax_GetDouble(
     char *end;
     double d;
 
-    d = strtod(string, &end);
+    d = Hax_strtod(string, &end);
     while ((*end != '\0') && isspace(*end)) {
 	end++;
     }

@@ -175,7 +175,7 @@ Hax_CaseCmd(
 	result = Hax_Eval(interp, caseArgv[body], 0, (char **) NULL);
 	if (result == HAX_ERROR) {
 	    char msg[100];
-	    sprintf(msg, "\n    (\"%.50s\" arm line %d)", caseArgv[body-1],
+	    Hax_sprintf(msg, "\n    (\"%.50s\" arm line %d)", caseArgv[body-1],
 		    interp->errorLine);
 	    Hax_AddErrorInfo(interp, msg);
 	}
@@ -237,7 +237,7 @@ Hax_CatchCmd(
 	}
     }
     Hax_ResetResult(interp);
-    sprintf(interp->result, "%d", result);
+    Hax_sprintf(interp->result, "%d", result);
     return HAX_OK;
 }
 
@@ -403,7 +403,7 @@ Hax_EvalCmd(
     }
     if (result == HAX_ERROR) {
 	char msg[60];
-	sprintf(msg, "\n    (\"eval\" body line %d)", interp->errorLine);
+	Hax_sprintf(msg, "\n    (\"eval\" body line %d)", interp->errorLine);
 	Hax_AddErrorInfo(interp, msg);
     }
     return result;
@@ -498,7 +498,8 @@ Hax_ForCmd(
 	} else if (result != HAX_OK) {
 	    if (result == HAX_ERROR) {
 		char msg[60];
-		sprintf(msg, "\n    (\"for\" body line %d)", interp->errorLine);
+		Hax_sprintf(msg, "\n    (\"for\" body line %d)",
+		    interp->errorLine);
 		Hax_AddErrorInfo(interp, msg);
 	    }
 	    break;
@@ -583,7 +584,7 @@ Hax_ForeachCmd(
 		break;
 	    } else if (result == HAX_ERROR) {
 		char msg[100];
-		sprintf(msg, "\n    (\"foreach\" body line %d)",
+		Hax_sprintf(msg, "\n    (\"foreach\" body line %d)",
 			interp->errorLine);
 		Hax_AddErrorInfo(interp, msg);
 		break;
@@ -746,7 +747,7 @@ Hax_FormatCmd(
 	    format++;
 	}
 	if (width != 0) {
-	    sprintf(newPtr, "%d", width);
+	    Hax_sprintf(newPtr, "%d", width);
 	    while (*newPtr != 0) {
 		newPtr++;
 	    }
@@ -773,7 +774,7 @@ Hax_FormatCmd(
 	    format++;
 	}
 	if (precision != 0) {
-	    sprintf(newPtr, "%d", precision);
+	    Hax_sprintf(newPtr, "%d", precision);
 	    while (*newPtr != 0) {
 		newPtr++;
 	    }
@@ -848,7 +849,8 @@ Hax_FormatCmd(
 			    "specifier";
 		goto fmtError;
 	    default:
-		sprintf(interp->result, "bad field specifier \"%c\"", *format);
+		Hax_sprintf(interp->result, "bad field specifier \"%c\"",
+		    *format);
 		goto fmtError;
 	}
 	argc--;
@@ -885,7 +887,7 @@ Hax_FormatCmd(
 	    dst[dstSize] = 0;
 	} else {
 	    if (useTwoWords) {
-		sprintf(dst+dstSize, newFormat, twoWordValue);
+		Hax_sprintf(dst+dstSize, newFormat, twoWordValue);
 	    } else if (useShort) {
 		/*
 		 * The double cast below is needed for a few machines
@@ -893,9 +895,9 @@ Hax_FormatCmd(
 		 * directly from pointers to shorts.
 		 */
 
-		sprintf(dst+dstSize, newFormat, (short) (long) oneWordValue);
+		Hax_sprintf(dst+dstSize, newFormat, (short) (long) oneWordValue);
 	    } else {
-		sprintf(dst+dstSize, newFormat, (char *) oneWordValue);
+		Hax_sprintf(dst+dstSize, newFormat, (char *) oneWordValue);
 	    }
 	    dstSize += strlen(dst+dstSize);
 	}

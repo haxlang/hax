@@ -338,18 +338,18 @@ Hax_HashStats(
      */
 
     result = (char *) ckalloc((unsigned) ((NUM_COUNTERS*60) + 300));
-    sprintf(result, "%d entries in table, %d buckets\n",
+    Hax_sprintf(result, "%d entries in table, %d buckets\n",
 	    tablePtr->numEntries, tablePtr->numBuckets);
     p = result + strlen(result);
     for (i = 0; i < NUM_COUNTERS; i++) {
-	sprintf(p, "number of buckets with %d entries: %d\n",
+	Hax_sprintf(p, "number of buckets with %d entries: %d\n",
 		i, count[i]);
 	p += strlen(p);
     }
-    sprintf(p, "number of buckets with more %d or more entries: %d\n",
+    Hax_sprintf(p, "number of buckets with more %d or more entries: %d\n",
 	    NUM_COUNTERS, overflow);
     p += strlen(p);
-    sprintf(p, "average search distance for entry: %.1f", average);
+    Hax_sprintf(p, "average search distance for entry: %.1f", average);
     return result;
 }
 

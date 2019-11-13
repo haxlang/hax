@@ -316,7 +316,7 @@ Hax_UplevelCmd(
     }
     if (result == HAX_ERROR) {
 	char msg[60];
-	sprintf(msg, "\n    (\"uplevel\" body line %d)", interp->errorLine);
+	Hax_sprintf(msg, "\n    (\"uplevel\" body line %d)", interp->errorLine);
 	Hax_AddErrorInfo(interp, msg);
     }
 
@@ -506,7 +506,7 @@ InterpProc(
 	 * Record information telling where the error occurred.
 	 */
 
-	sprintf(msg, "\n    (procedure \"%.50s\" line %d)", argv[0],
+	Hax_sprintf(msg, "\n    (procedure \"%.50s\" line %d)", argv[0],
 		iPtr->errorLine);
 	Hax_AddErrorInfo(interp, msg);
     } else if (result == HAX_BREAK) {

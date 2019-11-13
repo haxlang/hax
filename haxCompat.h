@@ -1,0 +1,32 @@
+/*
+ * haxCompat.h --
+ *
+ *	Declarations of compat code used by the Hax interpreter.
+ *
+ * Copyright 2019 Kamil Rytarowski
+ * Permission to use, copy, modify, and distribute this
+ * software and its documentation for any purpose and without
+ * fee is hereby granted, provided that the above copyright
+ * notice appear in all copies.  The copyright holders
+ * makes no representations about the suitability of this
+ * software for any purpose.  It is provided "as is" without
+ * express or implied warranty.
+ */
+
+#ifndef _HAXCOMPAT
+#define _HAXCOMPAT
+
+/*
+ * <stdio.h> - standard buffered input/output
+ */
+
+int			Hax_sprintf(char *str, const char *format, ...);
+
+/*
+ * <stdlib.h> - standard library definitions
+ */
+
+double			Hax_strtod(const char *nptr, char **endptr);
+
+
+#endif /* _HAXCOMPAT */

@@ -112,7 +112,7 @@ AppendResult(
 
     p = (char *) ckalloc((unsigned) (strlen(dir) + strlen(separator)
 	    + nameLength + 1));
-    sprintf(p, "%s%s%s", dir, separator, name);
+    Hax_sprintf(p, "%s%s%s", dir, separator, name);
     name[nameLength] = saved;
     Hax_AppendElement(interp, p, 0);
     ckfree(p);
@@ -323,7 +323,7 @@ DoGlob(
 		    } else {
 			newDir = (char *) ckalloc((unsigned) (l1+nameLength+2));
 		    }
-		    sprintf(newDir, "%s%s%s", dir, separator, entryPtr->d_name);
+		    Hax_sprintf(newDir, "%s%s%s", dir, separator, entryPtr->d_name);
 		    result = DoGlob(interp, newDir, p+1);
 		    if (newDir != static1) {
 			ckfree(newDir);
@@ -361,7 +361,7 @@ DoGlob(
 	} else {
 	    newDir = (char *) ckalloc((unsigned) l2);
 	}
-	sprintf(newDir, "%s%s%.*s", dir, separator, (int)(p-rem), rem);
+	Hax_sprintf(newDir, "%s%s%.*s", dir, separator, (int)(p-rem), rem);
 	result = DoGlob(interp, newDir, p+1);
 	if (newDir != static1) {
 	    ckfree(newDir);
