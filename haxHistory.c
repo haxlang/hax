@@ -185,7 +185,7 @@ Hax_RecordAndEval(
      * Don't record empty commands.
      */
 
-    while (isspace(*cmd)) {
+    while (Hax_isspace(*cmd)) {
 	cmd++;
     }
     if (*cmd == '\0') {
@@ -695,7 +695,7 @@ RevResult(
 	if (*evalFirst == '[') {
 	    break;
 	}
-	if (!isspace(*evalFirst)) {
+	if (!Hax_isspace(*evalFirst)) {
 	    return;
 	}
     }
@@ -824,7 +824,7 @@ GetEvent(
      * First check for a numeric specification of an event.
      */
 
-    if (isdigit(*string) || (*string == '-')) {
+    if (Hax_isdigit(*string) || (*string == '-')) {
 	if (Hax_GetInt((Hax_Interp *) iPtr, string, &eventNum) != HAX_OK) {
 	    return NULL;
 	}
@@ -1007,7 +1007,7 @@ GetWords(
 	    goto error;
 	}
 	first = -1;
-    } else if (isdigit(*words)) {
+    } else if (Hax_isdigit(*words)) {
 	first = strtoul(words, &start, 0);
 	if (*start == 0) {
 	    last = first;
@@ -1015,7 +1015,7 @@ GetWords(
 	    start++;
 	    if (*start == '$') {
 		start++;
-	    } else if (isdigit(*start)) {
+	    } else if (Hax_isdigit(*start)) {
 		last = strtoul(start, &start, 0);
 	    } else {
 		goto error;
@@ -1039,7 +1039,7 @@ GetWords(
 
     result = (char *) ckalloc((unsigned) (strlen(command) + 1));
     dst = result;
-    for (next = command; isspace(*next); next++) {
+    for (next = command; Hax_isspace(*next); next++) {
 	/* Empty loop body:  just find start of first word. */
     }
     for (index = 0; *next != 0; index++) {
@@ -1047,7 +1047,7 @@ GetWords(
 	end = HaxWordEnd(next, 0);
 	if (*end != 0) {
 	    end++;
-	    for (next = end; isspace(*next); next++) {
+	    for (next = end; Hax_isspace(*next); next++) {
 		/* Empty loop body:  just find start of next word. */
 	    }
 	}

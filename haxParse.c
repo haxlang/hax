@@ -163,7 +163,7 @@ Hax_Backslash(
 	    break;
 	case 'C':
 	    p++;
-	    if (isspace(*p) || (*p == 0)) {
+	    if (Hax_isspace(*p) || (*p == 0)) {
 		result = 'C';
 		count = 1;
 		break;
@@ -171,7 +171,7 @@ Hax_Backslash(
 	    count = 3;
 	    if (*p == 'M') {
 		p++;
-		if (isspace(*p) || (*p == 0)) {
+		if (Hax_isspace(*p) || (*p == 0)) {
 		    result = 'M' & 037;
 		    break;
 		}
@@ -184,7 +184,7 @@ Hax_Backslash(
 	    break;
 	case 'M':
 	    p++;
-	    if (isspace(*p) || (*p == 0)) {
+	    if (Hax_isspace(*p) || (*p == 0)) {
 		result = 'M';
 		count = 1;
 		break;
@@ -207,16 +207,16 @@ Hax_Backslash(
 	    result = 0;
 	    break;
 	default:
-	    if (isdigit(*p)) {
+	    if (Hax_isdigit(*p)) {
 		result = *p - '0';
 		p++;
-		if (!isdigit(*p)) {
+		if (!Hax_isdigit(*p)) {
 		    break;
 		}
 		count = 3;
 		result = (result << 3) + (*p - '0');
 		p++;
-		if (!isdigit(*p)) {
+		if (!Hax_isdigit(*p)) {
 		    break;
 		}
 		count = 4;
@@ -885,7 +885,7 @@ HaxWordEnd(
     int count;
 
     p = start;
-    while (isspace(*p)) {
+    while (Hax_isspace(*p)) {
 	p++;
     }
 
@@ -953,7 +953,7 @@ HaxWordEnd(
 	     */
 
 	    return p;
-	} else if (isspace(*p)) {
+	} else if (Hax_isspace(*p)) {
 	    return p-1;
 	} else if ((*p == ']') && nested) {
 	    return p-1;
@@ -1064,7 +1064,7 @@ VarNameEnd(
 	}
 	return p;
     }
-    while (isalnum(*p) || (*p == '_')) {
+    while (Hax_isalnum(*p) || (*p == '_')) {
 	p++;
     }
     if ((*p == '(') && (p != string+1)) {
@@ -1147,7 +1147,7 @@ Hax_ParseVar(
 	string++;
     } else {
 	name1 = string;
-	while (isalnum(*string) || (*string == '_')) {
+	while (Hax_isalnum(*string) || (*string == '_')) {
 	    string++;
 	}
 	if (string == name1) {

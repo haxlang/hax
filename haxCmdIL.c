@@ -739,7 +739,7 @@ Hax_LinsertCmd(
 
 	end = element+size;
 	if (element != argv[1]) {
-	    while ((*end != 0) && !isspace(*end)) {
+	    while ((*end != 0) && !Hax_isspace(*end)) {
 		end++;
 	    }
 	}
@@ -931,7 +931,7 @@ Hax_LrangeCmd(
      * Chop off trailing spaces.
      */
 
-    while (isspace(end[-1])) {
+    while (Hax_isspace(end[-1])) {
 	end--;
     }
     c = *end;
@@ -1032,7 +1032,7 @@ Hax_LreplaceCmd(
 
     p1 = element+size;
     if (element != argv[1]) {
-	while ((*p1 != 0) && !isspace(*p1)) {
+	while ((*p1 != 0) && !Hax_isspace(*p1)) {
 	    p1++;
 	}
     }

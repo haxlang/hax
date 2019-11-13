@@ -114,7 +114,7 @@ ValidateMemory (
             fflush (stdout);
 	    byte &= 0xff;
             fprintf(stderr, "low guard byte %d is 0x%x  \t%c\n", idx, byte,
-	    	    (isprint(byte) ? byte : ' '));
+	    	    (Hax_isprint(byte) ? byte : ' '));
         }
     }
     if (guard_failed) {
@@ -135,7 +135,7 @@ ValidateMemory (
             fflush (stdout);
 	    byte &= 0xff;
             fprintf(stderr, "hi guard byte %d is 0x%x  \t%c\n", idx, byte,
-	    	    (isprint(byte) ? byte : ' '));
+	    	    (Hax_isprint(byte) ? byte : ' '));
         }
     }
 

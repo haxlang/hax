@@ -19,6 +19,64 @@
 #include "haxInt.h"
 
 /*
+ * <ctype.h> - character types
+ */
+
+int
+Hax_isalnum(int c)
+{
+    return isalnum(c);
+}
+
+int
+Hax_isdigit(int c)
+{
+    return isdigit(c);
+}
+
+int
+Hax_islower(int c)
+{
+    return islower(c);
+}
+
+int
+Hax_isprint(int c)
+{
+    return isprint(c);
+}
+
+int
+Hax_isspace(int c)
+{
+    return isspace(c);
+}
+
+int
+Hax_isupper(int c)
+{
+    return isupper(c);
+}
+
+int
+Hax_tolower(int c)
+{
+    return tolower(c);
+}
+
+int
+Hax_toupper(int c)
+{
+    return toupper(c);
+}
+
+int
+Hax_isascii(int c)
+{
+    return isascii(c);
+}
+
+/*
  * <stdio.h> - standard buffered input/output
  */
 

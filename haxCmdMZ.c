@@ -116,8 +116,8 @@ Hax_RegexpCmd(
 
 	string = (char *) ckalloc((unsigned) (strlen(argPtr[1]) + 1));
 	for (src = argPtr[1], dst = string; *src != 0; src++, dst++) {
-	    if (isupper(*src)) {
-		*dst = tolower(*src);
+	    if (Hax_isupper(*src)) {
+		*dst = Hax_tolower(*src);
 	    } else {
 		*dst = *src;
 	    }
@@ -255,8 +255,8 @@ Hax_RegsubCmd(
 
 	string = (char *) ckalloc((unsigned) (strlen(argPtr[1]) + 1));
 	for (src = argPtr[1], dst = string; *src != 0; src++, dst++) {
-	    if (isupper(*src)) {
-		*dst = tolower(*src);
+	    if (Hax_isupper(*src)) {
+		*dst = Hax_tolower(*src);
 	    } else {
 		*dst = *src;
 	    }
@@ -589,7 +589,7 @@ Hax_ScanCmd(
 	    suppress = 0;
 	}
 	widthSpecified = 0;
-	while (isdigit(*fmt)) {
+	while (Hax_isdigit(*fmt)) {
 	    widthSpecified = 1;
 	    fmt++;
 	}
@@ -1006,8 +1006,8 @@ Hax_StringCmd(
 	}
 	Hax_SetResult(interp, argv[2], HAX_VOLATILE);
 	for (p = interp->result; *p != 0; p++) {
-	    if (isupper(*p)) {
-		*p = tolower(*p);
+	    if (Hax_isupper(*p)) {
+		*p = Hax_tolower(*p);
 	    }
 	}
 	return HAX_OK;
@@ -1022,8 +1022,8 @@ Hax_StringCmd(
 	}
 	Hax_SetResult(interp, argv[2], HAX_VOLATILE);
 	for (p = interp->result; *p != 0; p++) {
-	    if (islower(*p)) {
-		*p = toupper(*p);
+	    if (Hax_islower(*p)) {
+		*p = Hax_toupper(*p);
 	    }
 	}
 	return HAX_OK;

@@ -765,7 +765,7 @@ Hax_Eval(
 		iPtr->errorLine++;
 	    }
 	}
-	for ( ; isspace(*p) || (*p == ';'); p++) {
+	for ( ; Hax_isspace(*p) || (*p == ';'); p++) {
 	    if (*p == '\n') {
 		iPtr->errorLine++;
 	    }

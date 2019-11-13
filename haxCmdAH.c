@@ -133,7 +133,7 @@ Hax_CaseCmd(
 	 */
 
 	for (p = caseArgv[i]; *p != 0; p++) {
-	    if (isspace(*p) || (*p == '\\')) {
+	    if (Hax_isspace(*p) || (*p == '\\')) {
 		break;
 	    }
 	}
@@ -730,11 +730,11 @@ Hax_FormatCmd(
 	    newPtr++;
 	    format++;
 	}
-	if (isdigit(*format)) {
+	if (Hax_isdigit(*format)) {
 	    width = atoi(format);
 	    do {
 		format++;
-	    } while (isdigit(*format));
+	    } while (Hax_isdigit(*format));
 	} else if (*format == '*') {
 	    if (argc <= 0) {
 		goto notEnoughArgs;
@@ -757,11 +757,11 @@ Hax_FormatCmd(
 	    newPtr++;
 	    format++;
 	}
-	if (isdigit(*format)) {
+	if (Hax_isdigit(*format)) {
 	    precision = atoi(format);
 	    do {
 		format++;
-	    } while (isdigit(*format));
+	    } while (Hax_isdigit(*format));
 	} else if (*format == '*') {
 	    if (argc <= 0) {
 		goto notEnoughArgs;
@@ -802,7 +802,7 @@ Hax_FormatCmd(
 		} else {
 		    useShort = 0;
 		}
-		newPtr[-1] = tolower(*format);
+		newPtr[-1] = Hax_tolower(*format);
 		newPtr[-2] = 'l';
 		*newPtr = 0;
 	    case 'd':
@@ -828,7 +828,7 @@ Hax_FormatCmd(
 		size = 1;
 		break;
 	    case 'F':
-		newPtr[-1] = tolower(newPtr[-1]);
+		newPtr[-1] = Hax_tolower(newPtr[-1]);
 	    case 'e':
 	    case 'E':
 	    case 'f':

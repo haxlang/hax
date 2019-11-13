@@ -212,7 +212,7 @@ HaxGetFrame(
 		    (char *) NULL);
 	    return -1;
 	}
-    } else if (isdigit(*string)) {
+    } else if (Hax_isdigit(*string)) {
 	if (Hax_GetInt(interp, string, &level) != HAX_OK) {
 	    return -1;
 	}

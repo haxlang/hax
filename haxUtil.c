@@ -122,7 +122,7 @@ HaxFindElement(
      * be changed back eventually, or all of Hax should call isascii.
      */
 
-    while (isascii(*list) && isspace(*list)) {
+    while (Hax_isascii(*list) && Hax_isspace(*list)) {
 	list++;
     }
     if (*list == '{') {
@@ -167,10 +167,10 @@ HaxFindElement(
 
 		    size = p - list;
 		    p++;
-		    if ((isascii(*p) && isspace(*p)) || (*p == 0)) {
+		    if ((Hax_isascii(*p) && Hax_isspace(*p)) || (*p == 0)) {
 			goto done;
 		    }
-		    for (p2 = p; (*p2 != 0) && (!isspace(*p2)) && (p2 < p+20);
+		    for (p2 = p; (*p2 != 0) && (!Hax_isspace(*p2)) && (p2 < p+20);
 			    p2++) {
 			/* null body */
 		    }
@@ -224,10 +224,10 @@ HaxFindElement(
 
 		    size = p-list;
 		    p++;
-		    if ((isascii(*p) && isspace(*p)) || (*p == 0)) {
+		    if ((Hax_isascii(*p) && Hax_isspace(*p)) || (*p == 0)) {
 			goto done;
 		    }
-		    for (p2 = p; (*p2 != 0) && (!isspace(*p2)) && (p2 < p+20);
+		    for (p2 = p; (*p2 != 0) && (!Hax_isspace(*p2)) && (p2 < p+20);
 			    p2++) {
 			/* null body */
 		    }
@@ -263,7 +263,7 @@ HaxFindElement(
     }
 
     done:
-    while (isascii(*p) && isspace(*p)) {
+    while (Hax_isascii(*p) && Hax_isspace(*p)) {
 	p++;
     }
     *elementPtr = list;
@@ -373,7 +373,7 @@ Hax_SplitList(
      */
 
     for (size = 1, p = list; *p != 0; p++) {
-	if (isspace(*p)) {
+	if (Hax_isspace(*p)) {
 	    size++;
 	}
     }
@@ -769,11 +769,11 @@ Hax_Concat(
 	 */
 
 	element = argv[i];
-	while (isspace(*element)) {
+	while (Hax_isspace(*element)) {
 	    element++;
 	}
 	for (length = strlen(element);
-		(length > 0) && (isspace(element[length-1]));
+		(length > 0) && (Hax_isspace(element[length-1]));
 		length--) {
 	    /* Null loop body. */
 	}
@@ -1313,7 +1313,7 @@ HaxGetListIndex(
     char *string,			/* String containing list index. */
     long int *indexPtr			/* Where to store index. */)
 {
-    if (isdigit(*string) || (*string == '-')) {
+    if (Hax_isdigit(*string) || (*string == '-')) {
 	if (Hax_GetLong(interp, string, indexPtr) != HAX_OK) {
 	    return HAX_ERROR;
 	}

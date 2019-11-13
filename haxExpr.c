@@ -300,7 +300,7 @@ ExprLex(
 
     p = infoPtr->expr;
     c = *p;
-    while (isspace(c)) {
+    while (Hax_isspace(c)) {
 	p++;
 	c = *p;
     }

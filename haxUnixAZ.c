@@ -1314,7 +1314,7 @@ Hax_ReadCmd(
      * newline should be dropped.
      */
 
-    if ((argc >= (i + 2)) && isdigit(argv[i+1][0])) {
+    if ((argc >= (i + 2)) && Hax_isdigit(argv[i+1][0])) {
 	if (Hax_GetLong(interp, argv[i+1], &bytesLeft) != HAX_OK) {
 	    return HAX_ERROR;
 	}

@@ -17,6 +17,20 @@
 #define _HAXCOMPAT
 
 /*
+ * <ctype.h> - character types
+ */
+
+int			Hax_isalnum(int c);
+int			Hax_isdigit(int c);
+int			Hax_islower(int c);
+int			Hax_isprint(int c);
+int			Hax_isspace(int c);
+int			Hax_isupper(int c);
+int			Hax_tolower(int c);
+int			Hax_toupper(int c);
+int			Hax_isascii(int c);
+
+/*
  * <stdio.h> - standard buffered input/output
  */
 

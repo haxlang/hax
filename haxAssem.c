@@ -222,7 +222,7 @@ Hax_CommandComplete(
 
     p = cmd;
     while (1) {
-	while (isspace(*p)) {
+	while (Hax_isspace(*p)) {
 	    p++;
 	}
 	if (*p == 0) {

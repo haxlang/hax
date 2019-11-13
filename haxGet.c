@@ -51,7 +51,7 @@ Hax_GetInt(
     int i;
 
     i = strtol(string, &end, 0);
-    while ((*end != '\0') && isspace(*end)) {
+    while ((*end != '\0') && Hax_isspace(*end)) {
 	end++;
     }
     if ((end == string) || (*end != 0)) {
@@ -94,7 +94,7 @@ Hax_GetLong(
     long int i;
 
     i = strtol(string, &end, 0);
-    while ((*end != '\0') && isspace(*end)) {
+    while ((*end != '\0') && Hax_isspace(*end)) {
 	end++;
     }
     if ((end == string) || (*end != 0)) {
@@ -137,7 +137,7 @@ Hax_GetLongLong(
     long long int i;
 
     i = strtoll(string, &end, 0);
-    while ((*end != '\0') && isspace(*end)) {
+    while ((*end != '\0') && Hax_isspace(*end)) {
 	end++;
     }
     if ((end == string) || (*end != 0)) {
@@ -180,7 +180,7 @@ Hax_GetDouble(
     double d;
 
     d = Hax_strtod(string, &end);
-    while ((*end != '\0') && isspace(*end)) {
+    while ((*end != '\0') && Hax_isspace(*end)) {
 	end++;
     }
     if ((end == string) || (*end != 0)) {
