@@ -209,4 +209,4 @@ $(UNIX_OJBS): hax.h haxUnix.h
 
 .SUFFIXES: .c .o
 .c.o:
-	$(CC) $(CFLAGS) -I. -DHAX_LIBRARY=\"$(PREFIX)/$(HAX_LIBRARY)\" -c $<
+	$(CC) $(CFLAGS) -I. -DHAX_LIBRARY=\"$(PREFIX)/$(HAX_LIBRARY)\" -o $@ -c $<
