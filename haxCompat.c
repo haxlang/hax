@@ -16,7 +16,11 @@
 #ifndef _HAXCOMPAT
 #define _HAXCOMPAT
 
+#ifndef _HAXINT
 #include "haxInt.h"
+#endif
+
+#include <ctype.h>
 
 /*
  * <ctype.h> - character types
