@@ -983,7 +983,7 @@ Hax_VarEval(
     ...				/* One or more strings to concatenate,
 				 * terminated with a NULL string. */)
 {
-    va_list argList;
+    Va_list argList;
 #define FIXED_SIZE 200
     char fixedSpace[FIXED_SIZE+1];
     int spaceAvl, spaceUsed, length;
@@ -997,13 +997,13 @@ Hax_VarEval(
      * space.
      */
 
-    va_start(argList, interp);
-    interp = va_arg(argList, Hax_Interp *);
+    Va_start(argList, interp);
+    interp = Va_arg(argList, Hax_Interp *);
     spaceAvl = FIXED_SIZE;
     spaceUsed = 0;
     cmd = fixedSpace;
     while (1) {
-	string = va_arg(argList, char *);
+	string = Va_arg(argList, char *);
 	if (string == NULL) {
 	    break;
 	}
@@ -1023,7 +1023,7 @@ Hax_VarEval(
 	Hax_strcpy(cmd + spaceUsed, string);
 	spaceUsed += length;
     }
-    va_end(argList);
+    Va_end(argList);
     cmd[spaceUsed] = '\0';
 
     result = Hax_Eval(interp, cmd, 0, (char **) NULL);

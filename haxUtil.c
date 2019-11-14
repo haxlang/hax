@@ -1019,7 +1019,7 @@ Hax_AppendResult(
     ...				/* One or more strings to add to the
 				 * result, terminated with NULL. */)
 {
-    va_list argList, argList2;
+    Va_list argList, argList2;
     Interp *iPtr;
     char *string;
     int newSpace;
@@ -1029,18 +1029,18 @@ Hax_AppendResult(
      * needed.
      */
 
-    va_start(argList, interp);
-    va_copy(argList2, argList);
+    Va_start(argList, interp);
+    Va_copy(argList2, argList);
     iPtr = (Interp *) interp;
     newSpace = 0;
     while (1) {
-	string = va_arg(argList, char *);
+	string = Va_arg(argList, char *);
 	if (string == NULL) {
 	    break;
 	}
 	newSpace += Hax_strlen(string);
     }
-    va_end(argList);
+    Va_end(argList);
 
     /*
      * If the append buffer isn't already setup and large enough
@@ -1058,14 +1058,14 @@ Hax_AppendResult(
      */
 
     while (1) {
-	string = va_arg(argList2, char *);
+	string = Va_arg(argList2, char *);
 	if (string == NULL) {
 	    break;
 	}
 	Hax_strcpy(iPtr->appendResult + iPtr->appendUsed, string);
 	iPtr->appendUsed += Hax_strlen(string);
     }
-    va_end(argList2);
+    Va_end(argList2);
 }
 
 /*
@@ -1258,7 +1258,7 @@ Hax_SetErrorCode(
     ...				/* One or more elements to add to errorCode,
 				 * terminated with NULL. */)
 {
-    va_list argList;
+    Va_list argList;
     char *string;
     int flags;
     Interp *iPtr;
@@ -1268,11 +1268,11 @@ Hax_SetErrorCode(
      * $errorCode as list elements.
      */
 
-    va_start(argList, interp);
+    Va_start(argList, interp);
     iPtr = (Interp *) interp;
     flags = HAX_GLOBAL_ONLY | HAX_LIST_ELEMENT;
     while (1) {
-	string = va_arg(argList, char *);
+	string = Va_arg(argList, char *);
 	if (string == NULL) {
 	    break;
 	}
@@ -1280,7 +1280,7 @@ Hax_SetErrorCode(
 		(char *) NULL, string, flags);
 	flags |= HAX_APPEND_VALUE;
     }
-    va_end(argList);
+    Va_end(argList);
     iPtr->flags |= ERROR_CODE_SET;
 }
 

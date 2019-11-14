@@ -67,4 +67,14 @@ char *			Hax_strncpy (char *dst, const char *src,
 char *			Hax_strrchr (const char *string, int c);
 char *			Hax_strstr (const char *string, const char *substring);
 
+/*
+ * <stdarg.h> - handle variable argument list
+ */
+
+#define Va_list __builtin_va_list
+#define Va_start __builtin_va_start
+#define Va_arg __builtin_va_arg
+#define Va_copy __builtin_va_copy
+#define Va_end __builtin_va_end
+
 #endif /* _HAXCOMPAT */

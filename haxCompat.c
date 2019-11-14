@@ -13,12 +13,7 @@
  * express or implied warranty.
  */
 
-#ifndef _HAXCOMPAT
-#define _HAXCOMPAT
-
-#ifndef _HAXINT
 #include "haxInt.h"
-#endif
 
 #include <ctype.h>
 #include <string.h>
@@ -89,11 +84,11 @@ int
 Hax_sprintf(char *str, const char *format, ...)
 {
     int result;
-    va_list ap;
+    Va_list ap;
 
-    va_start(ap, format);
+    Va_start(ap, format);
     result = vsprintf(str, format, ap);
-    va_end(ap);
+    Va_end(ap);
 
     return result;
 }
@@ -194,5 +189,3 @@ Hax_strstr (const char *string, const char *substring)
 {
     return strstr(string, substring);
 }
-
-#endif /* _HAXCOMPAT */
