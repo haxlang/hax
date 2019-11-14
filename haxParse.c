@@ -316,13 +316,13 @@ HaxParseQuotes(
 		return HAX_ERROR;
 	    }
 	    src = *termPtr;
-	    length = strlen(value);
+	    length = Hax_strlen(value);
 	    if ((pvPtr->end - dst) <= length) {
 		pvPtr->next = dst;
 		(*pvPtr->expandProc)(pvPtr, length);
 		dst = pvPtr->next;
 	    }
-	    strcpy(dst, value);
+	    Hax_strcpy(dst, value);
 	    dst += length;
 	    continue;
 	} else if (c == '[') {
@@ -412,12 +412,12 @@ HaxParseNestedCmd(
 	return result;
     }
     (*termPtr) += 1;
-    length = strlen(iPtr->result);
+    length = Hax_strlen(iPtr->result);
     shortfall = length + 1 - (pvPtr->end - pvPtr->next);
     if (shortfall > 0) {
 	(*pvPtr->expandProc)(pvPtr, shortfall);
     }
-    strcpy(pvPtr->next, iPtr->result);
+    Hax_strcpy(pvPtr->next, iPtr->result);
     pvPtr->next += length;
     Hax_FreeResult(iPtr);
     iPtr->result = iPtr->resultSpace;
@@ -653,13 +653,13 @@ HaxParseWords(
 			return HAX_ERROR;
 		    }
 		    src = *termPtr;
-		    length = strlen(value);
+		    length = Hax_strlen(value);
 		    if ((pvPtr->end - dst) <= length) {
 			pvPtr->next = dst;
 			(*pvPtr->expandProc)(pvPtr, length);
 			dst = pvPtr->next;
 		    }
-		    strcpy(dst, value);
+		    Hax_strcpy(dst, value);
 		    dst += length;
 		} else if (type == HAX_COMMAND_END) {
 		    if ((c == ']') && !(flags & HAX_BRACKET_TERM)) {
@@ -844,7 +844,7 @@ HaxExpandParseValue(
      * mark newBuf buffer as malloc-ed.
      */
 
-    memcpy(newBuf, pvPtr->buffer, pvPtr->next - pvPtr->buffer);
+    Hax_memcpy(newBuf, pvPtr->buffer, pvPtr->next - pvPtr->buffer);
     pvPtr->next = newBuf + (pvPtr->next - pvPtr->buffer);
     if (pvPtr->clientData != 0) {
 	ckfree(pvPtr->buffer);

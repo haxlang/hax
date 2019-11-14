@@ -249,13 +249,13 @@ ExprParseString(
     if (string != valuePtr->pv.buffer) {
 	int length, shortfall;
 
-	length = strlen(string);
+	length = Hax_strlen(string);
 	valuePtr->pv.next = valuePtr->pv.buffer;
 	shortfall = length - (valuePtr->pv.end - valuePtr->pv.buffer);
 	if (shortfall > 0) {
 	    (*valuePtr->pv.expandProc)(&valuePtr->pv, shortfall);
 	}
-	strcpy(valuePtr->pv.buffer, string);
+	Hax_strcpy(valuePtr->pv.buffer, string);
     }
     return HAX_OK;
 }
@@ -967,7 +967,7 @@ ExprGetValue(
 			valuePtr->doubleValue < value2.doubleValue;
 		} else {
 		    valuePtr->llongValue =
-			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) < 0;
+			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) < 0;
 		}
 		valuePtr->type = TYPE_LLONG;
 		break;
@@ -980,7 +980,7 @@ ExprGetValue(
 			valuePtr->doubleValue > value2.doubleValue;
 		} else {
 		    valuePtr->llongValue =
-			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) > 0;
+			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) > 0;
 		}
 		valuePtr->type = TYPE_LLONG;
 		break;
@@ -993,7 +993,7 @@ ExprGetValue(
 			valuePtr->doubleValue <= value2.doubleValue;
 		} else {
 		    valuePtr->llongValue =
-			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) <= 0;
+			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) <= 0;
 		}
 		valuePtr->type = TYPE_LLONG;
 		break;
@@ -1006,7 +1006,7 @@ ExprGetValue(
 			valuePtr->doubleValue >= value2.doubleValue;
 		} else {
 		    valuePtr->llongValue =
-			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) >= 0;
+			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) >= 0;
 		}
 		valuePtr->type = TYPE_LLONG;
 		break;
@@ -1019,7 +1019,7 @@ ExprGetValue(
 			valuePtr->doubleValue == value2.doubleValue;
 		} else {
 		    valuePtr->llongValue =
-			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) == 0;
+			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) == 0;
 		}
 		valuePtr->type = TYPE_LLONG;
 		break;
@@ -1032,7 +1032,7 @@ ExprGetValue(
 			valuePtr->doubleValue != value2.doubleValue;
 		} else {
 		    valuePtr->llongValue =
-			    strcmp(valuePtr->pv.buffer, value2.pv.buffer) != 0;
+			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) != 0;
 		}
 		valuePtr->type = TYPE_LLONG;
 		break;

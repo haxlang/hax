@@ -69,8 +69,8 @@ Hax_ProcCmd(
 
     procPtr = (Proc *) ckalloc(sizeof(Proc));
     procPtr->iPtr = iPtr;
-    procPtr->command = (char *) ckalloc((unsigned) strlen(argv[3]) + 1);
-    strcpy(procPtr->command, argv[3]);
+    procPtr->command = (char *) ckalloc((unsigned) Hax_strlen(argv[3]) + 1);
+    Hax_strcpy(procPtr->command, argv[3]);
     procPtr->argPtr = NULL;
 
     /*
@@ -111,9 +111,9 @@ Hax_ProcCmd(
 	    result = HAX_ERROR;
 	    goto procError;
 	}
-	nameLength = strlen(fieldValues[0]) + 1;
+	nameLength = Hax_strlen(fieldValues[0]) + 1;
 	if (fieldCount == 2) {
-	    valueLength = strlen(fieldValues[1]) + 1;
+	    valueLength = Hax_strlen(fieldValues[1]) + 1;
 	} else {
 	    valueLength = 0;
 	}
@@ -127,10 +127,10 @@ Hax_ProcCmd(
 	}
 	lastArgPtr = argPtr;
 	argPtr->nextPtr = NULL;
-	strcpy(argPtr->name, fieldValues[0]);
+	Hax_strcpy(argPtr->name, fieldValues[0]);
 	if (fieldCount == 2) {
 	    argPtr->defValue = argPtr->name + nameLength;
-	    strcpy(argPtr->defValue, fieldValues[1]);
+	    Hax_strcpy(argPtr->defValue, fieldValues[1]);
 	} else {
 	    argPtr->defValue = NULL;
 	}
@@ -463,7 +463,7 @@ InterpProc(
 	 */
 
 	if ((argPtr->nextPtr == NULL)
-		&& (strcmp(argPtr->name, "args") == 0)) {
+		&& (Hax_strcmp(argPtr->name, "args") == 0)) {
 	    if (argc < 0) {
 		argc = 0;
 	    }

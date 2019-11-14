@@ -387,7 +387,7 @@ Hax_FileCmd(
 	return HAX_ERROR;
     }
     c = argv[1][0];
-    length = strlen(argv[1]);
+    length = Hax_strlen(argv[1]);
 
     /*
      * First handle operations on the file name.
@@ -397,7 +397,7 @@ Hax_FileCmd(
     if (fileName == NULL) {
 	return HAX_ERROR;
     }
-    if ((c == 'd') && (strncmp(argv[1], "dirname", length) == 0)) {
+    if ((c == 'd') && (Hax_strncmp(argv[1], "dirname", length) == 0)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "dirname";
 	    not3Args:
@@ -405,7 +405,7 @@ Hax_FileCmd(
 		    " ", argv[1], " name\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	p = strrchr(fileName, '/');
+	p = Hax_strrchr(fileName, '/');
 	if (p == NULL) {
 	    interp->result = (char *) ".";
 	} else if (p == fileName) {
@@ -416,7 +416,7 @@ Hax_FileCmd(
 	    *p = '/';
 	}
 	return HAX_OK;
-    } else if ((c == 'r') && (strncmp(argv[1], "rootname", length) == 0)
+    } else if ((c == 'r') && (Hax_strncmp(argv[1], "rootname", length) == 0)
 	    && (length >= 2)) {
 	char *lastSlash;
 
@@ -424,8 +424,8 @@ Hax_FileCmd(
 	    argv[1] = (char *) "rootname";
 	    goto not3Args;
 	}
-	p = strrchr(fileName, '.');
-	lastSlash = strrchr(fileName, '/');
+	p = Hax_strrchr(fileName, '.');
+	lastSlash = Hax_strrchr(fileName, '/');
 	if ((p == NULL) || ((lastSlash != NULL) && (lastSlash > p))) {
 	    Hax_SetResult(interp, fileName, HAX_VOLATILE);
 	} else {
@@ -434,7 +434,7 @@ Hax_FileCmd(
 	    *p = '.';
 	}
 	return HAX_OK;
-    } else if ((c == 'e') && (strncmp(argv[1], "extension", length) == 0)
+    } else if ((c == 'e') && (Hax_strncmp(argv[1], "extension", length) == 0)
 	    && (length >= 3)) {
 	char *lastSlash;
 
@@ -442,19 +442,19 @@ Hax_FileCmd(
 	    argv[1] = (char *) "extension";
 	    goto not3Args;
 	}
-	p = strrchr(fileName, '.');
-	lastSlash = strrchr(fileName, '/');
+	p = Hax_strrchr(fileName, '.');
+	lastSlash = Hax_strrchr(fileName, '/');
 	if ((p != NULL) && ((lastSlash == NULL) || (lastSlash < p))) {
 	    Hax_SetResult(interp, p, HAX_VOLATILE);
 	}
 	return HAX_OK;
-    } else if ((c == 't') && (strncmp(argv[1], "tail", length) == 0)
+    } else if ((c == 't') && (Hax_strncmp(argv[1], "tail", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "tail";
 	    goto not3Args;
 	}
-	p = strrchr(fileName, '/');
+	p = Hax_strrchr(fileName, '/');
 	if (p != NULL) {
 	    Hax_SetResult(interp, p+1, HAX_VOLATILE);
 	} else {
@@ -471,7 +471,7 @@ Hax_FileCmd(
     if (fileName == NULL) {
 	return HAX_ERROR;
     }
-    if ((c == 'r') && (strncmp(argv[1], "readable", length) == 0)
+    if ((c == 'r') && (Hax_strncmp(argv[1], "readable", length) == 0)
 	    && (length >= 5)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "readable";
@@ -485,14 +485,14 @@ Hax_FileCmd(
 	    interp->result = (char *) "1";
 	}
 	return HAX_OK;
-    } else if ((c == 'w') && (strncmp(argv[1], "writable", length) == 0)) {
+    } else if ((c == 'w') && (Hax_strncmp(argv[1], "writable", length) == 0)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "writable";
 	    goto not3Args;
 	}
 	mode = W_OK;
 	goto checkAccess;
-    } else if ((c == 'e') && (strncmp(argv[1], "executable", length) == 0)
+    } else if ((c == 'e') && (Hax_strncmp(argv[1], "executable", length) == 0)
 	    && (length >= 3)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "executable";
@@ -500,7 +500,7 @@ Hax_FileCmd(
 	}
 	mode = X_OK;
 	goto checkAccess;
-    } else if ((c == 'e') && (strncmp(argv[1], "exists", length) == 0)
+    } else if ((c == 'e') && (Hax_strncmp(argv[1], "exists", length) == 0)
 	    && (length >= 3)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "exists";
@@ -514,7 +514,7 @@ Hax_FileCmd(
      * Lastly, check stuff that requires the file to be stat-ed.
      */
 
-    if ((c == 'a') && (strncmp(argv[1], "atime", length) == 0)) {
+    if ((c == 'a') && (Hax_strncmp(argv[1], "atime", length) == 0)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "atime";
 	    goto not3Args;
@@ -524,21 +524,21 @@ Hax_FileCmd(
 	}
 	Hax_sprintf(interp->result, "%ld", statBuf.st_atime);
 	return HAX_OK;
-    } else if ((c == 'i') && (strncmp(argv[1], "isdirectory", length) == 0)
+    } else if ((c == 'i') && (Hax_strncmp(argv[1], "isdirectory", length) == 0)
 	    && (length >= 3)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "isdirectory";
 	    goto not3Args;
 	}
 	statOp = 2;
-    } else if ((c == 'i') && (strncmp(argv[1], "isfile", length) == 0)
+    } else if ((c == 'i') && (Hax_strncmp(argv[1], "isfile", length) == 0)
 	    && (length >= 3)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "isfile";
 	    goto not3Args;
 	}
 	statOp = 1;
-    } else if ((c == 'l') && (strncmp(argv[1], "lstat", length) == 0)) {
+    } else if ((c == 'l') && (Hax_strncmp(argv[1], "lstat", length) == 0)) {
 	if (argc != 4) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " lstat name varName\"", (char *) NULL);
@@ -551,7 +551,7 @@ Hax_FileCmd(
 	    return HAX_ERROR;
 	}
 	return StoreStatData(interp, argv[3], &statBuf);
-    } else if ((c == 'm') && (strncmp(argv[1], "mtime", length) == 0)) {
+    } else if ((c == 'm') && (Hax_strncmp(argv[1], "mtime", length) == 0)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "mtime";
 	    goto not3Args;
@@ -561,7 +561,7 @@ Hax_FileCmd(
 	}
 	Hax_sprintf(interp->result, "%ld", statBuf.st_mtime);
 	return HAX_OK;
-    } else if ((c == 'o') && (strncmp(argv[1], "owned", length) == 0)) {
+    } else if ((c == 'o') && (Hax_strncmp(argv[1], "owned", length) == 0)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "owned";
 	    goto not3Args;
@@ -571,7 +571,7 @@ Hax_FileCmd(
      * This option is only included if symbolic links exist on this system
      * (in which case S_IFLNK should be defined).
      */
-    } else if ((c == 'r') && (strncmp(argv[1], "readlink", length) == 0)
+    } else if ((c == 'r') && (Hax_strncmp(argv[1], "readlink", length) == 0)
 	    && (length >= 5)) {
 	char linkValue[MAXPATHLEN+1];
 	int linkLength;
@@ -589,7 +589,7 @@ Hax_FileCmd(
 	linkValue[linkLength] = 0;
 	Hax_SetResult(interp, linkValue, HAX_VOLATILE);
 	return HAX_OK;
-    } else if ((c == 's') && (strncmp(argv[1], "size", length) == 0)
+    } else if ((c == 's') && (Hax_strncmp(argv[1], "size", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "size";
@@ -600,7 +600,7 @@ Hax_FileCmd(
 	}
 	Hax_sprintf(interp->result, "%ld", statBuf.st_size);
 	return HAX_OK;
-    } else if ((c == 's') && (strncmp(argv[1], "stat", length) == 0)
+    } else if ((c == 's') && (Hax_strncmp(argv[1], "stat", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 4) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -615,7 +615,7 @@ Hax_FileCmd(
 	    return HAX_ERROR;
 	}
 	return StoreStatData(interp, argv[3], &statBuf);
-    } else if ((c == 't') && (strncmp(argv[1], "type", length) == 0)
+    } else if ((c == 't') && (Hax_strncmp(argv[1], "type", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 3) {
 	    argv[1] = (char *) "type";
@@ -1161,8 +1161,8 @@ Hax_PwdCmd(
 	    }
 	    return HAX_ERROR;
 	}
-	currentDir = (char *) ckalloc((unsigned) (strlen(buffer) + 1));
-	strcpy(currentDir, buffer);
+	currentDir = (char *) ckalloc((unsigned) (Hax_strlen(buffer) + 1));
+	Hax_strcpy(currentDir, buffer);
     }
     interp->result = currentDir;
     return HAX_OK;
@@ -1200,7 +1200,7 @@ Hax_PutsCmd(
 
     i = 1;
     newline = 1;
-    if ((argc >= 2) && (strcmp(argv[1], "-nonewline") == 0)) {
+    if ((argc >= 2) && (Hax_strcmp(argv[1], "-nonewline") == 0)) {
 	newline = 0;
 	i++;
     }
@@ -1216,7 +1216,7 @@ Hax_PutsCmd(
      */
 
     if (i == (argc-3)) {
-	if (strncmp(argv[i+2], "nonewline", strlen(argv[i+2])) != 0) {
+	if (Hax_strncmp(argv[i+2], "nonewline", Hax_strlen(argv[i+2])) != 0) {
 	    Hax_AppendResult(interp, "bad argument \"", argv[i+2],
 		    "\": should be \"nonewline\"", (char *) NULL);
 	    return HAX_ERROR;
@@ -1295,7 +1295,7 @@ Hax_ReadCmd(
     }
     i = 1;
     newline = 1;
-    if ((argc == 3) && (strcmp(argv[1], "-nonewline") == 0)) {
+    if ((argc == 3) && (Hax_strcmp(argv[1], "-nonewline") == 0)) {
 	newline = 0;
 	i++;
     }
@@ -1327,7 +1327,7 @@ Hax_ReadCmd(
 	 */
 
 	if (argc >= (i + 2)) {
-	    if (strncmp(argv[i+1], "nonewline", strlen(argv[i+1])) == 0) {
+	    if (Hax_strncmp(argv[i+1], "nonewline", Hax_strlen(argv[i+1])) == 0) {
 		newline = 0;
 	    } else {
 		Hax_AppendResult(interp, "bad argument \"", argv[i+1],
@@ -1415,13 +1415,13 @@ Hax_SeekCmd(
 	int length;
 	char c;
 
-	length = strlen(argv[3]);
+	length = Hax_strlen(argv[3]);
 	c = argv[3][0];
-	if ((c == 's') && (strncmp(argv[3], "start", length) == 0)) {
+	if ((c == 's') && (Hax_strncmp(argv[3], "start", length) == 0)) {
 	    mode = SEEK_SET;
-	} else if ((c == 'c') && (strncmp(argv[3], "current", length) == 0)) {
+	} else if ((c == 'c') && (Hax_strncmp(argv[3], "current", length) == 0)) {
 	    mode = SEEK_CUR;
-	} else if ((c == 'e') && (strncmp(argv[3], "end", length) == 0)) {
+	} else if ((c == 'e') && (Hax_strncmp(argv[3], "end", length) == 0)) {
 	    mode = SEEK_END;
 	} else {
 	    Hax_AppendResult(interp, "bad origin \"", argv[3],
@@ -1696,7 +1696,7 @@ CleanupChildren(
      * the newline character (the newline would just confuse things).
      */
 
-    length = strlen(interp->result);
+    length = Hax_strlen(interp->result);
     if ((length > 0) && (interp->result[length-1] == '\n')) {
 	interp->result[length-1] = '\0';
     }

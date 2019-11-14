@@ -110,7 +110,7 @@ AppendResult(
      * into a single name.  To do that, malloc a buffer to hold everything.
      */
 
-    p = (char *) ckalloc((unsigned) (strlen(dir) + strlen(separator)
+    p = (char *) ckalloc((unsigned) (Hax_strlen(dir) + Hax_strlen(separator)
 	    + nameLength + 1));
     Hax_sprintf(p, "%s%s%s", dir, separator, name);
     name[nameLength] = saved;
@@ -227,14 +227,14 @@ DoGlob(
 	    interp->result = (char *) "unmatched open-brace in file name";
 	    return HAX_ERROR;
 	}
-	remLength = strlen(rem) + 1;
+	remLength = Hax_strlen(rem) + 1;
 	if (remLength <= STATIC_SIZE) {
 	    newRem = static1;
 	} else {
 	    newRem = (char *) ckalloc((unsigned) remLength);
 	}
 	l1 = openBrace-rem;
-	strncpy(newRem, rem, l1);
+	Hax_strncpy(newRem, rem, l1);
 	p = openBrace;
 	for (p = openBrace; *p != '}'; ) {
 	    element = p+1;
@@ -242,8 +242,8 @@ DoGlob(
 		/* Empty loop body:  just find end of this element. */
 	    }
 	    l2 = p - element;
-	    strncpy(newRem+l1, element, l2);
-	    strcpy(newRem+l1+l2, closeBrace+1);
+	    Hax_strncpy(newRem+l1, element, l2);
+	    Hax_strcpy(newRem+l1+l2, closeBrace+1);
 	    if (DoGlob(interp, dir, newRem) != HAX_OK) {
 		return HAX_ERROR;
 	    }
@@ -288,14 +288,14 @@ DoGlob(
 		    dirName, "\": ", Hax_UnixError(interp), (char *) NULL);
 	    return HAX_ERROR;
 	}
-	l1 = strlen(dir);
+	l1 = Hax_strlen(dir);
 	l2 = (p - rem);
 	if (l2 < STATIC_SIZE) {
 	    pattern = static2;
 	} else {
 	    pattern = (char *) ckalloc((unsigned) (l2+1));
 	}
-	strncpy(pattern, rem, l2);
+	Hax_strncpy(pattern, rem, l2);
 	pattern[l2] = '\0';
 	result = HAX_OK;
 	while (1) {
@@ -313,7 +313,7 @@ DoGlob(
 		continue;
 	    }
 	    if (Hax_StringMatch(entryPtr->d_name, pattern)) {
-		int nameLength = strlen(entryPtr->d_name);
+		int nameLength = Hax_strlen(entryPtr->d_name);
 		if (*p == 0) {
 		    AppendResult(interp, dir, (char *) separator, entryPtr->d_name,
 			    nameLength);
@@ -354,7 +354,7 @@ DoGlob(
 	char *newDir;
 	char static1[STATIC_SIZE];
 
-	l1 = strlen(dir);
+	l1 = Hax_strlen(dir);
 	l2 = l1 + (p - rem) + 2;
 	if (l2 <= STATIC_SIZE) {
 	    newDir = static1;
@@ -441,7 +441,7 @@ Hax_TildeSubst(
 	if (length >= curSize) {
 	    length = curSize-1;
 	}
-	memcpy(curBuf, (name+1), length);
+	Hax_memcpy(curBuf, (name+1), length);
 	curBuf[length] = '\0';
 	pwPtr = getpwnam(curBuf);
 	if (pwPtr == NULL) {
@@ -460,7 +460,7 @@ Hax_TildeSubst(
      * full file name.
      */
 
-    length = strlen(dir) + strlen(p);
+    length = Hax_strlen(dir) + Hax_strlen(p);
     if (length >= curSize) {
 	if (curBuf != staticBuf) {
 	    ckfree(curBuf);
@@ -474,8 +474,8 @@ Hax_TildeSubst(
      * of the path in the buffer.
      */
 
-    strcpy(curBuf, dir);
-    strcat(curBuf, p);
+    Hax_strcpy(curBuf, dir);
+    Hax_strcat(curBuf, p);
     if (fromPw) {
 	endpwent();
     }
@@ -516,7 +516,7 @@ Hax_GlobCmd(
 	return HAX_ERROR;
     }
     noComplain = 0;
-    if ((argv[1][0] == '-') && (strcmp(argv[1], "-nocomplain") == 0)) {
+    if ((argv[1][0] == '-') && (Hax_strcmp(argv[1], "-nocomplain") == 0)) {
 	if (argc < 3) {
 	    goto notEnoughArgs;
 	}

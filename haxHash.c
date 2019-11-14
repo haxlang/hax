@@ -340,15 +340,15 @@ Hax_HashStats(
     result = (char *) ckalloc((unsigned) ((NUM_COUNTERS*60) + 300));
     Hax_sprintf(result, "%d entries in table, %d buckets\n",
 	    tablePtr->numEntries, tablePtr->numBuckets);
-    p = result + strlen(result);
+    p = result + Hax_strlen(result);
     for (i = 0; i < NUM_COUNTERS; i++) {
 	Hax_sprintf(p, "number of buckets with %d entries: %d\n",
 		i, count[i]);
-	p += strlen(p);
+	p += Hax_strlen(p);
     }
     Hax_sprintf(p, "number of buckets with more %d or more entries: %d\n",
 	    NUM_COUNTERS, overflow);
-    p += strlen(p);
+    p += Hax_strlen(p);
     Hax_sprintf(p, "average search distance for entry: %.1f", average);
     return result;
 }
@@ -511,12 +511,12 @@ StringCreate(
 
     *newPtr = 1;
     hPtr = (Hax_HashEntry *) ckalloc((unsigned)
-	    (sizeof(Hax_HashEntry) + strlen(key) - (sizeof(hPtr->key) -1)));
+	(sizeof(Hax_HashEntry) + Hax_strlen(key) - (sizeof(hPtr->key) -1)));
     hPtr->tablePtr = tablePtr;
     hPtr->bucketPtr = &(tablePtr->buckets[index]);
     hPtr->nextPtr = *hPtr->bucketPtr;
     hPtr->clientData = 0;
-    strcpy(hPtr->key.string, key);
+    Hax_strcpy(hPtr->key.string, key);
     *hPtr->bucketPtr = hPtr;
     tablePtr->numEntries++;
 

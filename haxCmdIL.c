@@ -76,7 +76,7 @@ Hax_IfCmd(
 	    return result;
 	}
 	i++;
-	if ((i < argc) && (strcmp(argv[i], "then") == 0)) {
+	if ((i < argc) && (Hax_strcmp(argv[i], "then") == 0)) {
 	    i++;
 	}
 	if (i >= argc) {
@@ -97,7 +97,7 @@ Hax_IfCmd(
 	if (i >= argc) {
 	    return HAX_OK;
 	}
-	if ((argv[i][0] == 'e') && (strcmp(argv[i], "elseif") == 0)) {
+	if ((argv[i][0] == 'e') && (Hax_strcmp(argv[i], "elseif") == 0)) {
 	    i++;
 	    continue;
 	}
@@ -110,7 +110,7 @@ Hax_IfCmd(
      * argument when we get here.
      */
 
-    if (strcmp(argv[i], "else") == 0) {
+    if (Hax_strcmp(argv[i], "else") == 0) {
 	i++;
 	if (i >= argc) {
 	    Hax_AppendResult(interp,
@@ -228,8 +228,8 @@ Hax_InfoCmd(
 	return HAX_ERROR;
     }
     c = argv[1][0];
-    length = strlen(argv[1]);
-    if ((c == 'a') && (strncmp(argv[1], "args", length)) == 0) {
+    length = Hax_strlen(argv[1]);
+    if ((c == 'a') && (Hax_strncmp(argv[1], "args", length)) == 0) {
 	if (argc != 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " args procname\"", (char *) NULL);
@@ -247,7 +247,7 @@ Hax_InfoCmd(
 	    Hax_AppendElement(interp, argPtr->name, 0);
 	}
 	return HAX_OK;
-    } else if ((c == 'b') && (strncmp(argv[1], "body", length)) == 0) {
+    } else if ((c == 'b') && (Hax_strncmp(argv[1], "body", length)) == 0) {
 	if (argc != 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " body procname\"", (char *) NULL);
@@ -259,7 +259,7 @@ Hax_InfoCmd(
 	}
 	iPtr->result = procPtr->command;
 	return HAX_OK;
-    } else if ((c == 'c') && (strncmp(argv[1], "cmdcount", length) == 0)
+    } else if ((c == 'c') && (Hax_strncmp(argv[1], "cmdcount", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 2) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -268,7 +268,7 @@ Hax_InfoCmd(
 	}
 	Hax_sprintf(iPtr->result, "%d", iPtr->cmdCount);
 	return HAX_OK;
-    } else if ((c == 'c') && (strncmp(argv[1], "commands", length) == 0)
+    } else if ((c == 'c') && (Hax_strncmp(argv[1], "commands", length) == 0)
 	    && (length >= 4)) {
 	if (argc > 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -284,7 +284,7 @@ Hax_InfoCmd(
 	    Hax_AppendElement(interp, name, 0);
 	}
 	return HAX_OK;
-    } else if ((c == 'c') && (strncmp(argv[1], "complete", length) == 0)
+    } else if ((c == 'c') && (Hax_strncmp(argv[1], "complete", length) == 0)
 	    && (length >= 4)) {
 	if (argc != 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -297,7 +297,7 @@ Hax_InfoCmd(
 	    interp->result = (char *) "0";
 	}
 	return HAX_OK;
-    } else if ((c == 'd') && (strncmp(argv[1], "default", length)) == 0) {
+    } else if ((c == 'd') && (Hax_strncmp(argv[1], "default", length)) == 0) {
 	if (argc != 5) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " default procname arg varname\"",
@@ -315,7 +315,7 @@ Hax_InfoCmd(
 			"\"", (char *) NULL);
 		return HAX_ERROR;
 	    }
-	    if (strcmp(argv[3], argPtr->name) == 0) {
+	    if (Hax_strcmp(argv[3], argPtr->name) == 0) {
 		if (argPtr->defValue != NULL) {
 		    if (Hax_SetVar((Hax_Interp *) iPtr, argv[4],
 			    argPtr->defValue, 0) == NULL) {
@@ -336,7 +336,7 @@ Hax_InfoCmd(
 		return HAX_OK;
 	    }
 	}
-    } else if ((c == 'e') && (strncmp(argv[1], "exists", length) == 0)) {
+    } else if ((c == 'e') && (Hax_strncmp(argv[1], "exists", length) == 0)) {
 	char *p;
 	if (argc != 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -355,7 +355,7 @@ Hax_InfoCmd(
 	    Hax_HashEntry *hPtr;
 	    Var *varPtr;
 
-	    if (strchr(argv[2], '(') != NULL) {
+	    if (Hax_strchr(argv[2], '(') != NULL) {
 		noVar:
 		iPtr->result = (char *) "0";
 		return HAX_OK;
@@ -378,7 +378,7 @@ Hax_InfoCmd(
 	}
 	iPtr->result = (char *) "1";
 	return HAX_OK;
-    } else if ((c == 'g') && (strncmp(argv[1], "globals", length) == 0)) {
+    } else if ((c == 'g') && (Hax_strncmp(argv[1], "globals", length) == 0)) {
 	char *name;
 
 	if (argc > 3) {
@@ -399,7 +399,7 @@ Hax_InfoCmd(
 	    Hax_AppendElement(interp, name, 0);
 	}
 	return HAX_OK;
-    } else if ((c == 'l') && (strncmp(argv[1], "level", length) == 0)
+    } else if ((c == 'l') && (Hax_strncmp(argv[1], "level", length) == 0)
 	    && (length >= 2)) {
 	if (argc == 2) {
 	    if (iPtr->varFramePtr == NULL) {
@@ -440,7 +440,7 @@ Hax_InfoCmd(
 	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		" level [number]\"", (char *) NULL);
 	return HAX_ERROR;
-    } else if ((c == 'l') && (strncmp(argv[1], "library", length) == 0)
+    } else if ((c == 'l') && (Hax_strncmp(argv[1], "library", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 2) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -458,7 +458,7 @@ Hax_InfoCmd(
 #endif
 	}
 	return HAX_OK;
-    } else if ((c == 'l') && (strncmp(argv[1], "locals", length) == 0)
+    } else if ((c == 'l') && (Hax_strncmp(argv[1], "locals", length) == 0)
 	    && (length >= 2)) {
 	char *name;
 
@@ -483,7 +483,7 @@ Hax_InfoCmd(
 	    Hax_AppendElement(interp, name, 0);
 	}
 	return HAX_OK;
-    } else if ((c == 'p') && (strncmp(argv[1], "procs", length)) == 0) {
+    } else if ((c == 'p') && (Hax_strncmp(argv[1], "procs", length)) == 0) {
 	if (argc > 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " procs [pattern]\"", (char *) NULL);
@@ -503,7 +503,7 @@ Hax_InfoCmd(
 	    Hax_AppendElement(interp, name, 0);
 	}
 	return HAX_OK;
-    } else if ((c == 's') && (strncmp(argv[1], "script", length) == 0)) {
+    } else if ((c == 's') && (Hax_strncmp(argv[1], "script", length) == 0)) {
 	if (argc != 2) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " script\"", (char *) NULL);
@@ -513,7 +513,7 @@ Hax_InfoCmd(
 	    interp->result = iPtr->scriptFile;
 	}
 	return HAX_OK;
-    } else if ((c == 't') && (strncmp(argv[1], "tclversion", length) == 0)) {
+    } else if ((c == 't') && (Hax_strncmp(argv[1], "tclversion", length) == 0)) {
 	if (argc != 2) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"",
 		    argv[0], " tclversion\"", (char *) NULL);
@@ -525,9 +525,9 @@ Hax_InfoCmd(
 	 * switch in the Makefile.
 	 */
 
-	strcpy(iPtr->result, HAX_VERSION);
+	Hax_strcpy(iPtr->result, HAX_VERSION);
 	return HAX_OK;
-    } else if ((c == 'v') && (strncmp(argv[1], "vars", length)) == 0) {
+    } else if ((c == 'v') && (Hax_strncmp(argv[1], "vars", length)) == 0) {
 	Hax_HashTable *tablePtr;
 	char *name;
 
@@ -673,7 +673,7 @@ Hax_LindexCmd(
 	interp->freeProc = (Hax_FreeProc *) free;
     }
     if (parenthesized) {
-	memcpy(interp->result, element, size);
+	Hax_memcpy(interp->result, element, size);
 	interp->result[size] = 0;
     } else {
 	HaxCopyAndCollapse(size, element, interp->result);
@@ -889,7 +889,8 @@ Hax_LrangeCmd(
     if (first < 0) {
 	first = 0;
     }
-    if ((*argv[3] == 'e') && (strncmp(argv[3], "end", strlen(argv[3])) == 0)) {
+    if ((*argv[3] == 'e') &&
+	(Hax_strncmp(argv[3], "end", Hax_strlen(argv[3])) == 0)) {
 	last = 1000000;
     } else {
 	if (Hax_GetLong(interp, argv[3], &last) != HAX_OK) {
@@ -1164,5 +1165,5 @@ static int
 SortCompareProc(
     const void *first, const void *second /* Elements to be compared. */)
 {
-    return strcmp(*((char **) first), *((char **) second));
+    return Hax_strcmp(*((char **) first), *((char **) second));
 }

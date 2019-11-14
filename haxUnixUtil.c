@@ -199,7 +199,7 @@ Hax_Fork(void)
 	newSize = waitTableSize + WAIT_TABLE_GROW_BY;
 	newWaitTable = (WaitInfo *) ckalloc((unsigned)
 		(newSize * sizeof(WaitInfo)));
-	memcpy(newWaitTable, waitTable,
+	Hax_memcpy(newWaitTable, waitTable,
 		(waitTableSize * sizeof(WaitInfo)));
 	if (waitTable != NULL) {
 	    ckfree((char *) waitTable);
@@ -566,7 +566,7 @@ Hax_CreatePipeline(
 	    char inName[sizeof(TMP_STDIN_NAME) + 1];
 	    int length;
 
-	    strcpy(inName, TMP_STDIN_NAME);
+	    Hax_strcpy(inName, TMP_STDIN_NAME);
 	    mktemp(inName);
 	    inputId = open(inName, O_RDWR|O_CREAT|O_TRUNC, 0600);
 	    if (inputId < 0) {
@@ -575,7 +575,7 @@ Hax_CreatePipeline(
 			Hax_UnixError(interp), (char *) NULL);
 		goto error;
 	    }
-	    length = strlen(input);
+	    length = Hax_strlen(input);
 	    if (write(inputId, input, length) != length) {
 		Hax_AppendResult(interp,
 			"couldn't write file input for command: ",
@@ -659,7 +659,7 @@ Hax_CreatePipeline(
 #	define TMP_STDERR_NAME "/tmp/hax.err.XXXXXX"
 	char errName[sizeof(TMP_STDERR_NAME) + 1];
 
-	strcpy(errName, TMP_STDERR_NAME);
+	Hax_strcpy(errName, TMP_STDERR_NAME);
 	mktemp(errName);
 	errorId = open(errName, O_WRONLY|O_CREAT|O_TRUNC, 0600);
 	if (errorId < 0) {
@@ -722,7 +722,7 @@ Hax_CreatePipeline(
 		    || ((errorId != -1) && (dup2(errorId, 2) == -1))) {
 		char *err;
 		err = (char *) "forked process couldn't set up input/output\n";
-		write(errorId < 0 ? 2 : errorId, err, strlen(err));
+		write(errorId < 0 ? 2 : errorId, err, Hax_strlen(err));
 		_exit(1);
 	    }
 	    for (i = 3; (i <= outputId) || (i <= inputId) || (i <= errorId);
@@ -732,7 +732,7 @@ Hax_CreatePipeline(
 	    execvp(execName, &argv[firstArg]);
 	    Hax_sprintf(errSpace, "couldn't find \"%.150s\" to execute\n",
 		    argv[firstArg]);
-	    write(2, errSpace, strlen(errSpace));
+	    write(2, errSpace, Hax_strlen(errSpace));
 	    _exit(1);
 	} else {
 	    pidPtr[numPids] = pid;
@@ -835,7 +835,7 @@ Hax_UnixError(
     char *id, *msg;
 
     id = Hax_ErrnoId();
-    msg = strerror(errno);
+    msg = Hax_strerror(errno);
     Hax_SetErrorCode(interp, "UNIX", id, msg, (char *) NULL);
     return msg;
 }
@@ -923,7 +923,7 @@ HaxMakeFileTable(
 	newSize = index+1;
 	newPtrArray = (OpenFile **) ckalloc((unsigned)
 		((newSize)*sizeof(OpenFile *)));
-	memcpy(newPtrArray, iPtr->filePtrArray,
+	Hax_memcpy(newPtrArray, iPtr->filePtrArray,
 		iPtr->numFiles*sizeof(OpenFile *));
 	for (i = iPtr->numFiles; i < newSize; i++) {
 	    newPtrArray[i] = NULL;
@@ -975,11 +975,11 @@ HaxGetOpenFile(
 	}
     } else if ((string[0] == 's') && (string[1] == 't')
 	    && (string[2] == 'd')) {
-	if (strcmp(string+3, "in") == 0) {
+	if (Hax_strcmp(string+3, "in") == 0) {
 	    fd = 0;
-	} else if (strcmp(string+3, "out") == 0) {
+	} else if (Hax_strcmp(string+3, "out") == 0) {
 	    fd = 1;
-	} else if (strcmp(string+3, "err") == 0) {
+	} else if (Hax_strcmp(string+3, "err") == 0) {
 	    fd = 2;
 	} else {
 	    goto badId;

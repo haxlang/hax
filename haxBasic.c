@@ -1007,20 +1007,20 @@ Hax_VarEval(
 	if (string == NULL) {
 	    break;
 	}
-	length = strlen(string);
+	length = Hax_strlen(string);
 	if ((spaceUsed + length) > spaceAvl) {
 	    char *newPtr;
 
 	    spaceAvl = spaceUsed + length;
 	    spaceAvl += spaceAvl/2;
 	    newPtr = (char *) ckalloc((unsigned) spaceAvl);
-	    memcpy(newPtr, cmd, spaceUsed);
+	    Hax_memcpy(newPtr, cmd, spaceUsed);
 	    if (cmd != fixedSpace) {
 		ckfree(cmd);
 	    }
 	    cmd = newPtr;
 	}
-	strcpy(cmd + spaceUsed, string);
+	Hax_strcpy(cmd + spaceUsed, string);
 	spaceUsed += length;
     }
     va_end(argList);

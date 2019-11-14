@@ -42,5 +42,29 @@ int			Hax_sprintf(char *str, const char *format, ...);
 
 double			Hax_strtod(const char *nptr, char **endptr);
 
+/*
+ * <string.h> - string operations
+ */
+
+#ifndef SIZE_T_DEFINED
+typedef __SIZE_TYPE__ Size_t;
+#define SIZE_T_DEFINED
+#endif
+
+char *			Hax_memcpy (void *t, const void *f, Size_t n);
+char *			Hax_memset (void *s, int c, Size_t n);
+char *			Hax_strcat (char *dst, const char *src);
+char *			Hax_strchr (const char *string, int c);
+int			Hax_strcmp (const char *s1, const char *s2);
+char *			Hax_strcpy (char *dst, const char *src);
+Size_t			Hax_strcspn (const char *string, const char *chars);
+char *			Hax_strerror (int error);
+Size_t			Hax_strlen (const char *string);
+int			Hax_strncmp (const char *s1, const char *s2,
+			    Size_t nChars);
+char *			Hax_strncpy (char *dst, const char *src,
+                            Size_t numChars);
+char *			Hax_strrchr (const char *string, int c);
+char *			Hax_strstr (const char *string, const char *substring);
 
 #endif /* _HAXCOMPAT */

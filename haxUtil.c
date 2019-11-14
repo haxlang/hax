@@ -398,7 +398,7 @@ Hax_SplitList(
 	}
 	argv[i] = p;
 	if (brace) {
-	    strncpy(p, element, elSize);
+	    Hax_strncpy(p, element, elSize);
 	    p += elSize;
 	    *p = 0;
 	    p++;
@@ -751,7 +751,7 @@ Hax_Concat(
     char *result;
 
     for (totalSize = 1, i = 0; i < argc; i++) {
-	totalSize += strlen(argv[i]) + 1;
+	totalSize += Hax_strlen(argv[i]) + 1;
     }
     result = (char *) ckalloc((unsigned) totalSize);
     if (argc == 0) {
@@ -772,7 +772,7 @@ Hax_Concat(
 	while (Hax_isspace(*element)) {
 	    element++;
 	}
-	for (length = strlen(element);
+	for (length = Hax_strlen(element);
 		(length > 0) && (Hax_isspace(element[length-1]));
 		length--) {
 	    /* Null loop body. */
@@ -780,7 +780,7 @@ Hax_Concat(
 	if (length == 0) {
 	    continue;
 	}
-	(void) strncpy(p, element, length);
+	(void) Hax_strncpy(p, element, length);
 	p += length;
 	*p = ' ';
 	p++;
@@ -964,7 +964,7 @@ Hax_SetResult(
 	iPtr->result = iPtr->resultSpace;
 	iPtr->freeProc = 0;
     } else if (freeProc == HAX_VOLATILE) {
-	length = strlen(string);
+	length = Hax_strlen(string);
 	if (length > HAX_RESULT_SIZE) {
 	    iPtr->result = (char *) ckalloc((unsigned) length+1);
 	    iPtr->freeProc = (Hax_FreeProc *) free;
@@ -972,7 +972,7 @@ Hax_SetResult(
 	    iPtr->result = iPtr->resultSpace;
 	    iPtr->freeProc = 0;
 	}
-	strcpy(iPtr->result, string);
+	Hax_strcpy(iPtr->result, string);
     } else {
 	iPtr->result = string;
     }
@@ -1038,7 +1038,7 @@ Hax_AppendResult(
 	if (string == NULL) {
 	    break;
 	}
-	newSpace += strlen(string);
+	newSpace += Hax_strlen(string);
     }
     va_end(argList);
 
@@ -1062,8 +1062,8 @@ Hax_AppendResult(
 	if (string == NULL) {
 	    break;
 	}
-	strcpy(iPtr->appendResult + iPtr->appendUsed, string);
-	iPtr->appendUsed += strlen(string);
+	Hax_strcpy(iPtr->appendResult + iPtr->appendUsed, string);
+	iPtr->appendUsed += Hax_strlen(string);
     }
     va_end(argList2);
 }
@@ -1172,7 +1172,7 @@ SetupAppendBuffer(
 	    iPtr->appendResult = NULL;
 	    iPtr->appendAvl = 0;
 	}
-	iPtr->appendUsed = strlen(iPtr->result);
+	iPtr->appendUsed = Hax_strlen(iPtr->result);
     }
     totalSpace = newSpace + iPtr->appendUsed;
     if (totalSpace >= iPtr->appendAvl) {
@@ -1184,14 +1184,14 @@ SetupAppendBuffer(
 	    totalSpace *= 2;
 	}
 	newPtr = (char *) ckalloc((unsigned) totalSpace);
-	strcpy(newPtr, iPtr->result);
+	Hax_strcpy(newPtr, iPtr->result);
 	if (iPtr->appendResult != NULL) {
 	    ckfree(iPtr->appendResult);
 	}
 	iPtr->appendResult = newPtr;
 	iPtr->appendAvl = totalSpace;
     } else if (iPtr->result != iPtr->appendResult) {
-	strcpy(iPtr->appendResult, iPtr->result);
+	Hax_strcpy(iPtr->appendResult, iPtr->result);
     }
     Hax_FreeResult(iPtr);
     iPtr->result = iPtr->appendResult;
@@ -1320,7 +1320,7 @@ HaxGetListIndex(
 	if (*indexPtr < 0) {
 	    *indexPtr = 0;
 	}
-    } else if (strncmp(string, "end", strlen(string)) == 0) {
+    } else if (Hax_strncmp(string, "end", Hax_strlen(string)) == 0) {
 	*indexPtr = 1<<30;
     } else {
 	Hax_AppendResult(interp, "bad index \"", string,
@@ -1364,10 +1364,10 @@ HaxCompileRegexp(
     int i, length;
     regexp *result;
 
-    length = strlen(string);
+    length = Hax_strlen(string);
     for (i = 0; i < NUM_REGEXPS; i++) {
 	if ((length == iPtr->patLengths[i])
-		&& (strcmp(string, iPtr->patterns[i]) == 0)) {
+		&& (Hax_strcmp(string, iPtr->patterns[i]) == 0)) {
 	    /*
 	     * Move the matched pattern to the first slot in the
 	     * cache and shift the other patterns down one position.
@@ -1415,7 +1415,7 @@ HaxCompileRegexp(
 	iPtr->regexps[i+1] = iPtr->regexps[i];
     }
     iPtr->patterns[0] = (char *) ckalloc((unsigned) (length+1));
-    strcpy(iPtr->patterns[0], string);
+    Hax_strcpy(iPtr->patterns[0], string);
     iPtr->patLengths[0] = length;
     iPtr->regexps[0] = result;
     return result;

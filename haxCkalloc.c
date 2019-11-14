@@ -150,8 +150,8 @@ ValidateMemory (
     }
 
     if (nukeGuards) {
-        memset ((char *) memHeaderP->low_guard, 0, GUARD_SIZE); 
-        memset ((char *) hiPtr, 0, GUARD_SIZE); 
+        Hax_memset ((char *) memHeaderP->low_guard, 0, GUARD_SIZE); 
+        Hax_memset ((char *) hiPtr, 0, GUARD_SIZE); 
     }
 
 }
@@ -204,7 +204,8 @@ Hax_DumpActiveMemory (
         fprintf (fileP, "%8lx - %8lx  %7d @ %s %d", address,
                  address + memScanP->length - 1, memScanP->length,
                  memScanP->file, memScanP->line);
-        if (strcmp(memScanP->file, "haxHash.c") == 0 && memScanP->line == 518){
+        if (Hax_strcmp(memScanP->file, "haxHash.c") == 0 &&
+	    memScanP->line == 518) {
 	    fprintf(fileP, "\t|%s|", ((Hax_HashEntry *) address)->key.string);
 	}
 	(void) fputc('\n', fileP);
@@ -257,8 +258,8 @@ Hax_DbCkalloc(
     result->length = size;
     result->file = file;
     result->line = line;
-    memset ((char *) result->low_guard, GUARD_VALUE, GUARD_SIZE);
-    memset (result->body + size, GUARD_VALUE, GUARD_SIZE);
+    Hax_memset ((char *) result->low_guard, GUARD_VALUE, GUARD_SIZE);
+    Hax_memset (result->body + size, GUARD_VALUE, GUARD_SIZE);
     result->flink = allocHead;
     result->blink = NULL;
     if (allocHead != NULL)
@@ -297,7 +298,7 @@ Hax_DbCkalloc(
         maximum_bytes_malloced = current_bytes_malloced;
 
     if (init_malloced_bodies)
-        memset (result->body, 0xff, (int) size);
+        Hax_memset (result->body, 0xff, (int) size);
 
     return result->body;
 }
@@ -382,7 +383,7 @@ Hax_DbCkrealloc(
     char *new;
 
     new = Hax_DbCkalloc(size, file, line);
-    memcpy(new, ptr, (int) size);
+    Hax_memcpy(new, ptr, (int) size);
     Hax_DbCkfree(ptr, file, line);
     return(new);
 }
@@ -420,32 +421,32 @@ MemoryCmd (
 	return HAX_ERROR;
     }
 
-    if (strcmp(argv[1],"trace") == 0) {
+    if (Hax_strcmp(argv[1],"trace") == 0) {
         if (argc != 3) 
             goto bad_suboption;
-        alloc_tracing = (strcmp(argv[2],"on") == 0);
+        alloc_tracing = (Hax_strcmp(argv[2],"on") == 0);
         return HAX_OK;
     }
-    if (strcmp(argv[1],"init") == 0) {
+    if (Hax_strcmp(argv[1],"init") == 0) {
         if (argc != 3)
             goto bad_suboption;
-        init_malloced_bodies = (strcmp(argv[2],"on") == 0);
+        init_malloced_bodies = (Hax_strcmp(argv[2],"on") == 0);
         return HAX_OK;
     }
-    if (strcmp(argv[1],"validate") == 0) {
+    if (Hax_strcmp(argv[1],"validate") == 0) {
         if (argc != 3)
              goto bad_suboption;
-        validate_memory = (strcmp(argv[2],"on") == 0);
+        validate_memory = (Hax_strcmp(argv[2],"on") == 0);
         return HAX_OK;
     }
-    if (strcmp(argv[1],"trace_on_at_malloc") == 0) {
+    if (Hax_strcmp(argv[1],"trace_on_at_malloc") == 0) {
         if (argc != 3) 
             goto argError;
         if (Hax_GetInt(interp, argv[2], &trace_on_at_malloc) != HAX_OK)
                 return HAX_ERROR;
          return HAX_OK;
     }
-    if (strcmp(argv[1],"break_on_malloc") == 0) {
+    if (Hax_strcmp(argv[1],"break_on_malloc") == 0) {
         if (argc != 3) 
             goto argError;
         if (Hax_GetInt(interp, argv[2], &break_on_malloc) != HAX_OK)
@@ -453,11 +454,11 @@ MemoryCmd (
         return HAX_OK;
     }
 
-    if (strcmp(argv[1],"info") == 0) {
+    if (Hax_strcmp(argv[1],"info") == 0) {
         dump_memory_info(stdout);
         return HAX_OK;
     }
-    if (strcmp(argv[1],"active") == 0) {
+    if (Hax_strcmp(argv[1],"active") == 0) {
         if (argc != 3) {
 	    Hax_AppendResult(interp, "wrong # args:  should be \"",
 		    argv[0], " active file", (char *) NULL);

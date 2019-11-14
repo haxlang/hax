@@ -86,11 +86,11 @@ Hax_RegexpCmd(
     argPtr = argv+1;
     argc--;
     while ((argc > 0) && (argPtr[0][0] == '-')) {
-	if (strcmp(argPtr[0], "-indices") == 0) {
+	if (Hax_strcmp(argPtr[0], "-indices") == 0) {
 	    argPtr++;
 	    argc--;
 	    indices = 1;
-	} else if (strcmp(argPtr[0], "-nocase") == 0) {
+	} else if (Hax_strcmp(argPtr[0], "-nocase") == 0) {
 	    argPtr++;
 	    argc--;
 	    noCase = 1;
@@ -114,7 +114,7 @@ Hax_RegexpCmd(
     if (noCase) {
 	char *dst, *src;
 
-	string = (char *) ckalloc((unsigned) (strlen(argPtr[1]) + 1));
+	string = (char *) ckalloc((unsigned) (Hax_strlen(argPtr[1]) + 1));
 	for (src = argPtr[1], dst = string; *src != 0; src++, dst++) {
 	    if (Hax_isupper(*src)) {
 		*dst = Hax_tolower(*src);
@@ -226,11 +226,11 @@ Hax_RegsubCmd(
     argPtr = argv+1;
     argc--;
     while (argPtr[0][0] == '-') {
-	if (strcmp(argPtr[0], "-nocase") == 0) {
+	if (Hax_strcmp(argPtr[0], "-nocase") == 0) {
 	    argPtr++;
 	    argc--;
 	    noCase = 1;
-	} else if (strcmp(argPtr[0], "-all") == 0) {
+	} else if (Hax_strcmp(argPtr[0], "-all") == 0) {
 	    argPtr++;
 	    argc--;
 	    all = 1;
@@ -253,7 +253,7 @@ Hax_RegsubCmd(
     if (noCase) {
 	char *dst;
 
-	string = (char *) ckalloc((unsigned) (strlen(argPtr[1]) + 1));
+	string = (char *) ckalloc((unsigned) (Hax_strlen(argPtr[1]) + 1));
 	for (src = argPtr[1], dst = string; *src != 0; src++, dst++) {
 	    if (Hax_isupper(*src)) {
 		*dst = Hax_tolower(*src);
@@ -576,7 +576,7 @@ Hax_ScanCmd(
      * 4. Pick off the fields from the array and assign them to variables.
      */
 
-    arg1Length = (strlen(argv[1]) + 4) & ~03;
+    arg1Length = (Hax_strlen(argv[1]) + 4) & ~03;
     for (fmt = argv[2]; *fmt != 0; fmt++) {
 	if (*fmt != '%') {
 	    continue;
@@ -868,14 +868,14 @@ Hax_StringCmd(
 	return HAX_ERROR;
     }
     c = argv[1][0];
-    length = strlen(argv[1]);
-    if ((c == 'c') && (strncmp(argv[1], "compare", length) == 0)) {
+    length = Hax_strlen(argv[1]);
+    if ((c == 'c') && (Hax_strncmp(argv[1], "compare", length) == 0)) {
 	if (argc != 4) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " compare string1 string2\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	match = strcmp(argv[2], argv[3]);
+	match = Hax_strcmp(argv[2], argv[3]);
 	if (match > 0) {
 	    interp->result = (char *) "1";
 	} else if (match < 0) {
@@ -884,7 +884,7 @@ Hax_StringCmd(
 	    interp->result = (char *) "0";
 	}
 	return HAX_OK;
-    } else if ((c == 'f') && (strncmp(argv[1], "first", length) == 0)) {
+    } else if ((c == 'f') && (Hax_strncmp(argv[1], "first", length) == 0)) {
 	if (argc != 4) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " first string1 string2\"", (char *) NULL);
@@ -895,12 +895,12 @@ Hax_StringCmd(
 	firstLast:
 	match = -1;
 	c = *argv[2];
-	length = strlen(argv[2]);
+	length = Hax_strlen(argv[2]);
 	for (p = argv[3]; *p != 0; p++) {
 	    if (*p != c) {
 		continue;
 	    }
-	    if (strncmp(argv[2], p, length) == 0) {
+	    if (Hax_strncmp(argv[2], p, length) == 0) {
 		match = p-argv[3];
 		if (first) {
 		    break;
@@ -909,7 +909,7 @@ Hax_StringCmd(
 	}
 	Hax_sprintf(interp->result, "%d", match);
 	return HAX_OK;
-    } else if ((c == 'i') && (strncmp(argv[1], "index", length) == 0)) {
+    } else if ((c == 'i') && (Hax_strncmp(argv[1], "index", length) == 0)) {
 	long int index;
 
 	if (argc != 4) {
@@ -920,12 +920,12 @@ Hax_StringCmd(
 	if (Hax_GetLong(interp, argv[3], &index) != HAX_OK) {
 	    return HAX_ERROR;
 	}
-	if ((index >= 0) && (index < strlen(argv[2]))) {
+	if ((index >= 0) && (index < Hax_strlen(argv[2]))) {
 	    interp->result[0] = argv[2][index];
 	    interp->result[1] = 0;
 	}
 	return HAX_OK;
-    } else if ((c == 'l') && (strncmp(argv[1], "last", length) == 0)
+    } else if ((c == 'l') && (Hax_strncmp(argv[1], "last", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 4) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -934,16 +934,16 @@ Hax_StringCmd(
 	}
 	first = 0;
 	goto firstLast;
-    } else if ((c == 'l') && (strncmp(argv[1], "length", length) == 0)
+    } else if ((c == 'l') && (Hax_strncmp(argv[1], "length", length) == 0)
 	    && (length >= 2)) {
 	if (argc != 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " length string\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	Hax_sprintf(interp->result, "%lu", (unsigned long)strlen(argv[2]));
+	Hax_sprintf(interp->result, "%lu", (unsigned long)Hax_strlen(argv[2]));
 	return HAX_OK;
-    } else if ((c == 'm') && (strncmp(argv[1], "match", length) == 0)) {
+    } else if ((c == 'm') && (Hax_strncmp(argv[1], "match", length) == 0)) {
 	if (argc != 4) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " match pattern string\"", (char *) NULL);
@@ -955,7 +955,7 @@ Hax_StringCmd(
 	    interp->result = (char *) "0";
 	}
 	return HAX_OK;
-    } else if ((c == 'r') && (strncmp(argv[1], "range", length) == 0)) {
+    } else if ((c == 'r') && (Hax_strncmp(argv[1], "range", length) == 0)) {
 	long int first, last, stringLength;
 
 	if (argc != 5) {
@@ -963,12 +963,12 @@ Hax_StringCmd(
 		    " range string first last\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	stringLength = strlen(argv[2]);
+	stringLength = Hax_strlen(argv[2]);
 	if (Hax_GetLong(interp, argv[3], &first) != HAX_OK) {
 	    return HAX_ERROR;
 	}
 	if ((*argv[4] == 'e')
-		&& (strncmp(argv[4], "end", strlen(argv[4])) == 0)) {
+		&& (Hax_strncmp(argv[4], "end", Hax_strlen(argv[4])) == 0)) {
 	    last = stringLength-1;
 	} else {
 	    if (Hax_GetLong(interp, argv[4], &last) != HAX_OK) {
@@ -995,7 +995,7 @@ Hax_StringCmd(
 	    *p = saved;
 	}
 	return HAX_OK;
-    } else if ((c == 't') && (strncmp(argv[1], "tolower", length) == 0)
+    } else if ((c == 't') && (Hax_strncmp(argv[1], "tolower", length) == 0)
 	    && (length >= 3)) {
 	char *p;
 
@@ -1011,7 +1011,7 @@ Hax_StringCmd(
 	    }
 	}
 	return HAX_OK;
-    } else if ((c == 't') && (strncmp(argv[1], "toupper", length) == 0)
+    } else if ((c == 't') && (Hax_strncmp(argv[1], "toupper", length) == 0)
 	    && (length >= 3)) {
 	char *p;
 
@@ -1027,7 +1027,7 @@ Hax_StringCmd(
 	    }
 	}
 	return HAX_OK;
-    } else if ((c == 't') && (strncmp(argv[1], "trim", length) == 0)
+    } else if ((c == 't') && (Hax_strncmp(argv[1], "trim", length) == 0)
 	    && (length == 4)) {
 	char *trimChars;
 	char *p, *checkPtr;
@@ -1059,7 +1059,7 @@ Hax_StringCmd(
 	if (right) {
 	    char *donePtr;
 
-	    p = interp->result + strlen(interp->result) - 1;
+	    p = interp->result + Hax_strlen(interp->result) - 1;
 	    donePtr = &interp->result[-1];
 	    for (c = *p; p != donePtr; p--, c = *p) {
 		for (checkPtr = trimChars; *checkPtr != c; checkPtr++) {
@@ -1072,12 +1072,12 @@ Hax_StringCmd(
 	    p[1] = 0;
 	}
 	return HAX_OK;
-    } else if ((c == 't') && (strncmp(argv[1], "trimleft", length) == 0)
+    } else if ((c == 't') && (Hax_strncmp(argv[1], "trimleft", length) == 0)
 	    && (length > 4)) {
 	left = 1;
 	argv[1] = (char *) "trimleft";
 	goto trim;
-    } else if ((c == 't') && (strncmp(argv[1], "trimright", length) == 0)
+    } else if ((c == 't') && (Hax_strncmp(argv[1], "trimright", length) == 0)
 	    && (length > 4)) {
 	right = 1;
 	argv[1] = (char *) "trimright";
@@ -1125,8 +1125,8 @@ Hax_TraceCmd(
 	return HAX_ERROR;
     }
     c = argv[1][1];
-    length = strlen(argv[1]);
-    if ((c == 'a') && (strncmp(argv[1], "variable", length) == 0)
+    length = Hax_strlen(argv[1]);
+    if ((c == 'a') && (Hax_strncmp(argv[1], "variable", length) == 0)
 	    && (length >= 2)) {
 	char *p;
 	int flags, length;
@@ -1154,19 +1154,19 @@ Hax_TraceCmd(
 	    goto badOps;
 	}
 
-	length = strlen(argv[4]);
+	length = Hax_strlen(argv[4]);
 	tvarPtr = (TraceVarInfo *) ckalloc((unsigned)
 		(sizeof(TraceVarInfo) - sizeof(tvarPtr->command) + length + 1));
 	tvarPtr->flags = flags;
 	tvarPtr->length = length;
 	flags |= HAX_TRACE_UNSETS;
-	strcpy(tvarPtr->command, argv[4]);
+	Hax_strcpy(tvarPtr->command, argv[4]);
 	if (Hax_TraceVar(interp, argv[2], flags, TraceVarProc,
 		(ClientData) tvarPtr) != HAX_OK) {
 	    ckfree((char *) tvarPtr);
 	    return HAX_ERROR;
 	}
-    } else if ((c == 'd') && (strncmp(argv[1], "vdelete", length)
+    } else if ((c == 'd') && (Hax_strncmp(argv[1], "vdelete", length)
 	    && (length >= 2)) == 0) {
 	char *p;
 	int flags, length;
@@ -1201,20 +1201,20 @@ Hax_TraceCmd(
 	 * delete the first one that matches.
 	 */
 
-	length = strlen(argv[4]);
+	length = Hax_strlen(argv[4]);
 	clientData = 0;
 	while ((clientData = Hax_VarTraceInfo(interp, argv[2], 0,
 		TraceVarProc, clientData)) != 0) {
 	    tvarPtr = (TraceVarInfo *) clientData;
 	    if ((tvarPtr->length == length) && (tvarPtr->flags == flags)
-		    && (strncmp(argv[4], tvarPtr->command, length) == 0)) {
+		    && (Hax_strncmp(argv[4], tvarPtr->command, length) == 0)) {
 		Hax_UntraceVar(interp, argv[2], flags | HAX_TRACE_UNSETS,
 			TraceVarProc, clientData);
 		ckfree((char *) tvarPtr);
 		break;
 	    }
 	}
-    } else if ((c == 'i') && (strncmp(argv[1], "vinfo", length) == 0)
+    } else if ((c == 'i') && (Hax_strncmp(argv[1], "vinfo", length) == 0)
 	    && (length >= 2)) {
 	ClientData clientData;
 	char ops[4], *p;
@@ -1321,7 +1321,7 @@ TraceVarProc(
 	    cmdPtr = (char *) ckalloc((unsigned) cmdLength);
 	}
 	p = cmdPtr;
-	strcpy(p, tvarPtr->command);
+	Hax_strcpy(p, tvarPtr->command);
 	p += tvarPtr->length;
 	*p = ' ';
 	p++;

@@ -32,6 +32,7 @@
  * 2019-11-07 Remove superfluous break in switch()
  * 2019-11-07 Rename regex functions to disable clash with libc
  * 2019-11-08 Correct build issued with a C++ compiler (g++, clang++)
+ * 2019-11-14 Convert libc calls from symbol() to Hax_symbol()
  */
 #include "haxInt.h"
 
@@ -260,9 +261,9 @@ RegComp(char *exp)
 			longest = NULL;
 			len = 0;
 			for (; scan != NULL; scan = RegNext(scan))
-				if (OP(scan) == EXACTLY && strlen(OPERAND(scan)) >= len) {
+				if (OP(scan) == EXACTLY && Hax_strlen(OPERAND(scan)) >= len) {
 					longest = OPERAND(scan);
-					len = strlen(OPERAND(scan));
+					len = Hax_strlen(OPERAND(scan));
 				}
 			r->regmust = longest;
 			r->regmlen = len;
@@ -542,7 +543,7 @@ int *flagp)
 			char ender;
 
 			regparse--;
-			len = strcspn(regparse, META);
+			len = Hax_strcspn(regparse, META);
 			if (len <= 0)
 				FAIL((char *) "internal disaster");
 			ender = *(regparse+len);
@@ -729,8 +730,8 @@ char *string)
 	/* If there is a "must appear" string, look for it. */
 	if (prog->regmust != NULL) {
 		s = string;
-		while ((s = strchr(s, prog->regmust[0])) != NULL) {
-			if (strncmp(s, prog->regmust, prog->regmlen) == 0)
+		while ((s = Hax_strchr(s, prog->regmust[0])) != NULL) {
+			if (Hax_strncmp(s, prog->regmust, prog->regmlen) == 0)
 				break;	/* Found it. */
 			s++;
 		}
@@ -749,7 +750,7 @@ char *string)
 	s = string;
 	if (prog->regstart != '\0')
 		/* We know what char it must start with. */
-		while ((s = strchr(s, prog->regstart)) != NULL) {
+		while ((s = Hax_strchr(s, prog->regstart)) != NULL) {
 			if (RegTry(prog, s))
 				return(1);
 			s++;
@@ -846,19 +847,19 @@ char *prog)
 				/* Inline the first character, for speed. */
 				if (*opnd != *reginput)
 					return(0);
-				len = strlen(opnd);
-				if (len > 1 && strncmp(opnd, reginput, len) != 0)
+				len = Hax_strlen(opnd);
+				if (len > 1 && Hax_strncmp(opnd, reginput, len) != 0)
 					return(0);
 				reginput += len;
 			}
 			break;
 		case ANYOF:
- 			if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) == NULL)
+ 			if (*reginput == '\0' || Hax_strchr(OPERAND(scan), *reginput) == NULL)
 				return(0);
 			reginput++;
 			break;
 		case ANYBUT:
- 			if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) != NULL)
+ 			if (*reginput == '\0' || Hax_strchr(OPERAND(scan), *reginput) != NULL)
 				return(0);
 			reginput++;
 			break;
@@ -1003,7 +1004,7 @@ char *p)
 	opnd = OPERAND(p);
 	switch (OP(p)) {
 	case ANY:
-		count = strlen(scan);
+		count = Hax_strlen(scan);
 		scan += count;
 		break;
 	case EXACTLY:
@@ -1013,13 +1014,13 @@ char *p)
 		}
 		break;
 	case ANYOF:
-		while (*scan != '\0' && strchr(opnd, *scan) != NULL) {
+		while (*scan != '\0' && Hax_strchr(opnd, *scan) != NULL) {
 			count++;
 			scan++;
 		}
 		break;
 	case ANYBUT:
-		while (*scan != '\0' && strchr(opnd, *scan) == NULL) {
+		while (*scan != '\0' && Hax_strchr(opnd, *scan) == NULL) {
 			count++;
 			scan++;
 		}
@@ -1113,7 +1114,7 @@ char *op)
 	char *p;
 	static char buf[50];
 
-	(void) strcpy(buf, ":");
+	(void) Hax_strcpy(buf, ":");
 
 	switch (OP(op)) {
 	case BOL:
@@ -1155,7 +1156,7 @@ char *op)
 	case OPEN+7:
 	case OPEN+8:
 	case OPEN+9:
-		Hax_sprintf(buf+strlen(buf), "OPEN%d", OP(op)-OPEN);
+		Hax_sprintf(buf+Hax_strlen(buf), "OPEN%d", OP(op)-OPEN);
 		p = NULL;
 		break;
 	case CLOSE+1:
@@ -1167,7 +1168,7 @@ char *op)
 	case CLOSE+7:
 	case CLOSE+8:
 	case CLOSE+9:
-		Hax_sprintf(buf+strlen(buf), "CLOSE%d", OP(op)-CLOSE);
+		Hax_sprintf(buf+Hax_strlen(buf), "CLOSE%d", OP(op)-CLOSE);
 		p = NULL;
 		break;
 	case STAR:
@@ -1181,7 +1182,7 @@ char *op)
 		break;
 	}
 	if (p != NULL)
-		(void) strcat(buf, p);
+		(void) Hax_strcat(buf, p);
 	return(buf);
 }
 #endif

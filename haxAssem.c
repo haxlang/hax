@@ -149,7 +149,7 @@ Hax_AssembleCmd(
      * command is complete, whether it really is or not.
      */
 
-    length = strlen(string);
+    length = Hax_strlen(string);
     if (length == 0) {
 	cbPtr->buffer[cbPtr->bytesUsed] = 0;
 	cbPtr->bytesUsed = 0;
@@ -162,7 +162,7 @@ Hax_AssembleCmd(
      * enough to hold the new text.
      */
 
-    length = strlen(string);
+    length = Hax_strlen(string);
     totalLength = cbPtr->bytesUsed + length + 1;
     if (totalLength > cbPtr->bufSize) {
 	unsigned int newSize;
@@ -173,12 +173,12 @@ Hax_AssembleCmd(
 	    newSize = totalLength;
 	}
 	newBuf = (char *) ckalloc(newSize);
-	strcpy(newBuf, cbPtr->buffer);
+	Hax_strcpy(newBuf, cbPtr->buffer);
 	ckfree(cbPtr->buffer);
 	cbPtr->buffer = newBuf;
 	cbPtr->bufSize = newSize;
     }
-    strcpy(cbPtr->buffer+cbPtr->bytesUsed, string);
+    Hax_strcpy(cbPtr->buffer+cbPtr->bytesUsed, string);
     cbPtr->bytesUsed += length;
 
     /*

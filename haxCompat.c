@@ -21,6 +21,7 @@
 #endif
 
 #include <ctype.h>
+#include <string.h>
 
 /*
  * <ctype.h> - character types
@@ -107,5 +108,91 @@ Hax_strtod(const char *nptr, char **endptr)
     return strtod(nptr, endptr);
 }
 
+/*
+ * <string.h> - string operations
+ */
+
+#ifndef SIZE_T_DEFINED
+typedef __SIZE_TYPE__ Size_t;
+#define SIZE_T_DEFINED
+#endif
+
+char *
+Hax_memcpy (void *t, const void *f, Size_t n)
+{
+    return memcpy(t, f, n);
+}
+
+char *
+Hax_memset (void *s, int c, Size_t n)
+{
+    return memset(s, c, n);
+}
+
+char *
+Hax_strcat (char *dst, const char *src)
+{
+    return strcat(dst, src);
+}
+
+char *
+Hax_strchr (const char *string, int c)
+{
+    return strchr(string, c);
+}
+
+int
+Hax_strcmp (const char *s1, const char *s2)
+{
+    return strcmp(s1, s2);
+}
+
+char *
+Hax_strcpy (char *dst, const char *src)
+{
+    return strcpy(dst, src);
+}
+
+Size_t
+Hax_strcspn (const char *string, const char *chars)
+{
+    return strcspn(string, chars);
+}
+
+char *
+Hax_strerror (int error)
+{
+    return strerror(error);
+}
+
+Size_t
+Hax_strlen (const char *string)
+{
+    return strlen(string);
+}
+
+int
+Hax_strncmp (const char *s1, const char *s2, Size_t nChars)
+{
+    return strncmp(s1, s2, nChars);
+}
+
+char *
+Hax_strncpy (char *dst, const char *src, Size_t numChars)
+{
+    return strncpy(dst, src, numChars);
+}
+
+char *
+Hax_strrchr (const char *string, int c)
+{
+    return strrchr(string, c);
+}
+
+char *
+Hax_strstr (const char *string, const char *substring)
+{
+    return strstr(string, substring);
+}
 
 #endif /* _HAXCOMPAT */

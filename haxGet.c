@@ -241,24 +241,24 @@ Hax_GetBoolean(
     }
     lowerCase[i] = 0;
 
-    length = strlen(lowerCase);
+    length = Hax_strlen(lowerCase);
     c = lowerCase[0];
     if ((c == '0') && (lowerCase[1] == '\0')) {
 	*boolPtr = 0;
     } else if ((c == '1') && (lowerCase[1] == '\0')) {
 	*boolPtr = 1;
-    } else if ((c == 'y') && (strncmp(lowerCase, "yes", length) == 0)) {
+    } else if ((c == 'y') && (Hax_strncmp(lowerCase, "yes", length) == 0)) {
 	*boolPtr = 1;
-    } else if ((c == 'n') && (strncmp(lowerCase, "no", length) == 0)) {
+    } else if ((c == 'n') && (Hax_strncmp(lowerCase, "no", length) == 0)) {
 	*boolPtr = 0;
-    } else if ((c == 't') && (strncmp(lowerCase, "true", length) == 0)) {
+    } else if ((c == 't') && (Hax_strncmp(lowerCase, "true", length) == 0)) {
 	*boolPtr = 1;
-    } else if ((c == 'f') && (strncmp(lowerCase, "false", length) == 0)) {
+    } else if ((c == 'f') && (Hax_strncmp(lowerCase, "false", length) == 0)) {
 	*boolPtr = 0;
     } else if ((c == 'o') && (length >= 2)) {
-	if (strncmp(lowerCase, "on", length) == 0) {
+	if (Hax_strncmp(lowerCase, "on", length) == 0) {
 	    *boolPtr = 1;
-	} else if (strncmp(lowerCase, "off", length) == 0) {
+	} else if (Hax_strncmp(lowerCase, "off", length) == 0) {
 	    *boolPtr = 0;
 	}
     } else {

@@ -94,7 +94,7 @@ Hax_CaseCmd(
     }
     string = argv[1];
     body = -1;
-    if (strcmp(argv[2], "in") == 0) {
+    if (Hax_strcmp(argv[2], "in") == 0) {
 	i = 3;
     } else {
 	i = 2;
@@ -139,7 +139,7 @@ Hax_CaseCmd(
 	}
 	if (*p == 0) {
 	    if ((*caseArgv[i] == 'd')
-		    && (strcmp(caseArgv[i], "default") == 0)) {
+		    && (Hax_strcmp(caseArgv[i], "default") == 0)) {
 		body = i+1;
 	    }
 	    if (Hax_StringMatch(string, caseArgv[i])) {
@@ -818,7 +818,7 @@ Hax_FormatCmd(
 		break;
 	    case 's':
 		oneWordValue = *curArg;
-		size = strlen(*curArg);
+		size = Hax_strlen(*curArg);
 		break;
 	    case 'c':
 		if (Hax_GetLong(interp, *curArg, (long *) &oneWordValue)
@@ -873,7 +873,7 @@ Hax_FormatCmd(
 	    newSpace = 2*(dstSize + size);
 	    newDst = (char *) ckalloc((unsigned) newSpace+1);
 	    if (dstSize != 0) {
-		memcpy(newDst, dst, dstSize);
+		Hax_memcpy(newDst, dst, dstSize);
 	    }
 	    if (dstSpace != HAX_RESULT_SIZE) {
 		ckfree(dst);
@@ -882,7 +882,7 @@ Hax_FormatCmd(
 	    dstSpace = newSpace;
 	}
 	if (noPercent) {
-	    memcpy((dst+dstSize), oneWordValue, size);
+	    Hax_memcpy((dst+dstSize), oneWordValue, size);
 	    dstSize += size;
 	    dst[dstSize] = 0;
 	} else {
@@ -899,7 +899,7 @@ Hax_FormatCmd(
 	    } else {
 		Hax_sprintf(dst+dstSize, newFormat, (char *) oneWordValue);
 	    }
-	    dstSize += strlen(dst+dstSize);
+	    dstSize += Hax_strlen(dst+dstSize);
 	}
     }
 

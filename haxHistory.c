@@ -204,12 +204,12 @@ Hax_RecordAndEval(
      * Chop off trailing newlines before recording the command.
      */
 
-    length = strlen(cmd);
+    length = Hax_strlen(cmd);
     while (cmd[length-1] == '\n') {
 	length--;
     }
     MakeSpace(eventPtr, length + 1);
-    strncpy(eventPtr->command, cmd, length);
+    Hax_strncpy(eventPtr->command, cmd, length);
     eventPtr->command[length] = 0;
 
     /*
@@ -270,16 +270,16 @@ Hax_HistoryCmd(
     }
 
     c = argv[1][0];
-    length = strlen(argv[1]);
+    length = Hax_strlen(argv[1]);
 
-    if ((c == 'a') && (strncmp(argv[1], "add", length)) == 0) {
+    if ((c == 'a') && (Hax_strncmp(argv[1], "add", length)) == 0) {
 	if ((argc != 3) && (argc != 4)) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " add event ?exec?\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
 	if (argc == 4) {
-	    if (strncmp(argv[3], "exec", strlen(argv[3])) != 0) {
+	    if (Hax_strncmp(argv[3], "exec", Hax_strlen(argv[3])) != 0) {
 		Hax_AppendResult(interp, "bad argument \"", argv[3],
 			"\": should be \"exec\"", (char *) NULL);
 		return HAX_ERROR;
@@ -287,7 +287,7 @@ Hax_HistoryCmd(
 	    return Hax_RecordAndEval(interp, argv[2], 0);
 	}
 	return Hax_RecordAndEval(interp, argv[2], HAX_NO_EVAL);
-    } else if ((c == 'c') && (strncmp(argv[1], "change", length)) == 0) {
+    } else if ((c == 'c') && (Hax_strncmp(argv[1], "change", length)) == 0) {
 	if ((argc != 3) && (argc != 4)) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " change newValue ?event?\"", (char *) NULL);
@@ -310,10 +310,10 @@ Hax_HistoryCmd(
 		return HAX_ERROR;
 	    }
 	}
-	MakeSpace(eventPtr, strlen(argv[2]) + 1);
-	strcpy(eventPtr->command, argv[2]);
+	MakeSpace(eventPtr, Hax_strlen(argv[2]) + 1);
+	Hax_strcpy(eventPtr->command, argv[2]);
 	return HAX_OK;
-    } else if ((c == 'e') && (strncmp(argv[1], "event", length)) == 0) {
+    } else if ((c == 'e') && (Hax_strncmp(argv[1], "event", length)) == 0) {
 	if (argc > 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " event ?event?\"", (char *) NULL);
@@ -326,7 +326,7 @@ Hax_HistoryCmd(
 	RevResult(iPtr, eventPtr->command);
 	Hax_SetResult(interp, eventPtr->command, HAX_VOLATILE);
 	return HAX_OK;
-    } else if ((c == 'i') && (strncmp(argv[1], "info", length)) == 0) {
+    } else if ((c == 'i') && (Hax_strncmp(argv[1], "info", length)) == 0) {
 	int count, indx, i;
 	const char *newline;
 
@@ -369,7 +369,7 @@ Hax_HistoryCmd(
 	     */
 
 	    while (1) {
-		next = strchr(cur, '\n');
+		next = Hax_strchr(cur, '\n');
 		if (next == NULL) {
 		    break;
 		}
@@ -383,7 +383,7 @@ Hax_HistoryCmd(
 	    Hax_AppendResult(interp, cur, (char *) NULL);
 	}
 	return HAX_OK;
-    } else if ((c == 'k') && (strncmp(argv[1], "keep", length)) == 0) {
+    } else if ((c == 'k') && (Hax_strncmp(argv[1], "keep", length)) == 0) {
 	int count, i, src;
 	HistoryEvent *events;
 
@@ -449,7 +449,7 @@ Hax_HistoryCmd(
 	}
 	iPtr->numEvents = count;
 	return HAX_OK;
-    } else if ((c == 'n') && (strncmp(argv[1], "nextid", length)) == 0) {
+    } else if ((c == 'n') && (Hax_strncmp(argv[1], "nextid", length)) == 0) {
 	if (argc != 2) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " nextid\"", (char *) NULL);
@@ -457,7 +457,7 @@ Hax_HistoryCmd(
 	}
 	Hax_sprintf(iPtr->result, "%d", iPtr->curEventNum+1);
 	return HAX_OK;
-    } else if ((c == 'r') && (strncmp(argv[1], "redo", length)) == 0) {
+    } else if ((c == 'r') && (Hax_strncmp(argv[1], "redo", length)) == 0) {
 	if (argc > 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " redo ?event?\"", (char *) NULL);
@@ -469,7 +469,7 @@ Hax_HistoryCmd(
 	}
 	RevCommand(iPtr, eventPtr->command);
 	return Hax_Eval(interp, eventPtr->command, 0, (char **) NULL);
-    } else if ((c == 's') && (strncmp(argv[1], "substitute", length)) == 0) {
+    } else if ((c == 's') && (Hax_strncmp(argv[1], "substitute", length)) == 0) {
 	if ((argc > 5) || (argc < 4)) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
 		    " substitute old new ?event?\"", (char *) NULL);
@@ -480,7 +480,7 @@ Hax_HistoryCmd(
 	    return HAX_ERROR;
 	}
 	return SubsAndEval(iPtr, eventPtr->command, argv[2], argv[3]);
-    } else if ((c == 'w') && (strncmp(argv[1], "words", length)) == 0) {
+    } else if ((c == 'w') && (Hax_strncmp(argv[1], "words", length)) == 0) {
 	char *words;
 
 	if ((argc != 3) && (argc != 4)) {
@@ -639,9 +639,9 @@ RevCommand(
     revPtr = (HistoryRev *) ckalloc(sizeof(HistoryRev));
     revPtr->firstIndex = iPtr->evalFirst - iPtr->historyFirst;
     revPtr->lastIndex = iPtr->evalLast - iPtr->historyFirst;
-    revPtr->newSize = strlen(string);
+    revPtr->newSize = Hax_strlen(string);
     revPtr->newBytes = (char *) ckalloc((unsigned) (revPtr->newSize+1));
-    strcpy(revPtr->newBytes, string);
+    Hax_strcpy(revPtr->newBytes, string);
     InsertRev(iPtr, revPtr);
 }
 
@@ -708,7 +708,7 @@ RevResult(
     revPtr->lastIndex = evalLast - iPtr->historyFirst;
     argv[0] = string;
     revPtr->newBytes = Hax_Merge(1, argv);
-    revPtr->newSize = strlen(revPtr->newBytes);
+    revPtr->newSize = Hax_strlen(revPtr->newBytes);
     InsertRev(iPtr, revPtr);
 }
 
@@ -751,7 +751,7 @@ DoRevs(
      */
 
     eventPtr = &iPtr->events[iPtr->curEvent];
-    size = strlen(eventPtr->command) + 1;
+    size = Hax_strlen(eventPtr->command) + 1;
     for (revPtr = iPtr->revPtr; revPtr != NULL; revPtr = revPtr->nextPtr) {
 	size -= revPtr->lastIndex + 1 - revPtr->firstIndex;
 	size += revPtr->newSize;
@@ -765,21 +765,21 @@ DoRevs(
 
 	count = revPtr->firstIndex - bytesSeen;
 	if (count > 0) {
-	    strncpy(p, eventPtr->command + bytesSeen, count);
+	    Hax_strncpy(p, eventPtr->command + bytesSeen, count);
 	    p += count;
 	}
-	strncpy(p, revPtr->newBytes, revPtr->newSize);
+	Hax_strncpy(p, revPtr->newBytes, revPtr->newSize);
 	p += revPtr->newSize;
 	bytesSeen = revPtr->lastIndex+1;
 	ckfree(revPtr->newBytes);
 	ckfree((char *) revPtr);
 	revPtr = nextPtr;
     }
-    if (&p[strlen(&eventPtr->command[bytesSeen]) + 1] >
+    if (&p[Hax_strlen(&eventPtr->command[bytesSeen]) + 1] >
 	    &newCommand[size]) {
 	printf("Assertion failed!\n");
     }
-    strcpy(p, eventPtr->command + bytesSeen);
+    Hax_strcpy(p, eventPtr->command + bytesSeen);
 
     /*
      * Replace the command in the event.
@@ -854,7 +854,7 @@ GetEvent(
      * that matches the string in the sense of Hax_StringMatch.
      */
 
-    length = strlen(string);
+    length = Hax_strlen(string);
     for (index = iPtr->curEvent - 1; ; index--) {
 	if (index < 0) {
 	    index += iPtr->numEvents;
@@ -863,7 +863,7 @@ GetEvent(
 	    break;
 	}
 	eventPtr = &iPtr->events[index];
-	if ((strncmp(eventPtr->command, string, length) == 0)
+	if ((Hax_strncmp(eventPtr->command, string, length) == 0)
 		|| Hax_StringMatch(eventPtr->command, string)) {
 	    return eventPtr;
 	}
@@ -910,12 +910,12 @@ SubsAndEval(
      * doesn't appear in the original command).
      */
 
-    oldLength = strlen(oldStr);
-    newLength = strlen(newStr);
+    oldLength = Hax_strlen(oldStr);
+    newLength = Hax_strlen(newStr);
     src = cmd;
     count = 0;
     while (1) {
-	src = strstr(src, oldStr);
+	src = Hax_strstr(src, oldStr);
 	if (src == NULL) {
 	    break;
 	}
@@ -927,7 +927,7 @@ SubsAndEval(
 		"\" doesn't appear in event", (char *) NULL);
 	return HAX_ERROR;
     }
-    length = strlen(cmd) + count*(newLength - oldLength);
+    length = Hax_strlen(cmd) + count*(newLength - oldLength);
 
     /*
      * Generate a substituted command.
@@ -936,14 +936,14 @@ SubsAndEval(
     newCmd = (char *) ckalloc((unsigned) (length + 1));
     dst = newCmd;
     while (1) {
-	src = strstr(cmd, oldStr);
+	src = Hax_strstr(cmd, oldStr);
 	if (src == NULL) {
-	    strcpy(dst, cmd);
+	    Hax_strcpy(dst, cmd);
 	    break;
 	}
-	strncpy(dst, cmd, src-cmd);
+	Hax_strncpy(dst, cmd, src-cmd);
 	dst += src-cmd;
-	strcpy(dst, newStr);
+	Hax_strcpy(dst, newStr);
 	dst += newLength;
 	cmd = src + oldLength;
     }
@@ -1037,7 +1037,7 @@ GetWords(
      * enough to hold all the words if necessary.
      */
 
-    result = (char *) ckalloc((unsigned) (strlen(command) + 1));
+    result = (char *) ckalloc((unsigned) (Hax_strlen(command) + 1));
     dst = result;
     for (next = command; Hax_isspace(*next); next++) {
 	/* Empty loop body:  just find start of first word. */
@@ -1072,7 +1072,7 @@ GetWords(
 	    *dst = ' ';
 	    dst++;
 	}
-	strncpy(dst, start, (end-start));
+	Hax_strncpy(dst, start, (end-start));
 	dst += end-start;
     }
     *dst = 0;

@@ -410,7 +410,7 @@ Hax_SetVar2(
     if (flags & HAX_LIST_ELEMENT) {
 	length = Hax_ScanElement(newValue, &listFlags) + 1;
     } else {
-	length = strlen(newValue);
+	length = Hax_strlen(newValue);
     }
 
     /*
@@ -458,7 +458,7 @@ Hax_SetVar2(
 	newVarPtr->tracePtr = varPtr->tracePtr;
 	newVarPtr->searchPtr = varPtr->searchPtr;
 	newVarPtr->flags = varPtr->flags;
-	strcpy(newVarPtr->value.string, varPtr->value.string);
+	Hax_strcpy(newVarPtr->value.string, varPtr->value.string);
 	Hax_SetHashValue(hPtr, newVarPtr);
 	ckfree((char *) varPtr);
 	varPtr = newVarPtr;
@@ -478,7 +478,7 @@ Hax_SetVar2(
 		varPtr->value.string + varPtr->valueLength, listFlags);
 	varPtr->value.string[varPtr->valueLength] = 0;
     } else {
-	strcpy(varPtr->value.string + varPtr->valueLength, newValue);
+	Hax_strcpy(varPtr->value.string + varPtr->valueLength, newValue);
 	varPtr->valueLength += length;
     }
     varPtr->flags &= ~VAR_UNDEFINED;
@@ -1485,8 +1485,8 @@ Hax_ArrayCmd(
      */
 
     c = argv[1][0];
-    length = strlen(argv[1]);
-    if ((c == 'a') && (strncmp(argv[1], "anymore", length) == 0)) {
+    length = Hax_strlen(argv[1]);
+    if ((c == 'a') && (Hax_strncmp(argv[1], "anymore", length) == 0)) {
 	ArraySearch *searchPtr;
 
 	if (argc != 4) {
@@ -1515,7 +1515,7 @@ Hax_ArrayCmd(
 	}
 	interp->result = (char *) "1";
 	return HAX_OK;
-    } else if ((c == 'd') && (strncmp(argv[1], "donesearch", length) == 0)) {
+    } else if ((c == 'd') && (Hax_strncmp(argv[1], "donesearch", length) == 0)) {
 	ArraySearch *searchPtr, *prevPtr;
 
 	if (argc != 4) {
@@ -1538,7 +1538,7 @@ Hax_ArrayCmd(
 	    }
 	}
 	ckfree((char *) searchPtr);
-    } else if ((c == 'n') && (strncmp(argv[1], "names", length) == 0)
+    } else if ((c == 'n') && (Hax_strncmp(argv[1], "names", length) == 0)
 	    && (length >= 2)) {
 	Hax_HashSearch search;
 	Var *varPtr2;
@@ -1557,7 +1557,7 @@ Hax_ArrayCmd(
 	    Hax_AppendElement(interp,
 		    Hax_GetHashKey(varPtr->value.tablePtr, hPtr), 0);
 	}
-    } else if ((c == 'n') && (strncmp(argv[1], "nextelement", length) == 0)
+    } else if ((c == 'n') && (Hax_strncmp(argv[1], "nextelement", length) == 0)
 	    && (length >= 2)) {
 	ArraySearch *searchPtr;
 	Hax_HashEntry *hPtr;
@@ -1590,7 +1590,7 @@ Hax_ArrayCmd(
 	    }
 	}
 	interp->result = Hax_GetHashKey(varPtr->value.tablePtr, hPtr);
-    } else if ((c == 's') && (strncmp(argv[1], "size", length) == 0)
+    } else if ((c == 's') && (Hax_strncmp(argv[1], "size", length) == 0)
 	    && (length >= 2)) {
 	Hax_HashSearch search;
 	Var *varPtr2;
@@ -1611,7 +1611,7 @@ Hax_ArrayCmd(
 	    size++;
 	}
 	Hax_sprintf(interp->result, "%d", size);
-    } else if ((c == 's') && (strncmp(argv[1], "startsearch", length) == 0)
+    } else if ((c == 's') && (Hax_strncmp(argv[1], "startsearch", length) == 0)
 	    && (length >= 2)) {
 	ArraySearch *searchPtr;
 
@@ -2130,7 +2130,7 @@ ParseSearchId(
     if ((end == (string+2)) || (*end != '-')) {
 	goto syntax;
     }
-    if (strcmp(end+1, varName) != 0) {
+    if (Hax_strcmp(end+1, varName) != 0) {
 	Hax_AppendResult(interp, "search identifier \"", string,
 		"\" isn't for variable \"", varName, "\"", (char *) NULL);
 	return NULL;

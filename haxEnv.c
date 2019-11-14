@@ -226,7 +226,7 @@ SetEnv(
 
 	    newEnviron = (char **) ckalloc((unsigned)
 		    ((length+5) * sizeof(char *)));
-	    memcpy(newEnviron, environ,
+	    Hax_memcpy(newEnviron, environ,
 		    length*sizeof(char *));
 	    ckfree(environ);
 	    environ = newEnviron;
@@ -234,7 +234,7 @@ SetEnv(
 	}
 	index = length;
 	environ[index+1] = NULL;
-	nameLength = strlen(name);
+	nameLength = Hax_strlen(name);
     } else {
 	/*
 	 * Compare the new value to the existing value.  If they're
@@ -244,7 +244,7 @@ SetEnv(
 	 * of the same value among the interpreters.
 	 */
 
-	if (strcmp(value, environ[index]+length+1) == 0) {
+	if (Hax_strcmp(value, environ[index]+length+1) == 0) {
 	    return;
 	}
 	ckfree(environ[index]);
@@ -255,12 +255,12 @@ SetEnv(
      * Create a new entry and enter it into the table.
      */
 
-    p = (char *) ckalloc((unsigned) (nameLength + strlen(value) + 2));
+    p = (char *) ckalloc((unsigned) (nameLength + Hax_strlen(value) + 2));
     environ[index] = p;
-    strcpy(p, name);
+    Hax_strcpy(p, name);
     p += nameLength;
     *p = '=';
-    strcpy(p+1, value);
+    Hax_strcpy(p+1, value);
 
     /*
      * Update all of the interpreters.
@@ -311,7 +311,7 @@ PutEnv(
      * setenv to do all of the real work.
      */
 
-    value = strchr(string, '=');
+    value = Hax_strchr(string, '=');
     if (value == NULL) {
 	return 0;
     }
@@ -320,7 +320,7 @@ PutEnv(
 	return 0;
     }
     name = (char *) ckalloc(nameLength+1);
-    memcpy(name, string, nameLength);
+    Hax_memcpy(name, string, nameLength);
     name[nameLength] = 0;
     SetEnv(name, value+1);
     ckfree(name);
@@ -497,8 +497,9 @@ EnvInit(void)
     newEnviron = (char **) ckalloc((unsigned)
 		(environSize * sizeof(char *)));
     for (i = 0; i < length; i++) {
-	newEnviron[i] = (char *) ckalloc((unsigned) (strlen(environ[i]) + 1));
-	strcpy(newEnviron[i], environ[i]);
+	newEnviron[i] =
+	    (char *) ckalloc((unsigned) (Hax_strlen(environ[i]) + 1));
+	Hax_strcpy(newEnviron[i], environ[i]);
     }
     newEnviron[length] = NULL;
     environ = newEnviron;
