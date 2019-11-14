@@ -1,4 +1,4 @@
-/* 
+/*
  * haxHistory.c --
  *
  *	This module implements history as an optional addition to Hax.
@@ -100,7 +100,7 @@ static void		RevCommand (Interp *iPtr, char *string);
 static void		RevResult (Interp *iPtr, char *string);
 static int		SubsAndEval (Interp *iPtr, char *cmd,
 			    char *oldStr, char *newStr);
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -140,7 +140,7 @@ Hax_InitHistory(
     Hax_CreateCommand((Hax_Interp *) iPtr, (char *) "history", Hax_HistoryCmd,
 	    (ClientData) NULL, (Hax_CmdDeleteProc *) NULL);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -230,7 +230,7 @@ Hax_RecordAndEval(
     iPtr->revDisables = 1;
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -507,7 +507,7 @@ Hax_HistoryCmd(
 	    "redo, substitute, or words", (char *) NULL);
     return HAX_ERROR;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -537,7 +537,7 @@ MakeSpace(
 	hPtr->bytesAvl = size;
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -606,7 +606,7 @@ InsertRev(
 	prevPtr->nextPtr = revPtr;
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -644,7 +644,7 @@ RevCommand(
     Hax_strcpy(revPtr->newBytes, string);
     InsertRev(iPtr, revPtr);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -711,7 +711,7 @@ RevResult(
     revPtr->newSize = Hax_strlen(revPtr->newBytes);
     InsertRev(iPtr, revPtr);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -790,7 +790,7 @@ DoRevs(
     eventPtr->bytesAvl = size;
     iPtr->revPtr = NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -873,7 +873,7 @@ GetEvent(
 	    "\"", (char *) NULL);
     return NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -953,7 +953,7 @@ SubsAndEval(
     ckfree(newCmd);
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

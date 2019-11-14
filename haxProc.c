@@ -1,4 +1,4 @@
-/* 
+/*
  * haxProc.c --
  *
  *	This file contains routines that implement Hax procedures,
@@ -27,7 +27,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclProc.c,v 1.60 92/09/14 
 static  int	InterpProc (ClientData clientData,
 		    Hax_Interp *interp, int argc, char **argv);
 static  void	ProcDeleteProc (ClientData clientData);
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -155,7 +155,7 @@ Hax_ProcCmd(
     }
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -243,7 +243,7 @@ HaxGetFrame(
     *framePtrPtr = framePtr;
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -327,7 +327,7 @@ Hax_UplevelCmd(
     iPtr->varFramePtr = savedVarFramePtr;
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -365,7 +365,7 @@ HaxFindProc(
     }
     return (Proc *) cmdPtr->clientData;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -393,7 +393,7 @@ HaxIsProc(
     }
     return (Proc *) 0;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -530,7 +530,7 @@ InterpProc(
     HaxDeleteVars(iPtr, &frame.varTable);
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

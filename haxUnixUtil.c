@@ -1,4 +1,4 @@
-/* 
+/*
  * haxUnixUtil.c --
  *
  *	This file contains a collection of utility procedures that
@@ -62,7 +62,7 @@ static int waitTableUsed = 0;	/* Number of entries in waitTable that
 				 * entries are always at the beginning
 				 * of the table. */
 #define WAIT_TABLE_GROW_BY 4
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -148,7 +148,7 @@ Hax_EvalFile(
     iPtr->scriptFile = oldScriptFile;
     return HAX_ERROR;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -222,7 +222,7 @@ Hax_Fork(void)
     }
     return pid;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -336,7 +336,7 @@ Hax_WaitPids(
 	}
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -394,7 +394,7 @@ Hax_DetachPids(
 	continue;
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -806,7 +806,7 @@ cleanup:
     numPids = -1;
     goto cleanup;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -839,7 +839,7 @@ Hax_UnixError(
     Hax_SetErrorCode(interp, "UNIX", id, msg, (char *) NULL);
     return msg;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -933,7 +933,7 @@ HaxMakeFileTable(
 	iPtr->filePtrArray = newPtrArray;
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

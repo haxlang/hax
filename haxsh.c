@@ -1,4 +1,4 @@
-/* 
+/*
  * haxTest.c --
  *
  *	Test driver for HAX.

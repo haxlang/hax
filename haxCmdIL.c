@@ -1,4 +1,4 @@
-/* 
+/*
  * haxCmdIL.c --
  *
  *	This file contains the top-level command routines for most of
@@ -28,7 +28,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclCmdIL.c,v 1.89 93/01/22
 
 static int		SortCompareProc (const void *first,
 			    const void *second);
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -121,7 +121,7 @@ Hax_IfCmd(
     }
     return Hax_Eval(interp, argv[i], 0, (char **) NULL);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -184,9 +184,9 @@ Hax_IncrCmd(
 	return HAX_ERROR;
     }
     interp->result = result;
-    return HAX_OK; 
+    return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -564,7 +564,7 @@ Hax_InfoCmd(
 	return HAX_ERROR;
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -617,7 +617,7 @@ Hax_JoinCmd(
     ckfree((char *) listArgv);
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -680,7 +680,7 @@ Hax_LindexCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -766,7 +766,7 @@ Hax_LinsertCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -801,7 +801,7 @@ Hax_ListCmd(
     interp->freeProc = (Hax_FreeProc *) free;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -848,7 +848,7 @@ Hax_LlengthCmd(
     Hax_sprintf(interp->result, "%ld", count);
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -941,7 +941,7 @@ Hax_LrangeCmd(
     *end = c;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1063,7 +1063,7 @@ Hax_LreplaceCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1112,7 +1112,7 @@ Hax_LsearchCmd(
     ckfree((char *) listArgv);
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

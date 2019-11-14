@@ -1,4 +1,4 @@
-/* 
+/*
  * haxPanic.c --
  *
  *	Source code for the "Hax_Panic" library procedure for Hax;
@@ -22,7 +22,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/panic.c,v 1.3 91/10/10 11:
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+
 /*
  *----------------------------------------------------------------------
  *

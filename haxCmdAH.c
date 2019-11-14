@@ -1,4 +1,4 @@
-/* 
+/*
  * haxCmdAH.c --
  *
  *	This file contains the top-level command routines for most of
@@ -21,7 +21,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclCmdAH.c,v 1.79 93/01/29
 
 #include "haxInt.h"
 
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -54,7 +54,7 @@ Hax_BreakCmd(
     }
     return HAX_BREAK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -194,7 +194,7 @@ Hax_CaseCmd(
     }
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -240,7 +240,7 @@ Hax_CatchCmd(
     Hax_sprintf(interp->result, "%d", result);
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -276,7 +276,7 @@ Hax_ConcatCmd(
     interp->freeProc = (Hax_FreeProc *) free;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -309,7 +309,7 @@ Hax_ContinueCmd(
     }
     return HAX_CONTINUE;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -354,7 +354,7 @@ Hax_ErrorCmd(
     Hax_SetResult(interp, argv[1], HAX_VOLATILE);
     return HAX_ERROR;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -391,12 +391,12 @@ Hax_EvalCmd(
     if (argc == 2) {
 	result = Hax_Eval(interp, argv[1], 0, (char **) NULL);
     } else {
-    
+
 	/*
 	 * More than one argument:  concatenate them together with spaces
 	 * between, then evaluate the result.
 	 */
-    
+
 	cmd = Hax_Concat(argc-1, argv+1);
 	result = Hax_Eval(interp, cmd, 0, (char **) NULL);
 	ckfree(cmd);
@@ -408,7 +408,7 @@ Hax_EvalCmd(
     }
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -442,7 +442,7 @@ Hax_ExprCmd(
 
     return Hax_ExprString(interp, argv[1]);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -523,7 +523,7 @@ Hax_ForCmd(
     }
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -599,7 +599,7 @@ Hax_ForeachCmd(
     }
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

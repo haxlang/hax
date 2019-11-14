@@ -1,4 +1,4 @@
-/* 
+/*
  * haxGlob.c --
  *
  *	This file provides procedures and commands for file name
@@ -47,7 +47,7 @@ static void		AppendResult (Hax_Interp *interp,
 			    int nameLength);
 static int		DoGlob (Hax_Interp *interp, char *dir,
 			    char *rem);
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -117,7 +117,7 @@ AppendResult(
     Hax_AppendElement(interp, p, 0);
     ckfree(p);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -372,7 +372,7 @@ DoGlob(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -481,7 +481,7 @@ Hax_TildeSubst(
     }
     return curBuf;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

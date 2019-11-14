@@ -1,4 +1,4 @@
-/* 
+/*
  * haxExpr.c --
  *
  *	This file contains the code to evaluate expressions for
@@ -170,7 +170,7 @@ static int		ExprParseString (Hax_Interp *interp,
 			    char *string, Value *valuePtr);
 static int		ExprTopLevel (Hax_Interp *interp,
 			    char *string, Value *valuePtr);
-
+
 /*
  *--------------------------------------------------------------
  *
@@ -259,7 +259,7 @@ ExprParseString(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -541,7 +541,7 @@ ExprLex(
 	    return HAX_OK;
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -648,7 +648,7 @@ ExprGetValue(
 		    } else {
 			badType = valuePtr->type;
 			goto illegalType;
-		    } 
+		    }
 		    break;
 		case NOT:
 		    if (valuePtr->type == TYPE_LLONG) {
@@ -1096,7 +1096,7 @@ ExprGetValue(
     result = HAX_ERROR;
     goto done;
 }
-
+
 /*
  *--------------------------------------------------------------
  *
@@ -1132,7 +1132,7 @@ ExprMakeString(
     }
     valuePtr->type = TYPE_STRING;
 }
-
+
 /*
  *--------------------------------------------------------------
  *
@@ -1185,7 +1185,7 @@ ExprTopLevel(
     }
     return HAX_OK;
 }
-
+
 /*
  *--------------------------------------------------------------
  *
@@ -1316,7 +1316,7 @@ Hax_ExprBoolean(
     }
     return result;
 }
-
+
 /*
  *--------------------------------------------------------------
  *

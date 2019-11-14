@@ -1,4 +1,4 @@
-/* 
+/*
  * haxGet.c --
  *
  *	This file contains procedures to convert strings into
@@ -20,7 +20,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclGet.c,v 1.11 92/02/29 1
 #endif /* not lint */
 
 #include "haxInt.h"
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -62,7 +62,7 @@ Hax_GetInt(
     *intPtr = i;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -105,7 +105,7 @@ Hax_GetLong(
     *longPtr = i;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -148,7 +148,7 @@ Hax_GetLongLong(
     *llongPtr = i;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -191,7 +191,7 @@ Hax_GetDouble(
     *(double *)doublePtr = d;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

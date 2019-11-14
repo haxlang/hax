@@ -1,4 +1,4 @@
-/* 
+/*
  * haxAssem.c --
  *
  *	This file contains procedures to help assemble Hax commands
@@ -44,7 +44,7 @@ typedef struct {
  */
 
 #define CMD_BUF_SIZE 100
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -74,7 +74,7 @@ Hax_CreateCmdBuf(void)
     cbPtr->bytesUsed = 0;
     return (Hax_CmdBuf) cbPtr;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -102,7 +102,7 @@ Hax_DeleteCmdBuf(
     ckfree(cbPtr->buffer);
     ckfree((char *) cbPtr);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -195,7 +195,7 @@ Hax_AssembleCmd(
     }
     return NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

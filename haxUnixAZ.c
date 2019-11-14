@@ -1,4 +1,4 @@
-/* 
+/*
  * haxUnixAZ.c --
  *
  *	This file contains the top-level command procedures for
@@ -41,7 +41,7 @@ static int		CleanupChildren (Hax_Interp *interp,
 static char *		GetFileType (int mode);
 static int		StoreStatData (Hax_Interp *interp,
 			    char *varName, struct stat *statPtr);
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -95,7 +95,7 @@ Hax_CdCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -167,7 +167,7 @@ Hax_CloseCmd(
     ckfree((char *) filePtr);
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -210,7 +210,7 @@ Hax_EofCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -281,9 +281,9 @@ Hax_ExecCmd(
 #	    define BUFFER_SIZE 1000
 	    char buffer[BUFFER_SIZE+1];
 	    int count;
-    
+
 	    count = read(outputId, buffer, BUFFER_SIZE);
-    
+
 	    if (count == 0) {
 		break;
 	    }
@@ -306,7 +306,7 @@ Hax_ExecCmd(
     }
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -348,7 +348,7 @@ Hax_ExitCmd(
     exit(value);
     return HAX_OK;			/* Better not ever reach this! */
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -659,7 +659,7 @@ Hax_FileCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -749,7 +749,7 @@ StoreStatData(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -788,7 +788,7 @@ GetFileType(
     }
     return (char *) "unknown";
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -842,7 +842,7 @@ Hax_FlushCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -942,7 +942,7 @@ Hax_GetsCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1117,7 +1117,7 @@ Hax_OpenCmd(
     ckfree((char *) filePtr);
     return HAX_ERROR;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1167,7 +1167,7 @@ Hax_PwdCmd(
     interp->result = currentDir;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1255,7 +1255,7 @@ Hax_PutsCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1369,7 +1369,7 @@ Hax_ReadCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1438,7 +1438,7 @@ Hax_SeekCmd(
 
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1471,7 +1471,7 @@ Hax_SourceCmd(
     }
     return Hax_EvalFile(interp, argv[1]);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1510,7 +1510,7 @@ Hax_TellCmd(
     Hax_sprintf(interp->result, "%lld", (long long int) ftello(filePtr->f));
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1576,7 +1576,7 @@ Hax_TimeCmd(
 	timePer/count);
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1638,7 +1638,7 @@ CleanupChildren(
 			(char *) NULL);
 	    } else if (WIFSIGNALED(waitStatus)) {
 		char *p;
-	
+
 		p = Hax_SignalMsg((int) (WTERMSIG(waitStatus)));
 		Hax_SetErrorCode(interp, "CHILDKILLED", msg1,
 			Hax_SignalId((int) (WTERMSIG(waitStatus))), p,
@@ -1673,9 +1673,9 @@ CleanupChildren(
 #	    define BUFFER_SIZE 1000
 	    char buffer[BUFFER_SIZE+1];
 	    int count;
-    
+
 	    count = read(errorId, buffer, BUFFER_SIZE);
-    
+
 	    if (count == 0) {
 		break;
 	    }

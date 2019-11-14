@@ -1,4 +1,4 @@
-/* 
+/*
  * haxEnv.c --
  *
  *	Hax support for environment variables, including a setenv
@@ -60,7 +60,7 @@ static int		FindVariable (const char *name,
 static void		SetEnv (const char *name,
 			    const char *value);
 static void		UnsetEnv (const char *name);
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -135,7 +135,7 @@ HaxSetupEnv(
 	    HAX_GLOBAL_ONLY | HAX_TRACE_WRITES | HAX_TRACE_UNSETS,
 	    EnvTraceProc, (ClientData) NULL);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -179,7 +179,7 @@ FindVariable(
     *lengthPtr = i;
     return -1;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -271,7 +271,7 @@ SetEnv(
 		p+1, HAX_GLOBAL_ONLY);
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -326,7 +326,7 @@ PutEnv(
     ckfree(name);
     return 0;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -381,7 +381,7 @@ UnsetEnv(
 		HAX_GLOBAL_ONLY);
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -461,7 +461,7 @@ EnvTraceProc(
     }
     return NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

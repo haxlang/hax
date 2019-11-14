@@ -1,4 +1,4 @@
-/* 
+/*
  * haxVar.c --
  *
  *	This file contains routines that implement Hax variables
@@ -51,7 +51,7 @@ static ArraySearch *	ParseSearchId (Hax_Interp *interp,
 static void		VarErrMsg (Hax_Interp *interp,
 			    char *part1, char *part2, char *operation,
 			    char *reason);
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -114,7 +114,7 @@ Hax_GetVar(
     scalar:
     return Hax_GetVar2(interp, varName, (char *) NULL, flags);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -240,7 +240,7 @@ Hax_GetVar2(
     }
     return varPtr->value.string;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -305,7 +305,7 @@ Hax_SetVar(
     scalar:
     return Hax_SetVar2(interp, varName, (char *) NULL, newValue, flags);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -508,7 +508,7 @@ Hax_SetVar2(
     }
     return varPtr->value.string;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -570,7 +570,7 @@ Hax_UnsetVar(
     scalar:
     return Hax_UnsetVar2(interp, varName, (char *) NULL, flags);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -734,7 +734,7 @@ Hax_UnsetVar2(
     }
     return 0;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -802,7 +802,7 @@ Hax_TraceVar(
     return Hax_TraceVar2(interp, varName, (char *) NULL, flags,
 	    proc, clientData);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -917,7 +917,7 @@ Hax_TraceVar2(
     varPtr->tracePtr = tracePtr;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -978,7 +978,7 @@ Hax_UntraceVar(
     scalar:
     Hax_UntraceVar2(interp, varName, (char *) NULL, flags, proc, clientData);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1077,7 +1077,7 @@ Hax_UntraceVar2(
     }
     ckfree((char *) tracePtr);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1150,7 +1150,7 @@ Hax_VarTraceInfo(
     return Hax_VarTraceInfo2(interp, varName, (char *) NULL, flags, proc,
 	    prevClientData);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1237,7 +1237,7 @@ Hax_VarTraceInfo2(
     }
     return NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1287,7 +1287,7 @@ Hax_SetCmd(
 	return HAX_ERROR;
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1327,7 +1327,7 @@ Hax_UnsetCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1373,7 +1373,7 @@ Hax_AppendCmd(
     interp->result = result;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1419,7 +1419,7 @@ Hax_LappendCmd(
     interp->result = result;
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1645,7 +1645,7 @@ Hax_ArrayCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1715,7 +1715,7 @@ Hax_GlobalCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1817,7 +1817,7 @@ Hax_UpvarCmd(
     }
     return HAX_OK;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1908,7 +1908,7 @@ HaxDeleteVars(
     }
     Hax_DeleteHashTable(tablePtr);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -2037,7 +2037,7 @@ CallTraces(
     iPtr->activeTracePtr = active.nextPtr;
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -2081,7 +2081,7 @@ NewVar(
     varPtr->value.string[0] = 0;
     return varPtr;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -2151,7 +2151,7 @@ ParseSearchId(
 	    (char *) NULL);
     return NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -2182,7 +2182,7 @@ DeleteSearches(
 	ckfree((char *) searchPtr);
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -2240,7 +2240,7 @@ DeleteArray(
     Hax_DeleteHashTable(varPtr->value.tablePtr);
     ckfree((char *) varPtr->value.tablePtr);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

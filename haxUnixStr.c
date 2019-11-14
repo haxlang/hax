@@ -1,4 +1,4 @@
-/* 
+/*
  * haxUnixStr.c --
  *
  *	This file contains procedures that generate strings
@@ -21,7 +21,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUnixStr.c,v 1.14 93/01/
 
 #include "haxInt.h"
 #include "haxUnix.h"
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -459,7 +459,7 @@ Hax_ErrnoId(void)
     }
     return (char *) "unknown error";
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -591,7 +591,7 @@ Hax_SignalId(
     }
     return (char *) "unknown signal";
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

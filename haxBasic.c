@@ -1,4 +1,4 @@
-/* 
+/*
  * haxBasic.c --
  *
  *	Contains the basic facilities for HAX command interpretation,
@@ -107,7 +107,7 @@ static CmdInfo builtInCmds[] = {
 #endif /* HAX_GENERIC_ONLY */
     {NULL,		(Hax_CmdProc *) NULL}
 };
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -197,7 +197,7 @@ Hax_CreateInterp(void)
 
     return (Hax_Interp *) iPtr;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -244,7 +244,7 @@ Hax_DeleteInterp(
     for (hPtr = Hax_FirstHashEntry(&iPtr->commandTable, &search);
 	    hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
 	cmdPtr = (Command *) Hax_GetHashValue(hPtr);
-	if (cmdPtr->deleteProc != NULL) { 
+	if (cmdPtr->deleteProc != NULL) {
 	    (*cmdPtr->deleteProc)(cmdPtr->clientData);
 	}
 	ckfree((char *) cmdPtr);
@@ -272,7 +272,7 @@ Hax_DeleteInterp(
     if (iPtr->numFiles > 0) {
 	for (i = 0; i < iPtr->numFiles; i++) {
 	    OpenFile *filePtr;
-    
+
 	    filePtr = iPtr->filePtrArray[i];
 	    if (filePtr == NULL) {
 		continue;
@@ -307,7 +307,7 @@ Hax_DeleteInterp(
     }
     ckfree((char *) iPtr);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -363,7 +363,7 @@ Hax_CreateCommand(
     cmdPtr->clientData = clientData;
     cmdPtr->deleteProc = deleteProc;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -405,7 +405,7 @@ Hax_DeleteCommand(
     Hax_DeleteHashEntry(hPtr);
     return 0;
 }
-
+
 /*
  *-----------------------------------------------------------------
  *
@@ -797,7 +797,7 @@ Hax_Eval(
     }
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -862,7 +862,7 @@ Hax_CreateTrace(
 
     return (Hax_Trace) tracePtr;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -904,7 +904,7 @@ Hax_DeleteTrace(
 	}
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -958,7 +958,7 @@ Hax_AddErrorInfo(
     Hax_SetVar2(interp, (char *) "errorInfo", (char *) NULL, message,
 	    HAX_GLOBAL_ONLY|HAX_APPEND_VALUE);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1032,7 +1032,7 @@ Hax_VarEval(
     }
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

@@ -1,4 +1,4 @@
-/* 
+/*
  * haxHash.c --
  *
  *	Implementation of in-memory hash tables for Hax and Hax-based
@@ -61,7 +61,7 @@ static Hax_HashEntry *	OneWordFind (Hax_HashTable *tablePtr,
 			    char *key);
 static Hax_HashEntry *	OneWordCreate (Hax_HashTable *tablePtr,
 			    char *key, int *newPtr);
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -108,7 +108,7 @@ Hax_InitHashTable(
 	tablePtr->createProc = ArrayCreate;
     };
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -151,7 +151,7 @@ Hax_DeleteHashEntry(
     entryPtr->tablePtr->numEntries--;
     ckfree((char *) entryPtr);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -205,7 +205,7 @@ Hax_DeleteHashTable(
     tablePtr->findProc = BogusFind;
     tablePtr->createProc = BogusCreate;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -239,7 +239,7 @@ Hax_FirstHashEntry(
     searchPtr->nextEntryPtr = NULL;
     return Hax_NextHashEntry(searchPtr);
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -280,7 +280,7 @@ Hax_NextHashEntry(
     searchPtr->nextEntryPtr = hPtr->nextPtr;
     return hPtr;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -352,7 +352,7 @@ Hax_HashStats(
     Hax_sprintf(p, "average search distance for entry: %.1f", average);
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -405,7 +405,7 @@ HashString(
     }
     return result;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -452,7 +452,7 @@ StringFind(
     }
     return NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -530,7 +530,7 @@ StringCreate(
     }
     return hPtr;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -571,7 +571,7 @@ OneWordFind(
     }
     return NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -642,7 +642,7 @@ OneWordCreate(
     }
     return hPtr;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -695,7 +695,7 @@ ArrayFind(
     }
     return NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -782,7 +782,7 @@ ArrayCreate(
     }
     return hPtr;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -810,7 +810,7 @@ BogusFind(
     Hax_Panic((char *) "called Hax_FindHashEntry on deleted table");
     return NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -841,7 +841,7 @@ BogusCreate(
     Hax_Panic((char *) "called Hax_CreateHashEntry on deleted table");
     return NULL;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *

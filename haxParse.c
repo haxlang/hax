@@ -1,4 +1,4 @@
-/* 
+/*
  * haxParse.c --
  *
  *	This file contains a collection of procedures that are used
@@ -101,7 +101,7 @@ char haxTypeTable[] = {
 
 static char *	QuoteEnd (char *string, int term);
 static char *	VarNameEnd (char *string);
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -233,7 +233,7 @@ Hax_Backslash(
     }
     return result;
 }
-
+
 /*
  *--------------------------------------------------------------
  *
@@ -356,7 +356,7 @@ HaxParseQuotes(
 	}
     }
 }
-
+
 /*
  *--------------------------------------------------------------
  *
@@ -424,7 +424,7 @@ HaxParseNestedCmd(
     iPtr->resultSpace[0] = '\0';
     return HAX_OK;
 }
-
+
 /*
  *--------------------------------------------------------------
  *
@@ -535,7 +535,7 @@ HaxParseBraces(
     *termPtr = src;
     return HAX_OK;
 }
-
+
 /*
  *--------------------------------------------------------------
  *
@@ -547,7 +547,7 @@ HaxParseBraces(
  *
  * Results:
  *	The return value is a standard Hax result.
- *	
+ *
  *	*argcPtr is modified to hold a count of the number of words
  *	successfully parsed, which may be 0.  At most maxWords words
  *	will be parsed.  If 0 <= *argcPtr < maxWords then it
@@ -561,7 +561,7 @@ HaxParseBraces(
  *	*argcPtr < maxWords), the character just after the last
  *	one in a word (if *argcPtr is maxWords), or the vicinity
  *	of an error (if the result is not HAX_OK).
- *	
+ *
  *	The pointers at *argv are filled in with pointers to the
  *	fully-substituted words, and the actual contents of the
  *	words are copied to the buffer at pvPtr.
@@ -609,7 +609,7 @@ HaxParseWords(
 	/*
 	 * Skip leading space.
 	 */
-    
+
 	skipSpace:
 	c = *src;
 	type = CHAR_TYPE(c);
@@ -618,7 +618,7 @@ HaxParseWords(
 	    c = *src;
 	    type = CHAR_TYPE(c);
 	}
-    
+
 	/*
 	 * Handle the normal case (i.e. no leading double-quote or brace).
 	 */
@@ -631,12 +631,12 @@ HaxParseWords(
 		     * Target buffer space is about to run out.  Make
 		     * more space.
 		     */
-	
+
 		    pvPtr->next = dst;
 		    (*pvPtr->expandProc)(pvPtr, 1);
 		    dst = pvPtr->next;
 		}
-	
+
 		if (type == HAX_NORMAL) {
 		    copy:
 		    *dst = c;
@@ -647,7 +647,7 @@ HaxParseWords(
 		} else if (type == HAX_DOLLAR) {
 		    int length;
 		    char *value;
-	
+
 		    value = Hax_ParseVar(interp, src, termPtr);
 		    if (value == NULL) {
 			return HAX_ERROR;
@@ -684,7 +684,7 @@ HaxParseWords(
 		    dst = pvPtr->next;
 		} else if (type == HAX_BACKSLASH) {
 		    int numRead;
-    
+
 		    *dst = Hax_Backslash(src, &numRead);
 		    if (*dst != 0) {
 			dst++;
@@ -697,11 +697,11 @@ HaxParseWords(
 		type = CHAR_TYPE(c);
 	    }
 	} else {
-    
+
 	    /*
 	     * Check for the end of the command.
 	     */
-	
+
 	    if (type == HAX_COMMAND_END) {
 		if (flags & HAX_BRACKET_TERM) {
 		    if (c == '\0') {
@@ -716,7 +716,7 @@ HaxParseWords(
 		}
 		goto done;
 	    }
-	
+
 	    /*
 	     * Now handle the special cases: open braces, double-quotes,
 	     * and backslash-newline.
@@ -737,13 +737,13 @@ HaxParseWords(
 	    if (result != HAX_OK) {
 		return result;
 	    }
-	
+
 	    /*
 	     * Back from quotes or braces;  make sure that the terminating
 	     * character was the end of the word.  Have to be careful here
 	     * to handle continuation lines (i.e. lines ending in backslash).
 	     */
-	
+
 	    c = **termPtr;
 	    if ((c == '\\') && ((*termPtr)[1] == '\n')) {
 		c = (*termPtr)[2];
@@ -791,7 +791,7 @@ HaxParseWords(
     *argcPtr = argc;
     return HAX_OK;
 }
-
+
 /*
  *--------------------------------------------------------------
  *
@@ -853,7 +853,7 @@ HaxExpandParseValue(
     pvPtr->end = newBuf + newSpace - 1;
     pvPtr->clientData = (ClientData) 1;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -971,7 +971,7 @@ HaxWordEnd(
 	}
     }
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1031,7 +1031,7 @@ QuoteEnd(
     }
     return p-1;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1072,7 +1072,7 @@ VarNameEnd(
     }
     return p-1;
 }
-
+
 /*
  *----------------------------------------------------------------------
  *
