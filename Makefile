@@ -9,7 +9,10 @@
 # CFLAGS.  Lastly, you'll have to provide your own replacement for the
 # "Hax_Panic" procedure (see haxPanic.c for what the current one does).
 
-# 2. If you want to put Hax-related information in non-standard places,
+# 2. Add the switch "-DHAX_FREESTANDING" to build a standalone version
+# of Hax.
+
+# 3. If you want to put Hax-related information in non-standard places,
 # change the following definitions below to reflect where you want
 # things (all must be specified as full rooted path names):
 #
@@ -29,7 +32,7 @@
 #			manual entry.
 #
 
-# 3. If you want to alter the default build programs and flags, change:
+# 4. If you want to alter the default build programs and flags, change:
 #
 #    CC			Path to cc(1).
 #    AR			Path to ar(1).
@@ -62,13 +65,13 @@ all: libhax.a haxsh
 GENERIC_OBJS =	haxRegexp.o haxAssem.o haxBasic.o haxCkalloc.o \
 	haxCmdAH.o haxCmdIL.o haxCmdMZ.o haxExpr.o haxGet.o \
 	haxHash.o haxHistory.o haxParse.o haxProc.o haxUtil.o \
-	haxVar.o haxPanic.o
+	haxVar.o haxCompat.o haxPanic.o
 
 UNIX_OBJS = haxEnv.o haxGlob.o haxUnixAZ.o haxUnixStr.o haxUnixUtil.o
 
-COMPAT_OBJS = haxCompat.o
+COMPAT_OBJS = compat/Hax_ctype_.o compat/Hax_tolower_.o compat/Hax_toupper_.o
 
-OBJS = $(GENERIC_OBJS) $(UNIX_OBJS) $(COMPAT_OBJS)
+OBJS = $(GENERIC_OBJS) $(UNIX_OBJS)
 
 libhax.a: $(OBJS)
 	$(AR) cr $@ $(OBJS)

@@ -15,8 +15,14 @@
 
 #include "haxInt.h"
 
+#ifdef HAX_FREESTANDING
+#include "compat/Hax_ctype.h"
+#else
 #include <ctype.h>
+#endif
+
 #include <string.h>
+
 
 /*
  * <ctype.h> - character types
@@ -25,55 +31,91 @@
 int
 Hax_isalnum(int c)
 {
+#ifdef HAX_FREESTANDING
+    return haxIsalnum(c);
+#else
     return isalnum(c);
+#endif
 }
 
 int
 Hax_isdigit(int c)
 {
+#ifdef HAX_FREESTANDING
+    return haxIsdigit(c);
+#else
     return isdigit(c);
+#endif
 }
 
 int
 Hax_islower(int c)
 {
+#ifdef HAX_FREESTANDING
+    return haxIslower(c);
+#else
     return islower(c);
+#endif
 }
 
 int
 Hax_isprint(int c)
 {
+#ifdef HAX_FREESTANDING
+    return haxIsprint(c);
+#else
     return isprint(c);
+#endif
 }
 
 int
 Hax_isspace(int c)
 {
+#ifdef HAX_FREESTANDING
+    return haxIsspace(c);
+#else
     return isspace(c);
+#endif
 }
 
 int
 Hax_isupper(int c)
 {
+#ifdef HAX_FREESTANDING
+    return haxIsupper(c);
+#else
     return isupper(c);
+#endif
 }
 
 int
 Hax_tolower(int c)
 {
+#ifdef HAX_FREESTANDING
+    return haxTolower(c);
+#else
     return tolower(c);
+#endif
 }
 
 int
 Hax_toupper(int c)
 {
+#ifdef HAX_FREESTANDING
+    return haxToupper(c);
+#else
     return toupper(c);
+#endif
 }
 
 int
 Hax_isascii(int c)
 {
+#ifdef HAX_FREESTANDING
+    return haxIsascii(c);
+#else
     return isascii(c);
+#endif
 }
 
 /*
