@@ -76,6 +76,9 @@ COMPAT_OBJS = compat/Hax_ctype_.o compat/Hax_tolower_.o compat/Hax_toupper_.o \
 	compat/Hax_strerror.o compat/Hax_strncmp.o compat/Hax_strrchr.o \
 	compat/Hax_errlist.o
 
+compat/Hax_errlist.c: compat/errlist.awk
+	awk -f compat/errlist.awk /usr/src/sys/sys/errno.h > $@
+
 OBJS = $(GENERIC_OBJS) $(UNIX_OBJS)
 
 libhax.a: $(OBJS)
@@ -127,7 +130,7 @@ test: haxsh
 	( echo cd tests ; echo source all ) | ./haxsh
 
 clean:
-	rm -f $(OBJS) libhax.a haxsh.o haxsh
+	rm -f $(OBJS) libhax.a haxsh.o haxsh compat/Hax_errlist.c
 
 $(OBJS): hax.h haxHash.h haxInt.h
 $(UNIX_OJBS): haxUnix.h

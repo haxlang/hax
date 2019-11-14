@@ -2,3 +2,4 @@
 *~
 libhax.a
 haxsh
+compat/Hax_errlist.c

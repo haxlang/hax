@@ -4,7 +4,6 @@
 __RCSID("NetBSD: errlist.awk,v 1.4 2010/12/16 22:52:32 joerg Exp ");
 #include <errno.h>
 #endif
-
 static const char *const Hax_errlist[] = {
 	"Undefined error: 0",			/* 0 - ENOERROR */
 	"Operation not permitted",		/* 1 - EPERM */
