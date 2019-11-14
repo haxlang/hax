@@ -20,27 +20,27 @@
  * <ctype.h> - character types
  */
 
-int			Hax_isalnum(int c);
-int			Hax_isdigit(int c);
-int			Hax_islower(int c);
-int			Hax_isprint(int c);
-int			Hax_isspace(int c);
-int			Hax_isupper(int c);
-int			Hax_tolower(int c);
-int			Hax_toupper(int c);
-int			Hax_isascii(int c);
+int			Hax_isalnum (int c);
+int			Hax_isdigit (int c);
+int			Hax_islower (int c);
+int			Hax_isprint (int c);
+int			Hax_isspace (int c);
+int			Hax_isupper (int c);
+int			Hax_tolower (int c);
+int			Hax_toupper (int c);
+int			Hax_isascii (int c);
 
 /*
  * <stdio.h> - standard buffered input/output
  */
 
-int			Hax_sprintf(char *str, const char *format, ...);
+int			Hax_sprintf (char *str, const char *format, ...);
 
 /*
  * <stdlib.h> - standard library definitions
  */
 
-double			Hax_strtod(const char *nptr, char **endptr);
+double			Hax_strtod (const char *nptr, char **endptr);
 
 /*
  * <string.h> - string operations
