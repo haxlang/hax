@@ -212,7 +212,7 @@ ExprParseString(
 
 	valuePtr->type = TYPE_LLONG;
 	errno = 0;
-	valuePtr->llongValue = strtol(string, &term, 0);
+	valuePtr->llongValue = Hax_strtol(string, &term, 0);
 	c = *term;
 	if ((c == '\0') && (errno != ERANGE)) {
 	    return HAX_OK;
@@ -328,7 +328,7 @@ ExprLex(
 	    infoPtr->token = VALUE;
 	    valuePtr->type = TYPE_LLONG;
 	    errno = 0;
-	    valuePtr->llongValue = strtoul(p, &term, 0);
+	    valuePtr->llongValue = Hax_strtoul(p, &term, 0);
 	    c = *term;
 	    if ((c == '.') || (c == 'e') || (c == 'E') || (errno == ERANGE)) {
 		char *term2;

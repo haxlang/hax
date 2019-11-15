@@ -29,7 +29,7 @@ THIS SOFTWARE.
 /* Please send bug reports to David M. Gay (dmg at acm dot org,
  * with " at " changed at "@" and " dot " changed to ".").	*/
 
-#include "gdtoaimp.h"
+#include "Hax_gdtoaimp.h"
 
  Bigint *
 s2b

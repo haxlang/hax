@@ -29,7 +29,7 @@ THIS SOFTWARE.
 /* Please send bug reports to David M. Gay (dmg at acm dot org,
  * with " at " changed at "@" and " dot " changed to ".").	*/
 
-#include "gdtoaimp.h"
+#include "Hax_gdtoaimp.h"
 
 #ifdef USE_LOCALE
 #include "locale.h"
@@ -1040,7 +1040,7 @@ strtodg
 			k = nbits >> kshift;
 			if (nbits & kmask)
 				++k;
-			memset(bits, 0, k*sizeof(ULong));
+			__builtin_memset(bits, 0, k*sizeof(ULong));
  infnanexp:
 			*exp = fpi->emax + 1;
 			goto ret;

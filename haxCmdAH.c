@@ -731,7 +731,7 @@ Hax_FormatCmd(
 	    format++;
 	}
 	if (Hax_isdigit(*format)) {
-	    width = atoi(format);
+	    width = Hax_atoi(format);
 	    do {
 		format++;
 	    } while (Hax_isdigit(*format));
@@ -758,7 +758,7 @@ Hax_FormatCmd(
 	    format++;
 	}
 	if (Hax_isdigit(*format)) {
-	    precision = atoi(format);
+	    precision = Hax_atoi(format);
 	    do {
 		format++;
 	    } while (Hax_isdigit(*format));

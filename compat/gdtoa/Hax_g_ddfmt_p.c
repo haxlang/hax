@@ -28,16 +28,16 @@ THIS SOFTWARE.
 
 /* Please send bug reports to David M. Gay (dmg@acm.org). */
 
-#include "gdtoaimp.h"
-#include <string.h>
+#include "Hax_gdtoaimp.h"
+#include "../Hax_string.h"
 
  extern ULong NanDflt_d_D2A[2];
 
  char *
 #ifdef KR_headers
-g_ddfmt_p(buf, dd0, ndig, bufsize, nik) char *buf; double *dd0; int ndig; size_t bufsize; int nik;
+g_ddfmt_p(buf, dd0, ndig, bufsize, nik) char *buf; double *dd0; int ndig; Size_t bufsize; int nik;
 #else
-g_ddfmt_p(char *buf, double *dd0, int ndig, size_t bufsize, int nik)
+g_ddfmt_p(char *buf, double *dd0, int ndig, Size_t bufsize, int nik)
 #endif
 {
 	FPI fpi;
@@ -65,7 +65,7 @@ g_ddfmt_p(char *buf, double *dd0, int ndig, size_t bufsize, int nik)
 #define Rounding FPI_Round_near
 #endif /*}}*/
 
-	if (bufsize < 10 || bufsize < (size_t)(ndig + 8))
+	if (bufsize < 10 || bufsize < (Size_t)(ndig + 8))
 		return 0;
 
 	dd = (U*)dd0;
@@ -175,7 +175,7 @@ g_ddfmt_p(char *buf, double *dd0, int ndig, size_t bufsize, int nik)
 		}
 	mode = 2;
 	if (ndig <= 0) {
-		if (bufsize < (size_t)(fpi.nbits * .301029995664) + 10) {
+		if (bufsize < (Size_t)(fpi.nbits * .301029995664) + 10) {
 			Bfree(z MTb);
 			return 0;
 			}

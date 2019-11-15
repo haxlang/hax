@@ -29,13 +29,13 @@ THIS SOFTWARE.
 /* Please send bug reports to David M. Gay (dmg at acm dot org,
  * with " at " changed at "@" and " dot " changed to ".").	*/
 
-#include "gdtoaimp.h"
+#include "Hax_gdtoaimp.h"
 
  char*
 #ifdef KR_headers
-g_dfmt(buf, d, ndig, bufsize) char *buf; double *d; int ndig; size_t bufsize;
+g_dfmt(buf, d, ndig, bufsize) char *buf; double *d; int ndig; Size_t bufsize;
 #else
-g_dfmt(char *buf, double *d, int ndig, size_t bufsize)
+g_dfmt(char *buf, double *d, int ndig, Size_t bufsize)
 #endif
 {
 	static FPI fpi0 = { 53, 1-1023-53+1, 2046-1023-53+1, 1, 0, Int_max };
@@ -43,14 +43,14 @@ g_dfmt(char *buf, double *d, int ndig, size_t bufsize)
 	ULong bits[2], *L, sign;
 	int decpt, ex, i, mode;
 #ifdef Honor_FLT_ROUNDS
-#include "gdtoa_fltrnds.h"
+#include "Hax_gdtoa_fltrnds.h"
 #else
 #define fpi &fpi0
 #endif
 
 	if (ndig < 0)
 		ndig = 0;
-	if (bufsize < (size_t)(ndig + 10))
+	if (bufsize < (Size_t)(ndig + 10))
 		return 0;
 
 	L = (ULong*)d;

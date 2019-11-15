@@ -29,7 +29,7 @@ THIS SOFTWARE.
 /* Please send bug reports to David M. Gay (dmg at acm dot org,
  * with " at " changed at "@" and " dot " changed to ".").	*/
 
-#include "gdtoaimp.h"
+#include "Hax_gdtoaimp.h"
 
  int
 #ifdef KR_headers
@@ -43,7 +43,7 @@ strtopf(CONST char *s, char **sp, float *f)
 	Long exp;
 	int k;
 #ifdef Honor_FLT_ROUNDS
-#include "gdtoa_fltrnds.h"
+#include "Hax_gdtoa_fltrnds.h"
 #else
 #define fpi &fpi0
 #endif

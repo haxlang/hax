@@ -43,7 +43,7 @@ SOFTWARE.
 /* distributed?							*/
 
 #include <stdio.h>
-#include "arith.h"
+#include "Hax_arith.h"
 
 #ifndef Long
 #define Long long

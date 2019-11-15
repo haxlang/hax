@@ -1149,7 +1149,7 @@ Hax_LsortCmd(
     if (Hax_SplitList(interp, argv[1], &listArgc, &listArgv) != HAX_OK) {
 	return HAX_ERROR;
     }
-    qsort(listArgv, listArgc, sizeof (char *), SortCompareProc);
+    Hax_qsort(listArgv, listArgc, sizeof (char *), SortCompareProc);
     interp->result = Hax_Merge(listArgc, listArgv);
     interp->freeProc = (Hax_FreeProc *) free;
     ckfree((char *) listArgv);

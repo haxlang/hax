@@ -969,7 +969,7 @@ HaxGetOpenFile(
 	    & (string[3] == 'e')) {
 	char *end;
 
-	fd = strtoul(string+4, &end, 10);
+	fd = Hax_strtoul(string+4, &end, 10);
 	if ((end == string+4) || (*end != 0)) {
 	    goto badId;
 	}

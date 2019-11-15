@@ -29,7 +29,7 @@ THIS SOFTWARE.
 /* Please send bug reports to David M. Gay (dmg at acm dot org,
  * with " at " changed at "@" and " dot " changed to ".").	*/
 
-#include "gdtoaimp.h"
+#include "Hax_gdtoaimp.h"
 
 #ifdef USE_LOCALE
 #include "locale.h"
@@ -61,22 +61,22 @@ THIS SOFTWARE.
 
  char *
 #ifdef KR_headers
-g__fmt(b, s, se, decpt, sign, blen) char *b; char *s; char *se; int decpt; ULong sign; size_t blen;
+g__fmt(b, s, se, decpt, sign, blen) char *b; char *s; char *se; int decpt; ULong sign; Size_t blen;
 #else
-g__fmt(char *b, char *s, char *se, int decpt, ULong sign, size_t blen)
+g__fmt(char *b, char *s, char *se, int decpt, ULong sign, Size_t blen)
 #endif
 {
 	int i, j, k;
 	char *be, *s0;
-	size_t len;
+	Size_t len;
 #ifdef USE_LOCALE
 #ifdef NO_LOCALE_CACHE
 	char *decimalpoint = localeconv()->decimal_point;
-	size_t dlen = strlen(decimalpoint);
+	Size_t dlen = strlen(decimalpoint);
 #else
 	char *decimalpoint;
 	static char *decimalpoint_cache;
-	static size_t dlen;
+	static Size_t dlen;
 	if (!(s0 = decimalpoint_cache)) {
 		s0 = localeconv()->decimal_point;
 		dlen = strlen(s0);
@@ -171,12 +171,12 @@ g__fmt(char *b, char *s, char *se, int decpt, ULong sign, size_t blen)
  	}
 
  char *
-add_nanbits_D2A(char *b, size_t blen, ULong *bits, int nb)
+add_nanbits_D2A(char *b, Size_t blen, ULong *bits, int nb)
 {
 	ULong t;
 	char *rv;
 	int i, j;
-	size_t L;
+	Size_t L;
 	static char Hexdig[16] = "0123456789abcdef";
 
 	while(!bits[--nb])

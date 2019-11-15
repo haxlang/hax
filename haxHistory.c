@@ -1008,7 +1008,7 @@ GetWords(
 	}
 	first = -1;
     } else if (Hax_isdigit(*words)) {
-	first = strtoul(words, &start, 0);
+	first = Hax_strtoul(words, &start, 0);
 	if (*start == 0) {
 	    last = first;
 	} else if (*start == '-') {
@@ -1016,7 +1016,7 @@ GetWords(
 	    if (*start == '$') {
 		start++;
 	    } else if (Hax_isdigit(*start)) {
-		last = strtoul(start, &start, 0);
+		last = Hax_strtoul(start, &start, 0);
 	    } else {
 		goto error;
 	    }

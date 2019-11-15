@@ -74,7 +74,33 @@ COMPAT_OBJS = compat/Hax_ctype_.o compat/Hax_tolower_.o compat/Hax_toupper_.o \
 	compat/Hax_strcpy.o compat/Hax_strcspn.o compat/Hax_strspn.o \
 	compat/Hax_strlen.o compat/Hax_strncpy.o compat/Hax_strstr.o \
 	compat/Hax_strerror.o compat/Hax_strncmp.o compat/Hax_strrchr.o \
-	compat/Hax_errlist.o
+	compat/Hax_errlist.o compat/Hax_atoi.o compat/Hax_strtol.o \
+	compat/Hax_qsort.o compat/Hax_strtoul.o compat/Hax_strtoll.o \
+	compat/gdtoa/Hax_dmisc.o compat/gdtoa/Hax_dtoa.o \
+	compat/gdtoa/Hax_g_Qfmt.o compat/gdtoa/Hax_g_Qfmt_p.o \
+	compat/gdtoa/Hax_g__fmt.o compat/gdtoa/Hax_g_ddfmt.o \
+	compat/gdtoa/Hax_g_ddfmt_p.o compat/gdtoa/Hax_g_dfmt.o \
+	compat/gdtoa/Hax_g_dfmt_p.o compat/gdtoa/Hax_g_ffmt.o \
+	compat/gdtoa/Hax_g_ffmt_p.o compat/gdtoa/Hax_g_xLfmt.o \
+	compat/gdtoa/Hax_g_xLfmt_p.o compat/gdtoa/Hax_g_xfmt.o \
+	compat/gdtoa/Hax_g_xfmt_p.o compat/gdtoa/Hax_gdtoa.o \
+	compat/gdtoa/Hax_gethex.o compat/gdtoa/Hax_gmisc.o \
+	compat/gdtoa/Hax_hd_init.o compat/gdtoa/Hax_hexnan.o \
+	compat/gdtoa/Hax_misc.o compat/gdtoa/Hax_smisc.o \
+	compat/gdtoa/Hax_strtoIQ.o compat/gdtoa/Hax_strtoId.o \
+	compat/gdtoa/Hax_strtoIdd.o compat/gdtoa/Hax_strtoIf.o \
+	compat/gdtoa/Hax_strtoIg.o compat/gdtoa/Hax_strtoIx.o \
+	compat/gdtoa/Hax_strtoIxL.o compat/gdtoa/Hax_strtod.o \
+	compat/gdtoa/Hax_strtodI.o compat/gdtoa/Hax_strtodg.o \
+	compat/gdtoa/Hax_strtof.o compat/gdtoa/Hax_strtopQ.o \
+	compat/gdtoa/Hax_strtopd.o compat/gdtoa/Hax_strtopdd.o \
+	compat/gdtoa/Hax_strtopf.o compat/gdtoa/Hax_strtopx.o \
+	compat/gdtoa/Hax_strtopxL.o compat/gdtoa/Hax_strtorQ.o \
+	compat/gdtoa/Hax_strtord.o compat/gdtoa/Hax_strtordd.o \
+	compat/gdtoa/Hax_strtorf.o compat/gdtoa/Hax_strtorx.o \
+	compat/gdtoa/Hax_strtorxL.o compat/gdtoa/Hax_sum.o \
+	compat/gdtoa/Hax_ulp.o \
+	compat/Hax_malloc.o
 
 compat/Hax_errlist.c: compat/errlist.awk
 	awk -f compat/errlist.awk /usr/src/sys/sys/errno.h > $@

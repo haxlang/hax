@@ -29,7 +29,7 @@ THIS SOFTWARE.
 /* Please send bug reports to David M. Gay (dmg at acm dot org,
  * with " at " changed at "@" and " dot " changed to ".").	*/
 
-#include "gdtoaimp.h"
+#include "Hax_gdtoaimp.h"
 
 #undef _0
 #undef _1
@@ -49,9 +49,9 @@ THIS SOFTWARE.
 
  char*
 #ifdef KR_headers
-g_xLfmt(buf, V, ndig, bufsize) char *buf; char *V; int ndig; size_t bufsize;
+g_xLfmt(buf, V, ndig, bufsize) char *buf; char *V; int ndig; Size_t bufsize;
 #else
-g_xLfmt(char *buf, void *V, int ndig, size_t bufsize)
+g_xLfmt(char *buf, void *V, int ndig, Size_t bufsize)
 #endif
 {
 	static FPI fpi0 = { 64, 1-16383-64+1, 32766 - 16383 - 64 + 1, 1, 0, Int_max };
@@ -59,14 +59,14 @@ g_xLfmt(char *buf, void *V, int ndig, size_t bufsize)
 	ULong bits[2], *L, sign;
 	int decpt, ex, i, mode;
 #ifdef Honor_FLT_ROUNDS
-#include "gdtoa_fltrnds.h"
+#include "Hax_gdtoa_fltrnds.h"
 #else
 #define fpi &fpi0
 #endif
 
 	if (ndig < 0)
 		ndig = 0;
-	if (bufsize < (size_t)(ndig + 10))
+	if (bufsize < (Size_t)(ndig + 10))
 		return 0;
 
 	L = (ULong*)V;

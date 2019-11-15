@@ -29,7 +29,7 @@ THIS SOFTWARE.
 /* Please send bug reports to David M. Gay (dmg at acm dot org,
  * with " at " changed at "@" and " dot " changed to ".").	*/
 
-#include "gdtoaimp.h"
+#include "Hax_gdtoaimp.h"
 
  extern UShort NanDflt_ldus_D2A[5];
 
@@ -66,7 +66,7 @@ strtopx(CONST char *s, char **sp, void *V)
 	int k;
 	UShort *L = (UShort*)V;
 #ifdef Honor_FLT_ROUNDS
-#include "gdtoa_fltrnds.h"
+#include "Hax_gdtoa_fltrnds.h"
 #else
 #define fpi &fpi0
 #endif

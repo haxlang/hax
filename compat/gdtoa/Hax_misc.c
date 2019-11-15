@@ -29,7 +29,7 @@ THIS SOFTWARE.
 /* Please send bug reports to David M. Gay (dmg at acm dot org,
  * with " at " changed at "@" and " dot " changed to ".").	*/
 
-#include "gdtoaimp.h"
+#include "Hax_gdtoaimp.h"
 
 #ifndef Omit_Private_Memory
 #ifndef PRIVATE_MEM
@@ -49,7 +49,7 @@ static double private_mem[PRIVATE_mem], *pmem_next = private_mem;
  void
 set_max_gdtoa_threads(unsigned int n)
 {
-	size_t L;
+	Size_t L;
 
 	if (n > maxthreads) {
 		L = n*sizeof(ThInfo);
@@ -947,9 +947,9 @@ strcp_D2A(char *a, CONST char *b)
 
  Char *
 #ifdef KR_headers
-memcpy_D2A(a, b, len) Char *a; Char *b; size_t len;
+memcpy_D2A(a, b, len) Char *a; Char *b; Size_t len;
 #else
-memcpy_D2A(void *a1, void *b1, size_t len)
+memcpy_D2A(void *a1, void *b1, Size_t len)
 #endif
 {
 	char *a = (char*)a1, *ae = a + len;

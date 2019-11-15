@@ -16,6 +16,11 @@
 #ifndef _HAXCOMPAT
 #define _HAXCOMPAT
 
+#ifndef SIZE_T_DEFINED
+typedef __SIZE_TYPE__ Size_t;
+#define SIZE_T_DEFINED
+#endif
+
 /*
  * <ctype.h> - character types
  */
@@ -40,16 +45,20 @@ int			Hax_sprintf (char *str, const char *format, ...);
  * <stdlib.h> - standard library definitions
  */
 
-double			Hax_strtod (const char *nptr, char **endptr);
+int			Hax_atoi(const char *nptr);
+void			Hax_free(void *ptr);
+void *			Hax_malloc(Size_t size);
+void			Hax_qsort(void *base, Size_t nmemb, Size_t size,
+				int (*compar)(const void *, const void *));
+void *			Hax_realloc(void *ptr, Size_t size);
+double			Hax_strtod(const char *nptr, char **endptr);
+long			Hax_strtol(const char *nptr, char **endptr, int base);
+unsigned long		Hax_strtoul(const char *nptr, char **endptr, int base);
+long long int		Hax_strtoll(const char *nptr, char **endptr, int base);
 
 /*
  * <string.h> - string operations
  */
-
-#ifndef SIZE_T_DEFINED
-typedef __SIZE_TYPE__ Size_t;
-#define SIZE_T_DEFINED
-#endif
 
 char *			Hax_memcpy (void *t, const void *f, Size_t n);
 char *			Hax_memset (void *s, int c, Size_t n);

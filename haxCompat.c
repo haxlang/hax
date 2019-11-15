@@ -18,9 +18,16 @@
 #ifdef HAX_FREESTANDING
 #include "compat/Hax_ctype.h"
 #include "compat/Hax_string.h"
+#include "compat/Hax_stdlib.h"
 #else
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
+#endif
+
+#ifndef SIZE_T_DEFINED
+typedef __SIZE_TYPE__ Size_t;
+#define SIZE_T_DEFINED
 #endif
 
 /*
@@ -138,20 +145,100 @@ Hax_sprintf(char *str, const char *format, ...)
  * <stdlib.h> - standard library definitions
  */
 
+int
+Hax_atoi(const char *nptr)
+{
+#ifdef HAX_FREESTANDING
+    return haxAtoi(nptr);
+#else
+    return atoi(nptr);
+#endif
+}
+
+void
+Hax_free(void *ptr)
+{
+#ifdef HAX_FREESTANDING
+    haxFree(ptr);
+#else
+    free(ptr);
+#endif
+}
+
+void *
+Hax_malloc(Size_t size)
+{
+#ifdef HAX_FREESTANDING
+    return haxMalloc(size);
+#else
+    return malloc(size);
+#endif
+}
+
+void
+Hax_qsort(void *base, Size_t nmemb, Size_t size,
+	int (*compar)(const void *, const void *))
+{
+#ifdef HAX_FREESTANDING
+    return haxQsort(base, nmemb, size, compar);
+#else
+    return qsort(base, nmemb, size, compar);
+#endif
+}
+
+void *
+Hax_realloc(void *ptr, Size_t size)
+{
+#ifdef HAX_FREESTANDING
+    return haxRealloc(ptr, size);
+#else
+    return realloc(ptr, size);
+#endif
+}
+
 double
 Hax_strtod(const char *nptr, char **endptr)
 {
+#ifdef HAX_FREESTANDING
+    return haxStrtod(nptr, endptr);
+#else
     return strtod(nptr, endptr);
+#endif
+}
+
+long
+Hax_strtol(const char *nptr, char **endptr, int base)
+{
+#ifdef HAX_FREESTANDING
+    return haxStrtol(nptr, endptr, base);
+#else
+    return strtol(nptr, endptr, base);
+#endif
+}
+
+unsigned long
+Hax_strtoul(const char *nptr, char **endptr, int base)
+{
+#ifdef HAX_FREESTANDING
+    return haxStrtoul(nptr, endptr, base);
+#else
+    return strtoul(nptr, endptr, base);
+#endif
+}
+
+long long int
+Hax_strtoll(const char *nptr, char **endptr, int base)
+{
+#ifdef HAX_FREESTANDING
+    return haxStrtoll(nptr, endptr, base);
+#else
+    return strtoll(nptr, endptr, base);
+#endif
 }
 
 /*
  * <string.h> - string operations
  */
-
-#ifndef SIZE_T_DEFINED
-typedef __SIZE_TYPE__ Size_t;
-#define SIZE_T_DEFINED
-#endif
 
 char *
 Hax_memcpy (void *t, const void *f, Size_t n)

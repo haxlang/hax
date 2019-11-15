@@ -1,3 +1,5 @@
+/* NetBSD: strtod.c,v 1.15 2019/08/01 02:27:43 riastradh Exp  */
+
 /****************************************************************
 
 The author of this software is David M. Gay.
@@ -30,12 +32,18 @@ THIS SOFTWARE.
  * with " at " changed at "@" and " dot " changed to ".").	*/
 
 #include "Hax_gdtoaimp.h"
+
+#ifndef NO_FENV_H
+#define NO_FENV_H
+#endif
+
 #ifndef NO_FENV_H
 #include <fenv.h>
 #endif
 
 #ifdef USE_LOCALE
-#include "locale.h"
+#include <locale.h>
+#include "setlocale_local.h"
 #endif
 
 #ifdef IEEE_Arith
@@ -79,54 +87,33 @@ sulp
 	}
 #endif /*}*/
 
- double
-haxStrtod
-#ifdef KR_headers
-	(s00, se) CONST char *s00; char **se;
-#else
-	(CONST char *s00, char **se)
-#endif
+static double
+_int_strtod_l(CONST char *s00, char **se)
 {
 #ifdef Avoid_Underflow
 	int scale;
 #endif
-	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, decpt, dsign,
+#ifdef INFNAN_CHECK
+	int decpt;
+#endif
+	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign,
 		 e, e1, esign, i, j, k, nd, nd0, nf, nz, nz0, sign;
 	CONST char *s, *s0, *s1;
 	double aadj;
 	Long L;
 	U adj, aadj1, rv, rv0;
 	ULong y, z;
-	Bigint *bb, *bb1, *bd, *bd0, *bs, *delta;
+	Bigint *bb = NULL, *bb1, *bd0;
+	Bigint *bd = NULL, *bs = NULL, *delta = NULL; /* pacify gcc */
 #ifdef Avoid_Underflow
 	ULong Lsb, Lsb1;
 #endif
 #ifdef SET_INEXACT
 	int inexact, oldinexact;
 #endif
-#ifdef MULTIPLE_THREADS
-	ThInfo *TI = 0;
-#endif
 #ifdef USE_LOCALE /*{{*/
-#ifdef NO_LOCALE_CACHE
-	char *decimalpoint = localeconv()->decimal_point;
-	int dplen = strlen(decimalpoint);
-#else
-	char *decimalpoint;
-	static char *decimalpoint_cache;
-	static int dplen;
-	if (!(s0 = decimalpoint_cache)) {
-		s0 = localeconv()->decimal_point;
-		if ((decimalpoint_cache = (char*)MALLOC(strlen(s0) + 1))) {
-			strcpy(decimalpoint_cache, s0);
-			s0 = decimalpoint_cache;
-			}
-		dplen = strlen(s0);
-		}
-	decimalpoint = (char*)s0;
-#endif /*NO_LOCALE_CACHE*/
-#else  /*USE_LOCALE}{*/
-#define dplen 1
+	char *decimalpoint = localeconv_l(loc)->decimal_point;
+	size_t dplen = strlen(decimalpoint);
 #endif /*USE_LOCALE}}*/
 
 #ifdef Honor_FLT_ROUNDS /*{*/
@@ -143,16 +130,19 @@ haxStrtod
 #endif /*}}*/
 #endif /*}*/
 
-	sign = nz0 = nz = decpt = 0;
+#ifdef INFNAN_CHECK
+	decpt = 0;
+#endif
+	sign = nz0 = nz = 0;
 	dval(&rv) = 0.;
 	for(s = s00;;s++) switch(*s) {
 		case '-':
 			sign = 1;
-			/* no break */
+			/* FALLTHROUGH */
 		case '+':
 			if (*++s)
 				goto break2;
-			/* no break */
+			/* FALLTHROUGH */
 		case 0:
 			goto ret0;
 		case '\t':
@@ -169,8 +159,8 @@ haxStrtod
 	if (*s == '0') {
 #ifndef NO_HEX_FP /*{*/
 		{
-		static FPI fpi = { 53, 1-1023-53+1, 2046-1023-53+1, 1, SI, 0 /*unused*/ };
-		Long exp;
+		static CONST FPI fpi = { 53, 1-1023-53+1, 2046-1023-53+1, 1, SI };
+		Long expt;
 		ULong bits[2];
 		switch(s[1]) {
 		  case 'x':
@@ -182,18 +172,19 @@ haxStrtod
 #else
 #define fpi1 fpi
 #endif
-			switch((i = gethex(&s, &fpi1, &exp, &bb, sign MTb)) & STRTOG_Retmask) {
+			switch((i = gethex(&s, &fpi1, &expt, &bb, sign, loc)) & STRTOG_Retmask) {
 			  case STRTOG_NoNumber:
 				s = s00;
 				sign = 0;
+				/* FALLTHROUGH */
 			  case STRTOG_Zero:
 				break;
 			  default:
 				if (bb) {
 					copybits(bits, fpi.nbits, bb);
-					Bfree(bb MTb);
+					Bfree(bb);
 					}
-				ULtod(((U*)&rv)->L, bits, exp, i);
+				ULtod((/* LINTED */(U*)&rv)->L, bits, expt, i);
 			  }}
 			goto ret;
 		  }
@@ -209,7 +200,7 @@ haxStrtod
 	for(nd = nf = 0; (c = *s) >= '0' && c <= '9'; nd++, s++)
 		if (nd < 9)
 			y = 10*y + c - '0';
-		else if (nd < DBL_DIG + 2)
+		else if (nd < 16)
 			z = 10*z + c - '0';
 	nd0 = nd;
 #ifdef USE_LOCALE
@@ -223,7 +214,9 @@ haxStrtod
 	if (c == '.') {
 		c = *++s;
 #endif
+#ifdef INFNAN_CHECK
 		decpt = 1;
+#endif
 		if (!nd) {
 			for(; c == '0'; c = *++s)
 				nz++;
@@ -243,11 +236,11 @@ haxStrtod
 				for(i = 1; i < nz; i++)
 					if (nd++ < 9)
 						y *= 10;
-					else if (nd <= DBL_DIG + 2)
+					else if (nd <= DBL_DIG + 1)
 						z *= 10;
 				if (nd++ < 9)
 					y = 10*y + c;
-				else if (nd <= DBL_DIG + 2)
+				else if (nd <= DBL_DIG + 1)
 					z = 10*z + c;
 				nz = 0;
 				}
@@ -264,6 +257,7 @@ haxStrtod
 		switch(c = *++s) {
 			case '-':
 				esign = 1;
+				/* FALLTHROUGH */
 			case '+':
 				c = *++s;
 			}
@@ -296,8 +290,8 @@ haxStrtod
 #ifdef INFNAN_CHECK
 			/* Check for Nan and Infinity */
 			ULong bits[2];
-			static FPI fpinan =	/* only 52 explicit bits */
-				{ 52, 1-1023-53+1, 2046-1023-53+1, 1, SI, 0 /*unused*/ };
+			static CONST FPI fpinan = /* only 52 explicit bits */
+				{ 52, 1-1023-53+1, 2046-1023-53+1, 1, SI };
 			if (!decpt)
 			 switch(c) {
 			  case 'i':
@@ -347,7 +341,7 @@ haxStrtod
 
 	if (!nd0)
 		nd0 = nd;
-	k = nd < DBL_DIG + 2 ? nd : DBL_DIG + 2;
+	k = nd < DBL_DIG + 1 ? nd : DBL_DIG + 1;
 	dval(&rv) = y;
 	if (k > 9) {
 #ifdef SET_INEXACT
@@ -487,19 +481,19 @@ haxStrtod
 #endif /*IEEE_Arith*/
  range_err:
 				if (bd0) {
-					Bfree(bb MTb);
-					Bfree(bd MTb);
-					Bfree(bs MTb);
-					Bfree(bd0 MTb);
-					Bfree(delta MTb);
+					Bfree(bb);
+					Bfree(bd);
+					Bfree(bs);
+					Bfree(bd0);
+					Bfree(delta);
 					}
 #ifndef NO_ERRNO
 				errno = ERANGE;
 #endif
 				goto ret;
 				}
-			e1 >>= 4;
-			for(j = 0; e1 > 1; j++, e1 >>= 1)
+			e1 = (unsigned int)e1 >> 4;
+			for(j = 0; e1 > 1; j++, e1 = (unsigned int)e1 >> 1)
 				if (e1 & 1)
 					dval(&rv) *= bigtens[j];
 		/* The last multiplication could overflow. */
@@ -528,7 +522,7 @@ haxStrtod
 #ifdef Avoid_Underflow
 			if (e1 & Scale_Bit)
 				scale = 2*P;
-			for(j = 0; e1 > 0; j++, e1 >>= 1)
+			for(j = 0; e1 > 0; j++, e1 = (unsigned int)e1 >> 1)
 				if (e1 & 1)
 					dval(&rv) *= tinytens[j];
 			if (scale && (j = 2*P + 1 - ((word0(&rv) & Exp_mask)
@@ -539,13 +533,13 @@ haxStrtod
 					if (j >= 53)
 					 word0(&rv) = (P+2)*Exp_msk1;
 					else
-					 word0(&rv) &= 0xffffffff << (j-32);
+					 word0(&rv) &= 0xffffffffU << (j-32);
 					}
 				else
-					word1(&rv) &= 0xffffffff << j;
+					word1(&rv) &= 0xffffffffU << j;
 				}
 #else
-			for(j = 0; e1 > 1; j++, e1 >>= 1)
+			for(j = 0; e1 > 1; j++, e1 = (unsigned int)e1 >> 1)
 				if (e1 & 1)
 					dval(&rv) *= tinytens[j];
 			/* The last multiplication could underflow. */
@@ -558,10 +552,6 @@ haxStrtod
 				if (!dval(&rv)) {
  undfl:
 					dval(&rv) = 0.;
-#ifdef Honor_FLT_ROUNDS
-					if (Rounding == 2)
-						word1(&rv) = 1;
-#endif
 					goto range_err;
 					}
 #ifndef Avoid_Underflow
@@ -579,13 +569,21 @@ haxStrtod
 
 	/* Put digits into bd: true value = bd * 10^e */
 
-	bd0 = s2b(s0, nd0, nd, y, dplen MTb);
+	bd0 = s2b(s0, nd0, nd, y, dplen);
+	if (bd0 == NULL)
+		goto ovfl;
 
 	for(;;) {
-		bd = Balloc(bd0->k MTb);
+		bd = Balloc(bd0->k);
+		if (bd == NULL)
+			goto ovfl;
 		Bcopy(bd, bd0);
-		bb = d2b(dval(&rv), &bbe, &bbbits MTb);	/* rv = bb * 2^bbe */
-		bs = i2b(1 MTb);
+		bb = d2b(dval(&rv), &bbe, &bbbits);	/* rv = bb * 2^bbe */
+		if (bb == NULL)
+			goto ovfl;
+		bs = i2b(1);
+		if (bs == NULL)
+			goto ovfl;
 
 		if (e >= 0) {
 			bb2 = bb5 = 0;
@@ -648,20 +646,38 @@ haxStrtod
 			bs2 -= i;
 			}
 		if (bb5 > 0) {
-			bs = pow5mult(bs, bb5 MTb);
-			bb1 = mult(bs, bb MTb);
-			Bfree(bb MTb);
+			bs = pow5mult(bs, bb5);
+			if (bs == NULL)
+				goto ovfl;
+			bb1 = mult(bs, bb);
+			if (bb1 == NULL)
+				goto ovfl;
+			Bfree(bb);
 			bb = bb1;
 			}
-		if (bb2 > 0)
-			bb = lshift(bb, bb2 MTb);
-		if (bd5 > 0)
-			bd = pow5mult(bd, bd5 MTb);
-		if (bd2 > 0)
-			bd = lshift(bd, bd2 MTb);
-		if (bs2 > 0)
-			bs = lshift(bs, bs2 MTb);
-		delta = diff(bb, bd MTb);
+		if (bb2 > 0) {
+			bb = lshift(bb, bb2);
+			if (bb == NULL)
+				goto ovfl;
+			}
+		if (bd5 > 0) {
+			bd = pow5mult(bd, bd5);
+			if (bd == NULL)
+				goto ovfl;
+			}
+		if (bd2 > 0) {
+			bd = lshift(bd, bd2);
+			if (bd == NULL)
+				goto ovfl;
+			}
+		if (bs2 > 0) {
+			bs = lshift(bs, bs2);
+			if (bs == NULL)
+				goto ovfl;
+			}
+		delta = diff(bb, bd);
+		if (delta == NULL)
+			goto ovfl;
 		dsign = delta->sign;
 		delta->sign = 0;
 		i = cmp(delta, bs);
@@ -693,7 +709,7 @@ haxStrtod
 						if (y)
 #endif
 						  {
-						  delta = lshift(delta,Log2P MTb);
+						  delta = lshift(delta,Log2P);
 						  if (cmp(delta, bs) <= 0)
 							dval(&adj) = -0.5;
 						  }
@@ -785,7 +801,7 @@ haxStrtod
 #endif
 				break;
 				}
-			delta = lshift(delta,Log2P MTb);
+			delta = lshift(delta,Log2P);
 			if (cmp(delta, bs) > 0)
 				goto drop_down;
 			break;
@@ -919,6 +935,7 @@ haxStrtod
 			aadj *= 0.5;
 			dval(&aadj1) = dsign ? aadj : -aadj;
 #ifdef Check_FLT_ROUNDS
+			/* CONSTCOND */
 			switch(Rounding) {
 				case 2: /* towards +infinity */
 					dval(&aadj1) -= 0.5;
@@ -928,6 +945,7 @@ haxStrtod
 					dval(&aadj1) += 0.5;
 				}
 #else
+			/* CONSTCOND */
 			if (Flt_Rounds == 0)
 				dval(&aadj1) += 0.5;
 #endif /*Check_FLT_ROUNDS*/
@@ -956,7 +974,7 @@ haxStrtod
 #ifdef Avoid_Underflow
 			if (scale && y <= 2*P*Exp_msk1) {
 				if (aadj <= 0x7fffffff) {
-					if ((z = aadj) <= 0)
+					if ((z = aadj) == 0)
 						z = 1;
 					aadj = z;
 					dval(&aadj1) = dsign ? aadj : -aadj;
@@ -971,7 +989,7 @@ haxStrtod
 				dval(&rv0) = dval(&rv);
 				word0(&rv) += P*Exp_msk1;
 				dval(&adj) = dval(&aadj1) * ulp(&rv);
-				dval(&rv) += adj;
+				dval(&rv) += dval(&adj);
 #ifdef IBM
 				if ((word0(&rv) & Exp_mask) <  P*Exp_msk1)
 #else
@@ -990,7 +1008,7 @@ haxStrtod
 				}
 			else {
 				dval(&adj) = dval(&aadj1) * ulp(&rv);
-				dval(&rv) += adj;
+				dval(&rv) += dval(&adj);
 				}
 #else /*Sudden_Underflow*/
 			/* Compute dval(&adj) so that the IEEE rounding rules will
@@ -1029,16 +1047,16 @@ haxStrtod
 			}
 #endif
  cont:
-		Bfree(bb MTb);
-		Bfree(bd MTb);
-		Bfree(bs MTb);
-		Bfree(delta MTb);
+		Bfree(bb);
+		Bfree(bd);
+		Bfree(bs);
+		Bfree(delta);
 		}
-	Bfree(bb MTb);
-	Bfree(bd MTb);
-	Bfree(bs MTb);
-	Bfree(bd0 MTb);
-	Bfree(delta MTb);
+	Bfree(bb);
+	Bfree(bd);
+	Bfree(bs);
+	Bfree(bd0);
+	Bfree(delta);
 #ifdef SET_INEXACT
 	if (inexact) {
 		if (!oldinexact) {
@@ -1075,6 +1093,12 @@ haxStrtod
 #endif
  ret:
 	if (se)
-		*se = (char *)s;
+		*se = __UNCONST(s);
 	return sign ? -dval(&rv) : dval(&rv);
 	}
+
+double
+haxStrtod(CONST char *s, char **sp)
+{
+	return _int_strtod_l(s, sp);
+}

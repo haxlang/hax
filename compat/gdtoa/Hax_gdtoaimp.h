@@ -197,10 +197,15 @@ THIS SOFTWARE.
 
 #ifndef GDTOAIMP_H_INCLUDED
 #define GDTOAIMP_H_INCLUDED
-#include "gdtoa.h"
-#include "gd_qnan.h"
+#include "Hax_gdtoa.h"
+#include "Hax_gd_qnan.h"
 #ifdef Honor_FLT_ROUNDS
 #include <fenv.h>
+#endif
+
+#ifndef SIZE_T_DEFINED
+typedef __SIZE_TYPE__ Size_t;
+#define SIZE_T_DEFINED
 #endif
 
 #ifdef DEBUG
@@ -208,8 +213,8 @@ THIS SOFTWARE.
 #define Bug(x) {fprintf(stderr, "%s\n", x); exit(1);}
 #endif
 
-#include "stdlib.h"
-#include "string.h"
+#include "../Hax_stdlib.h"
+#include "../Hax_string.h"
 
 #ifdef KR_headers
 #define Char char
@@ -217,14 +222,18 @@ THIS SOFTWARE.
 #define Char void
 #endif
 
+#define MALLOC haxMalloc
+#define FREE haxFree
+#define REALLOC haxRealloc
+
 #ifdef MALLOC
-extern Char *MALLOC ANSI((size_t));
+extern Char *MALLOC ANSI((Size_t));
 #else
 #define MALLOC malloc
 #endif
 
 #ifdef REALLOC
-extern Char *REALLOC ANSI((Char*, size_t));
+extern Char *REALLOC ANSI((Char*, Size_t));
 #else
 #define REALLOC realloc
 #endif
@@ -518,12 +527,12 @@ ThInfo {
 
 #ifdef NO_STRING_H
 #ifdef DECLARE_SIZE_T
-typedef unsigned int size_t;
+typedef unsigned int Size_t;
 #endif
-extern void memcpy_D2A ANSI((void*, const void*, size_t));
+extern void memcpy_D2A ANSI((void*, const void*, Size_t));
 #define Bcopy(x,y) memcpy_D2A(&x->sign,&y->sign,y->wds*sizeof(ULong) + 2*sizeof(int))
 #else /* !NO_STRING_H */
-#define Bcopy(x,y) memcpy(&x->sign,&y->sign,y->wds*sizeof(ULong) + 2*sizeof(int))
+#define Bcopy(x,y) __builtin_memcpy(&x->sign,&y->sign,y->wds*sizeof(ULong) + 2*sizeof(int))
 #endif /* NO_STRING_H */
 
 #define Balloc Balloc_D2A
@@ -575,7 +584,7 @@ extern void memcpy_D2A ANSI((void*, const void*, size_t));
 #define trailz trailz_D2A
 #define ulp ulp_D2A
 
- extern char *add_nanbits ANSI((char*, size_t, ULong*, int));
+ extern char *add_nanbits ANSI((char*, Size_t, ULong*, int));
  extern char *dtoa_result;
  extern CONST double bigtens[], tens[], tinytens[];
  extern unsigned char hexdig[];
@@ -598,7 +607,7 @@ extern void memcpy_D2A ANSI((void*, const void*, size_t));
  extern Bigint *diff ANSI((Bigint*, Bigint* MTd));
  extern char *dtoa ANSI((double d, int mode, int ndigits,
 			int *decpt, int *sign, char **rve));
- extern char *g__fmt ANSI((char*, char*, char*, int, ULong, size_t));
+ extern char *g__fmt ANSI((char*, char*, char*, int, ULong, Size_t));
  extern int gethex ANSI((CONST char**, CONST FPI*, Long*, Bigint**, int MTd));
  extern void hexdig_init_D2A(Void);
  extern int hexnan ANSI((CONST char**, CONST FPI*, ULong*));

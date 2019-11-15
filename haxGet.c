@@ -44,13 +44,13 @@ int
 Hax_GetInt(
     Hax_Interp *interp,		/* Interpreter to use for error reporting. */
     char *string,		/* String containing a (possibly signed)
-				 * integer in a form acceptable to strtol. */
+				 * integer in a form acceptable to Hax_strtol. */
     int *intPtr			/* Place to store converted result. */)
 {
     char *end;
     int i;
 
-    i = strtol(string, &end, 0);
+    i = Hax_strtol(string, &end, 0);
     while ((*end != '\0') && Hax_isspace(*end)) {
 	end++;
     }
@@ -87,13 +87,13 @@ int
 Hax_GetLong(
     Hax_Interp *interp,		/* Interpreter to use for error reporting. */
     char *string,		/* String containing a (possibly signed)
-				 * integer in a form acceptable to strtol. */
+				 * integer in a form acceptable to Hax_strtol. */
     long int *longPtr		/* Place to store converted result. */)
 {
     char *end;
     long int i;
 
-    i = strtol(string, &end, 0);
+    i = Hax_strtol(string, &end, 0);
     while ((*end != '\0') && Hax_isspace(*end)) {
 	end++;
     }
@@ -130,13 +130,13 @@ int
 Hax_GetLongLong(
     Hax_Interp *interp,		/* Interpreter to use for error reporting. */
     char *string,		/* String containing a (possibly signed)
-				 * integer in a form acceptable to strtol. */
+				 * integer in a form acceptable to Hax_strtol. */
     long long int *llongPtr	/* Place to store converted result. */)
 {
     char *end;
     long long int i;
 
-    i = strtoll(string, &end, 0);
+    i = Hax_strtoll(string, &end, 0);
     while ((*end != '\0') && Hax_isspace(*end)) {
 	end++;
     }

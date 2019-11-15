@@ -32,8 +32,12 @@ THIS SOFTWARE.
 #ifndef GDTOA_H_INCLUDED
 #define GDTOA_H_INCLUDED
 
-#include "arith.h"
-#include <stddef.h> /* for size_t */
+#include "Hax_arith.h"
+
+#ifndef SIZE_T_DEFINED
+typedef __SIZE_TYPE__ Size_t;
+#define SIZE_T_DEFINED
+#endif
 
 #ifndef Long
 #define Long int
@@ -113,18 +117,18 @@ extern float  strtof ANSI((CONST char *, char **));
 extern double strtod ANSI((CONST char *, char **));
 extern int strtodg ANSI((CONST char*, char**, CONST FPI*, Long*, ULong*));
 
-extern char*	g_ddfmt   ANSI((char*, double*, int, size_t));
-extern char*	g_ddfmt_p ANSI((char*, double*,	int, size_t, int));
-extern char*	g_dfmt    ANSI((char*, double*, int, size_t));
-extern char*	g_dfmt_p  ANSI((char*, double*,	int, size_t, int));
-extern char*	g_ffmt    ANSI((char*, float*,  int, size_t));
-extern char*	g_ffmt_p  ANSI((char*, float*,	int, size_t, int));
-extern char*	g_Qfmt    ANSI((char*, void*,   int, size_t));
-extern char*	g_Qfmt_p  ANSI((char*, void*,	int, size_t, int));
-extern char*	g_xfmt    ANSI((char*, void*,   int, size_t));
-extern char*	g_xfmt_p  ANSI((char*, void*,	int, size_t, int));
-extern char*	g_xLfmt   ANSI((char*, void*,   int, size_t));
-extern char*	g_xLfmt_p ANSI((char*, void*,	int, size_t, int));
+extern char*	g_ddfmt   ANSI((char*, double*, int, Size_t));
+extern char*	g_ddfmt_p ANSI((char*, double*,	int, Size_t, int));
+extern char*	g_dfmt    ANSI((char*, double*, int, Size_t));
+extern char*	g_dfmt_p  ANSI((char*, double*,	int, Size_t, int));
+extern char*	g_ffmt    ANSI((char*, float*,  int, Size_t));
+extern char*	g_ffmt_p  ANSI((char*, float*,	int, Size_t, int));
+extern char*	g_Qfmt    ANSI((char*, void*,   int, Size_t));
+extern char*	g_Qfmt_p  ANSI((char*, void*,	int, Size_t, int));
+extern char*	g_xfmt    ANSI((char*, void*,   int, Size_t));
+extern char*	g_xfmt_p  ANSI((char*, void*,	int, Size_t, int));
+extern char*	g_xLfmt   ANSI((char*, void*,   int, Size_t));
+extern char*	g_xLfmt_p ANSI((char*, void*,	int, Size_t, int));
 
 extern int	strtoId  ANSI((CONST char*, char**, double*, double*));
 extern int	strtoIdd ANSI((CONST char*, char**, double*, double*));

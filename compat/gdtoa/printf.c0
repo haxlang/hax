@@ -37,10 +37,10 @@ THIS SOFTWARE.
 #endif
 
 #ifdef Use_GDTOA_for_i386_long_double /*{{*/
-#include "gdtoa.h"
+#include "Hax_gdtoa.h"
 #else /*}{*/
 #ifndef NO_PRINTF_A_FMT /*{*/
-#include "gdtoa.h"
+#include "Hax_gdtoa.h"
 #endif /*}*/
 #endif /*}}*/
 
@@ -67,7 +67,7 @@ THIS SOFTWARE.
 
 #ifdef Use_GDTOA_Qtype /*{*/
 #ifndef GDTOA_H_INCLUDED
-#include "gdtoa.h"
+#include "Hax_gdtoa.h"
 #endif
 #ifndef GDTOA_Qtype
 #define GDTOA_Qtype long double
@@ -117,7 +117,7 @@ enum {	/* FPI.rounding values: same as FLT_ROUNDS */
 Finfo {
 	union { FILE *cf; char *sf; } u;
 	char *ob0, *obe1;
-	size_t lastlen;
+	Size_t lastlen;
 	} Finfo;
 
  typedef char *(*pgdtoa) ANSI((CONST FPI*, int be, ULong *bits, int *kind, int mode, int ndigits, int *decpt, char **rve));
@@ -205,7 +205,7 @@ xfpbits(U *u, FPBits *b)
 #endif /*} Use_GDTOA_for_i386_long_double */
 
 #ifdef Use_GDTOA_Qtype /*{*/
-#include "gdtoa.h"
+#include "Hax_gdtoa.h"
 #ifndef GDTOA_Qtype
 #define GDTOA_Qtype long double
 #endif
@@ -273,9 +273,9 @@ Qfpbits(U *u, FPBits *b)
 #ifdef KR_headers
 #define Const /* const */
 #define Voidptr char*
-#ifndef size_t__
-#define size_t int
-#define size_t__
+#ifndef Size_t__
+#define Size_t int
+#define Size_t__
 #endif
 
 #else
@@ -379,9 +379,9 @@ FILE *stderr_ASL = (FILE*)&stderr_ASL;
 void (*pfbuf_print_ASL) ANSI((char*));
 char *pfbuf_ASL;
 static char *pfbuf_next;
-static size_t pfbuf_len;
-extern Char *mymalloc_ASL ANSI((size_t));
-extern Char *myralloc_ASL ANSI((void *, size_t));
+static Size_t pfbuf_len;
+extern Char *mymalloc_ASL ANSI((Size_t));
+extern Char *myralloc_ASL ANSI((void *, Size_t));
 
 #undef fflush
 #ifdef old_fflush_ASL
@@ -405,7 +405,7 @@ fflush_ASL(FILE *f)
  static void
 pf_put(char *buf, int len)
 {
-	size_t x, y;
+	Size_t x, y;
 	if (!pfbuf_ASL) {
 		x = len + 256;
 		if (x < 512)
@@ -1592,7 +1592,7 @@ Snput
 #endif
 {
 	char *s, *s0;
-	size_t L;
+	Size_t L;
 
 	*rvp += Bsize;
 	s0 = f->ob0;
@@ -1612,15 +1612,15 @@ Snput
  int
 Vsnprintf
 #ifdef KR_headers
-	(s, n, fmt, ap) char *s; size_t n; char *fmt; va_list ap;
+	(s, n, fmt, ap) char *s; Size_t n; char *fmt; va_list ap;
 #else
-	(char *s, size_t n, const char *fmt, va_list ap)
+	(char *s, Size_t n, const char *fmt, va_list ap)
 #endif
 {
 	Finfo f;
 	char buf[Bsize];
 	int rv;
-	size_t L;
+	Size_t L;
 
 	if (n <= 0 || !s) {
 		n = 1;
@@ -1647,16 +1647,16 @@ Snprintf
 {
 	char *s, *fmt;
 	int rv;
-	size_t n;
+	Size_t n;
 	va_list ap;
 
 	va_start(ap);
 	s = va_arg(ap, char*);
-	n = va_arg(ap, size_t);
+	n = va_arg(ap, Size_t);
 	fmt = va_arg(ap, char*);
 	/*}*/
 #else
-	(char *s, size_t n, const char *fmt, ...)
+	(char *s, Size_t n, const char *fmt, ...)
 {
 	int rv;
 	va_list ap;
