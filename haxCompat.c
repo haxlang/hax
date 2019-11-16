@@ -19,10 +19,12 @@
 #include "compat/Hax_ctype.h"
 #include "compat/Hax_string.h"
 #include "compat/Hax_stdlib.h"
+#include "compat/Hax_stdio.h"
 #else
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #endif
 
 #ifndef SIZE_T_DEFINED
@@ -135,7 +137,11 @@ Hax_sprintf(char *str, const char *format, ...)
     Va_list ap;
 
     Va_start(ap, format);
+#ifdef HAX_FREESTANDING
+    result = haxVsprintf(str, format, ap);
+#else
     result = vsprintf(str, format, ap);
+#endif
     Va_end(ap);
 
     return result;

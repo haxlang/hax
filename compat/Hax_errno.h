@@ -1,8 +1,13 @@
-/*	NetBSD: string.h,v 1.52 2018/02/20 02:35:24 kamil Exp 	*/
+/*	NetBSD: errno.h,v 1.11 2008/03/03 06:57:48 dholland Exp 	*/
 
-/*-
- * Copyright (c) 1990, 1993
+/*
+ * Copyright (c) 1982, 1986, 1989, 1993
  *	The Regents of the University of California.  All rights reserved.
+ * (c) UNIX System Laboratories, Inc.
+ * All or some portions of this file are derived from material licensed
+ * to the University of California by American Telephone and Telegraph
+ * Co. or Unix System Laboratories, Inc. and are reproduced herein with
+ * the permission of UNIX System Laboratories, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,28 +33,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	@(#)string.h	8.1 (Berkeley) 6/2/93
+ *	from: @(#)errno.h	8.5 (Berkeley) 1/21/94
  */
 
-#ifndef _HAX_STRING_H_
-#define	_HAX_STRING_H_
+#ifndef _HAX_ERRNO_H_
+#define _HAX_ERRNO_H_
 
-#ifndef SIZE_T_DEFINED
-typedef __SIZE_TYPE__ Size_t;
-#define SIZE_T_DEFINED
-#endif
+#include "sys/Hax_errno.h"
 
-char	*haxStrcat(char *, const char *);
-char	*haxStrchr(const char *, int);
-int	 haxStrcmp(const char *, const char *);
-char	*haxStrcpy(char *, const char *);
-Size_t	 haxStrcspn(const char *, const char *);
-char *	 haxStrerror(int);
-Size_t	 haxStrlen(const char *);
-int	 haxStrncmp(const char *, const char *, Size_t);
-char	*haxStrncpy(char *, const char *, Size_t);
-char	*haxStrstr(const char *, const char *);
-char	*haxStrrchr(const char *, int);
-Size_t	haxStrnlen(const char *s, Size_t maxlen);
+extern int haxErrno;
 
-#endif /* !defined(_HAX_STRING_H_) */
+#endif /* !_ERRNO_H_ */

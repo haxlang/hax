@@ -76,6 +76,11 @@ COMPAT_OBJS = compat/Hax_ctype_.o compat/Hax_tolower_.o compat/Hax_toupper_.o \
 	compat/Hax_strerror.o compat/Hax_strncmp.o compat/Hax_strrchr.o \
 	compat/Hax_errlist.o compat/Hax_atoi.o compat/Hax_strtol.o \
 	compat/Hax_qsort.o compat/Hax_strtoul.o compat/Hax_strtoll.o \
+	compat/Hax_vsnprintf.o compat/Hax_vsprintf.o compat/Hax_vfprintf.o \
+	compat/Hax_strnlen.o compat/Hax_signbitd_ieee754.o \
+	compat/Hax_isfinited_ieee754.o compat/Hax_compat_frexp_ieee754.o \
+	compat/Hax_errno.o compat/Hax_fwrite.o compat/Hax___towrite.o \
+	compat/Hax_fwrite.o \
 	compat/gdtoa/Hax_dmisc.o compat/gdtoa/Hax_dtoa.o \
 	compat/gdtoa/Hax_g_Qfmt.o compat/gdtoa/Hax_g_Qfmt_p.o \
 	compat/gdtoa/Hax_g__fmt.o compat/gdtoa/Hax_g_ddfmt.o \

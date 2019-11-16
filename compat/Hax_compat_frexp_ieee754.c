@@ -1,8 +1,12 @@
-/*	NetBSD: string.h,v 1.52 2018/02/20 02:35:24 kamil Exp 	*/
+/* NetBSD: compat_frexp_ieee754.c,v 1.5 2010/04/23 19:04:54 drochner Exp  */
 
-/*-
- * Copyright (c) 1990, 1993
+/*
+ * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
+ *
+ * This software was developed by the Computer Systems Engineering group
+ * at Lawrence Berkeley Laboratory under DARPA contract BG 91-66 and
+ * contributed to Berkeley.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,28 +32,53 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	@(#)string.h	8.1 (Berkeley) 6/2/93
+ * from: Header: frexp.c,v 1.1 91/07/07 04:45:01 torek Exp
  */
 
-#ifndef _HAX_STRING_H_
-#define	_HAX_STRING_H_
-
-#ifndef SIZE_T_DEFINED
-typedef __SIZE_TYPE__ Size_t;
-#define SIZE_T_DEFINED
+#if 0
+#include <sys/cdefs.h>
+#if defined(LIBC_SCCS) && !defined(lint)
+#if 0
+static char sccsid[] = "@(#)frexp.c	8.1 (Berkeley) 6/4/93";
+#else
+__RCSID("NetBSD: compat_frexp_ieee754.c,v 1.5 2010/04/23 19:04:54 drochner Exp ");
+#endif
+#endif /* LIBC_SCCS and not lint */
 #endif
 
-char	*haxStrcat(char *, const char *);
-char	*haxStrchr(const char *, int);
-int	 haxStrcmp(const char *, const char *);
-char	*haxStrcpy(char *, const char *);
-Size_t	 haxStrcspn(const char *, const char *);
-char *	 haxStrerror(int);
-Size_t	 haxStrlen(const char *);
-int	 haxStrncmp(const char *, const char *, Size_t);
-char	*haxStrncpy(char *, const char *, Size_t);
-char	*haxStrstr(const char *, const char *);
-char	*haxStrrchr(const char *, int);
-Size_t	haxStrnlen(const char *s, Size_t maxlen);
+#include "sys/Hax_ieee754.h"
 
-#endif /* !defined(_HAX_STRING_H_) */
+double haxFrexp(double, int *);
+
+/*
+ * Split the given value into a fraction in the range [0.5, 1.0) and
+ * an exponent, such that frac * (2^exp) == value.  If value is 0,
+ * return 0.
+ */
+double
+haxFrexp(double value, int *eptr)
+{
+	union ieee_double_u u;
+
+	if (value) {
+		/*
+		 * Fractions in [0.5..1.0) have an exponent of 2^-1.
+		 * Leave Inf and NaN alone, however.
+		 */
+		u.dblu_d = value;
+		if (u.dblu_dbl.dbl_exp != DBL_EXP_INFNAN) {
+			*eptr = 0;
+			if (u.dblu_dbl.dbl_exp == 0) {
+				/* denormal, scale out of mantissa */
+				*eptr = -DBL_FRACBITS;
+				u.dblu_d *= 4.50359962737049600000e+15;
+			}
+			*eptr += u.dblu_dbl.dbl_exp - (DBL_EXP_BIAS - 1);
+			u.dblu_dbl.dbl_exp = DBL_EXP_BIAS - 1;
+		}
+		return (u.dblu_d);
+	} else {
+		*eptr = 0;
+		return (value);
+	}
+}
