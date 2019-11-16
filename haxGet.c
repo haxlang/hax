@@ -177,7 +177,7 @@ Hax_GetDouble(
     void *doublePtr		/* Place to store converted result. */)
 {
     char *end;
-    double d;
+    Double d;
 
     d = Hax_strtod(string, &end);
     while ((*end != '\0') && Hax_isspace(*end)) {
@@ -188,7 +188,7 @@ Hax_GetDouble(
 		string, "\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    *(double *)doublePtr = d;
+    *(Double *)doublePtr = d;
     return HAX_OK;
 }
 

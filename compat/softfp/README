@@ -1,0 +1,17 @@
+This is a modified version of part of John Hauser's SoftFloat 3e package
+from the upstream GitHub repository:
+
+  https://github.com/ucb-bar/berkeley-softfloat-3/
+
+This version is modified from the following commit:
+
+From b64af41c3276f97f0e181920400ee056b9c88037 Mon Sep 17 00:00:00 2001
+From: John Hauser <jhauser@eecs.berkeley.edu>
+Date: Thu, 26 Jul 2018 13:52:23 -0700
+Subject: [PATCH] Fix typo in function 'softfloat_propagateNaNF128M' for
+ RISC-V.
+
+This version has been heavily reduced and modified to support Hax.
+
+When needed this code reuses 8086 specialized FPU emulation.
+It shall work on each host/CPU, but picks behavior of x86.

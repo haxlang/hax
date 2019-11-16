@@ -31,7 +31,7 @@ THIS SOFTWARE.
 
 #include "Hax_gdtoaimp.h"
 
- double
+ Double
 ulp
 #ifdef KR_headers
 	(x) U *x;

@@ -202,7 +202,7 @@ Hax_realloc(void *ptr, Size_t size)
 #endif
 }
 
-double
+Double
 Hax_strtod(const char *nptr, char **endptr)
 {
 #ifdef HAX_FREESTANDING

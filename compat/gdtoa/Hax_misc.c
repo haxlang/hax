@@ -699,7 +699,7 @@ diff
 	return c;
 	}
 
- double
+ Double
 b2d
 #ifdef KR_headers
 	(a, e) Bigint *a; int *e;
@@ -771,9 +771,9 @@ b2d
  Bigint *
 d2b
 #ifdef KR_headers
-	(dd, e, bits MTa) double dd; int *e, *bits; MTk
+	(dd, e, bits MTa) Double dd; int *e, *bits; MTk
 #else
-	(double dd, int *e, int *bits MTd)
+	(Double dd, int *e, int *bits MTd)
 #endif
 {
 	Bigint *b;
@@ -906,29 +906,73 @@ d2b
 #undef d0
 #undef d1
 
- CONST double
+ CONST Double
 #ifdef IEEE_Arith
-bigtens[] = { 1e16, 1e32, 1e64, 1e128, 1e256 };
-CONST double tinytens[] = { 1e-16, 1e-32, 1e-64, 1e-128, 1e-256
+bigtens[] = {
+		0x4341c37937e08000LL,
+		0x4693b8b5b5056e17LL,
+		0x4d384f03e93ff9f5LL,
+		0x5a827748f9301d32LL,
+		0x75154fdd7f73bf3cLL};
+CONST Double tinytens[] = {
+		0x3c9cd2b297d889bcLL,
+		0x3949f623d5a8a733LL,
+		0x32a50ffd44f4a73dLL,
+		0x255bba08cf8c979dLL,
+		0xac8062864ac6f43LL,
 		};
 #else
 #ifdef IBM
-bigtens[] = { 1e16, 1e32, 1e64 };
-CONST double tinytens[] = { 1e-16, 1e-32, 1e-64 };
+bigtens[] = { 
+		0x4341c37937e08000LL,
+		0x4693b8b5b5056e17LL,
+		0x4d384f03e93ff9f5LL,
+
+ };
+CONST Double tinytens[] = { 
+		0x3c9cd2b297d889bcLL,
+		0x3949f623d5a8a733LL,
+		0x32a50ffd44f4a73dLL,
+ };
 #else
-bigtens[] = { 1e16, 1e32 };
-CONST double tinytens[] = { 1e-16, 1e-32 };
+bigtens[] = { 
+		0x4341c37937e08000LL,
+		0x4693b8b5b5056e17LL,
+ };
+CONST Double tinytens[] = { 
+		0x3c9cd2b297d889bcLL,
+		0x3949f623d5a8a733LL,
+ };
 #endif
 #endif
 
- CONST double
+ CONST Double
 tens[] = {
-		1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9,
-		1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19,
-		1e20, 1e21, 1e22
-#ifdef VAX
-		, 1e23, 1e24
-#endif
+		0x3ff0000000000000LL,
+		0x4024000000000000LL,
+		0x4059000000000000LL,
+		0x408f400000000000LL,
+		0x40c3880000000000LL,
+		0x40f86a0000000000LL,
+		0x412e848000000000LL,
+		0x416312d000000000LL,
+		0x4197d78400000000LL,
+		0x41cdcd6500000000LL,
+		0x4202a05f20000000LL,
+		0x42374876e8000000LL,
+		0x426d1a94a2000000LL,
+		0x42a2309ce5400000LL,
+		0x42d6bcc41e900000LL,
+		0x430c6bf526340000LL,
+		0x4341c37937e08000LL,
+		0x4376345785d8a000LL,
+		0x43abc16d674ec800LL,
+		0x43e158e460913d00LL,
+		0x4415af1d78b58c40LL,
+		0x444b1ae4d6e2ef50LL,
+		0x4480f0cf064dd592LL,
+		0x44b52d02c7e14af6LL,
+		0x44ea784379d99db4LL,
 		};
 
  char *

@@ -78,39 +78,67 @@ COMPAT_OBJS = compat/Hax_ctype_.o compat/Hax_tolower_.o compat/Hax_toupper_.o \
 	compat/Hax_qsort.o compat/Hax_strtoul.o compat/Hax_strtoll.o \
 	compat/Hax_vsnprintf.o compat/Hax_vsprintf.o compat/Hax_vfprintf.o \
 	compat/Hax_strnlen.o compat/Hax_signbitd_ieee754.o \
+	compat/Hax_isnand_ieee754.o \
 	compat/Hax_isfinited_ieee754.o compat/Hax_compat_frexp_ieee754.o \
 	compat/Hax_errno.o compat/Hax_fwrite.o compat/Hax___towrite.o \
 	compat/Hax_fwrite.o \
-	compat/gdtoa/Hax_dmisc.o compat/gdtoa/Hax_dtoa.o \
+	compat/gdtoa/Hax_dmisc.o \
 	compat/gdtoa/Hax_g_Qfmt.o compat/gdtoa/Hax_g_Qfmt_p.o \
-	compat/gdtoa/Hax_g__fmt.o compat/gdtoa/Hax_g_ddfmt.o \
-	compat/gdtoa/Hax_g_ddfmt_p.o compat/gdtoa/Hax_g_dfmt.o \
-	compat/gdtoa/Hax_g_dfmt_p.o compat/gdtoa/Hax_g_ffmt.o \
+	compat/gdtoa/Hax_g__fmt.o \
+	compat/gdtoa/Hax_g_ffmt.o \
 	compat/gdtoa/Hax_g_ffmt_p.o compat/gdtoa/Hax_g_xLfmt.o \
 	compat/gdtoa/Hax_g_xLfmt_p.o compat/gdtoa/Hax_g_xfmt.o \
-	compat/gdtoa/Hax_g_xfmt_p.o compat/gdtoa/Hax_gdtoa.o \
+	compat/gdtoa/Hax_g_xfmt_p.o \
 	compat/gdtoa/Hax_gethex.o compat/gdtoa/Hax_gmisc.o \
 	compat/gdtoa/Hax_hd_init.o compat/gdtoa/Hax_hexnan.o \
 	compat/gdtoa/Hax_misc.o compat/gdtoa/Hax_smisc.o \
-	compat/gdtoa/Hax_strtoIQ.o compat/gdtoa/Hax_strtoId.o \
-	compat/gdtoa/Hax_strtoIdd.o compat/gdtoa/Hax_strtoIf.o \
+	compat/gdtoa/Hax_strtoIQ.o \
+	compat/gdtoa/Hax_strtoIf.o \
 	compat/gdtoa/Hax_strtoIg.o compat/gdtoa/Hax_strtoIx.o \
 	compat/gdtoa/Hax_strtoIxL.o compat/gdtoa/Hax_strtod.o \
-	compat/gdtoa/Hax_strtodI.o compat/gdtoa/Hax_strtodg.o \
+	compat/gdtoa/Hax_strtodg.o \
 	compat/gdtoa/Hax_strtof.o compat/gdtoa/Hax_strtopQ.o \
-	compat/gdtoa/Hax_strtopd.o compat/gdtoa/Hax_strtopdd.o \
 	compat/gdtoa/Hax_strtopf.o compat/gdtoa/Hax_strtopx.o \
 	compat/gdtoa/Hax_strtopxL.o compat/gdtoa/Hax_strtorQ.o \
-	compat/gdtoa/Hax_strtord.o compat/gdtoa/Hax_strtordd.o \
+	compat/gdtoa/Hax_strtord.o \
 	compat/gdtoa/Hax_strtorf.o compat/gdtoa/Hax_strtorx.o \
 	compat/gdtoa/Hax_strtorxL.o compat/gdtoa/Hax_sum.o \
 	compat/gdtoa/Hax_ulp.o \
+	compat/softfp/haxDoubleEq.o compat/softfp/haxDoubleNeq.o \
+	compat/softfp/Hax_strtod.o compat/softfp/haxLongLongToDouble.o \
+	compat/softfp/haxDoubleMul.o compat/softfp/haxDoubleDiv.o \
+	compat/softfp/haxDoubleAdd.o compat/softfp/haxDoubleSub.o \
+	compat/softfp/haxDoubleLt.o compat/softfp/haxDoubleGt.o \
+	compat/softfp/haxDoubleLe.o compat/softfp/haxDoubleGe.o \
+	compat/softfp/Hax_s_normRoundPackToF64.o \
+	compat/softfp/Hax_s_normRoundPackToF64.o \
+	compat/softfp/Hax_s_normSubnormalF64Sig.o \
+	compat/softfp/Hax_s_roundPackToF32.o \
+	compat/softfp/Hax_s_countLeadingZeros64.o \
+	compat/softfp/Hax_s_propagateNaNF64UI.o \
+	compat/softfp/Hax_s_roundPackToF64.o \
+	compat/softfp/Hax_s_mul64To128M.o \
+	compat/softfp/Hax_softfloat_raiseFlags.o \
+	compat/softfp/Hax_softfloat_state.o \
+	compat/softfp/Hax_s_countLeadingZeros8.o \
+	compat/softfp/Hax_s_approxRecip32_1.o \
+	compat/softfp/Hax_s_subMagsF64.o \
+	compat/softfp/Hax_s_approxRecip_1Ks.o \
+	compat/softfp/Hax_s_addMagsF64.o \
+	compat/softfp/haxDoubleToLongLong.o \
+	compat/softfp/Hax_softfloat_roundMToI64.o \
+	compat/softfp/Hax_s_shiftRightJamM.o \
+	compat/softfp/Hax_s_shortShiftRightJamM.o \
+	compat/softfp/Hax_stod.o compat/softfp/haxFloatToDouble.o \
+	compat/softfp/Hax_s_f32UIToCommonNaN.o \
+	compat/softfp/Hax_s_commonNaNToF64UI.o \
+	compat/softfp/Hax_s_normSubnormalF32Sig.o \
 	compat/Hax_malloc.o
 
 compat/Hax_errlist.c: compat/errlist.awk
 	awk -f compat/errlist.awk /usr/src/sys/sys/errno.h > $@
 
-OBJS = $(GENERIC_OBJS) $(UNIX_OBJS)
+OBJS = $(GENERIC_OBJS) $(UNIX_OBJS) # $(COMPAT_OBJS)
 
 libhax.a: $(OBJS)
 	$(AR) cr $@ $(OBJS)

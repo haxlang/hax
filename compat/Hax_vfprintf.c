@@ -33,11 +33,14 @@
 #include "Hax_string.h"
 #include "Hax_ctype.h"
 
+#include "haxFloat.h"
+
 #define NL_ARGMAX 9
 
-int haxSignbitd(double x);
-int haxIsfinited(double x);
-double haxFrexp(double, int *);
+int haxSignbitd(Double x);
+int haxIsfinited(Double x);
+Double haxFrexp(Double, int *);
+int haxIsnand(Double x);
 
 #ifndef UINTMAX_T_DEFINED
 typedef __UINTMAX_TYPE__ Uintmax_t;
@@ -191,7 +194,7 @@ static const unsigned char states[]['z'-'A'+1] = {
 union arg
 {
 	Uintmax_t i;
-	long double f;
+	Double f;
 	void *p;
 };
 
@@ -214,8 +217,7 @@ static void pop_arg(union arg *arg, int type, va_list *ap)
 	break; case UMAX:	arg->i = va_arg(*ap, Uintmax_t);
 	break; case PDIFF:	arg->i = va_arg(*ap, Ptrdiff_t);
 	break; case UIPTR:	arg->i = (Uintptr_t)va_arg(*ap, void *);
-	break; case DBL:	arg->f = va_arg(*ap, double);
-	break; case LDBL:	arg->f = va_arg(*ap, long double);
+	break; case DBL:	arg->f = va_arg(*ap, Double);
 	}
 }
 
@@ -259,7 +261,7 @@ static char *fmt_u(Uintmax_t x, char *s)
 	return s;
 }
 
-static int fmt_fp(Hax_FILE *f, double y, int w, int p, int fl, int t)
+static int fmt_fp(Hax_FILE *f, Double y, int w, int p, int fl, int t)
 {
 	uint32_t big[(DBL_MANT_DIG+28)/29 + 1          // mantissa expansion
 		+ (DBL_MAX_EXP+DBL_MANT_DIG+28+8)/9]; // exponent expansion
@@ -272,7 +274,7 @@ static int fmt_fp(Hax_FILE *f, double y, int w, int p, int fl, int t)
 
 	pl=1;
 	if (haxSignbitd(y)) {
-		y=-y;
+		y=Hax_DoubleMul(y, HAX_DOUBLE_MINUSONE);
 	} else if (fl & MARK_POS) {
 		prefix+=3;
 	} else if (fl & PAD_POS) {
@@ -281,7 +283,7 @@ static int fmt_fp(Hax_FILE *f, double y, int w, int p, int fl, int t)
 
 	if (!haxIsfinited(y)) {
 		char *s = (t&32)?"inf":"INF";
-		if (y!=y) s=(t&32)?"nan":"NAN";
+		if (haxIsnand(y)) s=(t&32)?"nan":"NAN";
 		pad(f, ' ', w, 3+pl, fl&~ZERO_PAD);
 		out(f, prefix, pl);
 		out(f, s, 3);
@@ -289,11 +291,11 @@ static int fmt_fp(Hax_FILE *f, double y, int w, int p, int fl, int t)
 		return MAX(w, 3+pl);
 	}
 
-	y = haxFrexp(y, &e2) * 2;
-	if (y) e2--;
+	y = Hax_DoubleMul(haxFrexp(y, &e2), HAX_DOUBLE_TWO);
+	if (Hax_DoubleNeq(y, HAX_DOUBLE_ZERO)) e2--;
 
 	if ((t|32)=='a') {
-		double round = 8.0;
+		Double round = Hax_LongLongToDouble(8);
 		int re;
 
 		if (t&32) prefix += 9;
@@ -303,16 +305,16 @@ static int fmt_fp(Hax_FILE *f, double y, int w, int p, int fl, int t)
 		else re=DBL_MANT_DIG/4-1-p;
 
 		if (re) {
-			round *= 1<<(DBL_MANT_DIG%4);
-			while (re--) round*=16;
+			round = Hax_DoubleMul(round, Hax_LongLongToDouble(1<<(DBL_MANT_DIG%4)));
+			while (re--) round= Hax_DoubleMul(round, Hax_LongLongToDouble(16));
 			if (*prefix=='-') {
-				y=-y;
-				y-=round;
-				y+=round;
-				y=-y;
+				y=Hax_DoubleMul(y, HAX_DOUBLE_MINUSONE);
+				y=Hax_DoubleSub(y, round);
+				y=Hax_DoubleAdd(y, round);
+				y=Hax_DoubleMul(y, HAX_DOUBLE_MINUSONE);
 			} else {
-				y+=round;
-				y-=round;
+				y=Hax_DoubleAdd(y, round);
+				y=Hax_DoubleSub(y, round);
 			}
 		}
 
@@ -323,11 +325,11 @@ static int fmt_fp(Hax_FILE *f, double y, int w, int p, int fl, int t)
 
 		s=buf;
 		do {
-			int x=y;
+			int x=Hax_DoubleToLongLong(y);
 			*s++=xdigits[x]|(t&32);
-			y=16*(y-x);
-			if (s-buf==1 && (y||p>0||(fl&ALT_FORM))) *s++='.';
-		} while (y);
+			y=Hax_DoubleMul(Hax_LongLongToDouble(16),(Hax_DoubleSub(y, Hax_LongLongToDouble(x))));
+			if (s-buf==1 && (Hax_DoubleNeq(y, HAX_DOUBLE_ZERO)||p>0||(fl&ALT_FORM))) *s++='.';
+		} while (Hax_DoubleNeq(y, HAX_DOUBLE_ZERO));
 
 		if (p > INT_MAX-2-(ebuf-estr)-pl)
 			return -1;
@@ -347,15 +349,19 @@ static int fmt_fp(Hax_FILE *f, double y, int w, int p, int fl, int t)
 	}
 	if (p<0) p=6;
 
-	if (y) y *= 0x1p28, e2-=28;
+	if (Hax_DoubleNeq(y, HAX_DOUBLE_ZERO)) {
+		const Double const0x1p28 = {0x41b0000000000000LL}; // 0x1p28
+		y = Hax_DoubleMul(y, const0x1p28);
+		e2 -= 28;
+	}
 
 	if (e2<0) a=r=z=big;
 	else a=r=z=big+sizeof(big)/sizeof(*big) - DBL_MANT_DIG - 1;
 
 	do {
-		*z = y;
-		y = 1000000000*(y-*z++);
-	} while (y);
+		*z = Hax_DoubleToLongLong(y);
+		y = Hax_DoubleMul(Hax_LongLongToDouble(1000000000), Hax_DoubleSub(y,Hax_LongLongToDouble(*z++)));
+	} while (Hax_DoubleNeq(y, HAX_DOUBLE_ZERO));
 
 	while (e2>0) {
 		uint32_t carry=0;
@@ -400,17 +406,23 @@ static int fmt_fp(Hax_FILE *f, double y, int w, int p, int fl, int t)
 		x = *d % i;
 		/* Are there any significant digits past j? */
 		if (x || d+1!=z) {
-			double round = 2/DBL_EPSILON;
-			double small;
+			Double round = {0x4340000000000000LL}; // 2/DBL_EPSILON
+			Double small;
 			if ((*d/i & 1) || (i==1000000000 && d>a && (d[-1]&1)))
-				round += 2;
-			if (x<i/2) small=0x0.8p0;
-			else if (x==i/2 && d+1==z) small=0x1.0p0;
-			else small=0x1.8p0;
-			if (pl && *prefix=='-') round*=-1, small*=-1;
+				round = Hax_DoubleAdd(round, Hax_LongLongToDouble(2));
+			const Double const0x08p0 = {0x3fe0000000000000LL}; // 0x0.8p0
+			const Double const0x10p0 = {0x3ff0000000000000LL}; // 0x1.0p0
+			const Double const0x18p0 = {0x3ff8000000000000LL}; // 0x1.8p0
+			if (x<i/2) small=const0x08p0;
+			else if (x==i/2 && d+1==z) small=const0x10p0;
+			else small=const0x18p0;
+			if (pl && *prefix=='-') {
+				round=Hax_DoubleMul(round, HAX_DOUBLE_MINUSONE);
+				small=Hax_DoubleMul(small, HAX_DOUBLE_MINUSONE);
+			}
 			*d -= x;
 			/* Decide whether to round by probing round+small */
-			if (round+small != round) {
+			if (Hax_DoubleNeq(Hax_DoubleAdd(round, small), round)) {
 				*d = *d + i;
 				while (*d > 999999999) {
 					*d--=0;

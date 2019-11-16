@@ -308,7 +308,7 @@ extern "C" {
 Exactly one of IEEE_8087, IEEE_MC68k, VAX, or IBM should be defined.
 #endif
 
-typedef union { double d; ULong L[2]; } U;
+typedef union { Double d; ULong L[2]; } U;
 
 #ifdef IEEE_8087
 #define word0(x) (x)->L[1]
@@ -442,13 +442,13 @@ typedef union { double d; ULong L[2]; } U;
 #define rounded_product(a,b) a = rnd_prod(a, b)
 #define rounded_quotient(a,b) a = rnd_quot(a, b)
 #ifdef KR_headers
-extern double rnd_prod(), rnd_quot();
+extern Double rnd_prod(), rnd_quot();
 #else
-extern double rnd_prod(double, double), rnd_quot(double, double);
+extern Double rnd_prod(Double, Double), rnd_quot(Double, Double);
 #endif
 #else
-#define rounded_product(a,b) a *= b
-#define rounded_quotient(a,b) a /= b
+#define rounded_product(a,b) a = Hax_DoubleMul(a,b)
+#define rounded_quotient(a,b) a = Hax_DoubleDiv(a,b)
 #endif
 
 #define Big0 (Frac_mask1 | Exp_msk1*(DBL_MAX_EXP+Bias-1))
@@ -586,7 +586,7 @@ extern void memcpy_D2A ANSI((void*, const void*, Size_t));
 
  extern char *add_nanbits ANSI((char*, Size_t, ULong*, int));
  extern char *dtoa_result;
- extern CONST double bigtens[], tens[], tinytens[];
+ extern CONST Double bigtens[], tens[], tinytens[];
  extern unsigned char hexdig[];
  extern const char *InfName[6], *NanName[3];
 
@@ -599,13 +599,13 @@ extern void memcpy_D2A ANSI((void*, const void*, Size_t));
  extern void ULtox ANSI((UShort*, ULong*, Long, int));
  extern void ULtoxL ANSI((ULong*, ULong*, Long, int));
  extern ULong any_on ANSI((Bigint*, int));
- extern double b2d ANSI((Bigint*, int*));
+ extern Double b2d ANSI((Bigint*, int*));
  extern int cmp ANSI((Bigint*, Bigint*));
  extern void copybits ANSI((ULong*, int, Bigint*));
- extern Bigint *d2b ANSI((double, int*, int* MTd));
+ extern Bigint *d2b ANSI((Double, int*, int* MTd));
  extern void decrement ANSI((Bigint*));
  extern Bigint *diff ANSI((Bigint*, Bigint* MTd));
- extern char *dtoa ANSI((double d, int mode, int ndigits,
+ extern char *dtoa ANSI((Double d, int mode, int ndigits,
 			int *decpt, int *sign, char **rve));
  extern char *g__fmt ANSI((char*, char*, char*, int, ULong, Size_t));
  extern int gethex ANSI((CONST char**, CONST FPI*, Long*, Bigint**, int MTd));
@@ -622,17 +622,17 @@ extern void memcpy_D2A ANSI((void*, const void*, Size_t));
  extern char *nrv_alloc ANSI((char*, char **, int MTd));
  extern Bigint *pow5mult ANSI((Bigint*, int MTd));
  extern int quorem ANSI((Bigint*, Bigint*));
- extern double ratio ANSI((Bigint*, Bigint*));
+ extern Double ratio ANSI((Bigint*, Bigint*));
  extern void rshift ANSI((Bigint*, int));
  extern char *rv_alloc ANSI((int MTd));
  extern Bigint *s2b ANSI((CONST char*, int, int, ULong, int MTd));
  extern Bigint *set_ones ANSI((Bigint*, int MTd));
  extern char *strcp ANSI((char*, const char*));
  extern int strtoIg ANSI((CONST char*, char**, CONST FPI*, Long*, Bigint**, int*));
- extern double strtod ANSI((const char *s00, char **se));
+ extern Double strtod ANSI((const char *s00, char **se));
  extern Bigint *sum ANSI((Bigint*, Bigint* MTd));
  extern int trailz ANSI((Bigint*));
- extern double ulp ANSI((U*));
+ extern Double ulp ANSI((U*));
 
 #ifdef __cplusplus
 }

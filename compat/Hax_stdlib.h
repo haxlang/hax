@@ -43,12 +43,14 @@ typedef __SIZE_TYPE__ Size_t;
 #define NULL ((void *)0)
 #endif
 
+#include "haxFloat.h"
+
 int	 haxAtoi(const char *);
 void	 haxFree(void *);
 void	*haxMalloc(Size_t);
 void	 haxQsort(void *, Size_t, Size_t, int (*)(const void *, const void *));
 void	*haxRealloc(void *, Size_t);
-double	 haxStrtod(const char *, char **);
+Double	 haxStrtod(const char *, char **);
 long	 haxStrtol(const char *, char **, int);
 unsigned long
 	 haxStrtoul(const char *, char **, int);

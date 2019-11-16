@@ -1,4 +1,4 @@
-/* NetBSD: compat_frexp_ieee754.c,v 1.5 2010/04/23 19:04:54 drochner Exp  */
+/*	NetBSD: isnand_ieee754.c,v 1.1 2004/03/04 23:42:39 kleink Exp 	*/
 
 /*
  * Copyright (c) 1992, 1993
@@ -32,54 +32,33 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * from: Header: frexp.c,v 1.1 91/07/07 04:45:01 torek Exp
+ * from: Header: isinf.c,v 1.1 91/07/08 19:03:34 torek Exp
  */
 
 #if 0
 #include <sys/cdefs.h>
 #if defined(LIBC_SCCS) && !defined(lint)
 #if 0
-static char sccsid[] = "@(#)frexp.c	8.1 (Berkeley) 6/4/93";
+static char sccsid[] = "@(#)isinf.c	8.1 (Berkeley) 6/4/93";
 #else
-__RCSID("NetBSD: compat_frexp_ieee754.c,v 1.5 2010/04/23 19:04:54 drochner Exp ");
+__RCSID("NetBSD: isnand_ieee754.c,v 1.1 2004/03/04 23:42:39 kleink Exp ");
 #endif
 #endif /* LIBC_SCCS and not lint */
 #endif
 
 #include "sys/Hax_ieee754.h"
 
-Double haxFrexp(Double, int *);
-
 /*
- * Split the given value into a fraction in the range [0.5, 1.0) and
- * an exponent, such that frac * (2^exp) == value.  If value is 0,
- * return 0.
+ * 7.12.3.4 isnan - test for a NaN
+ *          IEEE 754 double-precision version
  */
-Double
-haxFrexp(Double value, int *eptr)
+int
+haxIsnand(Double x)
 {
 	union ieee_double_u u;
 
-	if (Hax_DoubleNeq(value, HAX_DOUBLE_ZERO)) {
-		/*
-		 * Fractions in [0.5..1.0) have an exponent of 2^-1.
-		 * Leave Inf and NaN alone, however.
-		 */
-		u.dblu_d = value;
-		if (u.dblu_dbl.dbl_exp != DBL_EXP_INFNAN) {
-			*eptr = 0;
-			if (u.dblu_dbl.dbl_exp == 0) {
-				/* denormal, scale out of mantissa */
-				*eptr = -DBL_FRACBITS;
-				const Double const450359962737049600000e15 = {0x4330000000000000LL}; // 4.50359962737049600000e+15
-				u.dblu_d = Hax_DoubleMul(u.dblu_d, const450359962737049600000e15);
-			}
-			*eptr += u.dblu_dbl.dbl_exp - (DBL_EXP_BIAS - 1);
-			u.dblu_dbl.dbl_exp = DBL_EXP_BIAS - 1;
-		}
-		return (u.dblu_d);
-	} else {
-		*eptr = 0;
-		return (value);
-	}
+	u.dblu_d = x;
+
+	return (u.dblu_dbl.dbl_exp == DBL_EXP_INFNAN &&
+	    (u.dblu_dbl.dbl_frach != 0 || u.dblu_dbl.dbl_fracl != 0));
 }

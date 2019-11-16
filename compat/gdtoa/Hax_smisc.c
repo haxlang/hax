@@ -69,7 +69,7 @@ s2b
 	return b;
 	}
 
- double
+ Double
 ratio
 #ifdef KR_headers
 	(a, b) Bigint *a, *b;
@@ -103,7 +103,7 @@ ratio
 		word0(&db) += k*Exp_msk1;
 		}
 #endif
-	return dval(&da) / dval(&db);
+	return Hax_DoubleDiv(dval(&da), dval(&db));
 	}
 
 #ifdef INFNAN_CHECK

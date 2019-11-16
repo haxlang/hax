@@ -43,7 +43,7 @@ __RCSID("NetBSD: isfinited_ieee754.c,v 1.2 2008/04/28 20:22:59 martin Exp ");
  *          IEEE 754 double-precision version
  */
 int
-haxIsfinited(double x)
+haxIsfinited(Double x)
 {
 	union ieee_double_u u;
 

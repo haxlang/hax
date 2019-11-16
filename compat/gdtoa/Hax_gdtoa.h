@@ -32,6 +32,8 @@ THIS SOFTWARE.
 #ifndef GDTOA_H_INCLUDED
 #define GDTOA_H_INCLUDED
 
+#include "haxFloat.h"
+
 #include "Hax_arith.h"
 
 #ifndef SIZE_T_DEFINED
@@ -108,19 +110,19 @@ enum {	/* FPI.rounding values: same as FLT_ROUNDS */
 extern "C" {
 #endif
 
-extern char* dtoa  ANSI((double d, int mode, int ndigits, int *decpt,
+extern char* dtoa  ANSI((Double d, int mode, int ndigits, int *decpt,
 			int *sign, char **rve));
 extern char* gdtoa ANSI((CONST FPI *fpi, int be, ULong *bits, int *kindp,
 			int mode, int ndigits, int *decpt, char **rve));
 extern void freedtoa ANSI((char*));
 extern float  strtof ANSI((CONST char *, char **));
-extern double strtod ANSI((CONST char *, char **));
+extern Double strtod ANSI((CONST char *, char **));
 extern int strtodg ANSI((CONST char*, char**, CONST FPI*, Long*, ULong*));
 
-extern char*	g_ddfmt   ANSI((char*, double*, int, Size_t));
-extern char*	g_ddfmt_p ANSI((char*, double*,	int, Size_t, int));
-extern char*	g_dfmt    ANSI((char*, double*, int, Size_t));
-extern char*	g_dfmt_p  ANSI((char*, double*,	int, Size_t, int));
+extern char*	g_ddfmt   ANSI((char*, Double*, int, Size_t));
+extern char*	g_ddfmt_p ANSI((char*, Double*,	int, Size_t, int));
+extern char*	g_dfmt    ANSI((char*, Double*, int, Size_t));
+extern char*	g_dfmt_p  ANSI((char*, Double*,	int, Size_t, int));
 extern char*	g_ffmt    ANSI((char*, float*,  int, Size_t));
 extern char*	g_ffmt_p  ANSI((char*, float*,	int, Size_t, int));
 extern char*	g_Qfmt    ANSI((char*, void*,   int, Size_t));
@@ -130,22 +132,22 @@ extern char*	g_xfmt_p  ANSI((char*, void*,	int, Size_t, int));
 extern char*	g_xLfmt   ANSI((char*, void*,   int, Size_t));
 extern char*	g_xLfmt_p ANSI((char*, void*,	int, Size_t, int));
 
-extern int	strtoId  ANSI((CONST char*, char**, double*, double*));
-extern int	strtoIdd ANSI((CONST char*, char**, double*, double*));
+extern int	strtoId  ANSI((CONST char*, char**, Double*, Double*));
+extern int	strtoIdd ANSI((CONST char*, char**, Double*, Double*));
 extern int	strtoIf  ANSI((CONST char*, char**, float*, float*));
 extern int	strtoIQ  ANSI((CONST char*, char**, void*, void*));
 extern int	strtoIx  ANSI((CONST char*, char**, void*, void*));
 extern int	strtoIxL ANSI((CONST char*, char**, void*, void*));
-extern int	strtord  ANSI((CONST char*, char**, int, double*));
-extern int	strtordd ANSI((CONST char*, char**, int, double*));
+extern int	strtord  ANSI((CONST char*, char**, int, Double*));
+extern int	strtordd ANSI((CONST char*, char**, int, Double*));
 extern int	strtorf  ANSI((CONST char*, char**, int, float*));
 extern int	strtorQ  ANSI((CONST char*, char**, int, void*));
 extern int	strtorx  ANSI((CONST char*, char**, int, void*));
 extern int	strtorxL ANSI((CONST char*, char**, int, void*));
 #if 1
-extern int	strtodI  ANSI((CONST char*, char**, double*));
-extern int	strtopd  ANSI((CONST char*, char**, double*));
-extern int	strtopdd ANSI((CONST char*, char**, double*));
+extern int	strtodI  ANSI((CONST char*, char**, Double*));
+extern int	strtopd  ANSI((CONST char*, char**, Double*));
+extern int	strtopdd ANSI((CONST char*, char**, Double*));
 extern int	strtopf  ANSI((CONST char*, char**, float*));
 extern int	strtopQ  ANSI((CONST char*, char**, void*));
 extern int	strtopx  ANSI((CONST char*, char**, void*));

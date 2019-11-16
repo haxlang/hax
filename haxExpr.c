@@ -47,7 +47,7 @@ int errno;
 
 typedef struct {
     long long int llongValue;	/* Integer value, if any. */
-    double  doubleValue;	/* Floating-point value, if any. */
+    Double  doubleValue;	/* Floating-point value, if any. */
     ParseValue pv;		/* Used to hold a string value, if any. */
     char staticSpace[STATIC_STRING_SPACE];
 				/* Storage for small strings;  large ones
@@ -222,7 +222,7 @@ ExprParseString(
 	    valuePtr->doubleValue = Hax_strtod(string, &term);
 	    if (errno == ERANGE) {
 		Hax_ResetResult(interp);
-		if (valuePtr->doubleValue == 0.0) {
+		if (Hax_DoubleEq(valuePtr->doubleValue, HAX_DOUBLE_ZERO)) {
 		    Hax_AppendResult(interp, "floating-point value \"",
 			    string, "\" too small to represent",
 			    (char *) NULL);
@@ -337,7 +337,7 @@ ExprLex(
 		valuePtr->doubleValue = Hax_strtod(p, &term2);
 		if (errno == ERANGE) {
 		    Hax_ResetResult(interp);
-		    if (valuePtr->doubleValue == 0.0) {
+		    if (Hax_DoubleEq(valuePtr->doubleValue, HAX_DOUBLE_ZERO)) {
 			interp->result =
 				(char *) "floating-point value too small to "
 				    "represent";
@@ -644,7 +644,7 @@ ExprGetValue(
 		    if (valuePtr->type == TYPE_LLONG) {
 			valuePtr->llongValue = -valuePtr->llongValue;
 		    } else if (valuePtr->type == TYPE_DOUBLE){
-			valuePtr->doubleValue = -valuePtr->doubleValue;
+			valuePtr->doubleValue = Hax_DoubleMul(valuePtr->doubleValue, HAX_DOUBLE_MINUSONE);
 		    } else {
 			badType = valuePtr->type;
 			goto illegalType;
@@ -659,7 +659,7 @@ ExprGetValue(
 			 * "!valuePtr->llongValue", but apparently some
 			 * compilers can't handle it.
 			 */
-			if (valuePtr->doubleValue == 0.0) {
+			if (Hax_DoubleEq(valuePtr->doubleValue, HAX_DOUBLE_ZERO)) {
 			    valuePtr->llongValue = 1;
 			} else {
 			    valuePtr->llongValue = 0;
@@ -719,7 +719,7 @@ ExprGetValue(
 
 	if ((op == AND) || (op == OR) || (op == QUESTY)) {
 	    if (valuePtr->type == TYPE_DOUBLE) {
-		valuePtr->llongValue = valuePtr->doubleValue != 0;
+		valuePtr->llongValue = Hax_DoubleNeq(valuePtr->doubleValue, HAX_DOUBLE_ZERO);
 		valuePtr->type = TYPE_LLONG;
 	    } else if (valuePtr->type == TYPE_STRING) {
 		badType = TYPE_STRING;
@@ -801,12 +801,12 @@ ExprGetValue(
 		}
 		if (valuePtr->type == TYPE_DOUBLE) {
 		    if (value2.type == TYPE_LLONG) {
-			value2.doubleValue = value2.llongValue;
+			value2.doubleValue = Hax_LongLongToDouble(value2.llongValue);
 			value2.type = TYPE_DOUBLE;
 		    }
 		} else if (value2.type == TYPE_DOUBLE) {
 		    if (valuePtr->type == TYPE_LLONG) {
-			valuePtr->doubleValue = valuePtr->llongValue;
+			valuePtr->doubleValue = Hax_LongLongToDouble(valuePtr->llongValue);
 			valuePtr->type = TYPE_DOUBLE;
 		    }
 		}
@@ -845,12 +845,12 @@ ExprGetValue(
 		    }
 		} else if (valuePtr->type == TYPE_DOUBLE) {
 		    if (value2.type == TYPE_LLONG) {
-			value2.doubleValue = value2.llongValue;
+			value2.doubleValue = Hax_LongLongToDouble(value2.llongValue);
 			value2.type = TYPE_DOUBLE;
 		    }
 		} else if (value2.type == TYPE_DOUBLE) {
 		     if (valuePtr->type == TYPE_LLONG) {
-			valuePtr->doubleValue = valuePtr->llongValue;
+			valuePtr->doubleValue = Hax_LongLongToDouble(valuePtr->llongValue);
 			valuePtr->type = TYPE_DOUBLE;
 		    }
 		}
@@ -902,7 +902,7 @@ ExprGetValue(
 		if (valuePtr->type == TYPE_LLONG) {
 		    valuePtr->llongValue *= value2.llongValue;
 		} else {
-		    valuePtr->doubleValue *= value2.doubleValue;
+		    valuePtr->doubleValue = Hax_DoubleMul(valuePtr->doubleValue, value2.doubleValue);
 		}
 		break;
 	    case DIVIDE:
@@ -915,10 +915,10 @@ ExprGetValue(
 		    }
 		    valuePtr->llongValue /= value2.llongValue;
 		} else {
-		    if (value2.doubleValue == 0.0) {
+		    if (Hax_DoubleEq(value2.doubleValue, HAX_DOUBLE_ZERO)) {
 			goto divideByZero;
 		    }
-		    valuePtr->doubleValue /= value2.doubleValue;
+		    valuePtr->doubleValue = Hax_DoubleDiv(valuePtr->doubleValue, value2.doubleValue);
 		}
 		break;
 	    case MOD:
@@ -931,14 +931,14 @@ ExprGetValue(
 		if (valuePtr->type == TYPE_LLONG) {
 		    valuePtr->llongValue += value2.llongValue;
 		} else {
-		    valuePtr->doubleValue += value2.doubleValue;
+		    valuePtr->doubleValue = Hax_DoubleAdd(valuePtr->doubleValue, value2.doubleValue);
 		}
 		break;
 	    case MINUS:
 		if (valuePtr->type == TYPE_LLONG) {
 		    valuePtr->llongValue -= value2.llongValue;
 		} else {
-		    valuePtr->doubleValue -= value2.doubleValue;
+		    valuePtr->doubleValue = Hax_DoubleSub(valuePtr->doubleValue, value2.doubleValue);
 		}
 		break;
 	    case LEFT_SHIFT:
@@ -964,7 +964,7 @@ ExprGetValue(
 			valuePtr->llongValue < value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
 		    valuePtr->llongValue =
-			valuePtr->doubleValue < value2.doubleValue;
+			Hax_DoubleLt(valuePtr->doubleValue, value2.doubleValue);
 		} else {
 		    valuePtr->llongValue =
 			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) < 0;
@@ -977,7 +977,7 @@ ExprGetValue(
 			valuePtr->llongValue > value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
 		    valuePtr->llongValue =
-			valuePtr->doubleValue > value2.doubleValue;
+			Hax_DoubleGt(valuePtr->doubleValue, value2.doubleValue);
 		} else {
 		    valuePtr->llongValue =
 			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) > 0;
@@ -990,7 +990,7 @@ ExprGetValue(
 			valuePtr->llongValue <= value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
 		    valuePtr->llongValue =
-			valuePtr->doubleValue <= value2.doubleValue;
+			Hax_DoubleLe(valuePtr->doubleValue, value2.doubleValue);
 		} else {
 		    valuePtr->llongValue =
 			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) <= 0;
@@ -1003,7 +1003,7 @@ ExprGetValue(
 			valuePtr->llongValue >= value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
 		    valuePtr->llongValue =
-			valuePtr->doubleValue >= value2.doubleValue;
+			Hax_DoubleGe(valuePtr->doubleValue, value2.doubleValue);
 		} else {
 		    valuePtr->llongValue =
 			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) >= 0;
@@ -1016,7 +1016,7 @@ ExprGetValue(
 			valuePtr->llongValue == value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
 		    valuePtr->llongValue =
-			valuePtr->doubleValue == value2.doubleValue;
+			Hax_DoubleEq(valuePtr->doubleValue, value2.doubleValue);
 		} else {
 		    valuePtr->llongValue =
 			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) == 0;
@@ -1029,7 +1029,7 @@ ExprGetValue(
 			valuePtr->llongValue != value2.llongValue;
 		} else if (valuePtr->type == TYPE_DOUBLE) {
 		    valuePtr->llongValue =
-			valuePtr->doubleValue != value2.doubleValue;
+			Hax_DoubleNeq(valuePtr->doubleValue, value2.doubleValue);
 		} else {
 		    valuePtr->llongValue =
 			Hax_strcmp(valuePtr->pv.buffer, value2.pv.buffer) != 0;
@@ -1054,14 +1054,14 @@ ExprGetValue(
 
 	    case AND:
 		if (value2.type == TYPE_DOUBLE) {
-		    value2.llongValue = value2.doubleValue != 0;
+		    value2.llongValue = Hax_DoubleNeq(value2.doubleValue, HAX_DOUBLE_ZERO);
 		    value2.type = TYPE_LLONG;
 		}
 		valuePtr->llongValue = valuePtr->llongValue && value2.llongValue;
 		break;
 	    case OR:
 		if (value2.type == TYPE_DOUBLE) {
-		    value2.llongValue = value2.doubleValue != 0;
+		    value2.llongValue = Hax_DoubleNeq(value2.doubleValue, HAX_DOUBLE_ZERO);
 		    value2.type = TYPE_LLONG;
 		}
 		valuePtr->llongValue = valuePtr->llongValue || value2.llongValue;
@@ -1224,7 +1224,7 @@ Hax_ExprLong(
 	if (value.type == TYPE_LLONG) {
 	    *ptr = value.llongValue;
 	} else if (value.type == TYPE_DOUBLE) {
-	    *ptr = value.doubleValue;
+	    *ptr = (long) Hax_DoubleToLongLong(value.doubleValue);
 	} else {
 	    interp->result = (char *) "expression didn't have numeric value";
 	    result = HAX_ERROR;
@@ -1251,7 +1251,7 @@ Hax_ExprLongLong(
 	if (value.type == TYPE_LLONG) {
 	    *ptr = value.llongValue;
 	} else if (value.type == TYPE_DOUBLE) {
-	    *ptr = value.doubleValue;
+	    *ptr = Hax_DoubleToLongLong(value.doubleValue);
 	} else {
 	    interp->result = (char *) "expression didn't have numeric value";
 	    result = HAX_ERROR;
@@ -1276,9 +1276,9 @@ Hax_ExprDouble(
     result = ExprTopLevel(interp, string, &value);
     if (result == HAX_OK) {
 	if (value.type == TYPE_LLONG) {
-	    *(double *)ptr = value.llongValue;
+	    *(Double *)ptr = Hax_LongLongToDouble(value.llongValue);
 	} else if (value.type == TYPE_DOUBLE) {
-	    *(double *)ptr = value.doubleValue;
+	    *(Double *)ptr = value.doubleValue;
 	} else {
 	    interp->result = (char *) "expression didn't have numeric value";
 	    result = HAX_ERROR;
@@ -1305,7 +1305,7 @@ Hax_ExprBoolean(
 	if (value.type == TYPE_LLONG) {
 	    *ptr = value.llongValue != 0;
 	} else if (value.type == TYPE_DOUBLE) {
-	    *ptr = value.doubleValue != 0.0;
+	    *ptr = Hax_DoubleNeq(value.doubleValue, HAX_DOUBLE_ZERO);
 	} else {
 	    interp->result = (char *) "expression didn't have numeric value";
 	    result = HAX_ERROR;

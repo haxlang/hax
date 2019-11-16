@@ -44,7 +44,7 @@ THIS SOFTWARE.
 #undef tinytens
 /* The factor of 2^106 in tinytens[4] helps us avoid setting the underflow */
 /* flag unnecessarily.  It leads to a song and dance at the end of strtod. */
-static CONST double tinytens[] = { 1e-16, 1e-32, 1e-64, 1e-128,
+static CONST Double tinytens[] = { 1e-16, 1e-32, 1e-64, 1e-128,
 		9007199254740992.*9007199254740992.e-256
 		};
 #endif
@@ -58,7 +58,7 @@ static CONST double tinytens[] = { 1e-16, 1e-32, 1e-64, 1e-128,
 #endif
 
 #ifdef Avoid_Underflow /*{*/
- static double
+ static Double
 sulp
 #ifdef KR_headers
 	(x, scale) U *x; int scale;
@@ -67,7 +67,7 @@ sulp
 #endif
 {
 	U u;
-	double rv;
+	Double rv;
 	int i;
 
 	rv = ulp(x);
@@ -75,11 +75,11 @@ sulp
 		return rv; /* Is there an example where i <= 0 ? */
 	word0(&u) = Exp_1 + (i << Exp_shift);
 	word1(&u) = 0;
-	return rv * u.d;
+	return Hax_DoubleMul(rv, u.d);
 	}
 #endif /*}*/
 
- double
+ Double
 haxStrtod
 #ifdef KR_headers
 	(s00, se) CONST char *s00; char **se;
@@ -93,7 +93,7 @@ haxStrtod
 	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, decpt, dsign,
 		 e, e1, esign, i, j, k, nd, nd0, nf, nz, nz0, sign;
 	CONST char *s, *s0, *s1;
-	double aadj;
+	Double aadj;
 	Long L;
 	U adj, aadj1, rv, rv0;
 	ULong y, z;
@@ -144,7 +144,7 @@ haxStrtod
 #endif /*}*/
 
 	sign = nz0 = nz = decpt = 0;
-	dval(&rv) = 0.;
+	dval(&rv) = HAX_DOUBLE_ZERO;
 	for(s = s00;;s++) switch(*s) {
 		case '-':
 			sign = 1;
@@ -348,13 +348,13 @@ haxStrtod
 	if (!nd0)
 		nd0 = nd;
 	k = nd < DBL_DIG + 2 ? nd : DBL_DIG + 2;
-	dval(&rv) = y;
+	dval(&rv) = Hax_LongLongToDouble(y);
 	if (k > 9) {
 #ifdef SET_INEXACT
 		if (k > DBL_DIG)
 			oldinexact = get_inexact();
 #endif
-		dval(&rv) = tens[k - 9] * dval(&rv) + z;
+		dval(&rv) = Hax_DoubleAdd(Hax_DoubleMul(tens[k - 9], dval(&rv)), Hax_LongLongToDouble(z));
 		}
 	bd0 = 0;
 	if (nd <= DBL_DIG
@@ -396,7 +396,7 @@ haxStrtod
 					}
 #endif
 				e -= i;
-				dval(&rv) *= tens[i];
+				dval(&rv) = Hax_DoubleMul(dval(&rv), tens[i]);
 #ifdef VAX
 				/* VAX exponent range is so narrow we must
 				 * worry about overflow here...
@@ -455,7 +455,7 @@ haxStrtod
 
 	if (e1 > 0) {
 		if ( (i = e1 & 15) !=0)
-			dval(&rv) *= tens[i];
+			dval(&rv) = Hax_DoubleMul(dval(&rv), tens[i]);
 		if (e1 &= ~15) {
 			if (e1 > DBL_MAX_10_EXP) {
  ovfl:
@@ -501,10 +501,10 @@ haxStrtod
 			e1 >>= 4;
 			for(j = 0; e1 > 1; j++, e1 >>= 1)
 				if (e1 & 1)
-					dval(&rv) *= bigtens[j];
+					dval(&rv) = Hax_DoubleMul(dval(&rv), bigtens[j]);
 		/* The last multiplication could overflow. */
 			word0(&rv) -= P*Exp_msk1;
-			dval(&rv) *= bigtens[j];
+			dval(&rv) = Hax_DoubleMul(dval(&rv), bigtens[j]);
 			if ((z = word0(&rv) & Exp_mask)
 			 > Exp_msk1*(DBL_MAX_EXP+Bias-P))
 				goto ovfl;
@@ -521,7 +521,7 @@ haxStrtod
 	else if (e1 < 0) {
 		e1 = -e1;
 		if ( (i = e1 & 15) !=0)
-			dval(&rv) /= tens[i];
+			dval(&rv) = Hax_DoubleDiv(dval(&rv), tens[i]);
 		if (e1 >>= 4) {
 			if (e1 >= 1 << n_bigtens)
 				goto undfl;
@@ -530,7 +530,7 @@ haxStrtod
 				scale = 2*P;
 			for(j = 0; e1 > 0; j++, e1 >>= 1)
 				if (e1 & 1)
-					dval(&rv) *= tinytens[j];
+					dval(&rv) = Hax_DoubleMul(dval(&rv), tinytens[j]);
 			if (scale && (j = 2*P + 1 - ((word0(&rv) & Exp_mask)
 						>> Exp_shift)) > 0) {
 				/* scaled rv is denormal; zap j low bits */
@@ -555,9 +555,9 @@ haxStrtod
 				dval(&rv) = 2.*dval(&rv0);
 				dval(&rv) *= tinytens[j];
 #endif
-				if (!dval(&rv)) {
+				if (Hax_DoubleNeq(dval(&rv), HAX_DOUBLE_ZERO)) {
  undfl:
-					dval(&rv) = 0.;
+					dval(&rv) = HAX_DOUBLE_ZERO;
 #ifdef Honor_FLT_ROUNDS
 					if (Rounding == 2)
 						word1(&rv) = 1;
@@ -871,19 +871,19 @@ haxStrtod
 #endif
 			if (dsign)
 #ifdef Avoid_Underflow
-				dval(&rv) += sulp(&rv, scale);
+				dval(&rv) = Hax_DoubleAdd(dval(&rv), sulp(&rv, scale));
 #else
 				dval(&rv) += ulp(&rv);
 #endif
 #ifndef ROUND_BIASED
 			else {
 #ifdef Avoid_Underflow
-				dval(&rv) -= sulp(&rv, scale);
+				dval(&rv) = Hax_DoubleSub(dval(&rv), sulp(&rv, scale));
 #else
 				dval(&rv) -= ulp(&rv);
 #endif
 #ifndef Sudden_Underflow
-				if (!dval(&rv))
+				if (Hax_DoubleNeq(dval(&rv), HAX_DOUBLE_ZERO))
 					goto undfl;
 #endif
 				}
@@ -893,31 +893,31 @@ haxStrtod
 #endif
 			break;
 			}
-		if ((aadj = ratio(delta, bs)) <= 2.) {
+		if (Hax_DoubleLe(aadj = ratio(delta, bs), HAX_DOUBLE_TWO)) {
 			if (dsign)
-				aadj = dval(&aadj1) = 1.;
+				aadj = dval(&aadj1) = HAX_DOUBLE_ONE;
 			else if (word1(&rv) || word0(&rv) & Bndry_mask) {
 #ifndef Sudden_Underflow
 				if (word1(&rv) == Tiny1 && !word0(&rv))
 					goto undfl;
 #endif
-				aadj = 1.;
-				dval(&aadj1) = -1.;
+				aadj = HAX_DOUBLE_ONE;
+				dval(&aadj1) = HAX_DOUBLE_MINUSONE;
 				}
 			else {
 				/* special case -- power of FLT_RADIX to be */
 				/* rounded down... */
 
-				if (aadj < 2./FLT_RADIX)
-					aadj = 1./FLT_RADIX;
+				if (Hax_DoubleLt(aadj, Hax_DoubleDiv(HAX_DOUBLE_TWO, Hax_LongLongToDouble(FLT_RADIX))))
+					aadj = Hax_DoubleDiv(HAX_DOUBLE_ONE, Hax_LongLongToDouble(FLT_RADIX));
 				else
-					aadj *= 0.5;
-				dval(&aadj1) = -aadj;
+					aadj = Hax_DoubleMul(aadj, Hax_DoubleDiv(HAX_DOUBLE_ONE, HAX_DOUBLE_TWO));
+				dval(&aadj1) = Hax_DoubleMul(aadj, HAX_DOUBLE_MINUSONE);
 				}
 			}
 		else {
-			aadj *= 0.5;
-			dval(&aadj1) = dsign ? aadj : -aadj;
+			aadj = Hax_DoubleMul(aadj, Hax_DoubleDiv(HAX_DOUBLE_ONE, HAX_DOUBLE_TWO));
+			dval(&aadj1) = dsign ? aadj : Hax_DoubleMul(aadj, HAX_DOUBLE_MINUSONE);
 #ifdef Check_FLT_ROUNDS
 			switch(Rounding) {
 				case 2: /* towards +infinity */
@@ -929,7 +929,7 @@ haxStrtod
 				}
 #else
 			if (Flt_Rounds == 0)
-				dval(&aadj1) += 0.5;
+				dval(&aadj1) = Hax_DoubleAdd(dval(&aadj1), Hax_DoubleDiv(HAX_DOUBLE_ONE, HAX_DOUBLE_TWO));
 #endif /*Check_FLT_ROUNDS*/
 			}
 		y = word0(&rv) & Exp_mask;
@@ -939,8 +939,8 @@ haxStrtod
 		if (y == Exp_msk1*(DBL_MAX_EXP+Bias-1)) {
 			dval(&rv0) = dval(&rv);
 			word0(&rv) -= P*Exp_msk1;
-			dval(&adj) = dval(&aadj1) * ulp(&rv);
-			dval(&rv) += dval(&adj);
+			dval(&adj) = Hax_DoubleMul(dval(&aadj1), ulp(&rv));
+			dval(&rv) = Hax_DoubleAdd(dval(&rv), dval(&adj));
 			if ((word0(&rv) & Exp_mask) >=
 					Exp_msk1*(DBL_MAX_EXP+Bias-P)) {
 				if (word0(&rv0) == Big0 && word1(&rv0) == Big1)
@@ -955,16 +955,16 @@ haxStrtod
 		else {
 #ifdef Avoid_Underflow
 			if (scale && y <= 2*P*Exp_msk1) {
-				if (aadj <= 0x7fffffff) {
-					if ((z = aadj) <= 0)
+				if (Hax_DoubleLe(aadj, Hax_LongLongToDouble(0x7fffffff))) {
+					if ((z = Hax_DoubleToLongLong(aadj)) <= 0)
 						z = 1;
-					aadj = z;
-					dval(&aadj1) = dsign ? aadj : -aadj;
+					aadj = Hax_LongLongToDouble(z);
+					dval(&aadj1) = dsign ? aadj : Hax_DoubleMul(aadj, HAX_DOUBLE_MINUSONE);
 					}
 				word0(&aadj1) += (2*P+1)*Exp_msk1 - y;
 				}
-			dval(&adj) = dval(&aadj1) * ulp(&rv);
-			dval(&rv) += dval(&adj);
+			dval(&adj) = Hax_DoubleMul(dval(&aadj1), ulp(&rv));
+			dval(&rv) = Hax_DoubleAdd(dval(&rv), dval(&adj));
 #else
 #ifdef Sudden_Underflow
 			if ((word0(&rv) & Exp_mask) <= P*Exp_msk1) {
@@ -1001,7 +1001,7 @@ haxStrtod
 			 * example: 1.2e-307 .
 			 */
 			if (y <= (P-1)*Exp_msk1 && aadj > 1.) {
-				dval(&aadj1) = (double)(int)(aadj + 0.5);
+				dval(&aadj1) = (Double)(int)(aadj + 0.5);
 				if (!dsign)
 					dval(&aadj1) = -dval(&aadj1);
 				}
@@ -1017,14 +1017,16 @@ haxStrtod
 #endif
 		if (y == z) {
 			/* Can we stop now? */
-			L = (Long)aadj;
-			aadj -= L;
+			L = Hax_DoubleToLongLong(aadj);
+			aadj = Hax_DoubleSub(aadj, Hax_LongLongToDouble(L));
 			/* The tolerances below are conservative. */
+			const Double four999999 = { 0x3fdfffff94a03595LL }; // 0.4999999
+			const Double five000001 = { 0x3fe0000035afe535LL }; // 0.5000001
 			if (dsign || word1(&rv) || word0(&rv) & Bndry_mask) {
-				if (aadj < .4999999 || aadj > .5000001)
+				if (Hax_DoubleLt(aadj, four999999) || Hax_DoubleGt(aadj, five000001))
 					break;
 				}
-			else if (aadj < .4999999/FLT_RADIX)
+			else if (Hax_DoubleLt(aadj, Hax_DoubleDiv(four999999, Hax_LongLongToDouble(FLT_RADIX))))
 				break;
 			}
 #endif
@@ -1054,7 +1056,7 @@ haxStrtod
 	if (scale) {
 		word0(&rv0) = Exp_1 - 2*P*Exp_msk1;
 		word1(&rv0) = 0;
-		dval(&rv) *= dval(&rv0);
+		dval(&rv) = Hax_DoubleMul(dval(&rv), dval(&rv0));
 #ifndef NO_ERRNO
 		/* try to avoid the bug of testing an 8087 register value */
 #ifdef IEEE_Arith
@@ -1076,5 +1078,5 @@ haxStrtod
  ret:
 	if (se)
 		*se = (char *)s;
-	return sign ? -dval(&rv) : dval(&rv);
+	return sign ? Hax_DoubleMul(dval(&rv), HAX_DOUBLE_MINUSONE) : dval(&rv);
 	}

@@ -51,7 +51,7 @@ void *			Hax_malloc(Size_t size);
 void			Hax_qsort(void *base, Size_t nmemb, Size_t size,
 				int (*compar)(const void *, const void *));
 void *			Hax_realloc(void *ptr, Size_t size);
-double			Hax_strtod(const char *nptr, char **endptr);
+Double			Hax_strtod(const char *nptr, char **endptr);
 long			Hax_strtol(const char *nptr, char **endptr, int base);
 unsigned long		Hax_strtoul(const char *nptr, char **endptr, int base);
 long long int		Hax_strtoll(const char *nptr, char **endptr, int base);

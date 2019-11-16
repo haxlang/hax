@@ -42,6 +42,8 @@
 #ifndef _HAX_SYS_IEEE754_H_
 #define _HAX_SYS_IEEE754_H_
 
+#include "haxFloat.h"
+
 /*
  * NOTICE: This is not a standalone file.  To use it, #include it in
  * your port's ieee.h header.
@@ -151,7 +153,7 @@ union ieee_single_u {
 #define	SNGU_ZEROFRAC_P(u)	((u).sngu_frac != 0)
 
 union ieee_double_u {
-	double			dblu_d;
+	Double			dblu_d;
 	struct ieee_double	dblu_dbl;
 };
 

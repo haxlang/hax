@@ -327,7 +327,7 @@ strtodg
 	int nbits, nd, nd0, nf, nz, nz0, rd, rvbits, rve, rve1, sign;
 	int sudden_underflow;
 	CONST char *s, *s0, *s1;
-	double adj0, tol;
+	Double adj0, tol;
 	Long L;
 	U adj, rv;
 	ULong *b, *be, y, z;
@@ -359,7 +359,7 @@ strtodg
 
 	irv = STRTOG_Zero;
 	denorm = sign = nz0 = nz = 0;
-	dval(&rv) = 0.;
+	dval(&rv) = HAX_DOUBLE_ZERO;
 	rvb = 0;
 	nbits = fpi->nbits;
 	for(s = s00;;s++) switch(*s) {
@@ -551,9 +551,9 @@ strtodg
 	if (!nd0)
 		nd0 = nd;
 	k = nd < DBL_DIG + 2 ? nd : DBL_DIG + 2;
-	dval(&rv) = y;
+	dval(&rv) = Hax_LongLongToDouble(y);
 	if (k > 9)
-		dval(&rv) = tens[k - 9] * dval(&rv) + z;
+		dval(&rv) = Hax_DoubleAdd(Hax_DoubleMul(tens[k - 9], dval(&rv)), Hax_LongLongToDouble(z));
 	bd0 = 0;
 	if (nbits <= P && nd <= DBL_DIG) {
 		if (!e) {
@@ -580,7 +580,7 @@ strtodg
 				 */
 				e2 = e - i;
 				e1 -= i;
-				dval(&rv) *= tens[i];
+				dval(&rv) = Hax_DoubleMul(dval(&rv), tens[i]);
 #ifdef VAX
 				/* VAX exponent range is so narrow we must
 				 * worry about overflow here...
@@ -619,7 +619,7 @@ strtodg
 	e2 = 0;
 	if (e1 > 0) {
 		if ( (i = e1 & 15) !=0)
-			dval(&rv) *= tens[i];
+			dval(&rv) = Hax_DoubleMul(dval(&rv), tens[i]);
 		if (e1 &= ~15) {
 			e1 >>= 4;
 			while(e1 >= (1 << (n_bigtens-1))) {
@@ -627,7 +627,7 @@ strtodg
 					>> Exp_shift1) - Bias;
 				word0(&rv) &= ~Exp_mask;
 				word0(&rv) |= Bias << Exp_shift1;
-				dval(&rv) *= bigtens[n_bigtens-1];
+				dval(&rv) = Hax_DoubleMul(dval(&rv), bigtens[n_bigtens-1]);
 				e1 -= 1 << (n_bigtens-1);
 				}
 			e2 += ((word0(&rv) & Exp_mask) >> Exp_shift1) - Bias;
@@ -635,13 +635,13 @@ strtodg
 			word0(&rv) |= Bias << Exp_shift1;
 			for(j = 0; e1 > 0; j++, e1 >>= 1)
 				if (e1 & 1)
-					dval(&rv) *= bigtens[j];
+					dval(&rv) = Hax_DoubleMul(dval(&rv), bigtens[j]);
 			}
 		}
 	else if (e1 < 0) {
 		e1 = -e1;
 		if ( (i = e1 & 15) !=0)
-			dval(&rv) /= tens[i];
+			dval(&rv) = Hax_DoubleDiv(dval(&rv), tens[i]);
 		if (e1 &= ~15) {
 			e1 >>= 4;
 			while(e1 >= (1 << (n_bigtens-1))) {
@@ -649,7 +649,7 @@ strtodg
 					>> Exp_shift1) - Bias;
 				word0(&rv) &= ~Exp_mask;
 				word0(&rv) |= Bias << Exp_shift1;
-				dval(&rv) *= tinytens[n_bigtens-1];
+				dval(&rv) = Hax_DoubleMul(dval(&rv), tinytens[n_bigtens-1]);
 				e1 -= 1 << (n_bigtens-1);
 				}
 			e2 += ((word0(&rv) & Exp_mask) >> Exp_shift1) - Bias;
@@ -657,7 +657,7 @@ strtodg
 			word0(&rv) |= Bias << Exp_shift1;
 			for(j = 0; e1 > 0; j++, e1 >>= 1)
 				if (e1 & 1)
-					dval(&rv) *= tinytens[j];
+					dval(&rv) = Hax_DoubleMul(dval(&rv), tinytens[j]);
 			}
 		}
 #ifdef IBM
@@ -874,7 +874,7 @@ strtodg
 				}
 			break;
 			}
-		if ((dval(&adj) = ratio(delta, bs)) <= 2.) {
+		if (Hax_DoubleLe((dval(&adj) = ratio(delta, bs)), HAX_DOUBLE_TWO)) {
  adj1:
 			inex = STRTOG_Inexlo;
 			if (dsign) {
@@ -893,34 +893,35 @@ strtodg
 					}
 				break;
 				}
-			adj0 = dval(&adj) = 1.;
+			adj0 = dval(&adj) = HAX_DOUBLE_ONE;
 			}
 		else {
-			adj0 = dval(&adj) *= 0.5;
+			adj0 = dval(&adj) = Hax_DoubleDiv(dval(&adj), HAX_DOUBLE_TWO);
+			const Double const2147483647 = {0x41dfffffffc00000LL};
 			if (dsign) {
 				asub = 0;
 				inex = STRTOG_Inexlo;
 				}
-			if (dval(&adj) < 2147483647.) {
-				L = adj0;
-				adj0 -= L;
+			if (Hax_DoubleLt(dval(&adj), const2147483647)) {
+				L = Hax_DoubleToLongLong(adj0);
+				adj0 = Hax_DoubleSub(adj0, Hax_LongLongToDouble(L));
 				switch(rd) {
 				  case 0:
-					if (adj0 >= .5)
+					if (Hax_DoubleGe(adj0, Hax_DoubleDiv(HAX_DOUBLE_ONE, HAX_DOUBLE_TWO)))
 						goto inc_L;
 					break;
 				  case 1:
-					if (asub && adj0 > 0.)
+					if (asub && Hax_DoubleGt(adj0, HAX_DOUBLE_ZERO))
 						goto inc_L;
 					break;
 				  case 2:
-					if (!asub && adj0 > 0.) {
+					if (!asub && Hax_DoubleGt(adj0, HAX_DOUBLE_ZERO)) {
  inc_L:
 						L++;
 						inex = STRTOG_Inexact - inex;
 						}
 				  }
-				dval(&adj) = L;
+				dval(&adj) = Hax_LongLongToDouble(L);
 				}
 			}
 		y = rve + rvbits;
@@ -986,16 +987,17 @@ strtodg
 
 		z = rve + rvbits;
 		if (y == z && L) {
+			const Double const5e_minus16 = {0x3cc203af9ee75616LL}; // 5e-16
 			/* Can we stop now? */
-			tol = dval(&adj) * 5e-16; /* > max rel error */
-			dval(&adj) = adj0 - .5;
-			if (dval(&adj) < -tol) {
-				if (adj0 > tol) {
+			tol = Hax_DoubleMul(dval(&adj), const5e_minus16); /* > max rel error */
+			dval(&adj) = Hax_DoubleSub(adj0, Hax_DoubleDiv(HAX_DOUBLE_ONE, HAX_DOUBLE_TWO));
+			if (Hax_DoubleLt(dval(&adj), Hax_DoubleMul(tol, HAX_DOUBLE_MINUSONE))) {
+				if (Hax_DoubleGt(adj0, tol)) {
 					irv |= inex;
 					break;
 					}
 				}
-			else if (dval(&adj) > tol && adj0 < 1. - tol) {
+			else if (Hax_DoubleGt(dval(&adj), tol) && Hax_DoubleLt(adj0, Hax_DoubleSub(HAX_DOUBLE_ONE, tol))) {
 				irv |= inex;
 				break;
 				}

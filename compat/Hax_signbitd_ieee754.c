@@ -43,7 +43,7 @@ __RCSID("NetBSD: signbitd_ieee754.c,v 1.2 2008/04/28 20:22:59 martin Exp ");
  *          IEEE 754 double-precision version
  */
 int
-haxSignbitd(double x)
+haxSignbitd(Double x)
 {
 	union ieee_double_u u;
 
