@@ -195,7 +195,7 @@ Hax_DumpActiveMemory (
         fprintf (fileP, "%p - %p  %7ld @ %s %d", address,
                  address + memScanP->length - 1, memScanP->length,
                  memScanP->file, memScanP->line);
-        if (strcmp(memScanP->file, "haxHash.c") == 0 && memScanP->line == 518){
+        if (strcmp(memScanP->file, "haxHash.c") == 0 && memScanP->line == 514){
 	    fprintf(fileP, "\t|%s|", ((Hax_HashEntry *) address)->key.string);
 	}
 	(void) fputc('\n', fileP);
