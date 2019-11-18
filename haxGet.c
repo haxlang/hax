@@ -50,7 +50,7 @@ Hax_GetInt(
     char *end;
     int i;
 
-    i = strtol(string, &end, 0);
+    i = Strtol(NULL, string, &end, 0);
     while ((*end != '\0') && isspace(*end)) {
 	end++;
     }
@@ -93,7 +93,7 @@ Hax_GetLong(
     char *end;
     long int i;
 
-    i = strtol(string, &end, 0);
+    i = Strtol(NULL, string, &end, 0);
     while ((*end != '\0') && isspace(*end)) {
 	end++;
     }
@@ -136,7 +136,7 @@ Hax_GetLongLong(
     char *end;
     long long int i;
 
-    i = strtoll(string, &end, 0);
+    i = Strtoll(NULL, string, &end, 0);
     while ((*end != '\0') && isspace(*end)) {
 	end++;
     }

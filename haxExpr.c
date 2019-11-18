@@ -24,15 +24,6 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclExpr.c,v 1.36 92/08/16 
 #include "haxInt.h"
 
 /*
- * The stuff below is a bit of a hack so that this file can be used
- * in environments that include no UNIX, i.e. no errno.  Just define
- * errno here.
- */
-
-extern int errno;
-#define ERANGE 34
-
-/*
  * The data structure below is used to describe an expression value,
  * which can be either an integer (the usual case), a double-precision
  * floating-point value, or a string.  A given number has only one
@@ -196,6 +187,7 @@ ExprParseString(
     Value *valuePtr		/* Where to store value information.
 				 * Caller must have initialized pv field. */)
 {
+    Interp *iPtr = (Interp *) interp;
     char c;
 
     /*
@@ -207,16 +199,17 @@ ExprParseString(
 	char *term;
 
 	valuePtr->type = TYPE_LLONG;
-	errno = 0;
-	valuePtr->llongValue = strtol(string, &term, 0);
+	iPtr->internalErrno = 0;
+	valuePtr->llongValue = Strtol(iPtr, string, &term, 0);
 	c = *term;
-	if ((c == '\0') && (errno != ERANGE)) {
+	if ((c == '\0') && (iPtr->internalErrno != HAX_ERANGE)) {
 	    return HAX_OK;
 	}
-	if ((c == '.') || (c == 'e') || (c == 'E') || (errno == ERANGE)) {
-	    errno = 0;
+	if ((c == '.') || (c == 'e') || (c == 'E') ||
+	    (iPtr->internalErrno == HAX_ERANGE)) {
+	    iPtr->internalErrno = 0;
 	    valuePtr->doubleValue = strtod(string, &term);
-	    if (errno == ERANGE) {
+	    if (iPtr->internalErrno == HAX_ERANGE) {
 		Hax_ResetResult(interp);
 		if (valuePtr->doubleValue == 0.0) {
 		    Hax_AppendResult(interp, "floating-point value \"",
@@ -290,6 +283,7 @@ ExprLex(
 					 * must have initialized pv field
 					 * correctly. */)
 {
+    Interp *iPtr = (Interp *) interp;
     char *p, c;
     char *var, *term;
     int result;
@@ -323,15 +317,16 @@ ExprLex(
 
 	    infoPtr->token = VALUE;
 	    valuePtr->type = TYPE_LLONG;
-	    errno = 0;
-	    valuePtr->llongValue = strtoul(p, &term, 0);
+	    iPtr->internalErrno = 0;
+	    valuePtr->llongValue = Strtoul(iPtr, p, &term, 0);
 	    c = *term;
-	    if ((c == '.') || (c == 'e') || (c == 'E') || (errno == ERANGE)) {
+	    if ((c == '.') || (c == 'e') || (c == 'E') ||
+		(iPtr->internalErrno == HAX_ERANGE)) {
 		char *term2;
 
-		errno = 0;
+		iPtr->internalErrno = 0;
 		valuePtr->doubleValue = strtod(p, &term2);
-		if (errno == ERANGE) {
+		if (iPtr->internalErrno == HAX_ERANGE) {
 		    Hax_ResetResult(interp);
 		    if (valuePtr->doubleValue == 0.0) {
 			interp->result =

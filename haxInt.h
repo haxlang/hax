@@ -43,6 +43,16 @@
 
 /*
  *----------------------------------------------------------------
+ * A selection of errno codes used by the Hax core.
+ *----------------------------------------------------------------
+ */
+
+#define HAX_ENOMEM 12
+#define HAX_EINVAL 22
+#define HAX_ERANGE 34
+
+/*
+ *----------------------------------------------------------------
  * Data structures related to variables.   These are used primarily
  * in haxVar.c
  *----------------------------------------------------------------
@@ -451,6 +461,9 @@ typedef struct Interp {
     Trace *tracePtr;		/* List of traces for this interpreter. */
     char resultSpace[HAX_RESULT_SIZE+1];
 				/* Static space for storing small results. */
+    int internalErrno;		/* Internal errno with a distinct symbol name
+				 * to avoid preprocessor name clash with
+				 * defines from <errno.h>. */
 } Interp;
 
 /*
@@ -576,6 +589,12 @@ extern char *		haxRegexpError;
  *----------------------------------------------------------------
  */
 
+extern long int		Strtol(Interp *iPtr, const char *nptr, char **endptr,
+			    int base);
+extern long long int	Strtoll(Interp *iPtr, const char *nptr, char **endptr,
+			    int base);
+extern unsigned long int Strtoul(Interp *iPtr, const char *nptr, char **endptr,
+			    int base);
 extern regexp *		HaxCompileRegexp (Hax_Interp *interp,
 			    char *string);
 extern void		HaxCopyAndCollapse (int count, char *src,

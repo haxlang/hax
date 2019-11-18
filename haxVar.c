@@ -2126,7 +2126,7 @@ ParseSearchId(
 		"\"", (char *) NULL);
 	return NULL;
     }
-    id = strtoul(string+2, &end, 10);
+    id = Strtoul(NULL, string+2, &end, 10);
     if ((end == (string+2)) || (*end != '-')) {
 	goto syntax;
     }

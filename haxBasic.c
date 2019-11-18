@@ -143,6 +143,7 @@ Hax_CreateInterp(void)
     iPtr->flags = 0;
     iPtr->tracePtr = NULL;
     iPtr->resultSpace[0] = 0;
+    iPtr->internalErrno = 0;
 
     /*
      * Create the built-in commands.  Do it here, rather than calling
