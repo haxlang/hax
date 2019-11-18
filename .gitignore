@@ -1,4 +1,5 @@
 *.o
 *~
 libhax.a
+libhaxunix.a
 haxsh

@@ -314,40 +314,6 @@ typedef struct HistoryRev {
 
 /*
  *----------------------------------------------------------------
- * Data structures related to files.  These are used primarily in
- * haxUnixUtil.c and haxUnixAZ.c.
- *----------------------------------------------------------------
- */
-
-/*
- * The data structure below defines an open file (or connection to
- * a process pipeline) as returned by the "open" command.
- */
-
-typedef struct OpenFile {
-    FILE *f;			/* Stdio file to use for reading and/or
-				 * writing. */
-    FILE *f2;			/* Normally NULL.  In the special case of
-				 * a command pipeline with pipes for both
-				 * input and output, this is a stdio file
-				 * to use for writing to the pipeline. */
-    int readable;		/* Non-zero means file may be read. */
-    int writable;		/* Non-zero means file may be written. */
-    int numPids;		/* If this is a connection to a process
-				 * pipeline, gives number of processes
-				 * in pidPtr array below;  otherwise it
-				 * is 0. */
-    int *pidPtr;		/* Pointer to malloc-ed array of child
-				 * process ids (numPids of them), or NULL
-				 * if this isn't a connection to a process
-				 * pipeline. */
-    int errorId;		/* File id of file that receives error
-				 * output from pipeline.  -1 means not
-				 * used (i.e. this is a normal file). */
-} OpenFile;
-
-/*
- *----------------------------------------------------------------
  * This structure defines an interpreter, which is a collection of
  * commands plus other state information related to interpreting
  * commands, such as variable storage.  Primary responsibility for
@@ -452,22 +418,6 @@ typedef struct Interp {
 				 * stored at partialResult. */
 
     /*
-     * Information related to files.  See haxUnixAZ.c and haxUnixUtil.c
-     * for details.
-     */
-
-    int numFiles;		/* Number of entries in filePtrArray
-				 * below.  0 means array hasn't been
-				 * created yet. */
-    OpenFile **filePtrArray;	/* Pointer to malloc-ed array of pointers
-				 * to information about open files.  Entry
-				 * N corresponds to the file with fileno N.
-				 * If an entry is NULL then the corresponding
-				 * file isn't open.  If filePtrArray is NULL
-				 * it means no files have been used, so even
-				 * stdin/stdout/stderr entries haven't been
-				 * setup yet. */
-    /*
      * A cache of compiled regular expressions.  See HaxCompileRegexp
      * in haxUtil.c for details.
      */
@@ -498,8 +448,8 @@ typedef struct Interp {
     char *scriptFile;		/* NULL means there is no nested source
 				 * command active;  otherwise this points to
 				 * the name of the file being sourced (it's
-				 * not malloc-ed:  it points to an argument
-				 * to Hax_EvalFile. */
+				 * not malloc-ed). Hax_EvalFile sets this
+				 * argument to fileName. */
     int flags;			/* Various flag bits.  See below. */
     Trace *tracePtr;		/* List of traces for this interpreter. */
     char resultSpace[HAX_RESULT_SIZE+1];
@@ -629,7 +579,6 @@ extern char *		haxRegexpError;
  *----------------------------------------------------------------
  */
 
-extern void		Hax_Panic(char *format, ...);
 extern regexp *		HaxCompileRegexp (Hax_Interp *interp,
 			    char *string);
 extern void		HaxCopyAndCollapse (int count, char *src,
@@ -647,11 +596,7 @@ extern int		HaxGetFrame (Hax_Interp *interp,
 			    char *string, CallFrame **framePtrPtr);
 extern int		HaxGetListIndex (Hax_Interp *interp,
 			    char *string, long int *indexPtr);
-extern int		HaxGetOpenFile (Hax_Interp *interp,
-			    char *string, OpenFile **filePtrPtr);
 extern Proc *		HaxIsProc (Command *cmdPtr);
-extern void		HaxMakeFileTable (Interp *iPtr,
-			    int index);
 extern int		HaxParseBraces (Hax_Interp *interp,
 			    char *string, char **termPtr, ParseValue *pvPtr);
 extern int		HaxParseNestedCmd (Hax_Interp *interp,
@@ -664,7 +609,6 @@ extern int		HaxParseWords (Hax_Interp *interp,
 			    char *string, int flags, int maxWords,
 			    char **termPtr, int *argcPtr, char **argv,
 			    ParseValue *pvPtr);
-extern void		HaxSetupEnv (Hax_Interp *interp);
 extern char *		HaxWordEnd (char *start, int nested);
 
 /*
@@ -760,47 +704,6 @@ extern int	Hax_WhileCmd (ClientData clientData,
 extern int	Hax_Cmd (ClientData clientData,
 		    Hax_Interp *interp, int argc, char **argv);
 extern int	Hax_Cmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-
-/*
- *----------------------------------------------------------------
- * Command procedures in the UNIX core:
- *----------------------------------------------------------------
- */
-
-extern int	Hax_CdCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_CloseCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_EofCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_ExecCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_ExitCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_FileCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_FlushCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_GetsCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_GlobCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_OpenCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_PutsCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_PwdCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_ReadCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_SeekCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_SourceCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_TellCmd (ClientData clientData,
-		    Hax_Interp *interp, int argc, char **argv);
-extern int	Hax_TimeCmd (ClientData clientData,
 		    Hax_Interp *interp, int argc, char **argv);
 
 #endif /* _HAXINT */

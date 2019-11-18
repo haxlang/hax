@@ -21,7 +21,7 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUnixAZ.c,v 1.40 93/01/28 16:06:35 ouster Exp $ SPRITE (Berkeley)";
 #endif /* not lint */
 
-#include "haxInt.h"
+#include "hax.h"
 #include "haxUnix.h"
 
 /*
@@ -31,6 +31,41 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUnixAZ.c,v 1.40 93/01/2
  */
 
 static char *currentDir =  NULL;
+
+/*
+ * The following structure defines all of the commands in the Hax core,
+ * and the C procedures that execute them.
+ */
+
+typedef struct {
+    const char *name;		/* Name of command. */
+    Hax_CmdProc *proc;		/* Procedure that executes command. */
+} CmdInfo;
+
+/*
+ * Built-in UNIX commands, and the procedures associated with them:
+ */
+
+static CmdInfo builtInCmds[] = {
+    {"cd",		Hax_CdCmd},
+    {"close",		Hax_CloseCmd},
+    {"eof",		Hax_EofCmd},
+    {"exec",		Hax_ExecCmd},
+    {"exit",		Hax_ExitCmd},
+    {"file",		Hax_FileCmd},
+    {"flush",		Hax_FlushCmd},
+    {"gets",		Hax_GetsCmd},
+    {"glob",		Hax_GlobCmd},
+    {"open",		Hax_OpenCmd},
+    {"puts",		Hax_PutsCmd},
+    {"pwd",		Hax_PwdCmd},
+    {"read",		Hax_ReadCmd},
+    {"seek",		Hax_SeekCmd},
+    {"source",		Hax_SourceCmd},
+    {"tell",		Hax_TellCmd},
+    {"time",		Hax_TimeCmd},
+    {NULL,		(Hax_CmdProc *) NULL}
+};
 
 /*
  * Prototypes for local procedures defined in this file:
@@ -116,11 +151,12 @@ Hax_CdCmd(
 	/* ARGSUSED */
 int
 Hax_CloseCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    UnixClientData *clientDataPtr;
     OpenFile *filePtr;
     int result = HAX_OK;
 
@@ -129,10 +165,13 @@ Hax_CloseCmd(
 		" fileId\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (HaxGetOpenFile(interp, argv[1], &filePtr) != HAX_OK) {
+
+    clientDataPtr = (UnixClientData *) clientData;
+    if (HaxGetOpenFile(interp, clientDataPtr, argv[1], &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
-    ((Interp *) interp)->filePtrArray[fileno(filePtr->f)] = NULL;
+
+    clientDataPtr->filePtrArray[fileno(filePtr->f)] = NULL;
 
     /*
      * First close the file (in the case of a process pipeline, there may
@@ -188,11 +227,12 @@ Hax_CloseCmd(
 	/* ARGSUSED */
 int
 Hax_EofCmd(
-    ClientData notUsed,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    UnixClientData *clientDataPtr;
     OpenFile *filePtr;
 
     if (argc != 2) {
@@ -200,7 +240,9 @@ Hax_EofCmd(
 		" fileId\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (HaxGetOpenFile(interp, argv[1], &filePtr) != HAX_OK) {
+
+    clientDataPtr = (UnixClientData *) clientData;
+    if (HaxGetOpenFile(interp, clientDataPtr, argv[1], &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
     if (feof(filePtr->f)) {
@@ -231,7 +273,7 @@ Hax_EofCmd(
 	/* ARGSUSED */
 int
 Hax_ExecCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
@@ -327,7 +369,7 @@ Hax_ExecCmd(
 	/* ARGSUSED */
 int
 Hax_ExitCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
@@ -369,7 +411,7 @@ Hax_ExitCmd(
 	/* ARGSUSED */
 int
 Hax_FileCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
@@ -809,11 +851,12 @@ GetFileType(
 	/* ARGSUSED */
 int
 Hax_FlushCmd(
-    ClientData notUsed,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    UnixClientData *clientDataPtr;
     OpenFile *filePtr;
     FILE *f;
 
@@ -822,7 +865,9 @@ Hax_FlushCmd(
 		" fileId\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (HaxGetOpenFile(interp, argv[1], &filePtr) != HAX_OK) {
+
+    clientDataPtr = (UnixClientData *) clientData;
+    if (HaxGetOpenFile(interp, clientDataPtr, argv[1], &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
     if (!filePtr->writable) {
@@ -863,7 +908,7 @@ Hax_FlushCmd(
 	/* ARGSUSED */
 int
 Hax_GetsCmd(
-    ClientData notUsed,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
@@ -871,6 +916,7 @@ Hax_GetsCmd(
 #   define BUF_SIZE 200
     char buffer[BUF_SIZE+1];
     int totalCount, done, flags;
+    UnixClientData *clientDataPtr;
     OpenFile *filePtr;
     FILE *f;
 
@@ -879,7 +925,9 @@ Hax_GetsCmd(
 		" fileId ?varName?\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (HaxGetOpenFile(interp, argv[1], &filePtr) != HAX_OK) {
+
+    clientDataPtr = (UnixClientData *) clientData;
+    if (HaxGetOpenFile(interp, clientDataPtr, argv[1], &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
     if (!filePtr->readable) {
@@ -963,12 +1011,12 @@ Hax_GetsCmd(
 	/* ARGSUSED */
 int
 Hax_OpenCmd(
-    ClientData notUsed,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
-    Interp *iPtr = (Interp *) interp;
+    UnixClientData *clientDataPtr;
     int pipeline, fd;
     char *access;
     OpenFile *filePtr;
@@ -1092,11 +1140,12 @@ Hax_OpenCmd(
      */
 
     fd = fileno(filePtr->f);
-    HaxMakeFileTable(iPtr, fd);
-    if (iPtr->filePtrArray[fd] != NULL) {
+    clientDataPtr = (UnixClientData *)clientData;
+    HaxMakeFileTable(clientDataPtr, fd);
+    if (clientDataPtr->filePtrArray[fd] != NULL) {
 	Hax_Panic((char *) "Hax_OpenCmd found file already open");
     }
-    iPtr->filePtrArray[fd] = filePtr;
+    clientDataPtr->filePtrArray[fd] = filePtr;
     sprintf(interp->result, "file%d", fd);
     return HAX_OK;
 
@@ -1138,7 +1187,7 @@ Hax_OpenCmd(
 	/* ARGSUSED */
 int
 Hax_PwdCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
@@ -1188,11 +1237,12 @@ Hax_PwdCmd(
 	/* ARGSUSED */
 int
 Hax_PutsCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    UnixClientData *clientDataPtr;
     OpenFile *filePtr;
     FILE *f;
     int i, newline;
@@ -1230,7 +1280,8 @@ Hax_PutsCmd(
 	i++;
     }
 
-    if (HaxGetOpenFile(interp, fileId, &filePtr) != HAX_OK) {
+    clientDataPtr = (UnixClientData *) clientData;
+    if (HaxGetOpenFile(interp, clientDataPtr, fileId, &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
     if (!filePtr->writable) {
@@ -1276,11 +1327,12 @@ Hax_PutsCmd(
 	/* ARGSUSED */
 int
 Hax_ReadCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    UnixClientData *clientDataPtr;
     OpenFile *filePtr;
     long int bytesLeft, bytesRead, count;
 #define READ_BUF_SIZE 4096
@@ -1300,7 +1352,8 @@ Hax_ReadCmd(
 	i++;
     }
 
-    if (HaxGetOpenFile(interp, argv[i], &filePtr) != HAX_OK) {
+    clientDataPtr = (UnixClientData *) clientData;
+    if (HaxGetOpenFile(interp, clientDataPtr, argv[i], &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
     if (!filePtr->readable) {
@@ -1390,11 +1443,12 @@ Hax_ReadCmd(
 	/* ARGSUSED */
 int
 Hax_SeekCmd(
-    ClientData notUsed,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    UnixClientData *clientDataPtr;
     OpenFile *filePtr;
     long long int offset;
     int mode;
@@ -1404,7 +1458,9 @@ Hax_SeekCmd(
 		" fileId offset ?origin?\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (HaxGetOpenFile(interp, argv[1], &filePtr) != HAX_OK) {
+
+    clientDataPtr = (UnixClientData *) clientData;
+    if (HaxGetOpenFile(interp, clientDataPtr, argv[1], &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
     if (Hax_GetLongLong(interp, argv[2], &offset) != HAX_OK) {
@@ -1459,7 +1515,7 @@ Hax_SeekCmd(
 	/* ARGSUSED */
 int
 Hax_SourceCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
@@ -1492,11 +1548,12 @@ Hax_SourceCmd(
 	/* ARGSUSED */
 int
 Hax_TellCmd(
-    ClientData notUsed,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    UnixClientData *clientDataPtr;
     OpenFile *filePtr;
 
     if (argc != 2) {
@@ -1504,7 +1561,9 @@ Hax_TellCmd(
 		" fileId\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (HaxGetOpenFile(interp, argv[1], &filePtr) != HAX_OK) {
+
+    clientDataPtr = (UnixClientData *) clientData;
+    if (HaxGetOpenFile(interp, clientDataPtr, argv[1], &filePtr) != HAX_OK) {
 	return HAX_ERROR;
     }
     sprintf(interp->result, "%lld", (long long int) ftello(filePtr->f));
@@ -1531,7 +1590,7 @@ Hax_TellCmd(
 	/* ARGSUSED */
 int
 Hax_TimeCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
@@ -1555,7 +1614,7 @@ Hax_TimeCmd(
     }
     gettimeofday(&start, &tz);
     for (i = count ; i > 0; i--) {
-	result = Hax_Eval(interp, argv[1], 0, (char **) NULL);
+	result = Hax_Eval(interp, NULL, argv[1], 0, (char **) NULL);
 	if (result != HAX_OK) {
 	    if (result == HAX_ERROR) {
 		char msg[60];
@@ -1701,4 +1760,83 @@ CleanupChildren(
     }
 
     return result;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Hax_UnixCoreDelete --
+ *     Destroy the UNIX core.
+ *
+ *----------------------------------------------------------------------
+ */
+
+void
+Hax_UnixCoreDelete(
+    ClientData clientData)
+{
+    UnixClientData *clientDataPtr;
+    int i;
+
+    clientDataPtr = (UnixClientData *)clientData;
+    clientDataPtr->refCount--;
+
+    if (clientDataPtr->refCount > 0)
+	return;
+
+    if (clientDataPtr->numFiles > 0) {
+	for (i = 0; i < clientDataPtr->numFiles; i++) {
+	    OpenFile *filePtr;
+
+	    filePtr = clientDataPtr->filePtrArray[i];
+	    if (filePtr == NULL) {
+		continue;
+	    }
+	    if (i >= 3) {
+		fclose(filePtr->f);
+		if (filePtr->f2 != NULL) {
+		    fclose(filePtr->f2);
+		}
+		if (filePtr->numPids > 0) {
+		    Hax_DetachPids(filePtr->numPids, filePtr->pidPtr);
+		    ckfree((char *) filePtr->pidPtr);
+		}
+	    }
+	    ckfree((char *) filePtr);
+	}
+	ckfree((char *) clientDataPtr->filePtrArray);
+    }
+    ckfree((char *) clientDataPtr);
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Hax_InitUnixCore --
+ *     Initialize the UNIX core.
+ *
+ *----------------------------------------------------------------------
+ */
+void
+Hax_InitUnixCore(
+    Hax_Interp *interp)
+{
+    CmdInfo *cmdInfoPtr;
+    UnixClientData *clientDataPtr;
+
+    clientDataPtr = ckalloc(sizeof(UnixClientData));
+    clientDataPtr->numFiles = 0;
+    clientDataPtr->filePtrArray = NULL;
+    clientDataPtr->refCount = 0;
+
+    for (cmdInfoPtr = builtInCmds; cmdInfoPtr->name != NULL;
+	 cmdInfoPtr++) {
+	Hax_CreateCommand (interp, (char *) cmdInfoPtr->name,
+	                   cmdInfoPtr->proc, (ClientData) clientDataPtr,
+	                   Hax_UnixCoreDelete);
+
+	clientDataPtr->refCount++;
+    }
+
+    HaxSetupEnv(interp);
 }

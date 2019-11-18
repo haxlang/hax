@@ -399,7 +399,7 @@ HaxParseNestedCmd(
     int result, length, shortfall;
     Interp *iPtr = (Interp *) interp;
 
-    result = Hax_Eval(interp, string, flags | HAX_BRACKET_TERM, termPtr);
+    result = Hax_Eval(interp, NULL, string, flags | HAX_BRACKET_TERM, termPtr);
     if (result != HAX_OK) {
 	/*
 	 * The increment below results in slightly cleaner message in

@@ -18,7 +18,7 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclGlob.c,v 1.26 92/12/23 11:33:18 ouster Exp $ SPRITE (Berkeley)";
 #endif /* not lint */
 
-#include "haxInt.h"
+#include "hax.h"
 #include "haxUnix.h"
 
 /*

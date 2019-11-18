@@ -1,4 +1,4 @@
-/* 
+/*
  * haxTest.c --
  *
  *	Test driver for HAX.
@@ -91,18 +91,17 @@ main(int argc, char **argv)
 
     interp = Hax_CreateInterp();
     Hax_InitMemory(interp);
+    Hax_InitUnixCore(interp);
     Hax_CreateCommand(interp, (char *) "echo", cmdEcho, (ClientData) "echo",
 	    (Hax_CmdDeleteProc *) NULL);
     Hax_CreateCommand(interp, (char *) "checkmem", cmdCheckmem, (ClientData) 0,
 	    (Hax_CmdDeleteProc *) NULL);
     buffer = Hax_CreateCmdBuf();
-#ifndef HAX_GENERIC_ONLY
-    result = Hax_Eval(interp, initCmd, 0, (char **) NULL);
+    result = Hax_Eval(interp, NULL, initCmd, 0, (char **) NULL);
     if (result != HAX_OK) {
 	printf("%s\n", interp->result);
 	exit(1);
     }
-#endif
 
     gotPartial = 0;
     while (1) {

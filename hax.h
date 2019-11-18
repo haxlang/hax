@@ -237,8 +237,8 @@ HAX_EXTERN void		Hax_DeleteTrace (Hax_Interp *interp,
 			    Hax_Trace trace);
 HAX_EXTERN void		Hax_DetachPids (int numPids, int *pidPtr);
 HAX_EXTERN char *	Hax_ErrnoId (void);
-HAX_EXTERN int		Hax_Eval (Hax_Interp *interp, char *cmd,
-			    int flags, char **termPtr);
+HAX_EXTERN int		Hax_Eval (Hax_Interp *interp, char *scriptFile,
+			    char *cmd, int flags, char **termPtr);
 HAX_EXTERN int		Hax_EvalFile (Hax_Interp *interp,
 			    char *fileName);
 HAX_EXTERN int		Hax_ExprBoolean (Hax_Interp *interp,
@@ -323,5 +323,13 @@ HAX_EXTERN ClientData	Hax_VarTraceInfo2 (Hax_Interp *interp,
 			    ClientData prevClientData);
 HAX_EXTERN int		Hax_WaitPids (int numPids, int *pidPtr,
 			    int *statusPtr);
+HAX_EXTERN void		Hax_InitUnixCore (Hax_Interp *interp);
+
+/*
+ * Miscelaous functions that can be overriden in the implementation.
+ */
+
+HAX_EXTERN void			Hax_Panic (char *format, ...);
+HAX_EXTERN void			Hax_Breakpoint (void);
 
 #endif /* _HAX */

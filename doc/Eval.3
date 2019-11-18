@@ -19,7 +19,7 @@ Hax_Eval, Hax_VarEval, Hax_EvalFile, Hax_GlobalEval \- execute Hax commands
 \fB#include <hax.h>\fR
 .sp
 int
-\fBHax_Eval\fR(\fIinterp, cmd, flags, termPtr\fR)
+\fBHax_Eval\fR(\fIinterp, scriptPath, cmd, flags, termPtr\fR)
 .sp
 int
 \fBHax_VarEval\fR(\fIinterp, string, string, ... \fB(char *) NULL\fR)
@@ -36,6 +36,11 @@ int
 .AP Hax_Interp *interp in
 Interpreter in which to execute the command.  String result will be
 stored in \fIinterp->result\fR.
+.AP char *scriptFile in
+NULL means there is no nested source command active;
+otherwise this points to
+the name of the file being sourced (it's not malloc-ed).
+Hax_EvalFile sets this argument to fileName.
 .AP char *cmd in
 Command (or sequence of commands) to execute.  Must be in writable
 memory (Hax_Eval makes temporary modifications to the command).

@@ -172,7 +172,7 @@ Hax_CaseCmd(
 
     match:
     if (body != -1) {
-	result = Hax_Eval(interp, caseArgv[body], 0, (char **) NULL);
+	result = Hax_Eval(interp, NULL, caseArgv[body], 0, (char **) NULL);
 	if (result == HAX_ERROR) {
 	    char msg[100];
 	    sprintf(msg, "\n    (\"%.50s\" arm line %d)", caseArgv[body-1],
@@ -227,7 +227,7 @@ Hax_CatchCmd(
 		argv[0], " command ?varName?\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    result = Hax_Eval(interp, argv[1], 0, (char **) NULL);
+    result = Hax_Eval(interp, NULL, argv[1], 0, (char **) NULL);
     if (argc == 3) {
 	if (Hax_SetVar(interp, argv[2], interp->result, 0) == NULL) {
 	    Hax_SetResult(interp,
@@ -389,7 +389,7 @@ Hax_EvalCmd(
 	return HAX_ERROR;
     }
     if (argc == 2) {
-	result = Hax_Eval(interp, argv[1], 0, (char **) NULL);
+	result = Hax_Eval(interp, NULL, argv[1], 0, (char **) NULL);
     } else {
     
 	/*
@@ -398,7 +398,7 @@ Hax_EvalCmd(
 	 */
     
 	cmd = Hax_Concat(argc-1, argv+1);
-	result = Hax_Eval(interp, cmd, 0, (char **) NULL);
+	result = Hax_Eval(interp, NULL, cmd, 0, (char **) NULL);
 	ckfree(cmd);
     }
     if (result == HAX_ERROR) {
@@ -476,7 +476,7 @@ Hax_ForCmd(
 	return HAX_ERROR;
     }
 
-    result = Hax_Eval(interp, argv[1], 0, (char **) NULL);
+    result = Hax_Eval(interp, NULL, argv[1], 0, (char **) NULL);
     if (result != HAX_OK) {
 	if (result == HAX_ERROR) {
 	    Hax_AddErrorInfo(interp,
@@ -492,7 +492,7 @@ Hax_ForCmd(
 	if (!value) {
 	    break;
 	}
-	result = Hax_Eval(interp, argv[4], 0, (char **) NULL);
+	result = Hax_Eval(interp, NULL, argv[4], 0, (char **) NULL);
 	if (result == HAX_CONTINUE) {
 	    result = HAX_OK;
 	} else if (result != HAX_OK) {
@@ -503,7 +503,7 @@ Hax_ForCmd(
 	    }
 	    break;
 	}
-	result = Hax_Eval(interp, argv[3], 0, (char **) NULL);
+	result = Hax_Eval(interp, NULL, argv[3], 0, (char **) NULL);
 	if (result == HAX_BREAK) {
 	    break;
 	} else if (result != HAX_OK) {
@@ -574,7 +574,7 @@ Hax_ForeachCmd(
 	    break;
 	}
 
-	result = Hax_Eval(interp, argv[3], 0, (char **) NULL);
+	result = Hax_Eval(interp, NULL, argv[3], 0, (char **) NULL);
 	if (result != HAX_OK) {
 	    if (result == HAX_CONTINUE) {
 		result = HAX_OK;

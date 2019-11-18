@@ -306,12 +306,12 @@ Hax_UplevelCmd(
      */
 
     if (argc == 1) {
-	result = Hax_Eval(interp, argv[0], 0, (char **) NULL);
+	result = Hax_Eval(interp, NULL, argv[0], 0, (char **) NULL);
     } else {
 	char *cmd;
 
 	cmd = Hax_Concat(argc, argv);
-	result = Hax_Eval(interp, cmd, 0, (char **) NULL);
+	result = Hax_Eval(interp, NULL, cmd, 0, (char **) NULL);
 	ckfree(cmd);
     }
     if (result == HAX_ERROR) {
@@ -496,7 +496,7 @@ InterpProc(
      * Invoke the commands in the procedure's body.
      */
 
-    result = Hax_Eval(interp, procPtr->command, 0, &end);
+    result = Hax_Eval(interp, NULL, procPtr->command, 0, &end);
     if (result == HAX_RETURN) {
 	result = HAX_OK;
     } else if (result == HAX_ERROR) {

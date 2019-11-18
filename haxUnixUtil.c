@@ -24,7 +24,7 @@
 static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUnixUtil.c,v 1.19 93/01/08 08:41:00 ouster Exp $ SPRITE (Berkeley)";
 #endif /* not lint */
 
-#include "haxInt.h"
+#include "hax.h"
 #include "haxUnix.h"
 
 /*
@@ -89,11 +89,8 @@ Hax_EvalFile(
 {
     int fileId, result;
     struct stat statBuf;
-    char *cmdBuffer, *end, *oldScriptFile;
-    Interp *iPtr = (Interp *) interp;
+    char *cmdBuffer, *end;
 
-    oldScriptFile = iPtr->scriptFile;
-    iPtr->scriptFile = fileName;
     fileName = Hax_TildeSubst(interp, fileName);
     if (fileName == NULL) {
 	goto error;
@@ -125,7 +122,7 @@ Hax_EvalFile(
 	goto error;
     }
     cmdBuffer[statBuf.st_size] = 0;
-    result = Hax_Eval(interp, cmdBuffer, 0, &end);
+    result = Hax_Eval(interp, fileName, cmdBuffer, 0, &end);
     if (result == HAX_RETURN) {
 	result = HAX_OK;
     }
@@ -141,11 +138,9 @@ Hax_EvalFile(
 	Hax_AddErrorInfo(interp, msg);
     }
     ckfree(cmdBuffer);
-    iPtr->scriptFile = oldScriptFile;
     return result;
 
     error:
-    iPtr->scriptFile = oldScriptFile;
     return HAX_ERROR;
 }
 
@@ -861,8 +856,9 @@ Hax_UnixError(
 
 void
 HaxMakeFileTable(
-    Interp *iPtr,		/* Interpreter whose table of files is
-				 * to be manipulated. */
+    UnixClientData *clientDataPtr,
+				/* Unix ClientData whose table of
+				 * files is to be manipulated. */
     int index			/* Make sure table is large enough to
 				 * hold at least this index. */)
 {
@@ -871,19 +867,19 @@ HaxMakeFileTable(
      * entries for standard files.
      */
 
-    if (iPtr->numFiles == 0) {
+    if (clientDataPtr->numFiles == 0) {
 	OpenFile *filePtr;
 	int i;
 
 	if (index < 2) {
-	    iPtr->numFiles = 3;
+	    clientDataPtr->numFiles = 3;
 	} else {
-	    iPtr->numFiles = index+1;
+	    clientDataPtr->numFiles = index+1;
 	}
-	iPtr->filePtrArray = (OpenFile **) ckalloc((unsigned)
-		((iPtr->numFiles)*sizeof(OpenFile *)));
-	for (i = iPtr->numFiles-1; i >= 0; i--) {
-	    iPtr->filePtrArray[i] = NULL;
+	clientDataPtr->filePtrArray = (OpenFile **) ckalloc((unsigned)
+		((clientDataPtr->numFiles)*sizeof(OpenFile *)));
+	for (i = clientDataPtr->numFiles-1; i >= 0; i--) {
+	    clientDataPtr->filePtrArray[i] = NULL;
 	}
 
 	filePtr = (OpenFile *) ckalloc(sizeof(OpenFile));
@@ -894,7 +890,7 @@ HaxMakeFileTable(
 	filePtr->numPids = 0;
 	filePtr->pidPtr = NULL;
 	filePtr->errorId = -1;
-	iPtr->filePtrArray[0] = filePtr;
+	clientDataPtr->filePtrArray[0] = filePtr;
 
 	filePtr = (OpenFile *) ckalloc(sizeof(OpenFile));
 	filePtr->f = stdout;
@@ -904,7 +900,7 @@ HaxMakeFileTable(
 	filePtr->numPids = 0;
 	filePtr->pidPtr = NULL;
 	filePtr->errorId = -1;
-	iPtr->filePtrArray[1] = filePtr;
+	clientDataPtr->filePtrArray[1] = filePtr;
 
 	filePtr = (OpenFile *) ckalloc(sizeof(OpenFile));
 	filePtr->f = stderr;
@@ -914,8 +910,8 @@ HaxMakeFileTable(
 	filePtr->numPids = 0;
 	filePtr->pidPtr = NULL;
 	filePtr->errorId = -1;
-	iPtr->filePtrArray[2] = filePtr;
-    } else if (index >= iPtr->numFiles) {
+	clientDataPtr->filePtrArray[2] = filePtr;
+    } else if (index >= clientDataPtr->numFiles) {
 	int newSize;
 	OpenFile **newPtrArray;
 	int i;
@@ -923,14 +919,14 @@ HaxMakeFileTable(
 	newSize = index+1;
 	newPtrArray = (OpenFile **) ckalloc((unsigned)
 		((newSize)*sizeof(OpenFile *)));
-	memcpy(newPtrArray, iPtr->filePtrArray,
-		iPtr->numFiles*sizeof(OpenFile *));
-	for (i = iPtr->numFiles; i < newSize; i++) {
+	memcpy(newPtrArray, clientDataPtr->filePtrArray,
+		clientDataPtr->numFiles*sizeof(OpenFile *));
+	for (i = clientDataPtr->numFiles; i < newSize; i++) {
 	    newPtrArray[i] = NULL;
 	}
-	ckfree((char *) iPtr->filePtrArray);
-	iPtr->numFiles = newSize;
-	iPtr->filePtrArray = newPtrArray;
+	ckfree((char *) clientDataPtr->filePtrArray);
+	clientDataPtr->numFiles = newSize;
+	clientDataPtr->filePtrArray = newPtrArray;
     }
 }
 
@@ -957,13 +953,14 @@ HaxMakeFileTable(
 int
 HaxGetOpenFile(
     Hax_Interp *interp,		/* Interpreter in which to find file. */
+    UnixClientData *clientDataPtr,
+				/* Unix Client Data in which to find file. */
     char *string,		/* String that identifies file. */
     OpenFile **filePtrPtr	/* Address of word in which to store pointer
 				 * to structure about open file. */)
 {
     int fd = 0;			/* Initial value needed only to stop compiler
 				 * warnings. */
-    Interp *iPtr = (Interp *) interp;
 
     if ((string[0] == 'f') && (string[1] == 'i') && (string[2] == 'l')
 	    & (string[3] == 'e')) {
@@ -991,9 +988,9 @@ HaxGetOpenFile(
 	return HAX_ERROR;
     }
 
-    if (fd >= iPtr->numFiles) {
-	if ((iPtr->numFiles == 0) && (fd <= 2)) {
-	    HaxMakeFileTable(iPtr, fd);
+    if (fd >= clientDataPtr->numFiles) {
+	if ((clientDataPtr->numFiles == 0) && (fd <= 2)) {
+	    HaxMakeFileTable(clientDataPtr, fd);
 	} else {
 	    notOpen:
 	    Hax_AppendResult(interp, "file \"", string, "\" isn't open",
@@ -1001,9 +998,9 @@ HaxGetOpenFile(
 	    return HAX_ERROR;
 	}
     }
-    if (iPtr->filePtrArray[fd] == NULL) {
+    if (clientDataPtr->filePtrArray[fd] == NULL) {
 	goto notOpen;
     }
-    *filePtrPtr = iPtr->filePtrArray[fd];
+    *filePtrPtr = clientDataPtr->filePtrArray[fd];
     return HAX_OK;
 }

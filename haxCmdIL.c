@@ -85,7 +85,7 @@ Hax_IfCmd(
 	    return HAX_ERROR;
 	}
 	if (value) {
-	    return Hax_Eval(interp, argv[i], 0, (char **) NULL);
+	    return Hax_Eval(interp, NULL, argv[i], 0, (char **) NULL);
 	}
 
 	/*
@@ -119,7 +119,7 @@ Hax_IfCmd(
 	    return HAX_ERROR;
 	}
     }
-    return Hax_Eval(interp, argv[i], 0, (char **) NULL);
+    return Hax_Eval(interp, NULL, argv[i], 0, (char **) NULL);
 }
 
 /*

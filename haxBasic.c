@@ -81,30 +81,6 @@ static CmdInfo builtInCmds[] = {
     {"uplevel",		Hax_UplevelCmd},
     {"upvar",		Hax_UpvarCmd},
     {"while",		Hax_WhileCmd},
-
-    /*
-     * Commands in the UNIX core:
-     */
-
-#ifndef HAX_GENERIC_ONLY
-    {"cd",		Hax_CdCmd},
-    {"close",		Hax_CloseCmd},
-    {"eof",		Hax_EofCmd},
-    {"exec",		Hax_ExecCmd},
-    {"exit",		Hax_ExitCmd},
-    {"file",		Hax_FileCmd},
-    {"flush",		Hax_FlushCmd},
-    {"gets",		Hax_GetsCmd},
-    {"glob",		Hax_GlobCmd},
-    {"open",		Hax_OpenCmd},
-    {"puts",		Hax_PutsCmd},
-    {"pwd",		Hax_PwdCmd},
-    {"read",		Hax_ReadCmd},
-    {"seek",		Hax_SeekCmd},
-    {"source",		Hax_SourceCmd},
-    {"tell",		Hax_TellCmd},
-    {"time",		Hax_TimeCmd},
-#endif /* HAX_GENERIC_ONLY */
     {NULL,		(Hax_CmdProc *) NULL}
 };
 
@@ -156,8 +132,6 @@ Hax_CreateInterp(void)
     iPtr->appendResult = NULL;
     iPtr->appendAvl = 0;
     iPtr->appendUsed = 0;
-    iPtr->numFiles = 0;
-    iPtr->filePtrArray = NULL;
     for (i = 0; i < NUM_REGEXPS; i++) {
 	iPtr->patterns[i] = NULL;
 	iPtr->patLengths[i] = -1;
@@ -190,10 +164,6 @@ Hax_CreateInterp(void)
 	    Hax_SetHashValue(hPtr, cmdPtr);
 	}
     }
-
-#ifndef HAX_GENERIC_ONLY
-    HaxSetupEnv((Hax_Interp *) iPtr);
-#endif
 
     return (Hax_Interp *) iPtr;
 }
@@ -268,30 +238,6 @@ Hax_DeleteInterp(
     if (iPtr->appendResult != NULL) {
 	ckfree(iPtr->appendResult);
     }
-#ifndef HAX_GENERIC_ONLY
-    if (iPtr->numFiles > 0) {
-	for (i = 0; i < iPtr->numFiles; i++) {
-	    OpenFile *filePtr;
-    
-	    filePtr = iPtr->filePtrArray[i];
-	    if (filePtr == NULL) {
-		continue;
-	    }
-	    if (i >= 3) {
-		fclose(filePtr->f);
-		if (filePtr->f2 != NULL) {
-		    fclose(filePtr->f2);
-		}
-		if (filePtr->numPids > 0) {
-		    Hax_DetachPids(filePtr->numPids, filePtr->pidPtr);
-		    ckfree((char *) filePtr->pidPtr);
-		}
-	    }
-	    ckfree((char *) filePtr);
-	}
-	ckfree((char *) iPtr->filePtrArray);
-    }
-#endif
     for (i = 0; i < NUM_REGEXPS; i++) {
 	if (iPtr->patterns[i] == NULL) {
 	    break;
@@ -432,6 +378,8 @@ int
 Hax_Eval(
     Hax_Interp *interp,		/* Token for command interpreter (returned
 				 * by a previous call to Hax_CreateInterp). */
+    char *scriptFile,		/* Optional argument with a descriptive path
+				 * of script loaded and passed to cmd. */
     char *cmd,			/* Pointer to HAX command to interpret. */
     int flags,			/* OR-ed combination of flags like
 				 * HAX_BRACKET_TERM and HAX_RECORD_BOUNDS. */
@@ -470,6 +418,7 @@ Hax_Eval(
 					 * that newlines terminate commands. */
     int result;				/* Return value. */
     Interp *iPtr = (Interp *) interp;
+    char *oldScriptFile = iPtr->scriptFile;
     Hax_HashEntry *hPtr;
     Command *cmdPtr;
     char *dummy;			/* Make termPtr point here if it was
@@ -484,6 +433,11 @@ Hax_Eval(
 					 * command is all there. */
     Trace *tracePtr;
 
+    /*
+     * Set the scriptFile path.
+     */
+    if (scriptFile)
+        iPtr->scriptFile = scriptFile;
     /*
      * Initialize the result to an empty string and clear out any
      * error information.  This makes sure that we return an empty
@@ -505,7 +459,8 @@ Hax_Eval(
 	iPtr->numLevels--;
 	iPtr->result =
 	    (char *) "too many nested calls to Hax_Eval (infinite loop?)";
-	return HAX_ERROR;
+	result = HAX_ERROR;
+	goto finish;
     }
 
     /*
@@ -795,6 +750,9 @@ Hax_Eval(
     } else {
 	iPtr->flags &= ~ERR_ALREADY_LOGGED;
     }
+
+finish:
+    iPtr->scriptFile = oldScriptFile;
     return result;
 }
 
@@ -1026,7 +984,7 @@ Hax_VarEval(
     va_end(argList);
     cmd[spaceUsed] = '\0';
 
-    result = Hax_Eval(interp, cmd, 0, (char **) NULL);
+    result = Hax_Eval(interp, NULL, cmd, 0, (char **) NULL);
     if (cmd != fixedSpace) {
 	ckfree(cmd);
     }
@@ -1064,7 +1022,7 @@ Hax_GlobalEval(
 
     savedVarFramePtr = iPtr->varFramePtr;
     iPtr->varFramePtr = NULL;
-    result = Hax_Eval(interp, command, 0, (char **) NULL);
+    result = Hax_Eval(interp, NULL, command, 0, (char **) NULL);
     iPtr->varFramePtr = savedVarFramePtr;
     return result;
 }

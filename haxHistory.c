@@ -224,7 +224,7 @@ Hax_RecordAndEval(
     if (flags != HAX_NO_EVAL) {
 	iPtr->historyFirst = cmd;
 	iPtr->revDisables = 0;
-	result = Hax_Eval(interp, cmd, flags | HAX_RECORD_BOUNDS,
+	result = Hax_Eval(interp, NULL, cmd, flags | HAX_RECORD_BOUNDS,
 		(char **) NULL);
     }
     iPtr->revDisables = 1;
@@ -468,7 +468,7 @@ Hax_HistoryCmd(
 	    return HAX_ERROR;
 	}
 	RevCommand(iPtr, eventPtr->command);
-	return Hax_Eval(interp, eventPtr->command, 0, (char **) NULL);
+	return Hax_Eval(interp, NULL, eventPtr->command, 0, (char **) NULL);
     } else if ((c == 's') && (strncmp(argv[1], "substitute", length)) == 0) {
 	if ((argc > 5) || (argc < 4)) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -949,7 +949,7 @@ SubsAndEval(
     }
 
     RevCommand(iPtr, newCmd);
-    result = Hax_Eval((Hax_Interp *) iPtr, newCmd, 0, (char **) NULL);
+    result = Hax_Eval((Hax_Interp *) iPtr, NULL, newCmd, 0, (char **) NULL);
     ckfree(newCmd);
     return result;
 }

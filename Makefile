@@ -4,10 +4,7 @@
 # Some changes you may wish to make here:
 #
 # 1. To compile for non-UNIX systems (so that only the non-UNIX-specific
-# commands are available), change the OBJS line below so it doesn't
-# include ${UNIX_OBJS}.  Also, add the switch "-DHAX_GENERIC_ONLY" to
-# CFLAGS.  Lastly, you'll have to provide your own replacement for the
-# "Hax_Panic" procedure (see haxPanic.c for what the current one does).
+# commands are available), disable libhaxunix.a build rules below.
 
 # 2. If you want to put Hax-related information in non-standard places,
 # change the following definitions below to reflect where you want
@@ -62,20 +59,24 @@ all: libhax.a haxsh
 GENERIC_OBJS =	haxRegexp.o haxAssem.o haxBasic.o haxCkalloc.o \
 	haxCmdAH.o haxCmdIL.o haxCmdMZ.o haxExpr.o haxGet.o \
 	haxHash.o haxHistory.o haxParse.o haxProc.o haxUtil.o \
-	haxVar.o haxPanic.o haxCkalloc.o
+	haxVar.o haxPanic.o haxCkalloc.o haxBreakpoint.o
 
 UNIX_OBJS = haxEnv.o haxGlob.o haxUnixAZ.o haxUnixStr.o haxUnixUtil.o
 
 COMPAT_OBJS =
 
-OBJS = $(GENERIC_OBJS) $(UNIX_OBJS) $(COMPAT_OBJS)
+OBJS = $(GENERIC_OBJS) $(COMPAT_OBJS)
 
 libhax.a: $(OBJS)
 	$(AR) cr $@ $(OBJS)
 	$(RANLIB) $@
 
-haxsh: haxsh.o libhax.a
-	$(CC) $(LDFLAGS) -o $@ haxsh.o libhax.a
+libhaxunix.a: $(UNIX_OBJS)
+	$(AR) cr $@ $(UNIX_OBJS)
+	$(RANLIB) $@
+
+haxsh: haxsh.o libhax.a libhaxunix.a
+	$(CC) $(LDFLAGS) -o $@ haxsh.o libhax.a libhaxunix.a
 
 install: libhax.a
 	install -d $(DESTDIR)$(PREFIX)/$(BIN_DIR)
@@ -92,6 +93,7 @@ install: libhax.a
 	done
 
 	install libhax.a $(DESTDIR)$(PREFIX)/$(LIB_DIR)
+	install libhaxunix.a $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 
 	install hax.h $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
 	install haxHash.h $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
@@ -119,7 +121,7 @@ test: haxsh
 	( echo cd tests ; echo source all ) | ./haxsh
 
 clean:
-	rm -f $(OBJS) libhax.a haxsh.o haxsh
+	rm -f $(OBJS) $(UNIX_OBJS) libhax.a libhaxunix.a haxsh.o haxsh
 
 $(OBJS): hax.h haxHash.h haxInt.h
 $(UNIX_OJBS): haxUnix.h

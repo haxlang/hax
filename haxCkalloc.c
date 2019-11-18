@@ -21,10 +21,6 @@
 #define FALSE	0
 #define TRUE	1
 
-#ifndef HAX_GENERIC_ONLY
-#include "haxUnix.h"
-#endif
-
 #define GUARD_SIZE 8
 
 struct mem_header {
@@ -114,10 +110,10 @@ ValidateMemory (
     }
     if (guard_failed) {
         dump_memory_info (stderr);
-        fprintf (stderr, "low guard failed at %lx, %s %d\n",
+        fprintf (stderr, "low guard failed at %p, %s %d\n",
                  memHeaderP->body, file, line);
         fflush (stderr);  /* In case name pointer is bad. */
-        fprintf (stderr, "%d bytes allocated at (%s %d)\n", memHeaderP->length,
+        fprintf (stderr, "%ld bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
         Hax_Panic ("Memory validation failure");
     }
@@ -136,10 +132,10 @@ ValidateMemory (
 
     if (guard_failed) {
         dump_memory_info (stderr);
-        fprintf (stderr, "high guard failed at %lx, %s %d\n",
+        fprintf (stderr, "high guard failed at %p, %s %d\n",
                  memHeaderP->body, file, line);
         fflush (stderr);  /* In case name pointer is bad. */
-        fprintf (stderr, "%d bytes allocated at (%s %d)\n", memHeaderP->length,
+        fprintf (stderr, "%ld bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
         Hax_Panic ("Memory validation failure");
     }
@@ -196,7 +192,7 @@ Hax_DumpActiveMemory (
 
     for (memScanP = allocHead; memScanP != NULL; memScanP = memScanP->flink) {
         address = &memScanP->body [0];
-        fprintf (fileP, "%8lx - %8lx  %7d @ %s %d", address,
+        fprintf (fileP, "%p - %p  %7ld @ %s %d", address,
                  address + memScanP->length - 1, memScanP->length,
                  memScanP->file, memScanP->line);
         if (strcmp(memScanP->file, "haxHash.c") == 0 && memScanP->line == 518){
@@ -271,7 +267,7 @@ Hax_DbCkalloc(
     }
 
     if (alloc_tracing)
-        fprintf(stderr,"ckalloc %lx %d %s %d\n", result->body, size, 
+        fprintf(stderr,"ckalloc %p %d %s %d\n", result->body, size, 
                 file, line);
 
     if (break_on_malloc && (total_mallocs >= break_on_malloc)) {
@@ -281,7 +277,7 @@ Hax_DbCkalloc(
                 total_mallocs);
         fprintf(stderr, "program will now enter C debugger\n");
         (void) fflush(stderr);
-        kill (getpid(), SIGINT);
+	Hax_Breakpoint();
     }
 
     current_malloc_packets++;
@@ -330,7 +326,7 @@ Hax_DbCkfree(
     memp = (struct mem_header *)(((char *) ptr) - (long)memp->body);
 
     if (alloc_tracing)
-        fprintf(stderr, "ckfree %lx %ld %s %d\n", memp->body, 
+        fprintf(stderr, "ckfree %p %ld %s %d\n", memp->body, 
                 memp->length, file, line);
 
     if (validate_memory)

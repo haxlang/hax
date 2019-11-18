@@ -29,12 +29,8 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclExpr.c,v 1.36 92/08/16 
  * errno here.
  */
 
-#ifndef HAX_GENERIC_ONLY
-#include "haxUnix.h"
-#else
-int errno;
+extern int errno;
 #define ERANGE 34
-#endif
 
 /*
  * The data structure below is used to describe an expression value,
@@ -381,7 +377,7 @@ ExprLex(
 
 	case '[':
 	    infoPtr->token = VALUE;
-	    result = Hax_Eval(interp, p+1, HAX_BRACKET_TERM,
+	    result = Hax_Eval(interp, NULL, p+1, HAX_BRACKET_TERM,
 		    &infoPtr->expr);
 	    if (result != HAX_OK) {
 		return result;

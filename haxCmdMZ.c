@@ -1352,7 +1352,7 @@ TraceVarProc(
 	    dummy.freeProc = interp->freeProc;
 	    dummy.result = interp->result;
 	}
-	code = Hax_Eval(interp, cmdPtr, 0, (char **) NULL);
+	code = Hax_Eval(interp, NULL, cmdPtr, 0, (char **) NULL);
 	if (cmdPtr != staticSpace) {
 	    ckfree(cmdPtr);
 	}
@@ -1411,7 +1411,7 @@ Hax_WhileCmd(
 	if (!value) {
 	    break;
 	}
-	result = Hax_Eval(interp, argv[2], 0, (char **) NULL);
+	result = Hax_Eval(interp, NULL, argv[2], 0, (char **) NULL);
 	if (result == HAX_CONTINUE) {
 	    result = HAX_OK;
 	} else if (result != HAX_OK) {
