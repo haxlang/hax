@@ -21,7 +21,6 @@
 #define FALSE	0
 #define TRUE	1
 
-#ifdef HAX_MEM_DEBUG
 #ifndef HAX_GENERIC_ONLY
 #include "haxUnix.h"
 #endif
@@ -54,11 +53,7 @@ static int break_on_malloc = 0;
 static int trace_on_at_malloc = 0;
 static int  alloc_tracing = FALSE;
 static int  init_malloced_bodies = FALSE;
-#ifdef MEM_VALIDATE
-    static int  validate_memory = TRUE;
-#else
-    static int  validate_memory = FALSE;
-#endif
+static int  validate_memory = TRUE;
 
 
 /*
@@ -231,7 +226,7 @@ Hax_DumpActiveMemory (
  *
  *----------------------------------------------------------------------
  */
-char *
+void *
 Hax_DbCkalloc(
     unsigned int size,
     char        *file,
@@ -323,7 +318,7 @@ Hax_DbCkalloc(
 
 int
 Hax_DbCkfree(
-    char *  ptr,
+    void *  ptr,
     char     *file,
     int       line)
 {
@@ -372,9 +367,9 @@ Hax_DbCkfree(
  *
  *--------------------------------------------------------------------
  */
-char *
+void *
 Hax_DbCkrealloc(
-    char *ptr,
+    void *ptr,
     unsigned int size,
     char *file,
     int line)
@@ -505,62 +500,3 @@ Hax_InitMemory(
 Hax_CreateCommand (interp, "memory", MemoryCmd, (ClientData)NULL, 
                   (void (*)())NULL);
 }
-
-#else
-
-
-/*
- *----------------------------------------------------------------------
- *
- * Hax_Ckalloc --
- *     Interface to malloc when HAX_MEM_DEBUG is disabled.  It does check
- *     that memory was actually allocated.
- *
- *----------------------------------------------------------------------
- */
-void *
-Hax_Ckalloc (
-    unsigned int size)
-{
-        void *result;
-
-        result = malloc(size);
-        if (result == NULL) 
-                Hax_Panic((char *) "unable to alloc %d bytes", size);
-        return result;
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * TckCkfree --
- *     Interface to free when HAX_MEM_DEBUG is disabled.  Done here rather
- *     in the macro to keep some modules from being compiled with 
- *     HAX_MEM_DEBUG enabled and some with it disabled.
- *
- *----------------------------------------------------------------------
- */
-void
-Hax_Ckfree (
-    void *ptr)
-{
-        free (ptr);
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * Hax_InitMemory --
- *     Dummy initialization for memory command, which is only available 
- *     if HAX_MEM_DEBUG is on.
- *
- *----------------------------------------------------------------------
- */
-	/* ARGSUSED */
-void
-Hax_InitMemory(
-    Hax_Interp *interp)
-{
-}
-
-#endif

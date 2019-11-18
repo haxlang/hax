@@ -90,9 +90,7 @@ main(int argc, char **argv)
     int result, gotPartial;
 
     interp = Hax_CreateInterp();
-#ifdef HAX_MEM_DEBUG
     Hax_InitMemory(interp);
-#endif
     Hax_CreateCommand(interp, (char *) "echo", cmdEcho, (ClientData) "echo",
 	    (Hax_CmdDeleteProc *) NULL);
     Hax_CreateCommand(interp, (char *) "checkmem", cmdCheckmem, (ClientData) 0,
@@ -134,9 +132,7 @@ main(int argc, char **argv)
 	    if (quitFlag) {
 		Hax_DeleteInterp(interp);
 		Hax_DeleteCmdBuf(buffer);
-#ifdef HAX_MEM_DEBUG
 		Hax_DumpActiveMemory(dumpFile);
-#endif
 		exit(0);
 	    }
 	} else {

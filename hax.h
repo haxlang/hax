@@ -165,35 +165,23 @@ typedef char *(Hax_VarTraceProc) (ClientData clientData,
 #define HAX_VARIABLE_UNDEFINED	8
 
 /*
- * The following declarations either map ckalloc and ckfree to
- * malloc and free, or they map them to procedures with all sorts
- * of debugging hooks defined in haxCkalloc.c.
+ * The following declarations map ckalloc and ckfree to procedures
+ * with all sorts of debugging hooks defined in haxCkalloc.c.
  */
 
-#ifdef HAX_MEM_DEBUG
-
-HAX_EXTERN char *	Hax_DbCkalloc (unsigned int size,
+HAX_EXTERN void *	Hax_DbCkalloc (unsigned int size,
 			    char *file, int line);
-HAX_EXTERN int		Hax_DbCkfree (char *ptr,
+HAX_EXTERN int		Hax_DbCkfree (void *ptr,
 			    char *file, int line);
-HAX_EXTERN char *	Hax_DbCkrealloc (char *ptr,
+HAX_EXTERN void *	Hax_DbCkrealloc (void *ptr,
 			    unsigned int size, char *file, int line);
 HAX_EXTERN int		Hax_DumpActiveMemory (char *fileName);
-HAX_EXTERN void		Hax_ValidateAllMemory (char *file,
-			    int line);
-#  define ckalloc(x) Hax_DbCkalloc(x, __FILE__, __LINE__)
-#  define ckfree(x)  Hax_DbCkfree(x, __FILE__, __LINE__)
-#  define ckrealloc(x,y) Hax_DbCkrealloc((x), (y),__FILE__, __LINE__)
+HAX_EXTERN void		Hax_ValidateAllMemory (char *file, int line);
 
-#else
+#define ckalloc(x) Hax_DbCkalloc(x, __FILE__, __LINE__)
+#define ckfree(x)  Hax_DbCkfree(x, __FILE__, __LINE__)
+#define ckrealloc(x,y) Hax_DbCkrealloc((x), (y),__FILE__, __LINE__)
 
-#  define ckalloc(x) malloc(x)
-#  define ckfree(x)  free(x)
-#  define ckrealloc(x,y) realloc(x,y)
-#  define Hax_DumpActiveMemory(x)
-#  define Hax_ValidateAllMemory(x,y)
-
-#endif /* HAX_MEM_DEBUG */
 
 /*
  * Macro to free up result of interpreter.
