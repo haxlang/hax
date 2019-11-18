@@ -31,10 +31,9 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclExpr.c,v 1.36 92/08/16 
 
 #ifndef HAX_GENERIC_ONLY
 #include "haxUnix.h"
-#else
-int errno;
-#define ERANGE 34
 #endif
+
+int haxErrno;
 
 /*
  * The data structure below is used to describe an expression value,
@@ -211,16 +210,16 @@ ExprParseString(
 	char *term;
 
 	valuePtr->type = TYPE_LLONG;
-	errno = 0;
+	haxErrno = 0;
 	valuePtr->llongValue = Hax_strtol(string, &term, 0);
 	c = *term;
-	if ((c == '\0') && (errno != ERANGE)) {
+	if ((c == '\0') && (haxErrno != ERANGE)) {
 	    return HAX_OK;
 	}
-	if ((c == '.') || (c == 'e') || (c == 'E') || (errno == ERANGE)) {
-	    errno = 0;
+	if ((c == '.') || (c == 'e') || (c == 'E') || (haxErrno == ERANGE)) {
+	    haxErrno = 0;
 	    valuePtr->doubleValue = Hax_strtod(string, &term);
-	    if (errno == ERANGE) {
+	    if (haxErrno == ERANGE) {
 		Hax_ResetResult(interp);
 		if (Hax_DoubleEq(valuePtr->doubleValue, HAX_DOUBLE_ZERO)) {
 		    Hax_AppendResult(interp, "floating-point value \"",
@@ -327,15 +326,15 @@ ExprLex(
 
 	    infoPtr->token = VALUE;
 	    valuePtr->type = TYPE_LLONG;
-	    errno = 0;
+	    haxErrno = 0;
 	    valuePtr->llongValue = Hax_strtoul(p, &term, 0);
 	    c = *term;
-	    if ((c == '.') || (c == 'e') || (c == 'E') || (errno == ERANGE)) {
+	    if ((c == '.') || (c == 'e') || (c == 'E') || (haxErrno == ERANGE)) {
 		char *term2;
 
-		errno = 0;
+		haxErrno = 0;
 		valuePtr->doubleValue = Hax_strtod(p, &term2);
-		if (errno == ERANGE) {
+		if (haxErrno == ERANGE) {
 		    Hax_ResetResult(interp);
 		    if (Hax_DoubleEq(valuePtr->doubleValue, HAX_DOUBLE_ZERO)) {
 			interp->result =

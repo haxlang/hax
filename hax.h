@@ -187,9 +187,22 @@ HAX_EXTERN void		Hax_ValidateAllMemory (char *file,
 
 #else
 
-#  define ckalloc(x) malloc(x)
-#  define ckfree(x)  free(x)
-#  define ckrealloc(x,y) realloc(x,y)
+#ifndef SIZE_T_DEFINED
+typedef __SIZE_TYPE__ Size_t;
+#define SIZE_T_DEFINED
+#endif
+
+HAX_EXTERN void *	Hax_malloc(Size_t size);
+
+HAX_EXTERN void *	Hax_calloc(Size_t number, Size_t size);
+
+HAX_EXTERN void *	Hax_realloc(void *ptr, Size_t size);
+
+HAX_EXTERN void		Hax_free(void *ptr);
+
+#  define ckalloc(x) Hax_malloc(x)
+#  define ckfree(x)  Hax_free(x)
+#  define ckrealloc(x,y) Hax_realloc(x,y)
 #  define Hax_DumpActiveMemory(x)
 #  define Hax_ValidateAllMemory(x,y)
 

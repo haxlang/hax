@@ -48,7 +48,7 @@
 AR	= ar
 RANLIB	= ranlib
 CC	= cc
-CFLAGS	=
+CFLAGS	= -DHAX_FREESTANDING -O0 -g
 LDFLAGS	=
 
 PREFIX ?=	/usr/local
@@ -65,7 +65,7 @@ all: libhax.a haxsh
 GENERIC_OBJS =	haxRegexp.o haxAssem.o haxBasic.o haxCkalloc.o \
 	haxCmdAH.o haxCmdIL.o haxCmdMZ.o haxExpr.o haxGet.o \
 	haxHash.o haxHistory.o haxParse.o haxProc.o haxUtil.o \
-	haxVar.o haxCompat.o haxPanic.o
+	haxVar.o haxCompat.o haxPanic.o haxCallocArena.o
 
 UNIX_OBJS = haxEnv.o haxGlob.o haxUnixAZ.o haxUnixStr.o haxUnixUtil.o
 
@@ -133,12 +133,12 @@ COMPAT_OBJS = compat/Hax_ctype_.o compat/Hax_tolower_.o compat/Hax_toupper_.o \
 	compat/softfp/Hax_s_f32UIToCommonNaN.o \
 	compat/softfp/Hax_s_commonNaNToF64UI.o \
 	compat/softfp/Hax_s_normSubnormalF32Sig.o \
-	compat/Hax_malloc.o
+	compat/Hax_sbrk.o compat/Hax_bsdmalloc.o
 
 compat/Hax_errlist.c: compat/errlist.awk
 	awk -f compat/errlist.awk /usr/src/sys/sys/errno.h > $@
 
-OBJS = $(GENERIC_OBJS) $(UNIX_OBJS) # $(COMPAT_OBJS)
+OBJS = $(GENERIC_OBJS) $(UNIX_OBJS) $(COMPAT_OBJS)
 
 libhax.a: $(OBJS)
 	$(AR) cr $@ $(OBJS)

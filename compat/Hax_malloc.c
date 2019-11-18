@@ -1,25 +1,33 @@
-#include <stdlib.h>
+#ifndef SIZE_T_DEFINED
+typedef __SIZE_TYPE__ Size_t;
+#define SIZE_T_DEFINED
+#endif
+
+void *bsdmalloc(Size_t size);
+void *bsdcalloc(Size_t number, Size_t size);
+void *bsdrealloc(void *ptr, Size_t size);
+void bsdfree(void *ptr);
 
 void *
-haxMalloc(size_t size)
+haxMalloc(Size_t size)
 {
-    return malloc(size);
+    return bsdmalloc(size);
 }
 
 void *
-haxCalloc(size_t number, size_t size)
+haxCalloc(Size_t number, Size_t size)
 {
-    return calloc(number, size);
+    return bsdcalloc(number, size);
 }
 
 void *
-haxRealloc(void *ptr, size_t size)
+haxRealloc(void *ptr, Size_t size)
 {
-    return realloc(ptr, size);
+    return bsdrealloc(ptr, size);
 }
 
 void
 haxFree(void *ptr)
 {
-    free(ptr);
+    bsdfree(ptr);
 }
