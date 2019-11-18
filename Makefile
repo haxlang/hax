@@ -96,7 +96,6 @@ install: libhax.a
 	install libhaxunix.a $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 
 	install hax.h $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
-	install haxHash.h $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
 
 	cd doc; for i in *.3; do \
 		sed -e '/man\.macros/r man.macros' -e '/man\.macros/d' \
@@ -123,7 +122,7 @@ test: haxsh
 clean:
 	rm -f $(OBJS) $(UNIX_OBJS) libhax.a libhaxunix.a haxsh.o haxsh
 
-$(OBJS): hax.h haxHash.h haxInt.h
+$(OBJS): hax.h haxInt.h
 $(UNIX_OJBS): haxUnix.h
 
 .SUFFIXES: .c .o

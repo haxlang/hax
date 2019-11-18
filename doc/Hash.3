@@ -17,7 +17,7 @@
 Hax_InitHashTable, Hax_DeleteHashTable, Hax_CreateHashEntry, Hax_DeleteHashEntry, Hax_FindHashEntry, Hax_GetHashValue, Hax_SetHashValue, Hax_GetHashKey, Hax_FirstHashEntry, Hax_NextHashEntry, Hax_HashStats \- procedures to manage hash tables
 .SH SYNOPSIS
 .nf
-\fB#include <haxHash.h>\fR
+\fB#include <hax.h>\fR
 .sp
 \fBHax_InitHashTable\fR(\fItablePtr, keyType\fR)
 .sp
@@ -198,7 +198,7 @@ and the utilization of the buckets.
 It is the caller's responsibility to free the result string
 by passing it to \fBfree\fR.
 .PP
-The header file \fBhaxHash.h\fR defines the actual data structures
+The header file \fBhax.h\fR defines the actual data structures
 used to implement hash tables.
 This is necessary so that clients can allocate Hax_HashTable
 structures and so that macros can be used to read and write
