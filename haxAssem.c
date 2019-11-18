@@ -1,4 +1,4 @@
-/* 
+/*
  * haxAssem.c --
  *
  *	This file contains procedures to help assemble Hax commands

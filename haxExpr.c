@@ -1,4 +1,4 @@
-/* 
+/*
  * haxExpr.c --
  *
  *	This file contains the code to evaluate expressions for
@@ -644,7 +644,7 @@ ExprGetValue(
 		    } else {
 			badType = valuePtr->type;
 			goto illegalType;
-		    } 
+		    }
 		    break;
 		case NOT:
 		    if (valuePtr->type == TYPE_LLONG) {

@@ -1,4 +1,4 @@
-/* 
+/*
  * haxPanic.c --
  *
  *	Source code for the "Hax_Panic" library procedure for Hax;

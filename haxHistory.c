@@ -1,4 +1,4 @@
-/* 
+/*
  * haxHistory.c --
  *
  *	This module implements history as an optional addition to Hax.

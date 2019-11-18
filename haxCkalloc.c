@@ -1,4 +1,4 @@
-/* 
+/*
  * haxCkalloc.c --
  *    Interface to malloc and free that provides support for debugging problems
  *    involving overwritten, double freeing memory and loss of memory.
@@ -64,17 +64,17 @@ static void
 dump_memory_info(
     FILE *outFile)
 {
-        fprintf(outFile,"total mallocs             %10d\n", 
+        fprintf(outFile,"total mallocs             %10d\n",
                 total_mallocs);
-        fprintf(outFile,"total frees               %10d\n", 
+        fprintf(outFile,"total frees               %10d\n",
                 total_frees);
-        fprintf(outFile,"current packets allocated %10d\n", 
+        fprintf(outFile,"current packets allocated %10d\n",
                 current_malloc_packets);
-        fprintf(outFile,"current bytes allocated   %10d\n", 
+        fprintf(outFile,"current bytes allocated   %10d\n",
                 current_bytes_malloced);
-        fprintf(outFile,"maximum packets allocated %10d\n", 
+        fprintf(outFile,"maximum packets allocated %10d\n",
                 maximum_malloc_packets);
-        fprintf(outFile,"maximum bytes allocated   %10d\n", 
+        fprintf(outFile,"maximum bytes allocated   %10d\n",
                 maximum_bytes_malloced);
 }
 
@@ -97,7 +97,7 @@ ValidateMemory (
     int   idx;
     int   guard_failed = FALSE;
     int byte;
-    
+
     for (idx = 0; idx < GUARD_SIZE; idx++) {
         byte = *(memHeaderP->low_guard + idx);
         if (byte != GUARD_VALUE) {
@@ -141,8 +141,8 @@ ValidateMemory (
     }
 
     if (nukeGuards) {
-        memset ((char *) memHeaderP->low_guard, 0, GUARD_SIZE); 
-        memset ((char *) hiPtr, 0, GUARD_SIZE); 
+        memset ((char *) memHeaderP->low_guard, 0, GUARD_SIZE);
+        memset ((char *) hiPtr, 0, GUARD_SIZE);
     }
 
 }
@@ -174,7 +174,7 @@ Hax_ValidateAllMemory (
  *     Displays all allocated memory to stderr.
  *
  * Results:
- *     Return HAX_ERROR if an error accessing the file occures, `errno' 
+ *     Return HAX_ERROR if an error accessing the file occures, `errno'
  *     will have the file error number left in it.
  *----------------------------------------------------------------------
  */
@@ -210,7 +210,7 @@ Hax_DumpActiveMemory (
  * Hax_DbCkalloc - debugging ckalloc
  *
  *        Allocate the requested amount of space plus some extra for
- *        guard bands at both ends of the request, plus a size, panicing 
+ *        guard bands at both ends of the request, plus a size, panicing
  *        if there isn't enough space, then write in the guard bands
  *        and return the address of the space in the middle that the
  *        user asked for.
@@ -233,12 +233,12 @@ Hax_DbCkalloc(
     if (validate_memory)
         Hax_ValidateAllMemory (file, line);
 
-    result = (struct mem_header *)malloc((unsigned)size + 
+    result = (struct mem_header *)malloc((unsigned)size +
                               sizeof(struct mem_header) + GUARD_SIZE);
     if (result == NULL) {
         fflush(stdout);
         dump_memory_info(stderr);
-        Hax_Panic("unable to alloc %d bytes, %s line %d", size, file, 
+        Hax_Panic("unable to alloc %d bytes, %s line %d", size, file,
               line);
     }
 
@@ -267,13 +267,13 @@ Hax_DbCkalloc(
     }
 
     if (alloc_tracing)
-        fprintf(stderr,"ckalloc %p %d %s %d\n", result->body, size, 
+        fprintf(stderr,"ckalloc %p %d %s %d\n", result->body, size,
                 file, line);
 
     if (break_on_malloc && (total_mallocs >= break_on_malloc)) {
         break_on_malloc = 0;
         (void) fflush(stdout);
-        fprintf(stderr,"reached malloc break limit (%d)\n", 
+        fprintf(stderr,"reached malloc break limit (%d)\n",
                 total_mallocs);
         fprintf(stderr, "program will now enter C debugger\n");
         (void) fflush(stderr);
@@ -326,7 +326,7 @@ Hax_DbCkfree(
     memp = (struct mem_header *)(((char *) ptr) - (long)memp->body);
 
     if (alloc_tracing)
-        fprintf(stderr, "ckfree %p %ld %s %d\n", memp->body, 
+        fprintf(stderr, "ckfree %p %ld %s %d\n", memp->body,
                 memp->length, file, line);
 
     if (validate_memory)
@@ -412,7 +412,7 @@ MemoryCmd (
     }
 
     if (strcmp(argv[1],"trace") == 0) {
-        if (argc != 3) 
+        if (argc != 3)
             goto bad_suboption;
         alloc_tracing = (strcmp(argv[2],"on") == 0);
         return HAX_OK;
@@ -430,14 +430,14 @@ MemoryCmd (
         return HAX_OK;
     }
     if (strcmp(argv[1],"trace_on_at_malloc") == 0) {
-        if (argc != 3) 
+        if (argc != 3)
             goto argError;
         if (Hax_GetInt(interp, argv[2], &trace_on_at_malloc) != HAX_OK)
                 return HAX_ERROR;
          return HAX_OK;
     }
     if (strcmp(argv[1],"break_on_malloc") == 0) {
-        if (argc != 3) 
+        if (argc != 3)
             goto argError;
         if (Hax_GetInt(interp, argv[2], &break_on_malloc) != HAX_OK)
                 return HAX_ERROR;
@@ -459,7 +459,7 @@ MemoryCmd (
             if ((fileName = Hax_TildeSubst (interp, fileName)) == NULL)
                 return HAX_ERROR;
         if (Hax_DumpActiveMemory (fileName) != HAX_OK) {
-	    Hax_AppendResult(interp, "error accessing ", argv[2], 
+	    Hax_AppendResult(interp, "error accessing ", argv[2],
 		    (char *) NULL);
 	    return HAX_ERROR;
 	}
@@ -493,6 +493,6 @@ void
 Hax_InitMemory(
     Hax_Interp *interp)
 {
-Hax_CreateCommand (interp, "memory", MemoryCmd, (ClientData)NULL, 
+Hax_CreateCommand (interp, "memory", MemoryCmd, (ClientData)NULL,
                   (void (*)())NULL);
 }

@@ -1,4 +1,4 @@
-/* 
+/*
  * haxEnv.c --
  *
  *	Hax support for environment variables, including a setenv

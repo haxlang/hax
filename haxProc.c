@@ -1,4 +1,4 @@
-/* 
+/*
  * haxProc.c --
  *
  *	This file contains routines that implement Hax procedures,

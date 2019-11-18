@@ -14,7 +14,7 @@
 # warranty.
 #
 # $Header: /sprite/src/lib/tcl/tests/RCS/history.test,v 1.7 91/09/09 11:50:13 ouster Exp $ (Berkeley)
-  
+
 if {[info commands history] == ""} {
     puts stdout "This version of Tcl was built without the history command;\n"
     puts stdout "history tests will be skipped.\n"

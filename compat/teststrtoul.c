@@ -1,4 +1,4 @@
-/* 
+/*
  * teststrtoul.c --
  *
  *	This file contains a simple program to detect broken versions

@@ -1,4 +1,4 @@
-/* 
+/*
  * haxCmdMZ.c --
  *
  *	This file contains the top-level command routines for most of
@@ -291,7 +291,7 @@ Hax_RegsubCmd(
 	 * Copy the portion of the source string before the match to the
 	 * result variable.
 	 */
-    
+
 	src = argPtr[1] + (regexpPtr->startp[0] - string);
 	c = *src;
 	*src = 0;
@@ -306,17 +306,17 @@ Hax_RegsubCmd(
 	    result = HAX_ERROR;
 	    goto done;
 	}
-    
+
 	/*
 	 * Append the subSpec argument to the variable, making appropriate
 	 * substitutions.  This code is a bit hairy because of the backslash
 	 * conventions and because the code saves up ranges of characters in
 	 * subSpec to reduce the number of calls to Hax_SetVar.
 	 */
-    
+
 	for (src = firstChar = argPtr[2], c = *src; c != 0; src++, c = *src) {
 	    int index;
-    
+
 	    if (c == '&') {
 		index = 0;
 	    } else if (c == '\\') {
@@ -355,7 +355,7 @@ Hax_RegsubCmd(
 	    if ((index < NSUBEXP) && (regexpPtr->startp[index] != NULL)
 		    && (regexpPtr->endp[index] != NULL)) {
 		char *first, *last, saved;
-    
+
 		first = argPtr[1] + (regexpPtr->startp[index] - string);
 		last = argPtr[1] + (regexpPtr->endp[index] - string);
 		saved = *last;
@@ -620,7 +620,7 @@ Hax_ScanCmd(
 
 	    case 'c':
                 if (widthSpecified) {
-                    interp->result = 
+                    interp->result =
                          (char *) "field width may not be specified in %c "
 			    "conversion";
                     return HAX_ERROR;

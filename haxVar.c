@@ -1,4 +1,4 @@
-/* 
+/*
  * haxVar.c --
  *
  *	This file contains routines that implement Hax variables

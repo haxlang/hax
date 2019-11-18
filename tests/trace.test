@@ -507,7 +507,7 @@ test trace-11.1 {delete one trace from another} {
     trace var x r {traceTag 2}
     trace var x r {traceTag 3}
     trace var x r {traceTag 4}
-    trace var x r delTraces 
+    trace var x r delTraces
     trace var x r {traceTag 5}
     set x
     set info

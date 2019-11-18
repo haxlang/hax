@@ -38,10 +38,10 @@ test cd-2.3 {changing directories} {
 } "Sample text"
 cd ..
 test cd-2.4 {changing directories} {
-    exec pwd 
+    exec pwd
 } $cwd
 test cd-2.5 {changing directories} {
-    pwd 
+    pwd
 } $cwd
 test cd-2.6 {changing directories} {
     exec cat cd.dir/test.file

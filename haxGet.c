@@ -1,4 +1,4 @@
-/* 
+/*
  * haxGet.c --
  *
  *	This file contains procedures to convert strings into

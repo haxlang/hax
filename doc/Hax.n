@@ -6,7 +6,7 @@
 '\" The University of California makes no representations about
 '\" the suitability of this material for any purpose.  It is
 '\" provided "as is" without express or implied warranty.
-'\" 
+'\"
 '\" $Header: /user6/ouster/tcl/man/RCS/Hax.n,v 1.105 93/01/31 15:35:41 ouster Exp $ SPRITE (Berkeley)
 '
 .so man.macros
@@ -648,7 +648,7 @@ precedence level.  For example, the expression
 evaluates to 0.
 .PP
 The \fB&&\fP, \fB||\fP, and \fB?:\fP operators have ``lazy
-evaluation'', just as in C, 
+evaluation'', just as in C,
 which means that operands are not evaluated if they are
 not needed to determine the outcome.  For example, in
 .DS
@@ -772,7 +772,7 @@ variable substitution are never
 made on a list (at least, not by the list-processing commands; the
 list can always be passed to the Hax interpreter for evaluation).
 .PP
-The Hax commands \fBconcat\fR, \fBforeach\fR, 
+The Hax commands \fBconcat\fR, \fBforeach\fR,
 .VS
 \fBlappend\fR, \fBlindex\fR, \fBlinsert\fR, \fBlist\fR, \fBllength\fR,
 \fBlrange\fR, \fBlreplace\fR, \fBlsearch\fR, and \fBlsort\fR allow
@@ -1108,7 +1108,7 @@ Below are some examples of \fBcase\fR commands:
 .DS
 \fBcase abc in {a b} {format 1} default {format 2} a* {format 3}
 .DE
-will return \fB3\fR, 
+will return \fB3\fR,
 .DS
 .ta .5c 1c
 \fBcase a in {

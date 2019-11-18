@@ -50,16 +50,16 @@ proc test {test_name test_description contents_of_test passing_results} {
 	if !$ok then return
     }
     set answer [uplevel $contents_of_test]
-    if {[string compare $answer $passing_results] == 0} then { 
+    if {[string compare $answer $passing_results] == 0} then {
 	if $VERBOSE then {
 	    print_verbose $test_name $test_description $contents_of_test $answer
 	    puts stdout "++++ $test_name PASSED"
 	}
-    } else { 
-	print_verbose $test_name $test_description $contents_of_test $answer 
+    } else {
+	print_verbose $test_name $test_description $contents_of_test $answer
 	puts stdout "---- Result should have been:"
 	puts stdout "$passing_results"
-	puts stdout "---- $test_name FAILED" 
+	puts stdout "---- $test_name FAILED"
     }
 }
 

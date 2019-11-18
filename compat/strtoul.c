@@ -1,4 +1,4 @@
-/* 
+/*
  * strtoul.c --
  *
  *	Source code for the "strtoul" library procedure.
@@ -90,7 +90,7 @@ strtoul(string, endPtr, base)
      * If no base was provided, pick one from the leading characters
      * of the string.
      */
-    
+
     if (base == 0)
     {
 	if (*p == '0') {

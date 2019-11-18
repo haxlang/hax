@@ -1,4 +1,4 @@
-/* 
+/*
  * haxHash.c --
  *
  *	Implementation of in-memory hash tables for Hax and Hax-based

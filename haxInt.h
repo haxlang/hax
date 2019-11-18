@@ -144,7 +144,7 @@ typedef struct Var {
 				 * valueSpace field above. */
 	Hax_HashTable *tablePtr;/* For array variables, this points to
 				 * information about the hash table used
-				 * to implement the associative array. 
+				 * to implement the associative array.
 				 * Points to malloc-ed data. */
 	Hax_HashEntry *upvarPtr;
 				/* If this is a global variable being

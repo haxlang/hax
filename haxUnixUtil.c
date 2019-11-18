@@ -1,4 +1,4 @@
-/* 
+/*
  * haxUnixUtil.c --
  *
  *	This file contains a collection of utility procedures that

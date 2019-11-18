@@ -1,4 +1,4 @@
-/* 
+/*
  * haxCmdIL.c --
  *
  *	This file contains the top-level command routines for most of
@@ -184,7 +184,7 @@ Hax_IncrCmd(
 	return HAX_ERROR;
     }
     interp->result = result;
-    return HAX_OK; 
+    return HAX_OK;
 }
 
 /*

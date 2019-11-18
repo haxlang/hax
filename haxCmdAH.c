@@ -1,4 +1,4 @@
-/* 
+/*
  * haxCmdAH.c --
  *
  *	This file contains the top-level command routines for most of
@@ -391,12 +391,12 @@ Hax_EvalCmd(
     if (argc == 2) {
 	result = Hax_Eval(interp, NULL, argv[1], 0, (char **) NULL);
     } else {
-    
+
 	/*
 	 * More than one argument:  concatenate them together with spaces
 	 * between, then evaluate the result.
 	 */
-    
+
 	cmd = Hax_Concat(argc-1, argv+1);
 	result = Hax_Eval(interp, NULL, cmd, 0, (char **) NULL);
 	ckfree(cmd);

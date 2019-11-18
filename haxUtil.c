@@ -1,4 +1,4 @@
-/* 
+/*
  * haxUtil.c --
  *
  *	This file contains utility procedures that are used by many Hax
@@ -452,7 +452,7 @@ Hax_ScanElement(
      * 1. They produce a proper list, one that will yield back the
      * argument strings when evaluated or when disassembled with
      * Hax_SplitList.  This is the most important thing.
-     * 
+     *
      * 2. They try to produce legible output, which means minimizing the
      * use of backslashes (using braces instead).  However, there are
      * some situations where backslashes must be used (e.g. an element
@@ -825,7 +825,7 @@ Hax_StringMatch(
 	 * If so, we succeeded.  If we're at the end of the pattern
 	 * but not at the end of the string, we failed.
 	 */
-	
+
 	if (*pattern == 0) {
 	    if (*string == 0) {
 		return 1;
@@ -842,7 +842,7 @@ Hax_StringMatch(
 	 * recursively for each postfix of string, until either we
 	 * match or we reach the end of the string.
 	 */
-	
+
 	if (*pattern == '*') {
 	    pattern += 1;
 	    if (*pattern == 0) {
@@ -858,7 +858,7 @@ Hax_StringMatch(
 		string += 1;
 	    }
 	}
-    
+
 	/* Check for a "?" as the next pattern character.  It matches
 	 * any single character.
 	 */
@@ -871,7 +871,7 @@ Hax_StringMatch(
 	 * by a list of characters that are acceptable, or by a range
 	 * (two characters separated by "-").
 	 */
-	
+
 	if (*pattern == '[') {
 	    pattern += 1;
 	    while (1) {
@@ -901,11 +901,11 @@ Hax_StringMatch(
 	    }
 	    goto thisCharOK;
 	}
-    
+
 	/* If the next pattern character is '/', just strip off the '/'
 	 * so we do exact matching on the character that follows.
 	 */
-	
+
 	if (*pattern == '\\') {
 	    pattern += 1;
 	    if (*pattern == 0) {
@@ -916,7 +916,7 @@ Hax_StringMatch(
 	/* There's no special character.  Just make sure that the next
 	 * characters of each string match.
 	 */
-	
+
 	if (*pattern != *string) {
 	    return 0;
 	}

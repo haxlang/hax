@@ -1,4 +1,4 @@
-/* 
+/*
  * haxUnixAZ.c --
  *
  *	This file contains the top-level command procedures for
@@ -323,9 +323,9 @@ Hax_ExecCmd(
 #	    define BUFFER_SIZE 1000
 	    char buffer[BUFFER_SIZE+1];
 	    int count;
-    
+
 	    count = read(outputId, buffer, BUFFER_SIZE);
-    
+
 	    if (count == 0) {
 		break;
 	    }
@@ -1696,7 +1696,7 @@ CleanupChildren(
 			(char *) NULL);
 	    } else if (WIFSIGNALED(waitStatus)) {
 		char *p;
-	
+
 		p = Hax_SignalMsg((int) (WTERMSIG(waitStatus)));
 		Hax_SetErrorCode(interp, "CHILDKILLED", msg1,
 			Hax_SignalId((int) (WTERMSIG(waitStatus))), p,
@@ -1731,9 +1731,9 @@ CleanupChildren(
 #	    define BUFFER_SIZE 1000
 	    char buffer[BUFFER_SIZE+1];
 	    int count;
-    
+
 	    count = read(errorId, buffer, BUFFER_SIZE);
-    
+
 	    if (count == 0) {
 		break;
 	    }

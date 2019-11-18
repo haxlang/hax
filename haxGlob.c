@@ -1,4 +1,4 @@
-/* 
+/*
  * haxGlob.c --
  *
  *	This file provides procedures and commands for file name

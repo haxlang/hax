@@ -1,4 +1,4 @@
-/* 
+/*
  * strerror.c --
  *
  *	Source code for the "strerror" library routine.

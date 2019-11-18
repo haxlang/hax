@@ -387,7 +387,7 @@ typedef struct Hax_HashTable {
 					 * order bits of randomized keys. */
     int mask;				/* Mask value used in hashing
 					 * function. */
-    int keyType;			/* Type of keys used in this table. 
+    int keyType;			/* Type of keys used in this table.
 					 * It's either HAX_STRING_KEYS,
 					 * HAX_ONE_WORD_KEYS, or an integer
 					 * giving the number of ints in a

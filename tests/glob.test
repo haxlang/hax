@@ -58,7 +58,7 @@ test glob-3.7 {asterisks and question marks} {lsort [glob {globTest/[xy]1.*}]} \
 if {[string compare [glob ~] /users/ouster] == 0} {
     test glob-4.1 {tildes} {glob ~/.csh*} "/users/ouster/.cshrc"
     test glob-4.2 {tildes} {glob ~/.csh*} "/users/ouster/.cshrc"
-} 
+}
 
 test glob-5.1 {error conditions} {
     list [catch {glob} msg] $msg

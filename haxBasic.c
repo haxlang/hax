@@ -1,4 +1,4 @@
-/* 
+/*
  * haxBasic.c --
  *
  *	Contains the basic facilities for HAX command interpretation,
@@ -214,7 +214,7 @@ Hax_DeleteInterp(
     for (hPtr = Hax_FirstHashEntry(&iPtr->commandTable, &search);
 	    hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
 	cmdPtr = (Command *) Hax_GetHashValue(hPtr);
-	if (cmdPtr->deleteProc != NULL) { 
+	if (cmdPtr->deleteProc != NULL) {
 	    (*cmdPtr->deleteProc)(cmdPtr->clientData);
 	}
 	ckfree((char *) cmdPtr);

@@ -508,7 +508,7 @@ test set-11.1 {array anymore option} {
     list [array anymore a s-1-a] [array next a s-1-a] \
 	    [array anymore a s-1-a] [array next a s-1-a] \
 	    [array anymore a s-1-a] [array next a s-1-a] \
-	    [array anymore a s-1-a] [array next a s-1-a] 
+	    [array anymore a s-1-a] [array next a s-1-a]
 } {1 a 1 b 1 c 0 {}}
 test set-11.2 {array anymore option} {
     catch {unset a}
@@ -518,7 +518,7 @@ test set-11.2 {array anymore option} {
     array startsearch a
     list [array next a s-1-a] [array next a s-1-a] \
 	    [array anymore a s-1-a] [array next a s-1-a] \
-	    [array next a s-1-a] [array anymore a s-1-a] 
+	    [array next a s-1-a] [array anymore a s-1-a]
 } {a b 1 c {} 0}
 
 # Must delete variables when done, since these arrays get used as
