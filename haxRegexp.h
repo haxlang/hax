@@ -22,7 +22,7 @@ typedef struct regexp {
 	char program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
 
-extern regexp *RegComp (char *exp);
+extern regexp *RegComp (Hax_Interp *interp, char *exp);
 extern int RegExec (regexp *prog, char *string);
 extern void RegSub (regexp *prog, char *source, char *dest);
 extern void RegError (char *msg);

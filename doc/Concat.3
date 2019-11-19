@@ -19,8 +19,11 @@ Hax_Concat \- concatenate a collection of strings
 \fB#include <hax.h>\fR
 .sp
 char *
-\fBHax_Concat\fR(\fIargc, argv\fR)
+\fBHax_Concat\fR(\fIinterp\fR, \fIargc, argv\fR)
 .SH ARGUMENTS
+.AS Hax_Interp *interp;
+.AP Hax_Interp *interp in
+Interpreter in which to execute the command.
 .AP int argc in
 Number of strings.
 .AP char *argv[] in

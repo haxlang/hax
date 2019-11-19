@@ -26,7 +26,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclProc.c,v 1.60 92/09/14 
 
 static  int	InterpProc (ClientData clientData,
 		    Hax_Interp *interp, int argc, char **argv);
-static  void	ProcDeleteProc (ClientData clientData);
+static  void	ProcDeleteProc (Hax_Interp *interp, ClientData clientData);
 
 /*
  *----------------------------------------------------------------------
@@ -54,6 +54,7 @@ Hax_ProcCmd(
     char **argv				/* Argument strings. */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Proc *procPtr;
     int result, argCount, i;
     char **argArray = NULL;
@@ -67,9 +68,10 @@ Hax_ProcCmd(
 	return HAX_ERROR;
     }
 
-    procPtr = (Proc *) ckalloc(sizeof(Proc));
+    procPtr = (Proc *) ckalloc(memoryp, sizeof(Proc));
     procPtr->iPtr = iPtr;
-    procPtr->command = (char *) ckalloc((unsigned) strlen(argv[3]) + 1);
+    procPtr->command =
+	(char *) ckalloc(memoryp, (unsigned) strlen(argv[3]) + 1);
     strcpy(procPtr->command, argv[3]);
     procPtr->argPtr = NULL;
 
@@ -97,7 +99,7 @@ Hax_ProcCmd(
 	    goto procError;
 	}
 	if (fieldCount > 2) {
-	    ckfree((char *) fieldValues);
+	    ckfree(memoryp, (char *) fieldValues);
 	    Hax_AppendResult(interp,
 		    "too many fields in argument specifier \"",
 		    argArray[i], "\"", (char *) NULL);
@@ -105,7 +107,7 @@ Hax_ProcCmd(
 	    goto procError;
 	}
 	if ((fieldCount == 0) || (*fieldValues[0] == 0)) {
-	    ckfree((char *) fieldValues);
+	    ckfree(memoryp, (char *) fieldValues);
 	    Hax_AppendResult(interp, "procedure \"", argv[1],
 		    "\" has argument with no name", (char *) NULL);
 	    result = HAX_ERROR;
@@ -117,7 +119,7 @@ Hax_ProcCmd(
 	} else {
 	    valueLength = 0;
 	}
-	argPtr = (Arg *) ckalloc((unsigned)
+	argPtr = (Arg *) ckalloc(memoryp, (unsigned)
 		(sizeof(Arg) - sizeof(argPtr->name) + nameLength
 		+ valueLength));
 	if (lastArgPtr == NULL) {
@@ -134,24 +136,24 @@ Hax_ProcCmd(
 	} else {
 	    argPtr->defValue = NULL;
 	}
-	ckfree((char *) fieldValues);
+	ckfree(memoryp, (char *) fieldValues);
     }
 
     Hax_CreateCommand(interp, argv[1], InterpProc, (ClientData) procPtr,
 	    ProcDeleteProc);
-    ckfree((char *) argArray);
+    ckfree(memoryp, (char *) argArray);
     return HAX_OK;
 
     procError:
-    ckfree(procPtr->command);
+    ckfree(memoryp, procPtr->command);
     while (procPtr->argPtr != NULL) {
 	argPtr = procPtr->argPtr;
 	procPtr->argPtr = argPtr->nextPtr;
-	ckfree((char *) argPtr);
+	ckfree(memoryp, (char *) argPtr);
     }
-    ckfree((char *) procPtr);
+    ckfree(memoryp, (char *) procPtr);
     if (argArray != NULL) {
-	ckfree((char *) argArray);
+	ckfree(memoryp, (char *) argArray);
     }
     return result;
 }
@@ -270,6 +272,7 @@ Hax_UplevelCmd(
     char **argv				/* Argument strings. */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int result;
     CallFrame *savedVarFramePtr, *framePtr;
 
@@ -310,9 +313,9 @@ Hax_UplevelCmd(
     } else {
 	char *cmd;
 
-	cmd = Hax_Concat(argc, argv);
+	cmd = Hax_Concat(interp, argc, argv);
 	result = Hax_Eval(interp, NULL, cmd, 0, (char **) NULL);
-	ckfree(cmd);
+	ckfree(memoryp, cmd);
     }
     if (result == HAX_ERROR) {
 	char msg[60];
@@ -424,6 +427,7 @@ InterpProc(
     Proc *procPtr = (Proc *) clientData;
     Arg *argPtr;
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     char **args;
     CallFrame frame;
     char *value, *end;
@@ -467,9 +471,9 @@ InterpProc(
 	    if (argc < 0) {
 		argc = 0;
 	    }
-	    value = Hax_Merge(argc, args);
+	    value = Hax_Merge(interp, argc, args);
 	    Hax_SetVar(interp, argPtr->name, value, 0);
-	    ckfree(value);
+	    ckfree(memoryp, value);
 	    argc = 0;
 	    break;
 	} else if (argc > 0) {
@@ -551,17 +555,20 @@ InterpProc(
 
 static void
 ProcDeleteProc(
+    Hax_Interp *interp,
     ClientData clientData		/* Procedure to be deleted. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Proc *procPtr = (Proc *) clientData;
     Arg *argPtr;
 
-    ckfree((char *) procPtr->command);
+    ckfree(memoryp, (char *) procPtr->command);
     for (argPtr = procPtr->argPtr; argPtr != NULL; ) {
 	Arg *nextPtr = argPtr->nextPtr;
 
-	ckfree((char *) argPtr);
+	ckfree(memoryp, (char *) argPtr);
 	argPtr = nextPtr;
     }
-    ckfree((char *) procPtr);
+    ckfree(memoryp, (char *) procPtr);
 }

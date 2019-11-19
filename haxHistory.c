@@ -95,7 +95,7 @@ static char *		GetWords (Interp *iPtr, char *command,
 			    char *words);
 static void		InsertRev (Interp *iPtr,
 			    HistoryRev *revPtr);
-static void		MakeSpace (HistoryEvent *hPtr, int size);
+static void		MakeSpace (Interp *iPtr, HistoryEvent *hPtr, int size);
 static void		RevCommand (Interp *iPtr, char *string);
 static void		RevResult (Interp *iPtr, char *string);
 static int		SubsAndEval (Interp *iPtr, char *cmd,
@@ -122,6 +122,7 @@ Hax_InitHistory(
     Hax_Interp *interp		/* Interpreter to initialize. */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int i;
 
     if (iPtr->numEvents != 0) {
@@ -129,9 +130,10 @@ Hax_InitHistory(
     }
     iPtr->numEvents = 20;
     iPtr->events = (HistoryEvent *)
-	    ckalloc((unsigned) (iPtr->numEvents * sizeof(HistoryEvent)));
+	    ckalloc(memoryp,
+		(unsigned) (iPtr->numEvents * sizeof(HistoryEvent)));
     for (i = 0; i < iPtr->numEvents; i++) {
-	iPtr->events[i].command = (char *) ckalloc(INITIAL_CMD_SIZE);
+	iPtr->events[i].command = (char *) ckalloc(memoryp, INITIAL_CMD_SIZE);
 	*iPtr->events[i].command = 0;
 	iPtr->events[i].bytesAvl = INITIAL_CMD_SIZE;
     }
@@ -208,7 +210,7 @@ Hax_RecordAndEval(
     while (cmd[length-1] == '\n') {
 	length--;
     }
-    MakeSpace(eventPtr, length + 1);
+    MakeSpace(iPtr, eventPtr, length + 1);
     strncpy(eventPtr->command, cmd, length);
     eventPtr->command[length] = 0;
 
@@ -257,6 +259,7 @@ Hax_HistoryCmd(
     char **argv				/* Argument strings. */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     HistoryEvent *eventPtr;
     int length;
     char c;
@@ -299,9 +302,9 @@ Hax_HistoryCmd(
 	    while (iPtr->revPtr != NULL) {
 		HistoryRev *nextPtr;
 
-		ckfree(iPtr->revPtr->newBytes);
+		ckfree(memoryp, iPtr->revPtr->newBytes);
 		nextPtr = iPtr->revPtr->nextPtr;
-		ckfree((char *) iPtr->revPtr);
+		ckfree(memoryp, (char *) iPtr->revPtr);
 		iPtr->revPtr = nextPtr;
 	    }
 	} else {
@@ -310,7 +313,7 @@ Hax_HistoryCmd(
 		return HAX_ERROR;
 	    }
 	}
-	MakeSpace(eventPtr, strlen(argv[2]) + 1);
+	MakeSpace(iPtr, eventPtr, strlen(argv[2]) + 1);
 	strcpy(eventPtr->command, argv[2]);
 	return HAX_OK;
     } else if ((c == 'e') && (strncmp(argv[1], "event", length)) == 0) {
@@ -407,7 +410,7 @@ Hax_HistoryCmd(
 	 */
 
 	events = (HistoryEvent *)
-		ckalloc((unsigned) (count * sizeof(HistoryEvent)));
+		ckalloc(memoryp, (unsigned) (count * sizeof(HistoryEvent)));
 	if (count < iPtr->numEvents) {
 	    src = iPtr->curEvent + 1 - count;
 	    if (src < 0) {
@@ -424,7 +427,7 @@ Hax_HistoryCmd(
 		events[i] = iPtr->events[src];
 		iPtr->events[src].command = NULL;
 	    } else {
-		events[i].command = (char *) ckalloc(INITIAL_CMD_SIZE);
+		events[i].command = (char *) ckalloc(memoryp, INITIAL_CMD_SIZE);
 		events[i].command[0] = 0;
 		events[i].bytesAvl = INITIAL_CMD_SIZE;
 	    }
@@ -437,10 +440,10 @@ Hax_HistoryCmd(
 
 	for (i = 0; i < iPtr->numEvents; i++) {
 	    if (iPtr->events[i].command != NULL) {
-		ckfree(iPtr->events[i].command);
+		ckfree(memoryp, iPtr->events[i].command);
 	    }
 	}
-	ckfree((char *) iPtr->events);
+	ckfree(memoryp, (char *) iPtr->events);
 	iPtr->events = events;
 	if (count < iPtr->numEvents) {
 	    iPtr->curEvent = count-1;
@@ -528,12 +531,14 @@ Hax_HistoryCmd(
 
 static void
 MakeSpace(
+    Interp *iPtr,
     HistoryEvent *hPtr,
     int size			/* # of bytes needed in hPtr. */)
 {
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     if (hPtr->bytesAvl < size) {
-	ckfree(hPtr->command);
-	hPtr->command = (char *) ckalloc((unsigned) size);
+	ckfree(memoryp, hPtr->command);
+	hPtr->command = (char *) ckalloc(memoryp, (unsigned) size);
 	hPtr->bytesAvl = size;
     }
 }
@@ -562,6 +567,7 @@ InsertRev(
     Interp *iPtr,			/* Interpreter to use. */
     HistoryRev *revPtr	/* Revision to add to iPtr's list. */)
 {
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     HistoryRev *curPtr;
     HistoryRev *prevPtr;
 
@@ -577,15 +583,15 @@ InsertRev(
 	    curPtr->firstIndex = revPtr->firstIndex;
 	    curPtr->lastIndex = revPtr->lastIndex;
 	    curPtr->newSize = revPtr->newSize;
-	    ckfree(curPtr->newBytes);
+	    ckfree(memoryp, curPtr->newBytes);
 	    curPtr->newBytes = revPtr->newBytes;
-	    ckfree((char *) revPtr);
+	    ckfree(memoryp, (char *) revPtr);
 	    return;
 	}
 	if ((revPtr->firstIndex >= curPtr->firstIndex)
 		&& (revPtr->lastIndex <= curPtr->lastIndex)) {
-	    ckfree(revPtr->newBytes);
-	    ckfree((char *) revPtr);
+	    ckfree(memoryp, revPtr->newBytes);
+	    ckfree(memoryp, (char *) revPtr);
 	    return;
 	}
 
@@ -631,16 +637,18 @@ RevCommand(
 				 * substitution. */
     char *string		/* String to substitute. */)
 {
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     HistoryRev *revPtr;
 
     if ((iPtr->evalFirst == NULL) || (iPtr->revDisables > 0)) {
 	return;
     }
-    revPtr = (HistoryRev *) ckalloc(sizeof(HistoryRev));
+    revPtr = (HistoryRev *) ckalloc(memoryp, sizeof(HistoryRev));
     revPtr->firstIndex = iPtr->evalFirst - iPtr->historyFirst;
     revPtr->lastIndex = iPtr->evalLast - iPtr->historyFirst;
     revPtr->newSize = strlen(string);
-    revPtr->newBytes = (char *) ckalloc((unsigned) (revPtr->newSize+1));
+    revPtr->newBytes =
+	(char *) ckalloc(memoryp, (unsigned) (revPtr->newSize+1));
     strcpy(revPtr->newBytes, string);
     InsertRev(iPtr, revPtr);
 }
@@ -669,6 +677,7 @@ RevResult(
 				 * substitution. */
     char *string		/* String to substitute. */)
 {
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     HistoryRev *revPtr;
     char *evalFirst, *evalLast;
     char *argv[2];
@@ -703,11 +712,11 @@ RevResult(
 	return;
     }
 
-    revPtr = (HistoryRev *) ckalloc(sizeof(HistoryRev));
+    revPtr = (HistoryRev *) ckalloc(memoryp, sizeof(HistoryRev));
     revPtr->firstIndex = evalFirst - iPtr->historyFirst;
     revPtr->lastIndex = evalLast - iPtr->historyFirst;
     argv[0] = string;
-    revPtr->newBytes = Hax_Merge(1, argv);
+    revPtr->newBytes = Hax_Merge((Hax_Interp *) iPtr, 1, argv);
     revPtr->newSize = strlen(revPtr->newBytes);
     InsertRev(iPtr, revPtr);
 }
@@ -734,6 +743,7 @@ DoRevs(
     Interp *iPtr		/* Interpreter whose history is to
 				 * be modified. */)
 {
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     HistoryRev *revPtr;
     HistoryEvent *eventPtr;
     char *newCommand, *p;
@@ -757,7 +767,7 @@ DoRevs(
 	size += revPtr->newSize;
     }
 
-    newCommand = (char *) ckalloc(size);
+    newCommand = (char *) ckalloc(memoryp, size);
     p = newCommand;
     bytesSeen = 0;
     for (revPtr = iPtr->revPtr; revPtr != NULL; ) {
@@ -771,8 +781,8 @@ DoRevs(
 	strncpy(p, revPtr->newBytes, revPtr->newSize);
 	p += revPtr->newSize;
 	bytesSeen = revPtr->lastIndex+1;
-	ckfree(revPtr->newBytes);
-	ckfree((char *) revPtr);
+	ckfree(memoryp, revPtr->newBytes);
+	ckfree(memoryp, (char *) revPtr);
 	revPtr = nextPtr;
     }
     if (&p[strlen(&eventPtr->command[bytesSeen]) + 1] >
@@ -785,7 +795,7 @@ DoRevs(
      * Replace the command in the event.
      */
 
-    ckfree(eventPtr->command);
+    ckfree(memoryp, eventPtr->command);
     eventPtr->command = newCommand;
     eventPtr->bytesAvl = size;
     iPtr->revPtr = NULL;
@@ -901,6 +911,7 @@ SubsAndEval(
     char *oldStr,		/* String to search for in command. */
     char *newStr		/* Replacement string for "old". */)
 {
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     char *src, *dst, *newCmd;
     int count, oldLength, newLength, length, result;
 
@@ -933,7 +944,7 @@ SubsAndEval(
      * Generate a substituted command.
      */
 
-    newCmd = (char *) ckalloc((unsigned) (length + 1));
+    newCmd = (char *) ckalloc(memoryp, (unsigned) (length + 1));
     dst = newCmd;
     while (1) {
 	src = strstr(cmd, oldStr);
@@ -950,7 +961,7 @@ SubsAndEval(
 
     RevCommand(iPtr, newCmd);
     result = Hax_Eval((Hax_Interp *) iPtr, NULL, newCmd, 0, (char **) NULL);
-    ckfree(newCmd);
+    ckfree(memoryp, newCmd);
     return result;
 }
 
@@ -984,6 +995,7 @@ GetWords(
 				 * from the command.  Either num[-num] or
 				 * a pattern. */)
 {
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     char *result;
     char *start, *end, *dst;
     char *next;
@@ -1037,7 +1049,7 @@ GetWords(
      * enough to hold all the words if necessary.
      */
 
-    result = (char *) ckalloc((unsigned) (strlen(command) + 1));
+    result = (char *) ckalloc(memoryp, (unsigned) (strlen(command) + 1));
     dst = result;
     for (next = command; isspace(*next); next++) {
 	/* Empty loop body:  just find start of first word. */
@@ -1082,7 +1094,7 @@ GetWords(
      */
 
     if ((last >= index) || (first >= index)) {
-	ckfree(result);
+	ckfree(memoryp, result);
 	Hax_AppendResult((Hax_Interp *) iPtr, "word selector \"", words,
 		"\" specified non-existent words", (char *) NULL);
 	return NULL;

@@ -69,6 +69,7 @@ typedef struct Hax_Interp{
 
 typedef int *Hax_Trace;
 typedef int *Hax_CmdBuf;
+typedef int *Hax_Memoryp;
 
 /*
  * When a HAX command returns, the string pointer interp->result points to
@@ -101,7 +102,7 @@ typedef int *Hax_CmdBuf;
  * Procedure types defined by Hax:
  */
 
-typedef void (Hax_CmdDeleteProc) (ClientData clientData);
+typedef void (Hax_CmdDeleteProc) (Hax_Interp *interp, ClientData clientData);
 typedef int (Hax_CmdProc) (ClientData clientData,
 	Hax_Interp *interp, int argc, char *argv[]);
 typedef void (Hax_CmdTraceProc) (ClientData clientData,
@@ -171,18 +172,19 @@ typedef char *(Hax_VarTraceProc) (ClientData clientData,
  * with all sorts of debugging hooks defined in haxCkalloc.c.
  */
 
-HAX_EXTERN void *	Hax_DbCkalloc (unsigned int size,
+HAX_EXTERN void *	Hax_DbCkalloc (Hax_Memoryp *, unsigned int size,
 			    char *file, int line);
-HAX_EXTERN int		Hax_DbCkfree (void *ptr,
+HAX_EXTERN int		Hax_DbCkfree (Hax_Memoryp *, void *ptr,
 			    char *file, int line);
-HAX_EXTERN void *	Hax_DbCkrealloc (void *ptr,
+HAX_EXTERN void *	Hax_DbCkrealloc (Hax_Memoryp *, void *ptr,
 			    unsigned int size, char *file, int line);
-HAX_EXTERN int		Hax_DumpActiveMemory (char *fileName);
-HAX_EXTERN void		Hax_ValidateAllMemory (char *file, int line);
+HAX_EXTERN int		Hax_DumpActiveMemory (Hax_Memoryp *, char *fileName);
+HAX_EXTERN void		Hax_ValidateAllMemory (Hax_Memoryp *, char *file,
+			    int line);
 
-#define ckalloc(x) Hax_DbCkalloc(x, __FILE__, __LINE__)
-#define ckfree(x)  Hax_DbCkfree(x, __FILE__, __LINE__)
-#define ckrealloc(x,y) Hax_DbCkrealloc((x), (y),__FILE__, __LINE__)
+#define ckalloc(m,x) Hax_DbCkalloc((m), (x), __FILE__, __LINE__)
+#define ckfree(m,x)  Hax_DbCkfree((m), (x), __FILE__, __LINE__)
+#define ckrealloc(m,x,y) Hax_DbCkrealloc((m), (x), (y), __FILE__, __LINE__)
 
 
 /*
@@ -193,7 +195,8 @@ HAX_EXTERN void		Hax_ValidateAllMemory (char *file, int line);
     do {							\
 	if ((interp)->freeProc != 0) {				\
 	    if ((interp)->freeProc == (Hax_FreeProc *) free) {	\
-		ckfree((interp)->result);			\
+		ckfree(Hax_GetMemoryp(interp),			\
+		    (interp)->result);				\
 	    } else {						\
 		(*(interp)->freeProc)((interp)->result);	\
 	    }							\
@@ -208,22 +211,27 @@ HAX_EXTERN void		Hax_ValidateAllMemory (char *file, int line);
 HAX_EXTERN void		Hax_AppendElement (Hax_Interp *interp,
 			    char *string, int noSep);
 HAX_EXTERN void		Hax_AppendResult (Hax_Interp *interp, ...);
-HAX_EXTERN char *	Hax_AssembleCmd (Hax_CmdBuf buffer,
-			    char *string);
+HAX_EXTERN char *	Hax_AssembleCmd (Hax_Interp *interp,
+			    Hax_CmdBuf buffer, char *string);
 HAX_EXTERN void		Hax_AddErrorInfo (Hax_Interp *interp,
 			    char *message);
 HAX_EXTERN char		Hax_Backslash (char *src,
 			    int *readPtr);
 HAX_EXTERN int		Hax_CommandComplete(char *cmd);
-HAX_EXTERN char *	Hax_Concat (int argc, char **argv);
+HAX_EXTERN char *	Hax_Concat (Hax_Interp *interp, int argc, char **argv);
 HAX_EXTERN int		Hax_ConvertElement (char *src,
 			    char *dst, int flags);
-HAX_EXTERN Hax_CmdBuf	Hax_CreateCmdBuf (void);
+HAX_EXTERN Hax_CmdBuf	Hax_CreateCmdBuf (Hax_Interp *interp);
 HAX_EXTERN void		Hax_CreateCommand (Hax_Interp *interp,
 			    char *cmdName, Hax_CmdProc *proc,
 			    ClientData clientData,
 			    Hax_CmdDeleteProc *deleteProc);
-HAX_EXTERN Hax_Interp *	Hax_CreateInterp (void);
+HAX_EXTERN Hax_Memoryp *Hax_CreateMemoryManagement (
+			    int break_on_malloc, int trace_on_at_malloc,
+			    int alloc_tracing, int init_malloced_bodies,
+			    int validate_memory);
+HAX_EXTERN Hax_Memoryp *Hax_GetMemoryp (Hax_Interp *interp);
+HAX_EXTERN Hax_Interp *	Hax_CreateInterp (Hax_Memoryp *memoryp);
 HAX_EXTERN int		Hax_CreatePipeline (Hax_Interp *interp,
 			    int argc, char **argv, int **pidArrayPtr,
 			    int *inPipePtr, int *outPipePtr,
@@ -231,7 +239,8 @@ HAX_EXTERN int		Hax_CreatePipeline (Hax_Interp *interp,
 HAX_EXTERN Hax_Trace	Hax_CreateTrace (Hax_Interp *interp,
 			    int level, Hax_CmdTraceProc *proc,
 			    ClientData clientData);
-HAX_EXTERN void		Hax_DeleteCmdBuf (Hax_CmdBuf buffer);
+HAX_EXTERN void		Hax_DeleteCmdBuf (Hax_Interp *interp,
+			    Hax_CmdBuf buffer);
 HAX_EXTERN int		Hax_DeleteCommand (Hax_Interp *interp,
 			    char *cmdName);
 HAX_EXTERN void		Hax_DeleteInterp (Hax_Interp *interp);
@@ -253,7 +262,7 @@ HAX_EXTERN int		Hax_ExprLongLong (Hax_Interp *interp,
 			    char *string, long long int *ptr);
 HAX_EXTERN int		Hax_ExprString (Hax_Interp *interp,
 			    char *string);
-HAX_EXTERN int		Hax_Fork (void);
+HAX_EXTERN int		Hax_Fork (Hax_Interp *interp);
 HAX_EXTERN int		Hax_GetBoolean (Hax_Interp *interp,
 			    char *string, int *boolPtr);
 HAX_EXTERN int		Hax_GetDouble (Hax_Interp *interp,
@@ -272,7 +281,7 @@ HAX_EXTERN int		Hax_GlobalEval (Hax_Interp *interp,
 			    char *command);
 HAX_EXTERN void		Hax_InitHistory (Hax_Interp *interp);
 HAX_EXTERN void		Hax_InitMemory (Hax_Interp *interp);
-HAX_EXTERN char *	Hax_Merge (int argc, char **argv);
+HAX_EXTERN char *	Hax_Merge (Hax_Interp *interp, int argc, char **argv);
 HAX_EXTERN char *	Hax_ParseVar (Hax_Interp *interp,
 			    char *string, char **termPtr);
 HAX_EXTERN int		Hax_RecordAndEval (Hax_Interp *interp,
@@ -394,8 +403,8 @@ typedef struct Hax_HashTable {
 					 */
     Hax_HashEntry *(*findProc) (struct Hax_HashTable *tablePtr,
 	    char *key);
-    Hax_HashEntry *(*createProc) (struct Hax_HashTable *tablePtr,
-	    char *key, int *newPtr);
+    Hax_HashEntry *(*createProc) (Hax_Interp *interp,
+	    struct Hax_HashTable *tablePtr, char *key, int *newPtr);
 } Hax_HashTable;
 
 /*
@@ -435,21 +444,22 @@ typedef struct Hax_HashSearch {
 
 #define Hax_FindHashEntry(tablePtr, key) \
 	(*((tablePtr)->findProc))(tablePtr, key)
-#define Hax_CreateHashEntry(tablePtr, key, newPtr) \
-	(*((tablePtr)->createProc))(tablePtr, key, newPtr)
+#define Hax_CreateHashEntry(interp, tablePtr, key, newPtr) \
+	(*((tablePtr)->createProc))(interp, tablePtr, key, newPtr)
 
 /*
  * Exported procedures:
  */
 
-HAX_EXTERN void			Hax_DeleteHashEntry (
+HAX_EXTERN void			Hax_DeleteHashEntry (Hax_Interp *interp,
 				    Hax_HashEntry *entryPtr);
-HAX_EXTERN void			Hax_DeleteHashTable (
+HAX_EXTERN void			Hax_DeleteHashTable (Hax_Interp *interp,
 				    Hax_HashTable *tablePtr);
 HAX_EXTERN Hax_HashEntry *	Hax_FirstHashEntry (
 				    Hax_HashTable *tablePtr,
 				    Hax_HashSearch *searchPtr);
-HAX_EXTERN char *		Hax_HashStats (Hax_HashTable *tablePtr);
+HAX_EXTERN char *		Hax_HashStats (Hax_Interp *interp,
+				    Hax_HashTable *tablePtr);
 HAX_EXTERN void			Hax_InitHashTable (Hax_HashTable *tablePtr,
 				    int keyType);
 HAX_EXTERN Hax_HashEntry *	Hax_NextHashEntry (

@@ -359,6 +359,8 @@ Hax_SplitList(
     char ***argvPtr		/* Pointer to place to store pointer to array
 				 * of pointers to list elements. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     char **argv;
     char *p;
     int result, brace;
@@ -378,20 +380,20 @@ Hax_SplitList(
 	}
     }
     size++;			/* Leave space for final NULL pointer. */
-    argv = (char **) ckalloc((unsigned)
+    argv = (char **) ckalloc(memoryp, (unsigned)
 	    ((size * sizeof(char *)) + (p - list) + 1));
     for (i = 0, p = ((char *) argv) + size*sizeof(char *);
 	    *list != 0; i++) {
 	result = HaxFindElement(interp, list, &element, &list, &elSize, &brace);
 	if (result != HAX_OK) {
-	    ckfree((char *) argv);
+	    ckfree(memoryp, (char *) argv);
 	    return result;
 	}
 	if (*element == 0) {
 	    break;
 	}
 	if (i >= size) {
-	    ckfree((char *) argv);
+	    ckfree(memoryp, (char *) argv);
 	    Hax_SetResult(interp, (char *) "internal error in Hax_SplitList",
 		    HAX_STATIC);
 	    return HAX_ERROR;
@@ -674,9 +676,12 @@ Hax_ConvertElement(
 
 char *
 Hax_Merge(
+    Hax_Interp *interp,
     int argc,			/* How many strings to merge. */
     char **argv			/* Array of string values. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
 #   define LOCAL_SIZE 20
     int localFlags[LOCAL_SIZE], *flagPtr;
     int numChars;
@@ -691,7 +696,7 @@ Hax_Merge(
     if (argc <= LOCAL_SIZE) {
 	flagPtr = localFlags;
     } else {
-	flagPtr = (int *) ckalloc((unsigned) argc*sizeof(int));
+	flagPtr = (int *) ckalloc(memoryp, (unsigned) argc*sizeof(int));
     }
     numChars = 1;
     for (i = 0; i < argc; i++) {
@@ -702,7 +707,7 @@ Hax_Merge(
      * Pass two: copy into the result area.
      */
 
-    result = (char *) ckalloc((unsigned) numChars);
+    result = (char *) ckalloc(memoryp, (unsigned) numChars);
     dst = result;
     for (i = 0; i < argc; i++) {
 	numChars = Hax_ConvertElement(argv[i], dst, flagPtr[i]);
@@ -717,7 +722,7 @@ Hax_Merge(
     }
 
     if (flagPtr != localFlags) {
-	ckfree((char *) flagPtr);
+	ckfree(memoryp, (char *) flagPtr);
     }
     return result;
 }
@@ -743,9 +748,12 @@ Hax_Merge(
 
 char *
 Hax_Concat(
+    Hax_Interp *interp,
     int argc,			/* Number of strings to concatenate. */
     char **argv			/* Array of strings to concatenate. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int totalSize, i;
     char *p;
     char *result;
@@ -753,7 +761,7 @@ Hax_Concat(
     for (totalSize = 1, i = 0; i < argc; i++) {
 	totalSize += strlen(argv[i]) + 1;
     }
-    result = (char *) ckalloc((unsigned) totalSize);
+    result = (char *) ckalloc(memoryp, (unsigned) totalSize);
     if (argc == 0) {
 	*result = '\0';
 	return result;
@@ -954,6 +962,7 @@ Hax_SetResult(
 				 * of a Hax_FreeProc such as free. */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int length;
     Hax_FreeProc *oldFreeProc = iPtr->freeProc;
     char *oldResult = iPtr->result;
@@ -966,7 +975,7 @@ Hax_SetResult(
     } else if (freeProc == HAX_VOLATILE) {
 	length = strlen(string);
 	if (length > HAX_RESULT_SIZE) {
-	    iPtr->result = (char *) ckalloc((unsigned) length+1);
+	    iPtr->result = (char *) ckalloc(memoryp, (unsigned) length+1);
 	    iPtr->freeProc = (Hax_FreeProc *) free;
 	} else {
 	    iPtr->result = iPtr->resultSpace;
@@ -985,7 +994,7 @@ Hax_SetResult(
 
     if (oldFreeProc != 0) {
 	if (oldFreeProc == (Hax_FreeProc *) free) {
-	    ckfree(oldResult);
+	    ckfree(memoryp, oldResult);
 	} else {
 	    (*oldFreeProc)(oldResult);
 	}
@@ -1152,6 +1161,7 @@ SetupAppendBuffer(
     int newSpace		/* Make sure that at least this many bytes
 				 * of new information may be added. */)
 {
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int totalSpace;
 
     /*
@@ -1168,7 +1178,7 @@ SetupAppendBuffer(
 	 */
 
 	if (iPtr->appendAvl > 500) {
-	    ckfree(iPtr->appendResult);
+	    ckfree(memoryp, iPtr->appendResult);
 	    iPtr->appendResult = NULL;
 	    iPtr->appendAvl = 0;
 	}
@@ -1183,17 +1193,17 @@ SetupAppendBuffer(
 	} else {
 	    totalSpace *= 2;
 	}
-	newPtr = (char *) ckalloc((unsigned) totalSpace);
+	newPtr = (char *) ckalloc(memoryp, (unsigned) totalSpace);
 	strcpy(newPtr, iPtr->result);
 	if (iPtr->appendResult != NULL) {
-	    ckfree(iPtr->appendResult);
+	    ckfree(memoryp, iPtr->appendResult);
 	}
 	iPtr->appendResult = newPtr;
 	iPtr->appendAvl = totalSpace;
     } else if (iPtr->result != iPtr->appendResult) {
 	strcpy(iPtr->appendResult, iPtr->result);
     }
-    Hax_FreeResult(iPtr);
+    Hax_FreeResult((Hax_Interp *) iPtr);
     iPtr->result = iPtr->appendResult;
 }
 
@@ -1222,7 +1232,7 @@ Hax_ResetResult(
 {
     Interp *iPtr = (Interp *) interp;
 
-    Hax_FreeResult(iPtr);
+    Hax_FreeResult(interp);
     iPtr->result = iPtr->resultSpace;
     iPtr->resultSpace[0] = 0;
     iPtr->flags &=
@@ -1361,6 +1371,7 @@ HaxCompileRegexp(
 					 * compiled regular expression. */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int i, length;
     regexp *result;
 
@@ -1398,7 +1409,7 @@ HaxCompileRegexp(
      */
 
     haxRegexpError = NULL;
-    result = RegComp(string);
+    result = RegComp(interp, string);
     if (haxRegexpError != NULL) {
 	Hax_AppendResult(interp,
 	    "couldn't compile regular expression pattern: ",
@@ -1406,15 +1417,15 @@ HaxCompileRegexp(
 	return NULL;
     }
     if (iPtr->patterns[NUM_REGEXPS-1] != NULL) {
-	ckfree(iPtr->patterns[NUM_REGEXPS-1]);
-	ckfree((char *) iPtr->regexps[NUM_REGEXPS-1]);
+	ckfree(memoryp, iPtr->patterns[NUM_REGEXPS-1]);
+	ckfree(memoryp, (char *) iPtr->regexps[NUM_REGEXPS-1]);
     }
     for (i = NUM_REGEXPS - 2; i >= 0; i--) {
 	iPtr->patterns[i+1] = iPtr->patterns[i];
 	iPtr->patLengths[i+1] = iPtr->patLengths[i];
 	iPtr->regexps[i+1] = iPtr->regexps[i];
     }
-    iPtr->patterns[0] = (char *) ckalloc((unsigned) (length+1));
+    iPtr->patterns[0] = (char *) ckalloc(memoryp, (unsigned) (length+1));
     strcpy(iPtr->patterns[0], string);
     iPtr->patLengths[0] = length;
     iPtr->regexps[0] = result;

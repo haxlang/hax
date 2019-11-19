@@ -291,7 +291,7 @@ HaxParseQuotes(
 	     */
 
 	    pvPtr->next = dst;
-	    (*pvPtr->expandProc)(pvPtr, 1);
+	    (*pvPtr->expandProc)(interp, pvPtr, 1);
 	    dst = pvPtr->next;
 	}
 
@@ -319,7 +319,7 @@ HaxParseQuotes(
 	    length = strlen(value);
 	    if ((pvPtr->end - dst) <= length) {
 		pvPtr->next = dst;
-		(*pvPtr->expandProc)(pvPtr, length);
+		(*pvPtr->expandProc)(interp, pvPtr, length);
 		dst = pvPtr->next;
 	    }
 	    strcpy(dst, value);
@@ -415,11 +415,11 @@ HaxParseNestedCmd(
     length = strlen(iPtr->result);
     shortfall = length + 1 - (pvPtr->end - pvPtr->next);
     if (shortfall > 0) {
-	(*pvPtr->expandProc)(pvPtr, shortfall);
+	(*pvPtr->expandProc)(interp, pvPtr, shortfall);
     }
     strcpy(pvPtr->next, iPtr->result);
     pvPtr->next += length;
-    Hax_FreeResult(iPtr);
+    Hax_FreeResult(interp);
     iPtr->result = iPtr->resultSpace;
     iPtr->resultSpace[0] = '\0';
     return HAX_OK;
@@ -480,7 +480,7 @@ HaxParseBraces(
 	src++;
 	if (dst == end) {
 	    pvPtr->next = dst;
-	    (*pvPtr->expandProc)(pvPtr, 20);
+	    (*pvPtr->expandProc)(interp, pvPtr, 20);
 	    dst = pvPtr->next;
 	    end = pvPtr->end;
 	}
@@ -513,7 +513,7 @@ HaxParseBraces(
 		while (count > 1) {
                     if (dst == end) {
                         pvPtr->next = dst;
-                        (*pvPtr->expandProc)(pvPtr, 20);
+                        (*pvPtr->expandProc)(interp, pvPtr, 20);
                         dst = pvPtr->next;
                         end = pvPtr->end;
                     }
@@ -633,7 +633,7 @@ HaxParseWords(
 		     */
 
 		    pvPtr->next = dst;
-		    (*pvPtr->expandProc)(pvPtr, 1);
+		    (*pvPtr->expandProc)(interp, pvPtr, 1);
 		    dst = pvPtr->next;
 		}
 
@@ -656,7 +656,7 @@ HaxParseWords(
 		    length = strlen(value);
 		    if ((pvPtr->end - dst) <= length) {
 			pvPtr->next = dst;
-			(*pvPtr->expandProc)(pvPtr, length);
+			(*pvPtr->expandProc)(interp, pvPtr, length);
 			dst = pvPtr->next;
 		    }
 		    strcpy(dst, value);
@@ -815,6 +815,7 @@ HaxParseWords(
 
 void
 HaxExpandParseValue(
+    Hax_Interp *interp,
     ParseValue *pvPtr,			/* Information about buffer that
 					 * must be expanded.  If the clientData
 					 * in the structure is non-zero, it
@@ -823,6 +824,8 @@ HaxExpandParseValue(
     int needed				/* Minimum amount of additional space
 					 * to allocate. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int newSpace;
     char *newBuf;
 
@@ -837,7 +840,7 @@ HaxExpandParseValue(
     } else {
 	newSpace += newSpace;
     }
-    newBuf = (char *) ckalloc((unsigned) newSpace);
+    newBuf = (char *) ckalloc(memoryp, (unsigned) newSpace);
 
     /*
      * Copy from old buffer to new, free old buffer if needed, and
@@ -847,7 +850,7 @@ HaxExpandParseValue(
     memcpy(newBuf, pvPtr->buffer, pvPtr->next - pvPtr->buffer);
     pvPtr->next = newBuf + (pvPtr->next - pvPtr->buffer);
     if (pvPtr->clientData != 0) {
-	ckfree(pvPtr->buffer);
+	ckfree(memoryp, pvPtr->buffer);
     }
     pvPtr->buffer = newBuf;
     pvPtr->end = newBuf + newSpace - 1;
@@ -1104,6 +1107,8 @@ Hax_ParseVar(
 					 * in with character just after last
 					 * one in the variable specifier. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     char *name1, *name1End, c, *result;
     char *name2;
 #define NUM_CHARS 200
@@ -1200,7 +1205,7 @@ Hax_ParseVar(
 
     done:
     if ((name2 != NULL) && (pv.buffer != copyStorage)) {
-	ckfree(pv.buffer);
+	ckfree(memoryp, pv.buffer);
     }
     return result;
 }

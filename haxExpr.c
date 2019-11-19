@@ -152,7 +152,7 @@ static int		ExprGetValue (Hax_Interp *interp,
 			    ExprInfo *infoPtr, int prec, Value *valuePtr);
 static int		ExprLex (Hax_Interp *interp,
 			    ExprInfo *infoPtr, Value *valuePtr);
-static void		ExprMakeString (Value *valuePtr);
+static void		ExprMakeString (Hax_Interp *interp, Value *valuePtr);
 static int		ExprParseString (Hax_Interp *interp,
 			    char *string, Value *valuePtr);
 static int		ExprTopLevel (Hax_Interp *interp,
@@ -242,7 +242,7 @@ ExprParseString(
 	valuePtr->pv.next = valuePtr->pv.buffer;
 	shortfall = length - (valuePtr->pv.end - valuePtr->pv.buffer);
 	if (shortfall > 0) {
-	    (*valuePtr->pv.expandProc)(&valuePtr->pv, shortfall);
+	    (*valuePtr->pv.expandProc)(interp, &valuePtr->pv, shortfall);
 	}
 	strcpy(valuePtr->pv.buffer, string);
     }
@@ -570,6 +570,7 @@ ExprGetValue(
 					 * initialized pv field. */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Value value2;			/* Second operand for current
 					 * operator.  */
     int op;				/* Current operator (either unary
@@ -828,11 +829,11 @@ ExprGetValue(
 	    case EQUAL: case NEQ:
 		if (valuePtr->type == TYPE_STRING) {
 		    if (value2.type != TYPE_STRING) {
-			ExprMakeString(&value2);
+			ExprMakeString(interp, &value2);
 		    }
 		} else if (value2.type == TYPE_STRING) {
 		    if (valuePtr->type != TYPE_STRING) {
-			ExprMakeString(valuePtr);
+			ExprMakeString(interp, valuePtr);
 		    }
 		} else if (valuePtr->type == TYPE_DOUBLE) {
 		    if (value2.type == TYPE_LLONG) {
@@ -1068,7 +1069,7 @@ ExprGetValue(
 
     done:
     if (value2.pv.buffer != value2.staticSpace) {
-	ckfree(value2.pv.buffer);
+	ckfree(memoryp, value2.pv.buffer);
     }
     return result;
 
@@ -1108,13 +1109,14 @@ ExprGetValue(
 
 static void
 ExprMakeString(
+    Hax_Interp *interp,
     Value *valuePtr		/* Value to be converted. */)
 {
     int shortfall;
 
     shortfall = 150 - (valuePtr->pv.end - valuePtr->pv.buffer);
     if (shortfall > 0) {
-	(*valuePtr->pv.expandProc)(&valuePtr->pv, shortfall);
+	(*valuePtr->pv.expandProc)(interp, &valuePtr->pv, shortfall);
     }
     if (valuePtr->type == TYPE_LLONG) {
 	sprintf(valuePtr->pv.buffer, "%lld", valuePtr->llongValue);
@@ -1207,6 +1209,8 @@ Hax_ExprLong(
     char *string,			/* Expression to evaluate. */
     long *ptr				/* Where to store result. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Value value;
     int result;
 
@@ -1222,7 +1226,7 @@ Hax_ExprLong(
 	}
     }
     if (value.pv.buffer != value.staticSpace) {
-	ckfree(value.pv.buffer);
+	ckfree(memoryp, value.pv.buffer);
     }
     return result;
 }
@@ -1234,6 +1238,8 @@ Hax_ExprLongLong(
     char *string,			/* Expression to evaluate. */
     long long int *ptr			/* Where to store result. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Value value;
     int result;
 
@@ -1249,7 +1255,7 @@ Hax_ExprLongLong(
 	}
     }
     if (value.pv.buffer != value.staticSpace) {
-	ckfree(value.pv.buffer);
+	ckfree(memoryp, value.pv.buffer);
     }
     return result;
 }
@@ -1261,6 +1267,8 @@ Hax_ExprDouble(
     char *string,			/* Expression to evaluate. */
     void *ptr				/* Where to store result. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Value value;
     int result;
 
@@ -1276,7 +1284,7 @@ Hax_ExprDouble(
 	}
     }
     if (value.pv.buffer != value.staticSpace) {
-	ckfree(value.pv.buffer);
+	ckfree(memoryp, value.pv.buffer);
     }
     return result;
 }
@@ -1288,6 +1296,8 @@ Hax_ExprBoolean(
     char *string,			/* Expression to evaluate. */
     int *ptr				/* Where to store 0/1 result. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Value value;
     int result;
 
@@ -1303,7 +1313,7 @@ Hax_ExprBoolean(
 	}
     }
     if (value.pv.buffer != value.staticSpace) {
-	ckfree(value.pv.buffer);
+	ckfree(memoryp, value.pv.buffer);
     }
     return result;
 }
@@ -1333,6 +1343,8 @@ Hax_ExprString(
 					 * expression. */
     char *string			/* Expression to evaluate. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Value value;
     int result;
 
@@ -1353,7 +1365,7 @@ Hax_ExprString(
 	}
     }
     if (value.pv.buffer != value.staticSpace) {
-	ckfree(value.pv.buffer);
+	ckfree(memoryp, value.pv.buffer);
     }
     return result;
 }

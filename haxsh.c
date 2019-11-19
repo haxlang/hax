@@ -25,6 +25,7 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/tclTest/RCS/tclTest.c,v 1.22 9
 #include <stdlib.h>
 #include "hax.h"
 
+Hax_Memoryp *memoryp;
 Hax_Interp *interp;
 Hax_CmdBuf buffer;
 char dumpFile[100];
@@ -89,14 +90,15 @@ main(int argc, char **argv)
     char line[1000], *cmd;
     int result, gotPartial;
 
-    interp = Hax_CreateInterp();
+    memoryp = Hax_CreateMemoryManagement(0, 0, 0, 0, 1);
+    interp = Hax_CreateInterp(memoryp);
     Hax_InitMemory(interp);
     Hax_InitUnixCore(interp);
     Hax_CreateCommand(interp, (char *) "echo", cmdEcho, (ClientData) "echo",
 	    (Hax_CmdDeleteProc *) NULL);
     Hax_CreateCommand(interp, (char *) "checkmem", cmdCheckmem, (ClientData) 0,
 	    (Hax_CmdDeleteProc *) NULL);
-    buffer = Hax_CreateCmdBuf();
+    buffer = Hax_CreateCmdBuf(interp);
     result = Hax_Eval(interp, NULL, initCmd, 0, (char **) NULL);
     if (result != HAX_OK) {
 	printf("%s\n", interp->result);
@@ -116,7 +118,7 @@ main(int argc, char **argv)
 	    }
 	    line[0] = 0;
 	}
-	cmd = Hax_AssembleCmd(buffer, line);
+	cmd = Hax_AssembleCmd(interp, buffer, line);
 	if (cmd == NULL) {
 	    gotPartial = 1;
 	    continue;
@@ -130,8 +132,8 @@ main(int argc, char **argv)
 	    }
 	    if (quitFlag) {
 		Hax_DeleteInterp(interp);
-		Hax_DeleteCmdBuf(buffer);
-		Hax_DumpActiveMemory(dumpFile);
+		Hax_DeleteCmdBuf(interp, buffer);
+		Hax_DumpActiveMemory(memoryp, dumpFile);
 		exit(0);
 	    }
 	} else {

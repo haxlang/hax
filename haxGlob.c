@@ -78,8 +78,11 @@ AppendResult(
 				 * necessarily null-terminated!). */
     int nameLength		/* Number of characters in name. */)
 {
+    Hax_Memoryp *memoryp;
     int dirFlags, nameFlags;
     char *p, saved;
+
+    memoryp = Hax_GetMemoryp (interp);
 
     /*
      * Next, see if we can put together a valid list element from dir
@@ -110,12 +113,12 @@ AppendResult(
      * into a single name.  To do that, malloc a buffer to hold everything.
      */
 
-    p = (char *) ckalloc((unsigned) (strlen(dir) + strlen(separator)
+    p = (char *) ckalloc(memoryp, (unsigned) (strlen(dir) + strlen(separator)
 	    + nameLength + 1));
     sprintf(p, "%s%s%s", dir, separator, name);
     name[nameLength] = saved;
     Hax_AppendElement(interp, p, 0);
-    ckfree(p);
+    ckfree(memoryp, p);
 }
 
 /*
@@ -160,11 +163,14 @@ DoGlob(
      * in the remainder.
      */
 
+    Hax_Memoryp *memoryp;
     char *p;
     char c;
     char *openBrace, *closeBrace;
     int gotSpecial, result;
     const char *separator;
+
+    memoryp = Hax_GetMemoryp (interp);
 
     /*
      * Figure out whether we'll need to add a slash between the directory
@@ -231,7 +237,7 @@ DoGlob(
 	if (remLength <= STATIC_SIZE) {
 	    newRem = static1;
 	} else {
-	    newRem = (char *) ckalloc((unsigned) remLength);
+	    newRem = (char *) ckalloc(memoryp, (unsigned) remLength);
 	}
 	l1 = openBrace-rem;
 	strncpy(newRem, rem, l1);
@@ -249,7 +255,7 @@ DoGlob(
 	    }
 	}
 	if (remLength > STATIC_SIZE) {
-	    ckfree(newRem);
+	    ckfree(memoryp, newRem);
 	}
 	return HAX_OK;
     }
@@ -293,7 +299,7 @@ DoGlob(
 	if (l2 < STATIC_SIZE) {
 	    pattern = static2;
 	} else {
-	    pattern = (char *) ckalloc((unsigned) (l2+1));
+	    pattern = (char *) ckalloc(memoryp, (unsigned) (l2+1));
 	}
 	strncpy(pattern, rem, l2);
 	pattern[l2] = '\0';
@@ -321,12 +327,13 @@ DoGlob(
 		    if ((l1+nameLength+2) <= STATIC_SIZE) {
 			newDir = static1;
 		    } else {
-			newDir = (char *) ckalloc((unsigned) (l1+nameLength+2));
+			newDir = (char *) ckalloc(memoryp, (unsigned)
+				(l1+nameLength+2));
 		    }
 		    sprintf(newDir, "%s%s%s", dir, separator, entryPtr->d_name);
 		    result = DoGlob(interp, newDir, p+1);
 		    if (newDir != static1) {
-			ckfree(newDir);
+			ckfree(memoryp, newDir);
 		    }
 		    if (result != HAX_OK) {
 			break;
@@ -336,7 +343,7 @@ DoGlob(
 	}
 	closedir(d);
 	if (pattern != static2) {
-	    ckfree(pattern);
+	    ckfree(memoryp, pattern);
 	}
 	return result;
     }
@@ -359,12 +366,12 @@ DoGlob(
 	if (l2 <= STATIC_SIZE) {
 	    newDir = static1;
 	} else {
-	    newDir = (char *) ckalloc((unsigned) l2);
+	    newDir = (char *) ckalloc(memoryp, (unsigned) l2);
 	}
 	sprintf(newDir, "%s%s%.*s", dir, separator, (int)(p-rem), rem);
 	result = DoGlob(interp, newDir, p+1);
 	if (newDir != static1) {
-	    ckfree(newDir);
+	    ckfree(memoryp, newDir);
 	}
 	if (result != HAX_OK) {
 	    return HAX_ERROR;
@@ -405,6 +412,7 @@ Hax_TildeSubst(
 				 * or "~<user>/" (to indicate any user's
 				 * home directory). */)
 {
+    Hax_Memoryp *memoryp;
 #define STATIC_BUF_SIZE 50
     static char staticBuf[STATIC_BUF_SIZE];
     static int curSize = STATIC_BUF_SIZE;
@@ -417,6 +425,8 @@ Hax_TildeSubst(
     if (name[0] != '~') {
 	return name;
     }
+
+    memoryp = Hax_GetMemoryp (interp);
 
     /*
      * First, find the directory name corresponding to the tilde entry.
@@ -463,10 +473,10 @@ Hax_TildeSubst(
     length = strlen(dir) + strlen(p);
     if (length >= curSize) {
 	if (curBuf != staticBuf) {
-	    ckfree(curBuf);
+	    ckfree(memoryp, curBuf);
 	}
 	curSize = length + 1;
-	curBuf = (char *) ckalloc((unsigned) curSize);
+	curBuf = (char *) ckalloc(memoryp, (unsigned) curSize);
     }
 
     /*

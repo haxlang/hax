@@ -42,10 +42,10 @@ static const char *traceActive =	"trace is active on variable";
 static  char *		CallTraces (Interp *iPtr, Var *arrayPtr,
 			    Hax_HashEntry *hPtr, char *part1, char *part2,
 			    int flags);
-static void		DeleteSearches (Var *arrayVarPtr);
+static void		DeleteSearches (Hax_Interp *interp, Var *arrayVarPtr);
 static void		DeleteArray (Interp *iPtr, char *arrayName,
 			    Var *varPtr, int flags);
-static Var *		NewVar (int space);
+static Var *		NewVar (Hax_Interp *interp, int space);
 static ArraySearch *	ParseSearchId (Hax_Interp *interp,
 			    Var *varPtr, char *varName, char *string);
 static void		VarErrMsg (Hax_Interp *interp,
@@ -349,6 +349,7 @@ Hax_SetVar2(
 				/* Initial value only used to stop compiler
 				 * from complaining; not really needed. */
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int length, newPtr, listFlags;
     Var *arrayPtr = NULL;
 
@@ -357,9 +358,9 @@ Hax_SetVar2(
      */
 
     if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
-	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, part1, &newPtr);
+	hPtr = Hax_CreateHashEntry(interp, &iPtr->globalTable, part1, &newPtr);
     } else {
-	hPtr = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable,
+	hPtr = Hax_CreateHashEntry(interp, &iPtr->varFramePtr->varTable,
 		part1, &newPtr);
     }
     if (!newPtr) {
@@ -378,17 +379,17 @@ Hax_SetVar2(
 
     if (part2 != NULL) {
 	if (newPtr) {
-	    varPtr = NewVar(0);
+	    varPtr = NewVar(interp, 0);
 	    Hax_SetHashValue(hPtr, varPtr);
 	    varPtr->flags = VAR_ARRAY;
 	    varPtr->value.tablePtr = (Hax_HashTable *)
-		    ckalloc(sizeof(Hax_HashTable));
+		    ckalloc(memoryp, sizeof(Hax_HashTable));
 	    Hax_InitHashTable(varPtr->value.tablePtr, HAX_STRING_KEYS);
 	} else {
 	    if (varPtr->flags & VAR_UNDEFINED) {
 		varPtr->flags = VAR_ARRAY;
 		varPtr->value.tablePtr = (Hax_HashTable *)
-			ckalloc(sizeof(Hax_HashTable));
+			ckalloc(memoryp, sizeof(Hax_HashTable));
 		Hax_InitHashTable(varPtr->value.tablePtr, HAX_STRING_KEYS);
 	    } else if (!(varPtr->flags & VAR_ARRAY)) {
 		if (flags & HAX_LEAVE_ERR_MSG) {
@@ -399,7 +400,8 @@ Hax_SetVar2(
 	    }
 	    arrayPtr = varPtr;
 	}
-	hPtr = Hax_CreateHashEntry(varPtr->value.tablePtr, part2, &newPtr);
+	hPtr = Hax_CreateHashEntry(interp, varPtr->value.tablePtr, part2,
+	                           &newPtr);
     }
 
     /*
@@ -420,10 +422,10 @@ Hax_SetVar2(
      */
 
     if (newPtr) {
-	varPtr = NewVar(length);
+	varPtr = NewVar(interp, length);
 	Hax_SetHashValue(hPtr, varPtr);
 	if ((arrayPtr != NULL) && (arrayPtr->searchPtr != NULL)) {
-	    DeleteSearches(arrayPtr);
+	    DeleteSearches(interp, arrayPtr);
 	}
     } else {
 	varPtr = (Var *) Hax_GetHashValue(hPtr);
@@ -452,7 +454,7 @@ Hax_SetVar2(
 	if (newSize <= (length + varPtr->valueLength)) {
 	    newSize += length;
 	}
-	newVarPtr = NewVar(newSize);
+	newVarPtr = NewVar(interp, newSize);
 	newVarPtr->valueLength = varPtr->valueLength;
 	newVarPtr->upvarUses = varPtr->upvarUses;
 	newVarPtr->tracePtr = varPtr->tracePtr;
@@ -460,7 +462,7 @@ Hax_SetVar2(
 	newVarPtr->flags = varPtr->flags;
 	strcpy(newVarPtr->value.string, varPtr->value.string);
 	Hax_SetHashValue(hPtr, newVarPtr);
-	ckfree((char *) varPtr);
+	ckfree(memoryp, (char *) varPtr);
 	varPtr = newVarPtr;
     }
 
@@ -604,6 +606,7 @@ Hax_UnsetVar2(
     Hax_HashEntry *hPtr, dummyEntry;
     Var *varPtr, dummyVar;
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Var *arrayPtr = NULL;
 
     if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
@@ -647,7 +650,7 @@ Hax_UnsetVar2(
 	    return -1;
 	}
 	if (varPtr->searchPtr != NULL) {
-	    DeleteSearches(varPtr);
+	    DeleteSearches(interp, varPtr);
 	}
 	arrayPtr = varPtr;
 	hPtr = Hax_FindHashEntry(varPtr->value.tablePtr, part2);
@@ -692,8 +695,8 @@ Hax_UnsetVar2(
     dummyVar = *varPtr;
     Hax_SetHashValue(&dummyEntry, &dummyVar);
     if (varPtr->upvarUses == 0) {
-	Hax_DeleteHashEntry(hPtr);
-	ckfree((char *) varPtr);
+	Hax_DeleteHashEntry(interp, hPtr);
+	ckfree(memoryp, (char *) varPtr);
     } else {
 	varPtr->flags = VAR_UNDEFINED;
 	varPtr->tracePtr = NULL;
@@ -711,7 +714,7 @@ Hax_UnsetVar2(
 	while (dummyVar.tracePtr != NULL) {
 	    VarTrace *tracePtr = dummyVar.tracePtr;
 	    dummyVar.tracePtr = tracePtr->nextPtr;
-	    ckfree((char *) tracePtr);
+	    ckfree(memoryp, (char *) tracePtr);
 	}
     }
 
@@ -843,6 +846,7 @@ Hax_TraceVar2(
     Var *varPtr = NULL;		/* Initial value only used to stop compiler
 				 * from complaining; not really needed. */
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     VarTrace *tracePtr;
     int newPtr;
 
@@ -851,9 +855,9 @@ Hax_TraceVar2(
      */
 
     if ((flags & HAX_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
-	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, part1, &newPtr);
+	hPtr = Hax_CreateHashEntry(interp, &iPtr->globalTable, part1, &newPtr);
     } else {
-	hPtr = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable, part1,
+	hPtr = Hax_CreateHashEntry(interp, &iPtr->varFramePtr->varTable, part1,
 		    &newPtr);
     }
     if (!newPtr) {
@@ -873,31 +877,32 @@ Hax_TraceVar2(
 
     if (part2 != NULL) {
 	if (newPtr) {
-	    varPtr = NewVar(0);
+	    varPtr = NewVar(interp, 0);
 	    Hax_SetHashValue(hPtr, varPtr);
 	    varPtr->flags = VAR_ARRAY;
 	    varPtr->value.tablePtr = (Hax_HashTable *)
-		    ckalloc(sizeof(Hax_HashTable));
+		    ckalloc(memoryp, sizeof(Hax_HashTable));
 	    Hax_InitHashTable(varPtr->value.tablePtr, HAX_STRING_KEYS);
 	} else {
 	    if (varPtr->flags & VAR_UNDEFINED) {
 		varPtr->flags = VAR_ARRAY;
 		varPtr->value.tablePtr = (Hax_HashTable *)
-			ckalloc(sizeof(Hax_HashTable));
+			ckalloc(memoryp, sizeof(Hax_HashTable));
 		Hax_InitHashTable(varPtr->value.tablePtr, HAX_STRING_KEYS);
 	    } else if (!(varPtr->flags & VAR_ARRAY)) {
 		iPtr->result = (char *) needArray;
 		return HAX_ERROR;
 	    }
 	}
-	hPtr = Hax_CreateHashEntry(varPtr->value.tablePtr, part2, &newPtr);
+	hPtr = Hax_CreateHashEntry(interp, varPtr->value.tablePtr, part2,
+			&newPtr);
     }
 
     if (newPtr) {
 	if ((part2 != NULL) && (varPtr->searchPtr != NULL)) {
-	    DeleteSearches(varPtr);
+	    DeleteSearches(interp, varPtr);
 	}
-	varPtr = NewVar(0);
+	varPtr = NewVar(interp, 0);
 	varPtr->flags = VAR_UNDEFINED;
 	Hax_SetHashValue(hPtr, varPtr);
     } else {
@@ -908,7 +913,7 @@ Hax_TraceVar2(
      * Set up trace information.
      */
 
-    tracePtr = (VarTrace *) ckalloc(sizeof(VarTrace));
+    tracePtr = (VarTrace *) ckalloc(memoryp, sizeof(VarTrace));
     tracePtr->traceProc = proc;
     tracePtr->clientData = clientData;
     tracePtr->flags = flags &
@@ -1015,6 +1020,7 @@ Hax_UntraceVar2(
     VarTrace *prevPtr;
     Var *varPtr;
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Hax_HashEntry *hPtr;
     ActiveVarTrace *activePtr;
 
@@ -1075,7 +1081,7 @@ Hax_UntraceVar2(
     } else {
 	prevPtr->nextPtr = tracePtr->nextPtr;
     }
-    ckfree((char *) tracePtr);
+    ckfree(memoryp, (char *) tracePtr);
 }
 
 /*
@@ -1450,6 +1456,7 @@ Hax_ArrayCmd(
     Var *varPtr;
     Hax_HashEntry *hPtr;
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
 
     if (argc < 3) {
 	Hax_AppendResult(interp, "wrong # args: should be \"",
@@ -1537,7 +1544,7 @@ Hax_ArrayCmd(
 		}
 	    }
 	}
-	ckfree((char *) searchPtr);
+	ckfree(memoryp, (char *) searchPtr);
     } else if ((c == 'n') && (strncmp(argv[1], "names", length) == 0)
 	    && (length >= 2)) {
 	Hax_HashSearch search;
@@ -1620,7 +1627,7 @@ Hax_ArrayCmd(
 		    argv[0], " startsearch arrayName\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	searchPtr = (ArraySearch *) ckalloc(sizeof(ArraySearch));
+	searchPtr = (ArraySearch *) ckalloc(memoryp, sizeof(ArraySearch));
 	if (varPtr->searchPtr == NULL) {
 	    searchPtr->id = 1;
 	    Hax_AppendResult(interp, "s-1-", argv[2], (char *) NULL);
@@ -1686,15 +1693,15 @@ Hax_GlobalCmd(
     }
 
     for (argc--, argv++; argc > 0; argc--, argv++) {
-	hPtr = Hax_CreateHashEntry(&iPtr->globalTable, *argv, &newPtr);
+	hPtr = Hax_CreateHashEntry(interp, &iPtr->globalTable, *argv, &newPtr);
 	if (newPtr) {
-	    gVarPtr = NewVar(0);
+	    gVarPtr = NewVar(interp, 0);
 	    gVarPtr->flags |= VAR_UNDEFINED;
 	    Hax_SetHashValue(hPtr, gVarPtr);
 	} else {
 	    gVarPtr = (Var *) Hax_GetHashValue(hPtr);
 	}
-	hPtr2 = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable, *argv,
+	hPtr2 = Hax_CreateHashEntry(interp, &iPtr->varFramePtr->varTable, *argv,
 		    &newPtr);
 	if (!newPtr) {
 	    Var *varPtr;
@@ -1707,7 +1714,7 @@ Hax_GlobalCmd(
 		return HAX_ERROR;
 	    }
 	}
-	varPtr = NewVar(0);
+	varPtr = NewVar(interp, 0);
 	varPtr->flags |= VAR_UPVAR;
 	varPtr->value.upvarPtr = hPtr;
 	gVarPtr->upvarUses++;
@@ -1786,9 +1793,9 @@ Hax_UpvarCmd(
      */
 
     while (argc > 0) {
-        hPtr = Hax_CreateHashEntry(upVarTablePtr, argv[0], &newPtr);
+        hPtr = Hax_CreateHashEntry(interp, upVarTablePtr, argv[0], &newPtr);
         if (newPtr) {
-            upVarPtr = NewVar(0);
+            upVarPtr = NewVar(interp, 0);
             upVarPtr->flags |= VAR_UNDEFINED;
             Hax_SetHashValue(hPtr, upVarPtr);
         } else {
@@ -1799,14 +1806,14 @@ Hax_UpvarCmd(
 	    }
         }
 
-        hPtr2 = Hax_CreateHashEntry(&iPtr->varFramePtr->varTable,
+        hPtr2 = Hax_CreateHashEntry(interp, &iPtr->varFramePtr->varTable,
                     argv[1], &newPtr);
         if (!newPtr) {
             Hax_AppendResult((Hax_Interp *) iPtr, "variable \"", argv[1],
                 "\" already exists", (char *) NULL);
             return HAX_ERROR;
         }
-        varPtr = NewVar(0);
+        varPtr = NewVar(interp, 0);
         varPtr->flags |= VAR_UPVAR;
         varPtr->value.upvarPtr = hPtr;
         upVarPtr->upvarUses++;
@@ -1845,6 +1852,7 @@ HaxDeleteVars(
     Hax_HashTable *tablePtr	/* Hash table containing variables to
 				 * delete. */)
 {
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Hax_HashSearch search;
     Hax_HashEntry *hPtr;
     Var *varPtr;
@@ -1869,7 +1877,7 @@ HaxDeleteVars(
 	globalFlag = 0;
 	if (varPtr->flags & VAR_UPVAR) {
 	    hPtr = varPtr->value.upvarPtr;
-	    ckfree((char *) varPtr);
+	    ckfree(memoryp, (char *) varPtr);
 	    varPtr = (Var *) Hax_GetHashValue(hPtr);
 	    varPtr->upvarUses--;
 	    if ((varPtr->upvarUses != 0) || !(varPtr->flags & VAR_UNDEFINED)
@@ -1894,7 +1902,7 @@ HaxDeleteVars(
 	    while (varPtr->tracePtr != NULL) {
 		VarTrace *tracePtr = varPtr->tracePtr;
 		varPtr->tracePtr = tracePtr->nextPtr;
-		ckfree((char *) tracePtr);
+		ckfree(memoryp, (char *) tracePtr);
 	    }
 	}
 	if (varPtr->flags & VAR_ARRAY) {
@@ -1902,11 +1910,11 @@ HaxDeleteVars(
 		    flags | globalFlag);
 	}
 	if (globalFlag) {
-	    Hax_DeleteHashEntry(hPtr);
+	    Hax_DeleteHashEntry((Hax_Interp *) iPtr, hPtr);
 	}
-	ckfree((char *) varPtr);
+	ckfree(memoryp, (char *) varPtr);
     }
-    Hax_DeleteHashTable(tablePtr);
+    Hax_DeleteHashTable((Hax_Interp *) iPtr, tablePtr);
 }
 
 /*
@@ -2060,9 +2068,12 @@ CallTraces(
 
 static Var *
 NewVar(
+    Hax_Interp *interp,
     int space		/* Minimum amount of space to allocate
 			 * for variable's value. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int extra;
     Var *varPtr;
 
@@ -2071,7 +2082,7 @@ NewVar(
 	extra = 0;
 	space = sizeof(varPtr->value);
     }
-    varPtr = (Var *) ckalloc((unsigned) (sizeof(Var) + extra));
+    varPtr = (Var *) ckalloc(memoryp, (unsigned) (sizeof(Var) + extra));
     varPtr->valueLength = 0;
     varPtr->valueSpace = space;
     varPtr->upvarUses = 0;
@@ -2171,15 +2182,18 @@ ParseSearchId(
 
 static void
 DeleteSearches(
+    Hax_Interp *interp,
     Var *arrayVarPtr		/* Variable whose searches are
 				 * to be deleted. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     ArraySearch *searchPtr;
 
     while (arrayVarPtr->searchPtr != NULL) {
 	searchPtr = arrayVarPtr->searchPtr;
 	arrayVarPtr->searchPtr = searchPtr->nextPtr;
-	ckfree((char *) searchPtr);
+	ckfree(memoryp, (char *) searchPtr);
     }
 }
 
@@ -2215,11 +2229,12 @@ DeleteArray(
 					 * HAX_INTERP_DESTROYED and/or
 					 * HAX_GLOBAL_ONLY. */)
 {
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Hax_HashSearch search;
     Hax_HashEntry *hPtr;
     Var *elPtr;
 
-    DeleteSearches(varPtr);
+    DeleteSearches((Hax_Interp *) iPtr, varPtr);
     for (hPtr = Hax_FirstHashEntry(varPtr->value.tablePtr, &search);
 	    hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
 	elPtr = (Var *) Hax_GetHashValue(hPtr);
@@ -2229,16 +2244,16 @@ DeleteArray(
 	    while (elPtr->tracePtr != NULL) {
 		VarTrace *tracePtr = elPtr->tracePtr;
 		elPtr->tracePtr = tracePtr->nextPtr;
-		ckfree((char *) tracePtr);
+		ckfree(memoryp, (char *) tracePtr);
 	    }
 	}
 	if (elPtr->flags & VAR_SEARCHES_POSSIBLE) {
 	    Hax_Panic((char *) "DeleteArray found searches on array alement!");
 	}
-	ckfree((char *) elPtr);
+	ckfree(memoryp, (char *) elPtr);
     }
-    Hax_DeleteHashTable(varPtr->value.tablePtr);
-    ckfree((char *) varPtr->value.tablePtr);
+    Hax_DeleteHashTable((Hax_Interp *) iPtr, varPtr->value.tablePtr);
+    ckfree(memoryp, (char *) varPtr->value.tablePtr);
 }
 
 /*

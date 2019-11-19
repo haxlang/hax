@@ -102,7 +102,10 @@ Hax_CdCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Hax_Memoryp *memoryp;
     char *dirName;
+
+    memoryp = Hax_GetMemoryp(interp);
 
     if (argc > 2) {
 	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -120,7 +123,7 @@ Hax_CdCmd(
 	return HAX_ERROR;
     }
     if (currentDir != NULL) {
-	ckfree(currentDir);
+	ckfree(memoryp, currentDir);
 	currentDir = NULL;
     }
     if (chdir(dirName) != 0) {
@@ -156,9 +159,12 @@ Hax_CloseCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Hax_Memoryp *memoryp;
     UnixClientData *clientDataPtr;
     OpenFile *filePtr;
     int result = HAX_OK;
+
+    memoryp = Hax_GetMemoryp(interp);
 
     if (argc != 2) {
 	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -203,7 +209,7 @@ Hax_CloseCmd(
 	}
     }
 
-    ckfree((char *) filePtr);
+    ckfree(memoryp, (char *) filePtr);
     return result;
 }
 
@@ -278,12 +284,15 @@ Hax_ExecCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Hax_Memoryp *memoryp;
     int outputId;			/* File id for output pipe.  -1
 					 * means command overrode. */
     int errorId;			/* File id for temporary file
 					 * containing error output. */
     int *pidPtr;
     int numPids, result;
+
+    memoryp = Hax_GetMemoryp(interp);
 
     /*
      * See if the command is to be run in background;  if so, create
@@ -299,7 +308,7 @@ Hax_ExecCmd(
 	    return HAX_ERROR;
 	}
 	Hax_DetachPids(numPids, pidPtr);
-	ckfree((char *) pidPtr);
+	ckfree(memoryp, (char *) pidPtr);
 	return HAX_OK;
     }
 
@@ -1016,10 +1025,13 @@ Hax_OpenCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Hax_Memoryp *memoryp;
     UnixClientData *clientDataPtr;
     int pipeline, fd;
     char *access;
     OpenFile *filePtr;
+
+    memoryp = Hax_GetMemoryp(interp);
 
     if (argc == 2) {
 	access = (char *) "r";
@@ -1031,7 +1043,7 @@ Hax_OpenCmd(
 	return HAX_ERROR;
     }
 
-    filePtr = (OpenFile *) ckalloc(sizeof(OpenFile));
+    filePtr = (OpenFile *) ckalloc(memoryp, sizeof(OpenFile));
     filePtr->f = NULL;
     filePtr->f2 = NULL;
     filePtr->readable = 0;
@@ -1105,7 +1117,7 @@ Hax_OpenCmd(
 	inPipe = outPipe = -1;
 	filePtr->numPids = Hax_CreatePipeline(interp, cmdArgc, cmdArgv,
 		&filePtr->pidPtr, inPipePtr, outPipePtr, &filePtr->errorId);
-	ckfree((char *) cmdArgv);
+	ckfree(memoryp, (char *) cmdArgv);
 	if (filePtr->numPids < 0) {
 	    goto error;
 	}
@@ -1141,7 +1153,7 @@ Hax_OpenCmd(
 
     fd = fileno(filePtr->f);
     clientDataPtr = (UnixClientData *)clientData;
-    HaxMakeFileTable(clientDataPtr, fd);
+    HaxMakeFileTable(interp, clientDataPtr, fd);
     if (clientDataPtr->filePtrArray[fd] != NULL) {
 	Hax_Panic((char *) "Hax_OpenCmd found file already open");
     }
@@ -1158,12 +1170,12 @@ Hax_OpenCmd(
     }
     if (filePtr->numPids > 0) {
 	Hax_DetachPids(filePtr->numPids, filePtr->pidPtr);
-	ckfree((char *) filePtr->pidPtr);
+	ckfree(memoryp, (char *) filePtr->pidPtr);
     }
     if (filePtr->errorId != -1) {
 	close(filePtr->errorId);
     }
-    ckfree((char *) filePtr);
+    ckfree(memoryp, (char *) filePtr);
     return HAX_ERROR;
 }
 
@@ -1192,7 +1204,10 @@ Hax_PwdCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Hax_Memoryp *memoryp;
     char buffer[MAXPATHLEN+1];
+
+    memoryp = Hax_GetMemoryp(interp);
 
     if (argc != 1) {
 	Hax_AppendResult(interp, "wrong # args: should be \"",
@@ -1210,7 +1225,7 @@ Hax_PwdCmd(
 	    }
 	    return HAX_ERROR;
 	}
-	currentDir = (char *) ckalloc((unsigned) (strlen(buffer) + 1));
+	currentDir = (char *) ckalloc(memoryp, (unsigned) (strlen(buffer) + 1));
 	strcpy(currentDir, buffer);
     }
     interp->result = currentDir;
@@ -1666,9 +1681,12 @@ CleanupChildren(
 				 * stderr output from pipeline.  -1 means
 				 * there isn't any stderr output. */)
 {
+    Hax_Memoryp *memoryp;
     int result = HAX_OK;
     int i, pid, length;
     int waitStatus;
+
+    memoryp = Hax_GetMemoryp(interp);
 
     for (i = 0; i < numPids; i++) {
 	pid = Hax_WaitPids(1, &pidPtr[i], (int *) &waitStatus);
@@ -1718,7 +1736,7 @@ CleanupChildren(
 	    }
 	}
     }
-    ckfree((char *) pidPtr);
+    ckfree(memoryp, (char *) pidPtr);
 
     /*
      * Read the standard error file.  If there's anything there,
@@ -1773,8 +1791,10 @@ CleanupChildren(
 
 void
 Hax_UnixCoreDelete(
+    Hax_Interp *interp,
     ClientData clientData)
 {
+    Hax_Memoryp *memoryp;
     UnixClientData *clientDataPtr;
     int i;
 
@@ -1783,6 +1803,8 @@ Hax_UnixCoreDelete(
 
     if (clientDataPtr->refCount > 0)
 	return;
+
+    memoryp = Hax_GetMemoryp(interp);
 
     if (clientDataPtr->numFiles > 0) {
 	for (i = 0; i < clientDataPtr->numFiles; i++) {
@@ -1799,14 +1821,14 @@ Hax_UnixCoreDelete(
 		}
 		if (filePtr->numPids > 0) {
 		    Hax_DetachPids(filePtr->numPids, filePtr->pidPtr);
-		    ckfree((char *) filePtr->pidPtr);
+		    ckfree(memoryp, (char *) filePtr->pidPtr);
 		}
 	    }
-	    ckfree((char *) filePtr);
+	    ckfree(memoryp, (char *) filePtr);
 	}
-	ckfree((char *) clientDataPtr->filePtrArray);
+	ckfree(memoryp, (char *) clientDataPtr->filePtrArray);
     }
-    ckfree((char *) clientDataPtr);
+    ckfree(memoryp, (char *) clientDataPtr);
 }
 
 /*
@@ -1821,10 +1843,13 @@ void
 Hax_InitUnixCore(
     Hax_Interp *interp)
 {
+    Hax_Memoryp *memoryp;
     CmdInfo *cmdInfoPtr;
     UnixClientData *clientDataPtr;
 
-    clientDataPtr = ckalloc(sizeof(UnixClientData));
+    memoryp = Hax_GetMemoryp(interp);
+
+    clientDataPtr = ckalloc(memoryp, sizeof(UnixClientData));
     clientDataPtr->numFiles = 0;
     clientDataPtr->filePtrArray = NULL;
     clientDataPtr->refCount = 0;

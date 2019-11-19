@@ -24,9 +24,9 @@ Hax_InitHashTable, Hax_DeleteHashTable, Hax_CreateHashEntry, Hax_DeleteHashEntry
 \fBHax_DeleteHashTable\fR(\fItablePtr\fR)
 .sp
 Hax_HashEntry *
-\fBHax_CreateHashEntry\fR(\fItablePtr, key, newPtr\fR)
+\fBHax_CreateHashEntry\fR(\fIinterp\fR, \fItablePtr, key, newPtr\fR)
 .sp
-\fBHax_DeleteHashEntry\fR(\fIentryPtr\fR)
+\fBHax_DeleteHashEntry\fR(\fIinterp\fR, \fIentryPtr\fR)
 .sp
 Hax_HashEntry *
 \fBHax_FindHashEntry\fR(\fItablePtr, key\fR)
@@ -46,9 +46,11 @@ Hax_HashEntry *
 \fBHax_NextHashEntry\fR(\fIsearchPtr\fR)
 .sp
 char *
-\fBHax_HashStats\fR(\fItablePtr\fR)
+\fBHax_HashStats\fR(\fIinterp\fR, \fItablePtr\fR)
 .SH ARGUMENTS
 .AS Hax_HashSearch *searchPtr
+.AP Hax_Interp *interp in
+Interpreter in which to execute the command.
 .AP Hax_HashTable *tablePtr in
 Address of hash table structure (for all procedures but
 \fBHax_InitHashTable\fR, this must have been initialized by

@@ -433,7 +433,7 @@ Hax_InfoCmd(
 	    if (framePtr == NULL) {
 		goto levelError;
 	    }
-	    iPtr->result = Hax_Merge(framePtr->argc, framePtr->argv);
+	    iPtr->result = Hax_Merge(interp, framePtr->argc, framePtr->argv);
 	    iPtr->freeProc = (Hax_FreeProc *) free;
 	    return HAX_OK;
 	}
@@ -590,6 +590,8 @@ Hax_JoinCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     char *joinString;
     char **listArgv;
     int listArgc, i;
@@ -614,7 +616,7 @@ Hax_JoinCmd(
 	    Hax_AppendResult(interp, joinString, listArgv[i], (char *) NULL);
 	}
     }
-    ckfree((char *) listArgv);
+    ckfree(memoryp, (char *) listArgv);
     return HAX_OK;
 }
 
@@ -643,6 +645,8 @@ Hax_LindexCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     char *p, *element;
     int parenthesized, result;
     long int index, size;
@@ -669,7 +673,7 @@ Hax_LindexCmd(
 	return HAX_OK;
     }
     if (size >= HAX_RESULT_SIZE) {
-	interp->result = (char *) ckalloc((unsigned) size+1);
+	interp->result = (char *) ckalloc(memoryp, (unsigned) size+1);
 	interp->freeProc = (Hax_FreeProc *) free;
     }
     if (parenthesized) {
@@ -797,7 +801,7 @@ Hax_ListCmd(
 		" arg ?arg ...?\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    interp->result = Hax_Merge(argc-1, argv+1);
+    interp->result = Hax_Merge(interp, argc-1, argv+1);
     interp->freeProc = (Hax_FreeProc *) free;
     return HAX_OK;
 }
@@ -1088,6 +1092,8 @@ Hax_LsearchCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int listArgc;
     char **listArgv;
     int i, match;
@@ -1108,7 +1114,7 @@ Hax_LsearchCmd(
 	}
     }
     sprintf(interp->result, "%d", match);
-    ckfree((char *) listArgv);
+    ckfree(memoryp, (char *) listArgv);
     return HAX_OK;
 }
 
@@ -1137,6 +1143,8 @@ Hax_LsortCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int listArgc;
     char **listArgv;
 
@@ -1149,9 +1157,9 @@ Hax_LsortCmd(
 	return HAX_ERROR;
     }
     qsort(listArgv, listArgc, sizeof (char *), SortCompareProc);
-    interp->result = Hax_Merge(listArgc, listArgv);
+    interp->result = Hax_Merge(interp, listArgc, listArgv);
     interp->freeProc = (Hax_FreeProc *) free;
-    ckfree((char *) listArgv);
+    ckfree(memoryp, (char *) listArgv);
     return HAX_OK;
 }
 

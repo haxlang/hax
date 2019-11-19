@@ -464,6 +464,7 @@ typedef struct Interp {
     int internalErrno;		/* Internal errno with a distinct symbol name
 				 * to avoid preprocessor name clash with
 				 * defines from <errno.h>. */
+    Hax_Memoryp *memoryp;	/* Memory Management context. */
 } Interp;
 
 /*
@@ -514,7 +515,8 @@ typedef struct ParseValue {
 				 * output buffer. */
     char *end;			/* Address of the last usable character
 				 * in the buffer. */
-    void (*expandProc) (struct ParseValue *pvPtr, int needed);
+    void (*expandProc) (Hax_Interp *interp, struct ParseValue *pvPtr,
+	int needed);
 				/* Procedure to call when space runs out;
 				 * it will make more space. */
     ClientData clientData;	/* Arbitrary information for use of
@@ -601,8 +603,8 @@ extern void		HaxCopyAndCollapse (int count, char *src,
 			    char *dst);
 extern void		HaxDeleteVars (Interp *iPtr,
 			    Hax_HashTable *tablePtr);
-extern void		HaxExpandParseValue (ParseValue *pvPtr,
-			    int needed);
+extern void		HaxExpandParseValue (Hax_Interp *interp,
+			    ParseValue *pvPtr, int needed);
 extern int		HaxFindElement (Hax_Interp *interp,
 			    char *list, char **elementPtr, char **nextPtr,
 			    long int *sizePtr, int *bracePtr);

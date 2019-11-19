@@ -121,8 +121,8 @@ typedef struct UnixClientData {
 extern int		HaxGetOpenFile (Hax_Interp *interp,
 			    UnixClientData *clientDataPtr,
 			    char *string, OpenFile **filePtrPtr);
-extern void		HaxMakeFileTable (UnixClientData *clientDataPtr,
-			    int index);
+extern void		HaxMakeFileTable (Hax_Interp *interp,
+			    UnixClientData *clientDataPtr, int index);
 extern void		HaxSetupEnv (Hax_Interp *interp);
 
 /*

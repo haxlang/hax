@@ -70,6 +70,8 @@ Hax_RegexpCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int noCase = 0;
     int indices = 0;
     regexp *regexpPtr;
@@ -114,7 +116,7 @@ Hax_RegexpCmd(
     if (noCase) {
 	char *dst, *src;
 
-	string = (char *) ckalloc((unsigned) (strlen(argPtr[1]) + 1));
+	string = (char *) ckalloc(memoryp, (unsigned) (strlen(argPtr[1]) + 1));
 	for (src = argPtr[1], dst = string; *src != 0; src++, dst++) {
 	    if (isupper(*src)) {
 		*dst = tolower(*src);
@@ -129,7 +131,7 @@ Hax_RegexpCmd(
     haxRegexpError = NULL;
     match = RegExec(regexpPtr, string);
     if (string != argPtr[1]) {
-	ckfree(string);
+	ckfree(memoryp, string);
     }
     if (haxRegexpError != NULL) {
 	Hax_AppendResult(interp, "error while matching pattern: ",
@@ -211,6 +213,8 @@ Hax_RegsubCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int noCase = 0, all = 0;
     regexp *regexpPtr;
     char *string, *p, *firstChar, *newValue, **argPtr;
@@ -253,7 +257,7 @@ Hax_RegsubCmd(
     if (noCase) {
 	char *dst;
 
-	string = (char *) ckalloc((unsigned) (strlen(argPtr[1]) + 1));
+	string = (char *) ckalloc(memoryp, (unsigned) (strlen(argPtr[1]) + 1));
 	for (src = argPtr[1], dst = string; *src != 0; src++, dst++) {
 	    if (isupper(*src)) {
 		*dst = tolower(*src);
@@ -409,7 +413,7 @@ Hax_RegsubCmd(
 
     done:
     if (string != argPtr[1]) {
-	ckfree(string);
+	ckfree(memoryp, string);
     }
     return result;
 }
@@ -470,8 +474,8 @@ Hax_RenameCmd(
 	return HAX_ERROR;
     }
     cmdPtr = (Command *) Hax_GetHashValue(hPtr);
-    Hax_DeleteHashEntry(hPtr);
-    hPtr = Hax_CreateHashEntry(&iPtr->commandTable, argv[2], &newPtr);
+    Hax_DeleteHashEntry(interp, hPtr);
+    hPtr = Hax_CreateHashEntry(interp, &iPtr->commandTable, argv[2], &newPtr);
     Hax_SetHashValue(hPtr, cmdPtr);
     return HAX_OK;
 }
@@ -537,6 +541,8 @@ Hax_ScanCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int arg1Length;			/* Number of bytes in argument to be
 					 * scanned.  This gives an upper limit
 					 * on string field sizes. */
@@ -668,7 +674,7 @@ Hax_ScanCmd(
      * Step 2:
      */
 
-    results = (char *) ckalloc((unsigned) totalSize);
+    results = (char *) ckalloc(memoryp, (unsigned) totalSize);
     for (i = 0, totalSize = 0, curField = fields;
 	    i < numFields; i++, curField++) {
 	curField->location = results + totalSize;
@@ -716,7 +722,7 @@ Hax_ScanCmd(
 		    Hax_AppendResult(interp,
 			    "couldn't set variable \"", argv[i+3], "\"",
 			    (char *) NULL);
-		    ckfree((char *) results);
+		    ckfree(memoryp, (char *) results);
 		    return HAX_ERROR;
 		}
 		break;
@@ -750,7 +756,7 @@ Hax_ScanCmd(
 		break;
 	}
     }
-    ckfree(results);
+    ckfree(memoryp, results);
     sprintf(interp->result, "%d", numScanned);
     return HAX_OK;
 }
@@ -1116,6 +1122,8 @@ Hax_TraceCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     char c;
     int length;
 
@@ -1155,7 +1163,7 @@ Hax_TraceCmd(
 	}
 
 	length = strlen(argv[4]);
-	tvarPtr = (TraceVarInfo *) ckalloc((unsigned)
+	tvarPtr = (TraceVarInfo *) ckalloc(memoryp, (unsigned)
 		(sizeof(TraceVarInfo) - sizeof(tvarPtr->command) + length + 1));
 	tvarPtr->flags = flags;
 	tvarPtr->length = length;
@@ -1163,7 +1171,7 @@ Hax_TraceCmd(
 	strcpy(tvarPtr->command, argv[4]);
 	if (Hax_TraceVar(interp, argv[2], flags, TraceVarProc,
 		(ClientData) tvarPtr) != HAX_OK) {
-	    ckfree((char *) tvarPtr);
+	    ckfree(memoryp, (char *) tvarPtr);
 	    return HAX_ERROR;
 	}
     } else if ((c == 'd') && (strncmp(argv[1], "vdelete", length)
@@ -1210,7 +1218,7 @@ Hax_TraceCmd(
 		    && (strncmp(argv[4], tvarPtr->command, length) == 0)) {
 		Hax_UntraceVar(interp, argv[2], flags | HAX_TRACE_UNSETS,
 			TraceVarProc, clientData);
-		ckfree((char *) tvarPtr);
+		ckfree(memoryp, (char *) tvarPtr);
 		break;
 	    }
 	}
@@ -1292,6 +1300,8 @@ TraceVarProc(
     int flags			/* OR-ed bits giving operation and other
 				 * information. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     TraceVarInfo *tvarPtr = (TraceVarInfo *) clientData;
     char *result;
     int code, cmdLength, flags1, flags2;
@@ -1318,7 +1328,7 @@ TraceVarProc(
 	if (cmdLength < STATIC_SIZE) {
 	    cmdPtr = staticSpace;
 	} else {
-	    cmdPtr = (char *) ckalloc((unsigned) cmdLength);
+	    cmdPtr = (char *) ckalloc(memoryp, (unsigned) cmdLength);
 	}
 	p = cmdPtr;
 	strcpy(p, tvarPtr->command);
@@ -1354,7 +1364,7 @@ TraceVarProc(
 	}
 	code = Hax_Eval(interp, NULL, cmdPtr, 0, (char **) NULL);
 	if (cmdPtr != staticSpace) {
-	    ckfree(cmdPtr);
+	    ckfree(memoryp, cmdPtr);
 	}
 	if (code != HAX_OK) {
 	    result = (char *) "access disallowed by trace command";
@@ -1365,7 +1375,7 @@ TraceVarProc(
 	interp->freeProc = dummy.freeProc;
     }
     if (flags & HAX_TRACE_DESTROYED) {
-	ckfree((char *) tvarPtr);
+	ckfree(memoryp, (char *) tvarPtr);
     }
     return result;
 }

@@ -19,19 +19,21 @@ Hax_CreateCmdBuf, Hax_AssembleCmd, Hax_DeleteCmdBuf \- buffer pieces of Hax comm
 \fB#include <hax.h>\fR
 .sp
 Hax_CmdBuf
-\fBHax_CreateCmdBuf\fR()
+\fBHax_CreateCmdBuf\fR(\fIinterp\fR)
 .sp
-\fBHax_DeleteCmdBuf\fR(\fIbuffer\fR)
+\fBHax_DeleteCmdBuf\fR(\fIinterp\fR, \fIbuffer\fR)
 .sp
 char *
 .VS
-\fBHax_AssembleCmd\fR(\fIbuffer\fR, \fIstring\fR)
+\fBHax_AssembleCmd\fR(\fIinterp\fR, \fIbuffer\fR, \fIstring\fR)
 .VE
 .sp
 int
 \fBHax_CommandComplete\fR(\fIcmd\fR)
 .SH ARGUMENTS
 .AS Hax_CmdBuf *string;
+.AP Hax_Interp *interp in
+Interpreter in which to execute the command.
 .AP Hax_CmdBuf buffer in
 Token for a command buffer (the result of some previous call to
 \fBHax_CreateCmdBuf\fR).

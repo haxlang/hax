@@ -51,15 +51,15 @@ static int environSize = 0;	/* Non-zero means that the all of the
  * Declarations for local procedures defined in this file:
  */
 
-static void		EnvInit (void);
+static void		EnvInit (Hax_Interp *interp);
 static char *		EnvTraceProc (ClientData clientData,
 			    Hax_Interp *interp, char *name1, char *name2,
 			    int flags);
 static int		FindVariable (const char *name,
 			    int *lengthPtr);
-static void		SetEnv (const char *name,
+static void		SetEnv (Hax_Interp *interp, const char *name,
 			    const char *value);
-static void		UnsetEnv (const char *name);
+static void		UnsetEnv (Hax_Interp *interp, const char *name);
 
 /*
  *----------------------------------------------------------------------
@@ -89,6 +89,7 @@ HaxSetupEnv(
     Hax_Interp *interp		/* Interpreter whose "env" array is to be
 				 * managed. */)
 {
+    Hax_Memoryp *memoryp;
     EnvInterp *eiPtr;
     int i;
 
@@ -98,14 +99,20 @@ HaxSetupEnv(
      */
 
     if (environSize == 0) {
-	EnvInit();
+	EnvInit(interp);
     }
+
+    /*
+     * Next, get the pointer to Memoryp.
+     */
+
+    memoryp = Hax_GetMemoryp(interp);
 
     /*
      * Next, add the interpreter to the list of those that we manage.
      */
 
-    eiPtr = (EnvInterp *) ckalloc(sizeof(EnvInterp));
+    eiPtr = (EnvInterp *) ckalloc(memoryp, sizeof(EnvInterp));
     eiPtr->interp = interp;
     eiPtr->nextPtr = firstInterpPtr;
     firstInterpPtr = eiPtr;
@@ -201,17 +208,21 @@ FindVariable(
 
 void
 SetEnv(
+    Hax_Interp *interp,
     const char *name,		/* Name of variable whose value is to be
 				 * set. */
     const char *value		/* New value for variable. */)
 {
+    Hax_Memoryp *memoryp;
     int index, length, nameLength;
     char *p;
     EnvInterp *eiPtr;
 
     if (environSize == 0) {
-	EnvInit();
+	EnvInit(interp);
     }
+
+    memoryp = Hax_GetMemoryp(interp);
 
     /*
      * Figure out where the entry is going to go.  If the name doesn't
@@ -224,11 +235,11 @@ SetEnv(
 	if ((length+2) > environSize) {
 	    char **newEnviron;
 
-	    newEnviron = (char **) ckalloc((unsigned)
+	    newEnviron = (char **) ckalloc(memoryp, (unsigned)
 		    ((length+5) * sizeof(char *)));
 	    memcpy(newEnviron, environ,
 		    length*sizeof(char *));
-	    ckfree(environ);
+	    ckfree(memoryp, environ);
 	    environ = newEnviron;
 	    environSize = length+5;
 	}
@@ -247,7 +258,7 @@ SetEnv(
 	if (strcmp(value, environ[index]+length+1) == 0) {
 	    return;
 	}
-	ckfree(environ[index]);
+	ckfree(memoryp, environ[index]);
 	nameLength = length;
     }
 
@@ -255,7 +266,7 @@ SetEnv(
      * Create a new entry and enter it into the table.
      */
 
-    p = (char *) ckalloc((unsigned) (nameLength + strlen(value) + 2));
+    p = (char *) ckalloc(memoryp, (unsigned) (nameLength + strlen(value) + 2));
     environ[index] = p;
     strcpy(p, name);
     p += nameLength;
@@ -296,15 +307,19 @@ SetEnv(
 
 int
 PutEnv(
+    Hax_Interp *interp,
     char *string		/* Info about environment variable in the
 				 * form NAME=value. */)
 {
+    Hax_Memoryp *memoryp;
     int nameLength;
     char *name, *value;
 
     if (string == NULL) {
 	return 0;
     }
+
+    memoryp = Hax_GetMemoryp(interp);
 
     /*
      * Separate the string into name and value parts, then call
@@ -319,11 +334,11 @@ PutEnv(
     if (nameLength == 0) {
 	return 0;
     }
-    name = (char *) ckalloc(nameLength+1);
+    name = (char *) ckalloc(memoryp, nameLength+1);
     memcpy(name, string, nameLength);
     name[nameLength] = 0;
-    SetEnv(name, value+1);
-    ckfree(name);
+    SetEnv(interp, name, value+1);
+    ckfree(memoryp, name);
     return 0;
 }
 
@@ -346,15 +361,19 @@ PutEnv(
 
 void
 UnsetEnv(
+    Hax_Interp *interp,
     const char *name			/* Name of variable to remove. */)
 {
+    Hax_Memoryp *memoryp;
     int index, dummy;
     char **envPtr;
     EnvInterp *eiPtr;
 
     if (environSize == 0) {
-	EnvInit();
+	EnvInit(interp);
     }
+
+    memoryp = Hax_GetMemoryp(interp);
 
     /*
      * Update the environ array.
@@ -364,7 +383,7 @@ UnsetEnv(
     if (index == -1) {
 	return;
     }
-    ckfree(environ[index]);
+    ckfree(memoryp, environ[index]);
     for (envPtr = environ+index+1; ; envPtr++) {
 	envPtr[-1] = *envPtr;
 	if (*envPtr == NULL) {
@@ -415,6 +434,10 @@ EnvTraceProc(
 				 * NULL if whole array is being deleted. */
     int flags			/* Indicates what's happening. */)
 {
+    Hax_Memoryp *memoryp;
+
+    memoryp = Hax_GetMemoryp(interp);
+
     /*
      * First see if the whole "env" variable is being deleted.  If
      * so, just forget about this interpreter.
@@ -443,7 +466,7 @@ EnvTraceProc(
 		}
 	    }
 	}
-	ckfree((char *) eiPtr);
+	ckfree(memoryp, (char *) eiPtr);
 	return NULL;
     }
 
@@ -452,12 +475,12 @@ EnvTraceProc(
      */
 
     if (flags & HAX_TRACE_WRITES) {
-	SetEnv(name2,
+	SetEnv(interp, name2,
 	    Hax_GetVar2(interp, (char *) "env", name2, HAX_GLOBAL_ONLY));
     }
 
     if (flags & HAX_TRACE_UNSETS) {
-	UnsetEnv(name2);
+	UnsetEnv(interp, name2);
     }
     return NULL;
 }
@@ -482,22 +505,27 @@ EnvTraceProc(
  */
 
 static void
-EnvInit(void)
+EnvInit(Hax_Interp *interp)
 {
+    Hax_Memoryp *memoryp;
     char **newEnviron;
     int i, length;
 
     if (environSize != 0) {
 	return;
     }
+
+    memoryp = Hax_GetMemoryp(interp);
+
     for (length = 0; environ[length] != NULL; length++) {
 	/* Empty loop body. */
     }
     environSize = length+5;
-    newEnviron = (char **) ckalloc((unsigned)
+    newEnviron = (char **) ckalloc(memoryp, (unsigned)
 		(environSize * sizeof(char *)));
     for (i = 0; i < length; i++) {
-	newEnviron[i] = (char *) ckalloc((unsigned) (strlen(environ[i]) + 1));
+	newEnviron[i] = (char *) ckalloc(memoryp, (unsigned)
+		(strlen(environ[i]) + 1));
 	strcpy(newEnviron[i], environ[i]);
     }
     newEnviron[length] = NULL;

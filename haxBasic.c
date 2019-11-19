@@ -104,14 +104,19 @@ static CmdInfo builtInCmds[] = {
  */
 
 Hax_Interp *
-Hax_CreateInterp(void)
+Hax_CreateInterp(
+    Hax_Memoryp *memoryp)
 {
     Interp *iPtr;
     Command *cmdPtr;
     CmdInfo *cmdInfoPtr;
     int i;
 
-    iPtr = (Interp *) ckalloc(sizeof(Interp));
+    if (memoryp == NULL)
+	return NULL;
+
+    iPtr = (Interp *) ckalloc(memoryp, sizeof(Interp));
+    iPtr->memoryp = memoryp;
     iPtr->result = iPtr->resultSpace;
     iPtr->freeProc = 0;
     iPtr->errorLine = 0;
@@ -155,10 +160,10 @@ Hax_CreateInterp(void)
 	int newPtr;
 	Hax_HashEntry *hPtr;
 
-	hPtr = Hax_CreateHashEntry(&iPtr->commandTable,
+	hPtr = Hax_CreateHashEntry((Hax_Interp *) iPtr, &iPtr->commandTable,
 		(char *) cmdInfoPtr->name, &newPtr);
 	if (newPtr) {
-	    cmdPtr = (Command *) ckalloc(sizeof(Command));
+	    cmdPtr = (Command *) ckalloc(memoryp, sizeof(Command));
 	    cmdPtr->proc = cmdInfoPtr->proc;
 	    cmdPtr->clientData = (ClientData) NULL;
 	    cmdPtr->deleteProc = NULL;
@@ -193,6 +198,7 @@ Hax_DeleteInterp(
 				 * by a previous call to Hax_CreateInterp). */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Hax_HashEntry *hPtr;
     Hax_HashSearch search;
     Command *cmdPtr;
@@ -216,43 +222,43 @@ Hax_DeleteInterp(
 	    hPtr != NULL; hPtr = Hax_NextHashEntry(&search)) {
 	cmdPtr = (Command *) Hax_GetHashValue(hPtr);
 	if (cmdPtr->deleteProc != NULL) {
-	    (*cmdPtr->deleteProc)(cmdPtr->clientData);
+	    (*cmdPtr->deleteProc)(interp, cmdPtr->clientData);
 	}
-	ckfree((char *) cmdPtr);
+	ckfree(memoryp, (char *) cmdPtr);
     }
-    Hax_DeleteHashTable(&iPtr->commandTable);
+    Hax_DeleteHashTable(interp, &iPtr->commandTable);
     HaxDeleteVars(iPtr, &iPtr->globalTable);
     if (iPtr->events != NULL) {
 	int i;
 
 	for (i = 0; i < iPtr->numEvents; i++) {
-	    ckfree(iPtr->events[i].command);
+	    ckfree(memoryp, iPtr->events[i].command);
 	}
-	ckfree((char *) iPtr->events);
+	ckfree(memoryp, (char *) iPtr->events);
     }
     while (iPtr->revPtr != NULL) {
 	HistoryRev *nextPtr = iPtr->revPtr->nextPtr;
 
-	ckfree((char *) iPtr->revPtr);
+	ckfree(memoryp, (char *) iPtr->revPtr);
 	iPtr->revPtr = nextPtr;
     }
     if (iPtr->appendResult != NULL) {
-	ckfree(iPtr->appendResult);
+	ckfree(memoryp, iPtr->appendResult);
     }
     for (i = 0; i < NUM_REGEXPS; i++) {
 	if (iPtr->patterns[i] == NULL) {
 	    break;
 	}
-	ckfree(iPtr->patterns[i]);
-	ckfree((char *) iPtr->regexps[i]);
+	ckfree(memoryp, iPtr->patterns[i]);
+	ckfree(memoryp, (char *) iPtr->regexps[i]);
     }
     while (iPtr->tracePtr != NULL) {
 	Trace *nextPtr = iPtr->tracePtr->nextPtr;
 
-	ckfree((char *) iPtr->tracePtr);
+	ckfree(memoryp, (char *) iPtr->tracePtr);
 	iPtr->tracePtr = nextPtr;
     }
-    ckfree((char *) iPtr);
+    ckfree(memoryp, (char *) iPtr);
 }
 
 /*
@@ -288,11 +294,12 @@ Hax_CreateCommand(
 				 * this command is deleted. */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Command *cmdPtr;
     Hax_HashEntry *hPtr;
     int newPtr;
 
-    hPtr = Hax_CreateHashEntry(&iPtr->commandTable, cmdName, &newPtr);
+    hPtr = Hax_CreateHashEntry(interp, &iPtr->commandTable, cmdName, &newPtr);
     if (!newPtr) {
 	/*
 	 * Command already exists:  delete the old one.
@@ -300,10 +307,10 @@ Hax_CreateCommand(
 
 	cmdPtr = (Command *) Hax_GetHashValue(hPtr);
 	if (cmdPtr->deleteProc != NULL) {
-	    (*cmdPtr->deleteProc)(cmdPtr->clientData);
+	    (*cmdPtr->deleteProc)(interp, cmdPtr->clientData);
 	}
     } else {
-	cmdPtr = (Command *) ckalloc(sizeof(Command));
+	cmdPtr = (Command *) ckalloc(memoryp, sizeof(Command));
 	Hax_SetHashValue(hPtr, cmdPtr);
     }
     cmdPtr->proc = proc;
@@ -337,6 +344,7 @@ Hax_DeleteCommand(
     char *cmdName		/* Name of command to remove. */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Hax_HashEntry *hPtr;
     Command *cmdPtr;
 
@@ -346,10 +354,10 @@ Hax_DeleteCommand(
     }
     cmdPtr = (Command *) Hax_GetHashValue(hPtr);
     if (cmdPtr->deleteProc != NULL) {
-	(*cmdPtr->deleteProc)(cmdPtr->clientData);
+	(*cmdPtr->deleteProc)(interp, cmdPtr->clientData);
     }
-    ckfree((char *) cmdPtr);
-    Hax_DeleteHashEntry(hPtr);
+    ckfree(memoryp, (char *) cmdPtr);
+    Hax_DeleteHashEntry(interp, hPtr);
     return 0;
 }
 
@@ -419,6 +427,7 @@ Hax_Eval(
 					 * that newlines terminate commands. */
     int result;				/* Return value. */
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     char *oldScriptFile = iPtr->scriptFile;
     Hax_HashEntry *hPtr;
     Command *cmdPtr;
@@ -445,7 +454,7 @@ Hax_Eval(
      * result if there are no commands in the command string.
      */
 
-    Hax_FreeResult((Hax_Interp *) iPtr);
+    Hax_FreeResult(interp);
     iPtr->result = iPtr->resultSpace;
     iPtr->resultSpace[0] = 0;
     result = HAX_OK;
@@ -575,12 +584,12 @@ Hax_Eval(
 
 	    argSize *= 2;
 	    newArgv = (char **)
-		    ckalloc((unsigned) argSize * sizeof(char *));
+		    ckalloc(memoryp, (unsigned) argSize * sizeof(char *));
 	    for (i = 0; i < argc; i++) {
 		newArgv[i] = argv[i];
 	    }
 	    if (argv != argStorage) {
-		ckfree((char *) argv);
+		ckfree(memoryp, (char *) argv);
 	    }
 	    argv = newArgv;
 	}
@@ -658,7 +667,7 @@ Hax_Eval(
 	 */
 
 	iPtr->cmdCount++;
-	Hax_FreeResult(iPtr);
+	Hax_FreeResult((Hax_Interp *) iPtr);
 	iPtr->result = iPtr->resultSpace;
 	iPtr->resultSpace[0] = 0;
 	result = (*cmdPtr->proc)(cmdPtr->clientData, interp, argc, argv);
@@ -673,10 +682,10 @@ Hax_Eval(
 
     done:
     if (pv.buffer != copyStorage) {
-	ckfree((char *) pv.buffer);
+	ckfree(memoryp, (char *) pv.buffer);
     }
     if (argv != argStorage) {
-	ckfree((char *) argv);
+	ckfree(memoryp, (char *) argv);
     }
     iPtr->numLevels--;
     if (iPtr->numLevels == 0) {
@@ -811,8 +820,9 @@ Hax_CreateTrace(
 {
     Trace *tracePtr;
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
 
-    tracePtr = (Trace *) ckalloc(sizeof(Trace));
+    tracePtr = (Trace *) ckalloc(memoryp, sizeof(Trace));
     tracePtr->level = level;
     tracePtr->proc = proc;
     tracePtr->clientData = clientData;
@@ -846,18 +856,19 @@ Hax_DeleteTrace(
 				 * Hax_CreateTrace). */)
 {
     Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Trace *tracePtr = (Trace *) trace;
     Trace *tracePtr2;
 
     if (iPtr->tracePtr == tracePtr) {
 	iPtr->tracePtr = tracePtr->nextPtr;
-	ckfree((char *) tracePtr);
+	ckfree(memoryp, (char *) tracePtr);
     } else {
 	for (tracePtr2 = iPtr->tracePtr; tracePtr2 != NULL;
 		tracePtr2 = tracePtr2->nextPtr) {
 	    if (tracePtr2->nextPtr == tracePtr) {
 		tracePtr2->nextPtr = tracePtr->nextPtr;
-		ckfree((char *) tracePtr);
+		ckfree(memoryp, (char *) tracePtr);
 		return;
 	    }
 	}
@@ -942,6 +953,8 @@ Hax_VarEval(
     ...				/* One or more strings to concatenate,
 				 * terminated with a NULL string. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     va_list argList;
 #define FIXED_SIZE 200
     char fixedSpace[FIXED_SIZE+1];
@@ -972,10 +985,10 @@ Hax_VarEval(
 
 	    spaceAvl = spaceUsed + length;
 	    spaceAvl += spaceAvl/2;
-	    newPtr = (char *) ckalloc((unsigned) spaceAvl);
+	    newPtr = (char *) ckalloc(memoryp, (unsigned) spaceAvl);
 	    memcpy(newPtr, cmd, spaceUsed);
 	    if (cmd != fixedSpace) {
-		ckfree(cmd);
+		ckfree(memoryp, cmd);
 	    }
 	    cmd = newPtr;
 	}
@@ -987,7 +1000,7 @@ Hax_VarEval(
 
     result = Hax_Eval(interp, NULL, cmd, 0, (char **) NULL);
     if (cmd != fixedSpace) {
-	ckfree(cmd);
+	ckfree(memoryp, cmd);
     }
     return result;
 }
@@ -1026,4 +1039,21 @@ Hax_GlobalEval(
     result = Hax_Eval(interp, NULL, command, 0, (char **) NULL);
     iPtr->varFramePtr = savedVarFramePtr;
     return result;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Hax_GetMemoryp --
+ *     Retrieve the Memoryp context of an interpreter.
+ *
+ *----------------------------------------------------------------------
+ */
+Hax_Memoryp *
+Hax_GetMemoryp(
+    Hax_Interp *interp)
+{
+    Interp *iPtr = (Interp *) interp;
+
+    return (Hax_Memoryp *) iPtr->memoryp;
 }

@@ -32,6 +32,8 @@
  * 2019-11-07 Remove superfluous break in switch()
  * 2019-11-07 Rename regex functions to disable clash with libc
  * 2019-11-08 Correct build issued with a C++ compiler (g++, clang++)
+ * 2019-11-19 Add Hax_Interp argument in RegComp()
+ * 2019-11-19 Convert the usage of allocators to the new prototype
  */
 #include "haxInt.h"
 
@@ -196,8 +198,10 @@ static void RegOpTail(char *p, char *val);
  * of the structure of the compiled regexp.
  */
 regexp *
-RegComp(char *exp)
+RegComp(Hax_Interp *interp, char *exp)
 {
+	Interp *iPtr = (Interp *) interp;
+	Hax_Memoryp *memoryp = iPtr->memoryp;
 	regexp *r;
 	char *scan;
 	char *longest;
@@ -221,7 +225,7 @@ RegComp(char *exp)
 		FAIL((char *) "regexp too big");
 
 	/* Allocate space. */
-	r = (regexp *)ckalloc(sizeof(regexp) + (unsigned)regsize);
+	r = (regexp *)ckalloc(memoryp, sizeof(regexp) + (unsigned)regsize);
 	if (r == NULL)
 		FAIL((char *) "out of space");
 

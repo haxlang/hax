@@ -104,12 +104,13 @@ result that match the type \fBHax_CmdDeleteProc\fR:
 .nf
 .RS
 .sp
-typedef void Hax_CmdDeleteProc(ClientData \fIclientData\fR);
+typedef void Hax_CmdDeleteProc(Hax_Interp *\fIinterp\fR,
+ClientData \fIclientData\fR);
 .sp
 .RE
 .fi
-The \fIclientData\fR argument will be the same as the \fIclientData\fR
-argument passed to \fBHax_CreateCommand\fR.
+The \fIinterp\fR and  \fIclientData\fR arguments will be the same as the
+\fIinterp\fR and \fIclientData\fR arguments passed to \fBHax_CreateCommand\fR.
 .PP
 \fBHax_DeleteCommand\fR deletes a command from a command interpreter.
 Once the call completes, attempts to invoke \fIcmdName\fR in

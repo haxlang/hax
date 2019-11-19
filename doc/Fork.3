@@ -20,7 +20,7 @@ Hax_Fork, Hax_WaitPids, Hax_DetachPids \- manage child processes
 \fB#include <hax.h>\fR
 .sp
 int
-\fBHax_Fork\fR( )
+\fBHax_Fork\fR(\fIinterp\fR)
 .sp
 int
 \fBHax_WaitPids\fR(\fInumPids, pidPtr, statusPtr\fR)
@@ -28,7 +28,9 @@ int
 int
 \fBHax_DetachPids\fR(\fInumPids, pidPtr\fR)
 .SH ARGUMENTS
-.AS int *statusPtr
+.AS Hax_Interp *interp;
+.AP Hax_Interp *interp in
+Interpreter in which to execute the command.
 .AP int numPids in
 Number of process ids contained in the array pointed to by \fIpidPtr\fR.
 .AP int *pidPtr in

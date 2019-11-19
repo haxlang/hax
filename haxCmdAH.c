@@ -80,6 +80,8 @@ Hax_CaseCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int i, result;
     int body;
     char *string;
@@ -164,7 +166,7 @@ Hax_CaseCmd(
 		break;
 	    }
 	}
-	ckfree((char *) patArgv);
+	ckfree(memoryp, (char *) patArgv);
 	if (j < patArgc) {
 	    break;
 	}
@@ -190,7 +192,7 @@ Hax_CaseCmd(
 
     cleanup:
     if (splitArgs) {
-	ckfree((char *) caseArgv);
+	ckfree(memoryp, (char *) caseArgv);
     }
     return result;
 }
@@ -272,7 +274,7 @@ Hax_ConcatCmd(
 	return HAX_ERROR;
     }
 
-    interp->result = Hax_Concat(argc-1, argv+1);
+    interp->result = Hax_Concat(interp, argc-1, argv+1);
     interp->freeProc = (Hax_FreeProc *) free;
     return HAX_OK;
 }
@@ -380,6 +382,8 @@ Hax_EvalCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int result;
     char *cmd;
 
@@ -397,9 +401,9 @@ Hax_EvalCmd(
 	 * between, then evaluate the result.
 	 */
 
-	cmd = Hax_Concat(argc-1, argv+1);
+	cmd = Hax_Concat(interp, argc-1, argv+1);
 	result = Hax_Eval(interp, NULL, cmd, 0, (char **) NULL);
-	ckfree(cmd);
+	ckfree(memoryp, cmd);
     }
     if (result == HAX_ERROR) {
 	char msg[60];
@@ -548,6 +552,8 @@ Hax_ForeachCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int listArgc, i, result;
     char **listArgv;
 
@@ -592,7 +598,7 @@ Hax_ForeachCmd(
 	    }
 	}
     }
-    ckfree((char *) listArgv);
+    ckfree(memoryp, (char *) listArgv);
     if (result == HAX_OK) {
 	Hax_ResetResult(interp);
     }
@@ -624,6 +630,8 @@ Hax_FormatCmd(
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     char *format;	/* Used to read characters from the format
 				 * string. */
     char newFormat[40];		/* A new format specifier is generated here. */
@@ -869,12 +877,12 @@ Hax_FormatCmd(
 	    int newSpace;
 
 	    newSpace = 2*(dstSize + size);
-	    newDst = (char *) ckalloc((unsigned) newSpace+1);
+	    newDst = (char *) ckalloc(memoryp, (unsigned) newSpace+1);
 	    if (dstSize != 0) {
 		memcpy(newDst, dst, dstSize);
 	    }
 	    if (dstSpace != HAX_RESULT_SIZE) {
-		ckfree(dst);
+		ckfree(memoryp, dst);
 	    }
 	    dst = newDst;
 	    dstSpace = newSpace;
@@ -913,7 +921,7 @@ Hax_FormatCmd(
     interp->result = (char *) "not enough arguments for all format specifiers";
     fmtError:
     if (dstSpace != HAX_RESULT_SIZE) {
-	ckfree(dst);
+	ckfree(memoryp, dst);
     }
     return HAX_ERROR;
 }

@@ -45,21 +45,26 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclHash.c,v 1.10 92/08/21 
 
 static Hax_HashEntry *	ArrayFind (Hax_HashTable *tablePtr,
 			    char *key);
-static Hax_HashEntry *	ArrayCreate (Hax_HashTable *tablePtr,
+static Hax_HashEntry *	ArrayCreate (Hax_Interp *interp,
+			    Hax_HashTable *tablePtr,
 			    char *key, int *newPtr);
 static Hax_HashEntry *	BogusFind (Hax_HashTable *tablePtr,
 			    char *key);
-static Hax_HashEntry *	BogusCreate (Hax_HashTable *tablePtr,
+static Hax_HashEntry *	BogusCreate (Hax_Interp *interp,
+			    Hax_HashTable *tablePtr,
 			    char *key, int *newPtr);
 static unsigned int	HashString (char *string);
-static void		RebuildTable (Hax_HashTable *tablePtr);
+static void		RebuildTable (Hax_Interp *interp,
+			    Hax_HashTable *tablePtr);
 static Hax_HashEntry *	StringFind (Hax_HashTable *tablePtr,
 			    char *key);
-static Hax_HashEntry *	StringCreate (Hax_HashTable *tablePtr,
+static Hax_HashEntry *	StringCreate (Hax_Interp *interp,
+			    Hax_HashTable *tablePtr,
 			    char *key, int *newPtr);
 static Hax_HashEntry *	OneWordFind (Hax_HashTable *tablePtr,
 			    char *key);
-static Hax_HashEntry *	OneWordCreate (Hax_HashTable *tablePtr,
+static Hax_HashEntry *	OneWordCreate (Hax_Interp *interp,
+			    Hax_HashTable *tablePtr,
 			    char *key, int *newPtr);
 
 /*
@@ -130,8 +135,11 @@ Hax_InitHashTable(
 
 void
 Hax_DeleteHashEntry(
+    Hax_Interp *interp,
     Hax_HashEntry *entryPtr)
 {
+    Interp *iPtr = (Interp *)interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Hax_HashEntry *prevPtr;
 
     if (*entryPtr->bucketPtr == entryPtr) {
@@ -149,7 +157,7 @@ Hax_DeleteHashEntry(
 	}
     }
     entryPtr->tablePtr->numEntries--;
-    ckfree((char *) entryPtr);
+    ckfree(memoryp, (char *) entryPtr);
 }
 
 /*
@@ -171,8 +179,11 @@ Hax_DeleteHashEntry(
 
 void
 Hax_DeleteHashTable(
+    Hax_Interp *interp,
     Hax_HashTable *tablePtr		/* Table to delete. */)
 {
+    Interp *iPtr = (Interp *)interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Hax_HashEntry *hPtr, *nextPtr;
     int i;
 
@@ -184,7 +195,7 @@ Hax_DeleteHashTable(
 	hPtr = tablePtr->buckets[i];
 	while (hPtr != NULL) {
 	    nextPtr = hPtr->nextPtr;
-	    ckfree((char *) hPtr);
+	    ckfree(memoryp, (char *) hPtr);
 	    hPtr = nextPtr;
 	}
     }
@@ -194,7 +205,7 @@ Hax_DeleteHashTable(
      */
 
     if (tablePtr->buckets != tablePtr->staticBuckets) {
-	ckfree((char *) tablePtr->buckets);
+	ckfree(memoryp, (char *) tablePtr->buckets);
     }
 
     /*
@@ -302,8 +313,11 @@ Hax_NextHashEntry(
 
 char *
 Hax_HashStats(
+    Hax_Interp *interp,
     Hax_HashTable *tablePtr		/* Table for which to produce stats. */)
 {
+    Interp *iPtr = (Interp *)interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
 #define NUM_COUNTERS 10
     int count[NUM_COUNTERS], overflow, i, j;
     double average, tmp;
@@ -337,7 +351,7 @@ Hax_HashStats(
      * Print out the histogram and a few other pieces of information.
      */
 
-    result = (char *) ckalloc((unsigned) ((NUM_COUNTERS*60) + 300));
+    result = (char *) ckalloc(memoryp, (unsigned) ((NUM_COUNTERS*60) + 300));
     sprintf(result, "%d entries in table, %d buckets\n",
 	    tablePtr->numEntries, tablePtr->numBuckets);
     p = result + strlen(result);
@@ -476,12 +490,15 @@ StringFind(
 
 static Hax_HashEntry *
 StringCreate(
+    Hax_Interp *interp,
     Hax_HashTable *tablePtr,	/* Table in which to lookup entry. */
     char *key,			/* Key to use to find or create matching
 				 * entry. */
     int *newPtr			/* Store info here telling whether a new
 				 * entry was created. */)
 {
+    Interp *iPtr = (Interp *)interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Hax_HashEntry *hPtr;
     char *p1, *p2;
     int index;
@@ -510,7 +527,7 @@ StringCreate(
      */
 
     *newPtr = 1;
-    hPtr = (Hax_HashEntry *) ckalloc((unsigned)
+    hPtr = (Hax_HashEntry *) ckalloc(memoryp, (unsigned)
 	    (sizeof(Hax_HashEntry) + strlen(key) - (sizeof(hPtr->key) -1)));
     hPtr->tablePtr = tablePtr;
     hPtr->bucketPtr = &(tablePtr->buckets[index]);
@@ -526,7 +543,7 @@ StringCreate(
      */
 
     if (tablePtr->numEntries >= tablePtr->rebuildSize) {
-	RebuildTable(tablePtr);
+	RebuildTable(interp, tablePtr);
     }
     return hPtr;
 }
@@ -595,12 +612,15 @@ OneWordFind(
 
 static Hax_HashEntry *
 OneWordCreate(
+    Hax_Interp *interp,
     Hax_HashTable *tablePtr,	/* Table in which to lookup entry. */
     char *key,			/* Key to use to find or create matching
 				 * entry. */
     int *newPtr			/* Store info here telling whether a new
 				 * entry was created. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Hax_HashEntry *hPtr;
     int index;
 
@@ -623,7 +643,7 @@ OneWordCreate(
      */
 
     *newPtr = 1;
-    hPtr = (Hax_HashEntry *) ckalloc(sizeof(Hax_HashEntry));
+    hPtr = (Hax_HashEntry *) ckalloc(memoryp, sizeof(Hax_HashEntry));
     hPtr->tablePtr = tablePtr;
     hPtr->bucketPtr = &(tablePtr->buckets[index]);
     hPtr->nextPtr = *hPtr->bucketPtr;
@@ -638,7 +658,7 @@ OneWordCreate(
      */
 
     if (tablePtr->numEntries >= tablePtr->rebuildSize) {
-	RebuildTable(tablePtr);
+	RebuildTable(interp, tablePtr);
     }
     return hPtr;
 }
@@ -719,12 +739,15 @@ ArrayFind(
 
 static Hax_HashEntry *
 ArrayCreate(
+    Hax_Interp *interp,
     Hax_HashTable *tablePtr,	/* Table in which to lookup entry. */
     char *key,			/* Key to use to find or create matching
 				 * entry. */
     int *newPtr			/* Store info here telling whether a new
 				 * entry was created. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     Hax_HashEntry *hPtr;
     int *arrayPtr = (int *) key;
     int *iPtr1, *iPtr2;
@@ -759,7 +782,7 @@ ArrayCreate(
      */
 
     *newPtr = 1;
-    hPtr = (Hax_HashEntry *) ckalloc((unsigned) (sizeof(Hax_HashEntry)
+    hPtr = (Hax_HashEntry *) ckalloc(memoryp, (unsigned) (sizeof(Hax_HashEntry)
 	    + (tablePtr->keyType*sizeof(int)) - 4));
     hPtr->tablePtr = tablePtr;
     hPtr->bucketPtr = &(tablePtr->buckets[index]);
@@ -778,7 +801,7 @@ ArrayCreate(
      */
 
     if (tablePtr->numEntries >= tablePtr->rebuildSize) {
-	RebuildTable(tablePtr);
+	RebuildTable(interp, tablePtr);
     }
     return hPtr;
 }
@@ -832,6 +855,7 @@ BogusFind(
 	/* ARGSUSED */
 static Hax_HashEntry *
 BogusCreate(
+    Hax_Interp *interp,
     Hax_HashTable *tablePtr,	/* Table in which to lookup entry. */
     char *key,			/* Key to use to find or create matching
 				 * entry. */
@@ -864,8 +888,11 @@ BogusCreate(
 
 static void
 RebuildTable(
+    Hax_Interp *interp,
     Hax_HashTable *tablePtr	/* Table to enlarge. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     int oldSize, count, index;
     Hax_HashEntry **oldBuckets;
     Hax_HashEntry **oldChainPtr, **newChainPtr;
@@ -880,7 +907,7 @@ RebuildTable(
      */
 
     tablePtr->numBuckets *= 4;
-    tablePtr->buckets = (Hax_HashEntry **) ckalloc((unsigned)
+    tablePtr->buckets = (Hax_HashEntry **) ckalloc(memoryp, (unsigned)
 	    (tablePtr->numBuckets * sizeof(Hax_HashEntry *)));
     for (count = tablePtr->numBuckets, newChainPtr = tablePtr->buckets;
 	    count > 0; count--, newChainPtr++) {
@@ -922,6 +949,6 @@ RebuildTable(
      */
 
     if (oldBuckets != tablePtr->staticBuckets) {
-	ckfree((char *) oldBuckets);
+	ckfree(memoryp, (char *) oldBuckets);
     }
 }

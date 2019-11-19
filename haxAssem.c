@@ -63,12 +63,15 @@ typedef struct {
  */
 
 Hax_CmdBuf
-Hax_CreateCmdBuf(void)
+Hax_CreateCmdBuf(
+    Hax_Interp *interp)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     CmdBuf *cbPtr;
 
-    cbPtr = (CmdBuf *) ckalloc(sizeof(CmdBuf));
-    cbPtr->buffer = (char *) ckalloc(CMD_BUF_SIZE);
+    cbPtr = (CmdBuf *) ckalloc(memoryp, sizeof(CmdBuf));
+    cbPtr->buffer = (char *) ckalloc(memoryp, CMD_BUF_SIZE);
     cbPtr->buffer[0] = '\0';
     cbPtr->bufSize = CMD_BUF_SIZE;
     cbPtr->bytesUsed = 0;
@@ -94,13 +97,16 @@ Hax_CreateCmdBuf(void)
 
 void
 Hax_DeleteCmdBuf(
+    Hax_Interp *interp,
     Hax_CmdBuf buffer		/* Token for command buffer (return value
 				 * from previous call to Hax_CreateCmdBuf). */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     CmdBuf *cbPtr = (CmdBuf *) buffer;
 
-    ckfree(cbPtr->buffer);
-    ckfree((char *) cbPtr);
+    ckfree(memoryp, cbPtr->buffer);
+    ckfree(memoryp, (char *) cbPtr);
 }
 
 /*
@@ -132,6 +138,7 @@ Hax_DeleteCmdBuf(
 
 char *
 Hax_AssembleCmd(
+    Hax_Interp *interp,
     Hax_CmdBuf buffer,		/* Token for a command buffer previously
 				 * created by Hax_CreateCmdBuf.  */
     char *string		/* Bytes to be appended to command stream.
@@ -141,6 +148,8 @@ Hax_AssembleCmd(
 				 * regardless of whether parentheses are
 				 * matched or not. */)
 {
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
     CmdBuf *cbPtr = (CmdBuf *) buffer;
     int length, totalLength, c;
 
@@ -172,9 +181,9 @@ Hax_AssembleCmd(
 	if (newSize < totalLength) {
 	    newSize = totalLength;
 	}
-	newBuf = (char *) ckalloc(newSize);
+	newBuf = (char *) ckalloc(memoryp, newSize);
 	strcpy(newBuf, cbPtr->buffer);
-	ckfree(cbPtr->buffer);
+	ckfree(memoryp, cbPtr->buffer);
 	cbPtr->buffer = newBuf;
 	cbPtr->bufSize = newSize;
     }

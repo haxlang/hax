@@ -87,9 +87,12 @@ Hax_EvalFile(
     char *fileName		/* Name of file to process.  Tilde-substitution
 				 * will be performed on this name. */)
 {
+    Hax_Memoryp *memoryp;
     int fileId, result;
     struct stat statBuf;
     char *cmdBuffer, *end;
+
+    memoryp = Hax_GetMemoryp (interp);
 
     fileName = Hax_TildeSubst(interp, fileName);
     if (fileName == NULL) {
@@ -107,18 +110,18 @@ Hax_EvalFile(
 	close(fileId);
 	goto error;
     }
-    cmdBuffer = (char *) ckalloc((unsigned) statBuf.st_size+1);
+    cmdBuffer = (char *) ckalloc(memoryp, (unsigned) statBuf.st_size+1);
     if (read(fileId, cmdBuffer, (int) statBuf.st_size) != statBuf.st_size) {
 	Hax_AppendResult(interp, "error in reading file \"", fileName,
 		"\": ", Hax_UnixError(interp), (char *) NULL);
 	close(fileId);
-	ckfree(cmdBuffer);
+	ckfree(memoryp, cmdBuffer);
 	goto error;
     }
     if (close(fileId) != 0) {
 	Hax_AppendResult(interp, "error closing file \"", fileName,
 		"\": ", Hax_UnixError(interp), (char *) NULL);
-	ckfree(cmdBuffer);
+	ckfree(memoryp, cmdBuffer);
 	goto error;
     }
     cmdBuffer[statBuf.st_size] = 0;
@@ -137,7 +140,7 @@ Hax_EvalFile(
 		interp->errorLine);
 	Hax_AddErrorInfo(interp, msg);
     }
-    ckfree(cmdBuffer);
+    ckfree(memoryp, cmdBuffer);
     return result;
 
     error:
@@ -165,10 +168,14 @@ Hax_EvalFile(
  */
 
 int
-Hax_Fork(void)
+Hax_Fork(
+    Hax_Interp *interp)
 {
+    Hax_Memoryp *memoryp;
     WaitInfo *waitPtr;
     pid_t pid;
+
+    memoryp = Hax_GetMemoryp(interp);
 
     /*
      * Disable SIGPIPE signals:  if they were allowed, this process
@@ -192,12 +199,12 @@ Hax_Fork(void)
 	WaitInfo *newWaitTable;
 
 	newSize = waitTableSize + WAIT_TABLE_GROW_BY;
-	newWaitTable = (WaitInfo *) ckalloc((unsigned)
+	newWaitTable = (WaitInfo *) ckalloc(memoryp, (unsigned)
 		(newSize * sizeof(WaitInfo)));
 	memcpy(newWaitTable, waitTable,
 		(waitTableSize * sizeof(WaitInfo)));
 	if (waitTable != NULL) {
-	    ckfree((char *) waitTable);
+	    ckfree(memoryp, (char *) waitTable);
 	}
 	waitTable = newWaitTable;
 	waitTableSize = newSize;
@@ -451,6 +458,7 @@ Hax_CreatePipeline(
 				 * of the file.  If this is NULL, then
 				 * all stderr output goes to our stderr. */)
 {
+    Hax_Memoryp *memoryp;
     int *pidPtr = NULL;		/* Points to malloc-ed array holding all
 				 * the pids of child processes. */
     int numPids = 0;		/* Actual number of processes that exist
@@ -494,6 +502,8 @@ Hax_CreatePipeline(
 	*errFilePtr = -1;
     }
     pipeIds[0] = pipeIds[1] = -1;
+
+    memoryp = Hax_GetMemoryp(interp);
 
     /*
      * First, scan through all the arguments to figure out the structure
@@ -681,7 +691,7 @@ Hax_CreatePipeline(
      * group of arguments between "|" arguments.
      */
 
-    pidPtr = (int *) ckalloc((unsigned) (cmdCount * sizeof(int)));
+    pidPtr = (int *) ckalloc(memoryp, (unsigned) (cmdCount * sizeof(int)));
     for (i = 0; i < numPids; i++) {
 	pidPtr[i] = -1;
     }
@@ -703,7 +713,7 @@ Hax_CreatePipeline(
 	    outputId = pipeIds[1];
 	}
 	execName = Hax_TildeSubst(interp, argv[firstArg]);
-	pid = Hax_Fork();
+	pid = Hax_Fork(interp);
 	if (pid == -1) {
 	    Hax_AppendResult(interp, "couldn't fork child process: ",
 		    Hax_UnixError(interp), (char *) NULL);
@@ -796,7 +806,7 @@ cleanup:
 		Hax_DetachPids(1, &pidPtr[i]);
 	    }
 	}
-	ckfree((char *) pidPtr);
+	ckfree(memoryp, (char *) pidPtr);
     }
     numPids = -1;
     goto cleanup;
@@ -856,12 +866,17 @@ Hax_UnixError(
 
 void
 HaxMakeFileTable(
+    Hax_Interp *interp,
     UnixClientData *clientDataPtr,
 				/* Unix ClientData whose table of
 				 * files is to be manipulated. */
     int index			/* Make sure table is large enough to
 				 * hold at least this index. */)
 {
+    Hax_Memoryp *memoryp;
+
+    memoryp = Hax_GetMemoryp(interp);
+
     /*
      * If the table doesn't even exist, then create it and initialize
      * entries for standard files.
@@ -876,13 +891,13 @@ HaxMakeFileTable(
 	} else {
 	    clientDataPtr->numFiles = index+1;
 	}
-	clientDataPtr->filePtrArray = (OpenFile **) ckalloc((unsigned)
+	clientDataPtr->filePtrArray = (OpenFile **) ckalloc(memoryp, (unsigned)
 		((clientDataPtr->numFiles)*sizeof(OpenFile *)));
 	for (i = clientDataPtr->numFiles-1; i >= 0; i--) {
 	    clientDataPtr->filePtrArray[i] = NULL;
 	}
 
-	filePtr = (OpenFile *) ckalloc(sizeof(OpenFile));
+	filePtr = (OpenFile *) ckalloc(memoryp, sizeof(OpenFile));
 	filePtr->f = stdin;
 	filePtr->f2 = NULL;
 	filePtr->readable = 1;
@@ -892,7 +907,7 @@ HaxMakeFileTable(
 	filePtr->errorId = -1;
 	clientDataPtr->filePtrArray[0] = filePtr;
 
-	filePtr = (OpenFile *) ckalloc(sizeof(OpenFile));
+	filePtr = (OpenFile *) ckalloc(memoryp, sizeof(OpenFile));
 	filePtr->f = stdout;
 	filePtr->f2 = NULL;
 	filePtr->readable = 0;
@@ -902,7 +917,7 @@ HaxMakeFileTable(
 	filePtr->errorId = -1;
 	clientDataPtr->filePtrArray[1] = filePtr;
 
-	filePtr = (OpenFile *) ckalloc(sizeof(OpenFile));
+	filePtr = (OpenFile *) ckalloc(memoryp, sizeof(OpenFile));
 	filePtr->f = stderr;
 	filePtr->f2 = NULL;
 	filePtr->readable = 0;
@@ -917,14 +932,14 @@ HaxMakeFileTable(
 	int i;
 
 	newSize = index+1;
-	newPtrArray = (OpenFile **) ckalloc((unsigned)
+	newPtrArray = (OpenFile **) ckalloc(memoryp, (unsigned)
 		((newSize)*sizeof(OpenFile *)));
 	memcpy(newPtrArray, clientDataPtr->filePtrArray,
 		clientDataPtr->numFiles*sizeof(OpenFile *));
 	for (i = clientDataPtr->numFiles; i < newSize; i++) {
 	    newPtrArray[i] = NULL;
 	}
-	ckfree((char *) clientDataPtr->filePtrArray);
+	ckfree(memoryp, (char *) clientDataPtr->filePtrArray);
 	clientDataPtr->numFiles = newSize;
 	clientDataPtr->filePtrArray = newPtrArray;
     }
@@ -990,7 +1005,7 @@ HaxGetOpenFile(
 
     if (fd >= clientDataPtr->numFiles) {
 	if ((clientDataPtr->numFiles == 0) && (fd <= 2)) {
-	    HaxMakeFileTable(clientDataPtr, fd);
+	    HaxMakeFileTable(interp, clientDataPtr, fd);
 	} else {
 	    notOpen:
 	    Hax_AppendResult(interp, "file \"", string, "\" isn't open",
