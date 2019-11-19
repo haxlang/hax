@@ -78,7 +78,7 @@ libhaxunix.a: $(UNIX_OBJS)
 haxsh: haxsh.o libhax.a libhaxunix.a
 	$(CC) $(LDFLAGS) -o $@ haxsh.o libhax.a libhaxunix.a
 
-install: libhax.a
+install: libhax.a libhaxunix.a haxsh
 	install -d $(DESTDIR)$(PREFIX)/$(BIN_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(HAX_LIBRARY)
@@ -102,6 +102,83 @@ install: libhax.a
 			$$i > Hax_$$i; \
 		install Hax_$$i $(DESTDIR)$(PREFIX)/$(MAN3_DIR); \
 		rm -f Hax_$$i; \
+	done
+
+	for i in Hax_AddErrorInfo Hax_SetErrorCode Hax_UnixError; do \
+		ln -fs Hax_AddErrInfo.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_CreateCmdBuf Hax_DeleteCmdBuf Hax_AssembleCmd \
+		Hax_CommandComplete; do \
+		ln -fs Hax_AssembCmd.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_CreateCommand Hax_DeleteCommand; do \
+		ln -fs Hax_CrtCommand.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_CreateInterp Hax_DeleteInterp; do \
+		ln -fs Hax_CrtInterp.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_CreatePipeline; do \
+		ln -fs Hax_CrtPipelin.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_CreateTrace Hax_DeleteTrace; do \
+		ln -fs Hax_CrtTrace.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_VarEval Hax_EvalFile Hax_GlobalEval; do \
+		ln -fs Hax_Eval.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_ExprLong Hax_ExprLongLong Hax_ExprDouble Hax_ExprBoolean \
+		Hax_ExprString; do \
+		ln -fs Hax_ExprLong.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_WaitPids Hax_DetachPids; do \
+		ln -fs Hax_Fork.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_GetInt Hax_GetLong Hax_GetLongLong Hax_GetDouble \
+		Hax_GetBoolean; do \
+		ln -fs Hax_GetInt.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_InitHashTable Hax_DeleteHashTable Hax_CreateHashEntry \
+		Hax_DeleteHashEntry Hax_FindHashEntry Hax_GetHashValue \
+		Hax_SetHashValue Hax_GetHashKey Hax_FirstHashEntry \
+		Hax_NextHashEntry Hax_HashStats; do \
+		ln -fs Hax_Hash.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_InitHistory Hax_RecordAndEval; do \
+		ln -fs Hax_History.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_AppendResult Hax_AppendElement \
+		Hax_ResetResult Hax_FreeResult; do \
+		ln -fs Hax_SetResult.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_SetVar2 Hax_GetVar Hax_GetVar2 Hax_UnsetVar \
+		Hax_UnsetVar2; do \
+		ln -fs Hax_SetVar.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_Merge Hax_ScanElement Hax_ConvertElement; do \
+		ln -fs Hax_SplitList.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_StringMatch; do \
+		ln -fs Hax_StrMatch.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
+	done
+
+	for i in Hax_TraceVar2 Hax_UnTraceVar Hax_UnTraceVar2 \
+		Hax_VarTraceInfo Hax_VarTraceInfo2; do \
+		ln -fs Hax_TraceVar.3 $(DESTDIR)$(PREFIX)/$(MAN3_DIR)/$$i.3; \
 	done
 
 	cd doc; \
