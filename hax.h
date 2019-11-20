@@ -41,7 +41,7 @@
  */
 
 #ifndef _CLIENTDATA
-typedef int *ClientData;
+typedef void *ClientData;
 #define _CLIENTDATA
 #endif
 
@@ -67,9 +67,9 @@ typedef struct Hax_Interp{
 				 * the error occurred (1 means first line). */
 } Hax_Interp;
 
-typedef int *Hax_Trace;
-typedef int *Hax_CmdBuf;
-typedef int *Hax_Memoryp;
+typedef void *Hax_Trace;
+typedef void *Hax_CmdBuf;
+typedef void *Hax_Memoryp;
 
 /*
  * When a HAX command returns, the string pointer interp->result points to
@@ -172,12 +172,12 @@ typedef char *(Hax_VarTraceProc) (ClientData clientData,
  * with all sorts of debugging hooks defined in haxCkalloc.c.
  */
 
-HAX_EXTERN void *	Hax_DbCkalloc (Hax_Memoryp *, unsigned int size,
+HAX_EXTERN void *	Hax_DbCkalloc (Hax_Memoryp *, unsigned long int size,
 			    char *file, int line);
 HAX_EXTERN int		Hax_DbCkfree (Hax_Memoryp *, void *ptr,
 			    char *file, int line);
 HAX_EXTERN void *	Hax_DbCkrealloc (Hax_Memoryp *, void *ptr,
-			    unsigned int size, char *file, int line);
+			    unsigned long int size, char *file, int line);
 HAX_EXTERN int		Hax_DumpActiveMemory (Hax_Memoryp *, char *fileName);
 HAX_EXTERN void		Hax_ValidateAllMemory (Hax_Memoryp *, char *file,
 			    int line);

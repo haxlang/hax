@@ -24,7 +24,7 @@
 #define GUARD_SIZE 8
 
 struct mem_header {
-        long               length;
+        unsigned long int  length;
         char              *file;
         int                line;
         struct mem_header *flink;
@@ -35,12 +35,12 @@ struct mem_header {
 
 typedef struct Memoryp {
         struct mem_header *allocHead; /* List of allocated structures */
-        int                total_mallocs;
-        int                total_frees;
-        int                current_bytes_malloced;
-        int                maximum_bytes_malloced;
-        int                current_malloc_packets;
-        int                maximum_malloc_packets;
+        long long int      total_mallocs;
+        long long int      total_frees;
+        unsigned long int  current_bytes_malloced;
+        unsigned long int  maximum_bytes_malloced;
+        unsigned long int  current_malloc_packets;
+        unsigned long int  maximum_malloc_packets;
         int                break_on_malloc;
         int                trace_on_at_malloc;
         int                alloc_tracing;
@@ -66,17 +66,17 @@ dump_memory_info(
     Memoryp *memoryp,
     FILE *outFile)
 {
-        fprintf(outFile,"total mallocs             %10d\n",
+        fprintf(outFile,"total mallocs             %10lld\n",
                 memoryp->total_mallocs);
-        fprintf(outFile,"total frees               %10d\n",
+        fprintf(outFile,"total frees               %10lld\n",
                 memoryp->total_frees);
-        fprintf(outFile,"current packets allocated %10d\n",
+        fprintf(outFile,"current packets allocated %10lu\n",
                 memoryp->current_malloc_packets);
-        fprintf(outFile,"current bytes allocated   %10d\n",
+        fprintf(outFile,"current bytes allocated   %10lu\n",
                 memoryp->current_bytes_malloced);
-        fprintf(outFile,"maximum packets allocated %10d\n",
+        fprintf(outFile,"maximum packets allocated %10lu\n",
                 memoryp->maximum_malloc_packets);
-        fprintf(outFile,"maximum bytes allocated   %10d\n",
+        fprintf(outFile,"maximum bytes allocated   %10lu\n",
                 memoryp->maximum_bytes_malloced);
 }
 
@@ -116,7 +116,7 @@ ValidateMemory (
         fprintf (stderr, "low guard failed at %p, %s %d\n",
                  memHeaderP->body, file, line);
         fflush (stderr);  /* In case name pointer is bad. */
-        fprintf (stderr, "%ld bytes allocated at (%s %d)\n", memHeaderP->length,
+        fprintf (stderr, "%lu bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
         Hax_Panic ("Memory validation failure");
     }
@@ -138,7 +138,7 @@ ValidateMemory (
         fprintf (stderr, "high guard failed at %p, %s %d\n",
                  memHeaderP->body, file, line);
         fflush (stderr);  /* In case name pointer is bad. */
-        fprintf (stderr, "%ld bytes allocated at (%s %d)\n", memHeaderP->length,
+        fprintf (stderr, "%lu bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
         Hax_Panic ("Memory validation failure");
     }
@@ -234,7 +234,7 @@ Hax_DumpActiveMemory (
 void *
 Hax_DbCkalloc(
     Hax_Memoryp *memoryp,
-    unsigned int size,
+    unsigned long int size,
     char        *file,
     int          line)
 {
@@ -244,12 +244,12 @@ Hax_DbCkalloc(
     if (memCtx->validate_memory)
         Hax_ValidateAllMemory (memoryp, file, line);
 
-    result = (struct mem_header *)malloc((unsigned)size +
+    result = (struct mem_header *)malloc(size +
                               sizeof(struct mem_header) + GUARD_SIZE);
     if (result == NULL) {
         fflush(stdout);
         dump_memory_info(memCtx, stderr);
-        Hax_Panic("unable to alloc %d bytes, %s line %d", size, file,
+        Hax_Panic("unable to alloc %lu bytes, %s line %d", size, file,
               line);
     }
 
@@ -271,7 +271,7 @@ Hax_DbCkalloc(
     if (memCtx->trace_on_at_malloc &&
 	(memCtx->total_mallocs >= memCtx->trace_on_at_malloc)) {
         (void) fflush(stdout);
-        fprintf(stderr, "reached malloc trace enable point (%d)\n",
+        fprintf(stderr, "reached malloc trace enable point (%lld)\n",
                 memCtx->total_mallocs);
         fflush(stderr);
         memCtx->alloc_tracing = TRUE;
@@ -279,14 +279,14 @@ Hax_DbCkalloc(
     }
 
     if (memCtx->alloc_tracing)
-        fprintf(stderr,"ckalloc %p %d %s %d\n", result->body, size,
+        fprintf(stderr,"ckalloc %p %lu %s %d\n", result->body, size,
                 file, line);
 
     if (memCtx->break_on_malloc &&
 	(memCtx->total_mallocs >= memCtx->break_on_malloc)) {
         memCtx->break_on_malloc = 0;
         (void) fflush(stdout);
-        fprintf(stderr,"reached malloc break limit (%d)\n",
+        fprintf(stderr,"reached malloc break limit (%lld)\n",
                 memCtx->total_mallocs);
         fprintf(stderr, "program will now enter C debugger\n");
         (void) fflush(stderr);
@@ -341,7 +341,7 @@ Hax_DbCkfree(
     memp = (struct mem_header *)(((char *) ptr) - (long)memp->body);
 
     if (memCtx->alloc_tracing)
-        fprintf(stderr, "ckfree %p %ld %s %d\n", memp->body,
+        fprintf(stderr, "ckfree %p %lu %s %d\n", memp->body,
                 memp->length, file, line);
 
     if (memCtx->validate_memory)
@@ -382,7 +382,7 @@ void *
 Hax_DbCkrealloc(
     Hax_Memoryp *memoryp,
     void *ptr,
-    unsigned int size,
+    unsigned long int size,
     char *file,
     int line)
 {
