@@ -118,7 +118,7 @@ ValidateMemory (
         fflush (stderr);  /* In case name pointer is bad. */
         fprintf (stderr, "%lu bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
-        Hax_Panic ("Memory validation failure");
+        Hax_Panic ((char *) "Memory validation failure");
     }
 
     hiPtr = (unsigned char *)memHeaderP->body + memHeaderP->length;
@@ -140,7 +140,7 @@ ValidateMemory (
         fflush (stderr);  /* In case name pointer is bad. */
         fprintf (stderr, "%lu bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
-        Hax_Panic ("Memory validation failure");
+        Hax_Panic ((char *) "Memory validation failure");
     }
 
     if (nukeGuards) {
@@ -249,7 +249,7 @@ Hax_DbCkalloc(
     if (result == NULL) {
         fflush(stdout);
         dump_memory_info(memCtx, stderr);
-        Hax_Panic("unable to alloc %lu bytes, %s line %d", size, file,
+        Hax_Panic((char *) "unable to alloc %lu bytes, %s line %d", size, file,
               line);
     }
 
@@ -386,12 +386,12 @@ Hax_DbCkrealloc(
     char *file,
     int line)
 {
-    char *new;
+    void *newPtr;
 
-    new = Hax_DbCkalloc(memoryp, size, file, line);
-    memcpy(new, ptr, (int) size);
+    newPtr = Hax_DbCkalloc(memoryp, size, file, line);
+    memcpy(newPtr, ptr, (int) size);
     Hax_DbCkfree(memoryp, ptr, file, line);
-    return(new);
+    return newPtr;
 }
 
 /*
@@ -511,8 +511,8 @@ void
 Hax_InitMemory(
     Hax_Interp *interp)
 {
-Hax_CreateCommand (interp, "memory", MemoryCmd, (ClientData)NULL,
-                  (void (*)())NULL);
+Hax_CreateCommand (interp, (char *) "memory", MemoryCmd, (ClientData)NULL,
+                  (Hax_CmdDeleteProc *) NULL);
 }
 
 /*

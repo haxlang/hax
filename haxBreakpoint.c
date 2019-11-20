@@ -17,6 +17,15 @@
 
 #include <signal.h>
 #include <unistd.h>
+
+#ifdef __cplusplus
+#   define HAX_EXTERN extern "C"
+#else
+#   define HAX_EXTERN extern
+#endif
+
+HAX_EXTERN void Hax_Breakpoint(void);
+
 
 /*
  *----------------------------------------------------------------------

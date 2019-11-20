@@ -1849,7 +1849,7 @@ Hax_InitUnixCore(
 
     memoryp = Hax_GetMemoryp(interp);
 
-    clientDataPtr = ckalloc(memoryp, sizeof(UnixClientData));
+    clientDataPtr = (UnixClientData *) ckalloc(memoryp, sizeof(UnixClientData));
     clientDataPtr->numFiles = 0;
     clientDataPtr->filePtrArray = NULL;
     clientDataPtr->refCount = 0;

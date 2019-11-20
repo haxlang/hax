@@ -163,7 +163,7 @@ ErrnoToInternalErrno(int e)
 	case ERANGE:
 	    return HAX_ERANGE;
 	default:
-	    Hax_Panic("Unknown errno=%d\n", e);
+	    Hax_Panic((char *) "Unknown errno=%d\n", e);
     }
     /* NOTREACHABLE */
     return 0;

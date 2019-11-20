@@ -182,9 +182,10 @@ HAX_EXTERN int		Hax_DumpActiveMemory (Hax_Memoryp *, char *fileName);
 HAX_EXTERN void		Hax_ValidateAllMemory (Hax_Memoryp *, char *file,
 			    int line);
 
-#define ckalloc(m,x) Hax_DbCkalloc((m), (x), __FILE__, __LINE__)
-#define ckfree(m,x)  Hax_DbCkfree((m), (x), __FILE__, __LINE__)
-#define ckrealloc(m,x,y) Hax_DbCkrealloc((m), (x), (y), __FILE__, __LINE__)
+#define ckalloc(m,x) Hax_DbCkalloc((m), (x), (char *) __FILE__, __LINE__)
+#define ckfree(m,x)  Hax_DbCkfree((m), (x), (char *) __FILE__, __LINE__)
+#define ckrealloc(m,x,y)					\
+	Hax_DbCkrealloc((m), (x), (y), (char *) __FILE__, __LINE__)
 
 
 /*

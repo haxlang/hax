@@ -22,6 +22,15 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/panic.c,v 1.3 91/10/10 11:
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef __cplusplus
+#   define HAX_EXTERN extern "C"
+#else
+#   define HAX_EXTERN extern
+#endif
+
+HAX_EXTERN void Hax_Panic(char *format, ...);
+
 
 /*
  *----------------------------------------------------------------------
