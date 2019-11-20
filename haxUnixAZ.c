@@ -25,14 +25,6 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUnixAZ.c,v 1.40 93/01/2
 #include "haxUnix.h"
 
 /*
- * The variable below caches the name of the current working directory
- * in order to avoid repeated calls to getwd.  The string is malloc-ed.
- * NULL means the cache needs to be refreshed.
- */
-
-static char *currentDir =  NULL;
-
-/*
  * The following structure defines all of the commands in the Hax core,
  * and the C procedures that execute them.
  */
@@ -97,15 +89,17 @@ static int		StoreStatData (Hax_Interp *interp,
 	/* ARGSUSED */
 int
 Hax_CdCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix ClientData */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    UnixClientData *clientDataPtr;
     Hax_Memoryp *memoryp;
     char *dirName;
 
     memoryp = Hax_GetMemoryp(interp);
+    clientDataPtr = (UnixClientData *) clientData;
 
     if (argc > 2) {
 	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -122,9 +116,9 @@ Hax_CdCmd(
     if (dirName == NULL) {
 	return HAX_ERROR;
     }
-    if (currentDir != NULL) {
-	ckfree(memoryp, currentDir);
-	currentDir = NULL;
+    if (clientDataPtr->currentDir != NULL) {
+	ckfree(memoryp, clientDataPtr->currentDir);
+	clientDataPtr->currentDir = NULL;
     }
     if (chdir(dirName) != 0) {
 	Hax_AppendResult(interp, "couldn't change working directory to \"",
@@ -1205,16 +1199,18 @@ Hax_PwdCmd(
     char **argv				/* Argument strings. */)
 {
     Hax_Memoryp *memoryp;
+    UnixClientData *clientDataPtr;
     char buffer[MAXPATHLEN+1];
 
     memoryp = Hax_GetMemoryp(interp);
+    clientDataPtr = (UnixClientData *) clientData;
 
     if (argc != 1) {
 	Hax_AppendResult(interp, "wrong # args: should be \"",
 		argv[0], "\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    if (currentDir == NULL) {
+    if (clientDataPtr->currentDir == NULL) {
 	if (getcwd(buffer, MAXPATHLEN) == NULL) {
 	    if (errno == ERANGE) {
 		interp->result = (char *) "working directory name is too long";
@@ -1225,10 +1221,11 @@ Hax_PwdCmd(
 	    }
 	    return HAX_ERROR;
 	}
-	currentDir = (char *) ckalloc(memoryp, (unsigned) (strlen(buffer) + 1));
-	strcpy(currentDir, buffer);
+	clientDataPtr->currentDir = (char *) ckalloc(memoryp, (unsigned)
+		(strlen(buffer) + 1));
+	strcpy(clientDataPtr->currentDir, buffer);
     }
-    interp->result = currentDir;
+    interp->result = clientDataPtr->currentDir;
     return HAX_OK;
 }
 
@@ -1828,6 +1825,9 @@ Hax_UnixCoreDelete(
 	}
 	ckfree(memoryp, (char *) clientDataPtr->filePtrArray);
     }
+
+    ckfree(memoryp, clientDataPtr->currentDir);
+
     ckfree(memoryp, (char *) clientDataPtr);
 }
 
@@ -1853,6 +1853,7 @@ Hax_InitUnixCore(
     clientDataPtr->numFiles = 0;
     clientDataPtr->filePtrArray = NULL;
     clientDataPtr->refCount = 0;
+    clientDataPtr->currentDir = NULL;
 
     for (cmdInfoPtr = builtInCmds; cmdInfoPtr->name != NULL;
 	 cmdInfoPtr++) {

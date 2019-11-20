@@ -109,6 +109,14 @@ typedef struct UnixClientData {
 				 * and still in use. On termination it will
 				 * be decremented and freed with the last
 				 * user. */
+    /*
+     * Used in haxUnixAZ.c
+     */
+    char *currentDir;		/* The variable caches the name of the current
+				 * working directory in order to avoid repeated
+				 * calls to getwd.  The string is malloc-ed.
+				 * NULL means the cache needs to be refreshed.
+				 */
 } UnixClientData;
 
 /*
