@@ -572,8 +572,7 @@ Hax_CreatePipeline(
 	    int length;
 
 	    strcpy(inName, TMP_STDIN_NAME);
-	    mktemp(inName);
-	    inputId = open(inName, O_RDWR|O_CREAT|O_TRUNC, 0600);
+	    inputId = mkstemp(inName);
 	    if (inputId < 0) {
 		Hax_AppendResult(interp,
 			"couldn't create input file for command: ",
@@ -665,7 +664,15 @@ Hax_CreatePipeline(
 	char errName[sizeof(TMP_STDERR_NAME) + 1];
 
 	strcpy(errName, TMP_STDERR_NAME);
-	mktemp(errName);
+
+	/*
+	 * mktemp() usage warns on NetBSD as it is an insecure function.
+	 * Fake it with mkstemp()+close() to pacify the warning. The I/O
+	 * mechanism should be certainly done in a better way.
+	 */
+	if ((errorId = mkstemp(errName)) == -1 || close(errorId)) {
+	    goto errFileError;
+	}
 	errorId = open(errName, O_WRONLY|O_CREAT|O_TRUNC, 0600);
 	if (errorId < 0) {
 	    errFileError:
