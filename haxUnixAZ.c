@@ -112,7 +112,7 @@ Hax_CdCmd(
     } else {
 	dirName = (char *) "~";
     }
-    dirName = Hax_TildeSubst(interp, dirName);
+    dirName = Hax_TildeSubst(interp, clientData, dirName);
     if (dirName == NULL) {
 	return HAX_ERROR;
     }
@@ -296,8 +296,8 @@ Hax_ExecCmd(
     if ((argv[argc-1][0] == '&') && (argv[argc-1][1] == 0)) {
 	argc--;
 	argv[argc] = NULL;
-	numPids = Hax_CreatePipeline(interp, argc-1, argv+1, &pidPtr,
-		(int *) NULL, (int *) NULL, (int *) NULL);
+	numPids = Hax_CreatePipeline(interp, clientData, argc-1, argv+1,
+		&pidPtr, (int *) NULL, (int *) NULL, (int *) NULL);
 	if (numPids < 0) {
 	    return HAX_ERROR;
 	}
@@ -310,7 +310,7 @@ Hax_ExecCmd(
      * Create the command's pipeline.
      */
 
-    numPids = Hax_CreatePipeline(interp, argc-1, argv+1, &pidPtr,
+    numPids = Hax_CreatePipeline(interp, clientData, argc-1, argv+1, &pidPtr,
 	    (int *) NULL, &outputId, &errorId);
     if (numPids < 0) {
 	return HAX_ERROR;
@@ -438,7 +438,7 @@ Hax_FileCmd(
      * First handle operations on the file name.
      */
 
-    fileName = Hax_TildeSubst(interp, argv[2]);
+    fileName = Hax_TildeSubst(interp, clientData, argv[2]);
     if (fileName == NULL) {
 	return HAX_ERROR;
     }
@@ -1087,7 +1087,7 @@ Hax_OpenCmd(
 	char *fileName = argv[1];
 
 	if (fileName[0] == '~') {
-	    fileName = Hax_TildeSubst(interp, fileName);
+	    fileName = Hax_TildeSubst(interp, clientData, fileName);
 	    if (fileName == NULL) {
 		goto error;
 	    }
@@ -1109,8 +1109,9 @@ Hax_OpenCmd(
 	inPipePtr = (filePtr->writable) ? &inPipe : NULL;
 	outPipePtr = (filePtr->readable) ? &outPipe : NULL;
 	inPipe = outPipe = -1;
-	filePtr->numPids = Hax_CreatePipeline(interp, cmdArgc, cmdArgv,
-		&filePtr->pidPtr, inPipePtr, outPipePtr, &filePtr->errorId);
+	filePtr->numPids = Hax_CreatePipeline(interp, clientData, cmdArgc,
+		cmdArgv, &filePtr->pidPtr, inPipePtr, outPipePtr,
+		&filePtr->errorId);
 	ckfree(memoryp, (char *) cmdArgv);
 	if (filePtr->numPids < 0) {
 	    goto error;
@@ -1537,7 +1538,7 @@ Hax_SourceCmd(
 		" fileName\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    return Hax_EvalFile(interp, argv[1]);
+    return Hax_EvalFile(interp, clientData, argv[1]);
 }
 
 /*
@@ -1830,6 +1831,10 @@ Hax_UnixCoreDelete(
 	ckfree(memoryp, clientDataPtr->currentDir);
     }
 
+    if (clientDataPtr->curBuf != clientDataPtr->staticBuf) {
+	ckfree(memoryp, clientDataPtr->curBuf);
+    }
+
     ckfree(memoryp, (char *) clientDataPtr);
 }
 
@@ -1841,7 +1846,7 @@ Hax_UnixCoreDelete(
  *
  *----------------------------------------------------------------------
  */
-void
+ClientData
 Hax_InitUnixCore(
     Hax_Interp *interp)
 {
@@ -1857,6 +1862,9 @@ Hax_InitUnixCore(
     clientDataPtr->filePtrArray = NULL;
     clientDataPtr->refCount = 0;
     clientDataPtr->currentDir = NULL;
+    memset(&clientDataPtr->staticBuf, 0, sizeof(clientDataPtr->staticBuf));
+    clientDataPtr->curSize = STATIC_BUF_SIZE;
+    clientDataPtr->curBuf = clientDataPtr->staticBuf;
 
     for (cmdInfoPtr = builtInCmds; cmdInfoPtr->name != NULL;
 	 cmdInfoPtr++) {
@@ -1873,4 +1881,6 @@ Hax_InitUnixCore(
     }
 
     HaxSetupEnv(interp);
+
+    return (ClientData) clientDataPtr;
 }

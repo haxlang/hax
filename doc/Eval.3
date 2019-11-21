@@ -25,17 +25,19 @@ int
 \fBHax_VarEval\fR(\fIinterp, string, string, ... \fB(char *) NULL\fR)
 .sp
 int
-\fBHax_EvalFile\fR(\fIinterp, fileName\fR)
+\fBHax_EvalFile\fR(\fIinterp, clientData, fileName\fR)
 .sp
 .VS
 int
 \fBHax_GlobalEval\fR(\fIinterp, cmd\fR)
 .VE
 .SH ARGUMENTS
-.AS Hax_Interp **termPtr;
+.AS ClientData clientData;
 .AP Hax_Interp *interp in
 Interpreter in which to execute the command.  String result will be
 stored in \fIinterp->result\fR.
+.AP ClientData clientData in
+Unix Client Data in which to execute the command.
 .AP char *scriptFile in
 NULL means there is no nested source command active;
 otherwise this points to

@@ -19,11 +19,13 @@ Hax_TildeSubst \- replace tilde with home directory in a file name
 \fB#include <hax.h>\fR
 .sp
 char *
-\fBHax_TildeSubst\fR(\fIinterp\fR, \fIname\fR)
+\fBHax_TildeSubst\fR(\fIinterp\fR, \fIclientData\fR, \fIname\fR)
 .SH ARGUMENTS
-.AS Hax_Interp *interp
+.AS ClientData clientData;
 .AP Hax_Interp *interp in
 Interpreter in which to report an error, if any.
+.AP ClientData clientData in
+Unix Client Data in which to execute the command.
 .AP char *name in
 File name, which may start with a ``~''.
 .BE

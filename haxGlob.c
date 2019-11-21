@@ -407,16 +407,14 @@ char *
 Hax_TildeSubst(
     Hax_Interp *interp,		/* Interpreter in which to store error
 				 * message (if necessary). */
+    ClientData clientData,	/* Unix Client Data */
     char *name			/* File name, which may begin with "~/"
 				 * (to indicate current user's home directory)
 				 * or "~<user>/" (to indicate any user's
 				 * home directory). */)
 {
     Hax_Memoryp *memoryp;
-#define STATIC_BUF_SIZE 50
-    static char staticBuf[STATIC_BUF_SIZE];
-    static int curSize = STATIC_BUF_SIZE;
-    static char *curBuf = staticBuf;
+    UnixClientData *clientDataPtr = (UnixClientData *) clientData;
     char *dir;
     int length;
     int fromPw = 0;
@@ -448,16 +446,16 @@ Hax_TildeSubst(
 	    /* Null body;  just find end of name. */
 	}
 	length = p-&name[1];
-	if (length >= curSize) {
-	    length = curSize-1;
+	if (length >= clientDataPtr->curSize) {
+	    length = clientDataPtr->curSize-1;
 	}
-	memcpy(curBuf, (name+1), length);
-	curBuf[length] = '\0';
-	pwPtr = getpwnam(curBuf);
+	memcpy(clientDataPtr->curBuf, (name+1), length);
+	clientDataPtr->curBuf[length] = '\0';
+	pwPtr = getpwnam(clientDataPtr->curBuf);
 	if (pwPtr == NULL) {
 	    endpwent();
 	    Hax_ResetResult(interp);
-	    Hax_AppendResult(interp, "user \"", curBuf,
+	    Hax_AppendResult(interp, "user \"", clientDataPtr->curBuf,
 		    "\" doesn't exist", (char *) NULL);
 	    return NULL;
 	}
@@ -471,12 +469,12 @@ Hax_TildeSubst(
      */
 
     length = strlen(dir) + strlen(p);
-    if (length >= curSize) {
-	if (curBuf != staticBuf) {
-	    ckfree(memoryp, curBuf);
+    if (length >= clientDataPtr->curSize) {
+	if (clientDataPtr->curBuf != clientDataPtr->staticBuf) {
+	    ckfree(memoryp, clientDataPtr->curBuf);
 	}
-	curSize = length + 1;
-	curBuf = (char *) ckalloc(memoryp, (unsigned) curSize);
+	clientDataPtr->curSize = length + 1;
+	clientDataPtr->curBuf = ckalloc(memoryp, clientDataPtr->curSize);
     }
 
     /*
@@ -484,12 +482,12 @@ Hax_TildeSubst(
      * of the path in the buffer.
      */
 
-    strcpy(curBuf, dir);
-    strcat(curBuf, p);
+    strcpy(clientDataPtr->curBuf, dir);
+    strcat(clientDataPtr->curBuf, p);
     if (fromPw) {
 	endpwent();
     }
-    return curBuf;
+    return clientDataPtr->curBuf;
 }
 
 /*
@@ -512,11 +510,12 @@ Hax_TildeSubst(
 	/* ARGSUSED */
 int
 Hax_GlobCmd(
-    ClientData dummy,			/* Not used. */
+    ClientData clientData,		/* Unix Client Data */
     Hax_Interp *interp,			/* Current interpreter. */
     int argc,				/* Number of arguments. */
     char **argv				/* Argument strings. */)
 {
+    UnixClientData *clientDataPtr = (UnixClientData *) clientData;
     int i, result, noComplain;
 
     if (argc < 2) {
@@ -543,7 +542,7 @@ Hax_GlobCmd(
 
 	thisName = argv[i];
 	if (*thisName == '~') {
-	    thisName = Hax_TildeSubst(interp, thisName);
+	    thisName = Hax_TildeSubst(interp, clientDataPtr, thisName);
 	    if (thisName == NULL) {
 		return HAX_ERROR;
 	    }

@@ -117,6 +117,13 @@ typedef struct UnixClientData {
 				 * calls to getwd.  The string is malloc-ed.
 				 * NULL means the cache needs to be refreshed.
 				 */
+    /*
+     * Used in haxGlob.c
+     */
+#define STATIC_BUF_SIZE 50
+    char staticBuf[STATIC_BUF_SIZE];
+    int curSize;
+    char *curBuf;
 } UnixClientData;
 
 /*

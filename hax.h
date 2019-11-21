@@ -235,6 +235,7 @@ HAX_EXTERN Hax_Memoryp *Hax_GetMemoryp (Hax_Interp *interp);
 HAX_EXTERN void		Hax_SetLibraryPath (Hax_Interp *interp, char *path);
 HAX_EXTERN Hax_Interp *	Hax_CreateInterp (Hax_Memoryp *memoryp);
 HAX_EXTERN int		Hax_CreatePipeline (Hax_Interp *interp,
+			    ClientData clientData,
 			    int argc, char **argv, int **pidArrayPtr,
 			    int *inPipePtr, int *outPipePtr,
 			    int *errFilePtr);
@@ -253,7 +254,7 @@ HAX_EXTERN char *	Hax_ErrnoId (void);
 HAX_EXTERN int		Hax_Eval (Hax_Interp *interp, char *scriptFile,
 			    char *cmd, int flags, char **termPtr);
 HAX_EXTERN int		Hax_EvalFile (Hax_Interp *interp,
-			    char *fileName);
+			    ClientData clientData, char *fileName);
 HAX_EXTERN int		Hax_ExprBoolean (Hax_Interp *interp,
 			    char *string, int *ptr);
 HAX_EXTERN int		Hax_ExprDouble (Hax_Interp *interp,
@@ -307,7 +308,7 @@ HAX_EXTERN int		Hax_SplitList (Hax_Interp *interp,
 HAX_EXTERN int		Hax_StringMatch (char *string,
 			    char *pattern);
 HAX_EXTERN char *	Hax_TildeSubst (Hax_Interp *interp,
-			    char *name);
+			    ClientData clientData, char *name);
 HAX_EXTERN int		Hax_TraceVar (Hax_Interp *interp,
 			    char *varName, int flags, Hax_VarTraceProc *proc,
 			    ClientData clientData);
@@ -336,7 +337,7 @@ HAX_EXTERN ClientData	Hax_VarTraceInfo2 (Hax_Interp *interp,
 			    ClientData prevClientData);
 HAX_EXTERN int		Hax_WaitPids (int numPids, int *pidPtr,
 			    int *statusPtr);
-HAX_EXTERN void		Hax_InitUnixCore (Hax_Interp *interp);
+HAX_EXTERN ClientData	Hax_InitUnixCore (Hax_Interp *interp);
 
 /*
  * Miscelaous functions that can be overriden in the implementation.

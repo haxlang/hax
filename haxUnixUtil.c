@@ -84,6 +84,7 @@ static int waitTableUsed = 0;	/* Number of entries in waitTable that
 int
 Hax_EvalFile(
     Hax_Interp *interp,		/* Interpreter in which to process file. */
+    ClientData clientData,	/* Unix Client Data */
     char *fileName		/* Name of file to process.  Tilde-substitution
 				 * will be performed on this name. */)
 {
@@ -94,7 +95,7 @@ Hax_EvalFile(
 
     memoryp = Hax_GetMemoryp (interp);
 
-    fileName = Hax_TildeSubst(interp, fileName);
+    fileName = Hax_TildeSubst(interp, clientData, fileName);
     if (fileName == NULL) {
 	goto error;
     }
@@ -429,6 +430,7 @@ Hax_DetachPids(
 int
 Hax_CreatePipeline(
     Hax_Interp *interp,		/* Interpreter to use for error reporting. */
+    ClientData clientData,	/* Unix Client Data */
     int argc,			/* Number of entries in argv. */
     char **argv,		/* Array of strings describing commands in
 				 * pipeline plus I/O redirection with <,
@@ -719,7 +721,7 @@ Hax_CreatePipeline(
 	    }
 	    outputId = pipeIds[1];
 	}
-	execName = Hax_TildeSubst(interp, argv[firstArg]);
+	execName = Hax_TildeSubst(interp, clientData, argv[firstArg]);
 	pid = Hax_Fork(interp);
 	if (pid == -1) {
 	    Hax_AppendResult(interp, "couldn't fork child process: ",

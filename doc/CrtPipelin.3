@@ -20,11 +20,13 @@ Hax_CreatePipeline \- create one or more child processes, with I/O redirection
 \fB#include <hax.h>\fR
 .sp
 int
-\fBHax_CreatePipeline\fR(\fIinterp, argc, argv, pidArrayPtr, inPipePtr, outPipePtr, errFilePtr\fR)
+\fBHax_CreatePipeline\fR(\fIinterp, clientData, argc, argv, pidArrayPtr, inPipePtr, outPipePtr, errFilePtr\fR)
 .SH ARGUMENTS
 .AS Hax_Interp **pidArrayPtr
 .AP Hax_Interp *interp in
 Interpreter to use for error reporting.
+.AP ClientData clientData in
+Unix Client Data in which to execute the command.
 .AP int argc in
 Number of strings in \fIargv\fR array.
 .AP char **argv in
