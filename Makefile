@@ -54,7 +54,7 @@ MAN_DIR ?=	man
 MAN3_DIR ?=	$(MAN_DIR)/man3
 MANN_DIR ?=	$(MAN_DIR)/mann
 
-all: libhax.a haxsh
+all: libhax.a libhaxunix.a haxsh
 
 GENERIC_OBJS =	haxRegexp.o haxAssem.o haxBasic.o haxCkalloc.o \
 	haxCmdAH.o haxCmdIL.o haxCmdMZ.o haxExpr.o haxGet.o \
