@@ -28,7 +28,6 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/tclTest/RCS/tclTest.c,v 1.22 9
 Hax_Memoryp *memoryp;
 Hax_Interp *interp;
 Hax_CmdBuf buffer;
-char dumpFile[100];
 int quitFlag = 0;
 
 char initCmd[] =
@@ -42,12 +41,11 @@ cmdCheckmem(
     int argc,
     char *argv[])
 {
-    if (argc != 2) {
+    if (argc != 1) {
 	Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
-		" fileName\"", (char *) NULL);
+		"\"", (char *) NULL);
 	return HAX_ERROR;
     }
-    strcpy(dumpFile, argv[1]);
     quitFlag = 1;
     return HAX_OK;
 }
@@ -133,7 +131,7 @@ main(int argc, char **argv)
 	    if (quitFlag) {
 		Hax_DeleteInterp(interp);
 		Hax_DeleteCmdBuf(interp, buffer);
-		Hax_DumpActiveMemory(memoryp, dumpFile);
+		Hax_DumpActiveMemory(memoryp);
 		exit(0);
 	    }
 	} else {

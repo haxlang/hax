@@ -178,7 +178,7 @@ HAX_EXTERN int		Hax_DbCkfree (Hax_Memoryp *, void *ptr,
 			    char *file, int line);
 HAX_EXTERN void *	Hax_DbCkrealloc (Hax_Memoryp *, void *ptr,
 			    unsigned long int size, char *file, int line);
-HAX_EXTERN int		Hax_DumpActiveMemory (Hax_Memoryp *, char *fileName);
+HAX_EXTERN int		Hax_DumpActiveMemory (Hax_Memoryp *);
 HAX_EXTERN void		Hax_ValidateAllMemory (Hax_Memoryp *, char *file,
 			    int line);
 

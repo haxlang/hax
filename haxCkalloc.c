@@ -177,7 +177,7 @@ Hax_ValidateAllMemory (
  *----------------------------------------------------------------------
  *
  * Hax_DumpActiveMemory --
- *     Displays all allocated memory to stderr.
+ *     Displays all allocated memory to stdout.
  *
  * Results:
  *     Return HAX_ERROR if an error accessing the file occures, `errno'
@@ -186,30 +186,23 @@ Hax_ValidateAllMemory (
  */
 int
 Hax_DumpActiveMemory (
-    Hax_Memoryp *memoryp,
-    char *fileName)
+    Hax_Memoryp *memoryp)
 {
     Memoryp           *memCtx = (Memoryp *) memoryp;
-    FILE              *fileP;
     struct mem_header *memScanP;
     char              *address;
-
-    fileP = fopen (fileName, "w");
-    if (fileP == NULL)
-        return HAX_ERROR;
 
     for (memScanP = memCtx->allocHead; memScanP != NULL;
 	 memScanP = memScanP->flink) {
         address = &memScanP->body [0];
-        fprintf (fileP, "%p - %p  %7ld @ %s %d", address,
+        printf ("%p - %p  %7ld @ %s %d", address,
                  address + memScanP->length - 1, memScanP->length,
                  memScanP->file, memScanP->line);
         if (strcmp(memScanP->file, "haxHash.c") == 0 && memScanP->line == 514){
-	    fprintf(fileP, "\t|%s|", ((Hax_HashEntry *) address)->key.string);
+	    printf("\t|%s|", ((Hax_HashEntry *) address)->key.string);
 	}
-	(void) fputc('\n', fileP);
+	(void) putchar('\n');
     }
-    fclose (fileP);
     return HAX_OK;
 }
 
@@ -421,7 +414,6 @@ MemoryCmd (
 {
     Interp *iPtr = (Interp *) interp;
     Memoryp *memCtx = (Memoryp *) iPtr->memoryp;
-    char *fileName;
 
     if (argc < 2) {
 	Hax_AppendResult(interp, "wrong # args:  should be \"",
@@ -467,17 +459,13 @@ MemoryCmd (
         return HAX_OK;
     }
     if (strcmp(argv[1],"active") == 0) {
-        if (argc != 3) {
+        if (argc != 2) {
 	    Hax_AppendResult(interp, "wrong # args:  should be \"",
-		    argv[0], " active file", (char *) NULL);
+		    argv[0], " active", (char *) NULL);
 	    return HAX_ERROR;
 	}
-        fileName = argv [2];
-        if (fileName [0] == '~')
-            if ((fileName = Hax_TildeSubst (interp, fileName)) == NULL)
-                return HAX_ERROR;
-        if (Hax_DumpActiveMemory (iPtr->memoryp, fileName) != HAX_OK) {
-	    Hax_AppendResult(interp, "error accessing ", argv[2],
+        if (Hax_DumpActiveMemory (iPtr->memoryp) != HAX_OK) {
+	    Hax_AppendResult(interp, "error dumping active memory ",
 		    (char *) NULL);
 	    return HAX_ERROR;
 	}
