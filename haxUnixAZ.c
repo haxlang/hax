@@ -1826,7 +1826,9 @@ Hax_UnixCoreDelete(
 	ckfree(memoryp, (char *) clientDataPtr->filePtrArray);
     }
 
-    ckfree(memoryp, clientDataPtr->currentDir);
+    if (clientDataPtr->currentDir != NULL) {
+	ckfree(memoryp, clientDataPtr->currentDir);
+    }
 
     ckfree(memoryp, (char *) clientDataPtr);
 }
