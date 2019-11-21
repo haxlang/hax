@@ -447,16 +447,13 @@ Hax_InfoCmd(
 		    " library\"", (char *) NULL);
 	    return HAX_ERROR;
 	}
-	interp->result = getenv("HAX_LIBRARY");
-	if (interp->result == NULL) {
-#ifdef HAX_LIBRARY
-	    interp->result = (char *) HAX_LIBRARY;
-#else
+
+	if (iPtr->libraryPath == NULL) {
 	    interp->result =
 		(char *) "there is no Hax library at this installation";
 	    return HAX_ERROR;
-#endif
 	}
+	interp->result = iPtr->libraryPath;
 	return HAX_OK;
     } else if ((c == 'l') && (strncmp(argv[1], "locals", length) == 0)
 	    && (length >= 2)) {

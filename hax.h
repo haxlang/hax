@@ -232,6 +232,7 @@ HAX_EXTERN Hax_Memoryp *Hax_CreateMemoryManagement (
 			    int alloc_tracing, int init_malloced_bodies,
 			    int validate_memory);
 HAX_EXTERN Hax_Memoryp *Hax_GetMemoryp (Hax_Interp *interp);
+HAX_EXTERN void		Hax_SetLibraryPath (Hax_Interp *interp, char *path);
 HAX_EXTERN Hax_Interp *	Hax_CreateInterp (Hax_Memoryp *memoryp);
 HAX_EXTERN int		Hax_CreatePipeline (Hax_Interp *interp,
 			    int argc, char **argv, int **pidArrayPtr,

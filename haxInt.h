@@ -487,6 +487,7 @@ typedef struct Interp {
 				 * to avoid preprocessor name clash with
 				 * defines from <errno.h>. */
     Hax_Memoryp *memoryp;	/* Memory Management context. */
+    char *libraryPath;		/* Hax library (HAX_LIBRARY) path. */
 } Interp;
 
 /*

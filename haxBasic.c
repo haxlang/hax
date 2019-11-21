@@ -149,6 +149,12 @@ Hax_CreateInterp(
     iPtr->tracePtr = NULL;
     iPtr->resultSpace[0] = 0;
     iPtr->internalErrno = 0;
+#ifdef HAX_LIBRARY
+    iPtr->libraryPath = ckalloc(memoryp, strlen(HAX_LIBRARY) + 1);
+    strcpy(iPtr->libraryPath, HAX_LIBRARY);
+#else
+    iPtr->libraryPath = NULL;
+#endif
 
     /*
      * Create the built-in commands.  Do it here, rather than calling
@@ -258,6 +264,11 @@ Hax_DeleteInterp(
 	ckfree(memoryp, (char *) iPtr->tracePtr);
 	iPtr->tracePtr = nextPtr;
     }
+
+    if (iPtr->libraryPath != NULL) {
+	ckfree(memoryp, iPtr->libraryPath);
+    }
+
     ckfree(memoryp, (char *) iPtr);
 }
 
@@ -1056,4 +1067,28 @@ Hax_GetMemoryp(
     Interp *iPtr = (Interp *) interp;
 
     return (Hax_Memoryp *) iPtr->memoryp;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Hax_SetLibraryPath --
+ *     Set location of the Hax library.
+ *
+ *----------------------------------------------------------------------
+ */
+void
+Hax_SetLibraryPath(
+    Hax_Interp *interp,
+    char *path)
+{
+    Interp *iPtr = (Interp *) interp;
+    Hax_Memoryp *memoryp = iPtr->memoryp;
+
+    if (iPtr->libraryPath != NULL) {
+	ckfree(memoryp, iPtr->libraryPath);
+    }
+
+    iPtr->libraryPath = ckalloc(memoryp, strlen(path) + 1);
+    strcpy(iPtr->libraryPath, path);
 }

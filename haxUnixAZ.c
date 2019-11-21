@@ -1848,6 +1848,7 @@ Hax_InitUnixCore(
     Hax_Memoryp *memoryp;
     CmdInfo *cmdInfoPtr;
     UnixClientData *clientDataPtr;
+    char *libraryPath;
 
     memoryp = Hax_GetMemoryp(interp);
 
@@ -1864,6 +1865,11 @@ Hax_InitUnixCore(
 	                   Hax_UnixCoreDelete);
 
 	clientDataPtr->refCount++;
+    }
+
+    libraryPath = getenv("HAX_LIBRARY");
+    if (libraryPath != NULL) {
+	Hax_SetLibraryPath(interp, libraryPath);
     }
 
     HaxSetupEnv(interp);
