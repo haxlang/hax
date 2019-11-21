@@ -54,7 +54,7 @@ MAN_DIR ?=	man
 MAN3_DIR ?=	$(MAN_DIR)/man3
 MANN_DIR ?=	$(MAN_DIR)/mann
 
-all: libhax.a libhaxunix.a haxsh
+all: libhax.a libhaxunix.a haxsh rhaxsh
 
 GENERIC_OBJS =	haxRegexp.o haxAssem.o haxBasic.o haxCkalloc.o \
 	haxCmdAH.o haxCmdIL.o haxCmdMZ.o haxExpr.o haxGet.o \
@@ -75,10 +75,13 @@ libhaxunix.a: $(UNIX_OBJS)
 	$(AR) cr $@ $(UNIX_OBJS)
 	$(RANLIB) $@
 
+rhaxsh: rhaxsh.o libhax.a
+	$(CC) $(LDFLAGS) -o $@ rhaxsh.o libhax.a
+
 haxsh: haxsh.o libhax.a libhaxunix.a
 	$(CC) $(LDFLAGS) -o $@ haxsh.o libhax.a libhaxunix.a
 
-install: libhax.a libhaxunix.a haxsh
+install: libhax.a libhaxunix.a haxsh rhaxsh
 	install -d $(DESTDIR)$(PREFIX)/$(BIN_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(HAX_LIBRARY)
@@ -87,6 +90,7 @@ install: libhax.a libhaxunix.a haxsh
 	install -d $(DESTDIR)$(PREFIX)/$(MANN_DIR)
 
 	install haxsh $(DESTDIR)$(PREFIX)/$(BIN_DIR)
+	install rhaxsh $(DESTDIR)$(PREFIX)/$(BIN_DIR)
 
 	cd library; for i in *.tcl; do \
 		install $$i $(DESTDIR)$(PREFIX)/$(HAX_LIBRARY); \
@@ -197,7 +201,8 @@ test: haxsh
 	( echo cd tests ; echo source all ) | ./haxsh
 
 clean:
-	rm -f $(OBJS) $(UNIX_OBJS) libhax.a libhaxunix.a haxsh.o haxsh
+	rm -f $(OBJS) $(UNIX_OBJS) libhax.a libhaxunix.a \
+		haxsh.o haxsh rhaxsh.o rhaxsh
 
 $(OBJS): hax.h haxInt.h
 $(UNIX_OJBS): haxUnix.h

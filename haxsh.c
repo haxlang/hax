@@ -1,7 +1,7 @@
 /*
- * haxTest.c --
+ * haxsh.c --
  *
- *	Test driver for HAX.
+ *	Interactive driver for Hax.
  *
  * Copyright 1987-1991 Regents of the University of California
  * All rights reserved.
@@ -30,8 +30,10 @@ Hax_Interp *interp;
 Hax_CmdBuf buffer;
 int quitFlag = 0;
 
+#ifndef RHAXSH
 char initCmd[] =
     "if [file exists [info library]/init.tcl] {source [info library]/init.tcl}";
+#endif
 
 	/* ARGSUSED */
 int
@@ -91,17 +93,21 @@ main(int argc, char **argv)
     memoryp = Hax_CreateMemoryManagement(0, 0, 0, 0, 1);
     interp = Hax_CreateInterp(memoryp);
     Hax_InitMemory(interp);
+#ifndef RHAXSH
     Hax_InitUnixCore(interp);
+#endif
     Hax_CreateCommand(interp, (char *) "echo", cmdEcho, (ClientData) "echo",
 	    (Hax_CmdDeleteProc *) NULL);
     Hax_CreateCommand(interp, (char *) "checkmem", cmdCheckmem, (ClientData) 0,
 	    (Hax_CmdDeleteProc *) NULL);
     buffer = Hax_CreateCmdBuf(interp);
+#ifndef RHAXSH
     result = Hax_Eval(interp, NULL, initCmd, 0, (char **) NULL);
     if (result != HAX_OK) {
 	printf("%s\n", interp->result);
 	exit(1);
     }
+#endif
 
     gotPartial = 0;
     while (1) {
