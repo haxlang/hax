@@ -205,7 +205,7 @@ clean:
 		haxsh.o haxsh rhaxsh.o rhaxsh
 
 $(OBJS): hax.h haxInt.h
-$(UNIX_OJBS): haxUnix.h
+$(UNIX_OJBS): hax.h haxUnix.h
 
 .SUFFIXES: .c .o
 .c.o:
