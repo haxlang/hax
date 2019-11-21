@@ -328,6 +328,11 @@ Hax_DbCkfree(
     Memoryp *memCtx = (Memoryp *) memoryp;
     struct mem_header *memp = 0;  /* Must be zero for size calc */
 
+    if (ptr == NULL) {
+	Hax_Panic ((char *) "Cannot free memory at addres 0x0, %s line %d",
+	    file, line);
+    }
+
     /*
      * Since header ptr is zero, body offset will be size
      */
