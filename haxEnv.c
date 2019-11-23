@@ -437,6 +437,9 @@ EnvTraceProc(
 		!= (HAX_TRACE_UNSETS|HAX_TRACE_DESTROYED)) {
 	    Hax_Panic((char *) "EnvTraceProc called with confusing arguments");
 	}
+	if (flags & HAX_INTERP_DESTROYED) {
+	    return NULL;
+	}
 	ckfree(memoryp, unixClientData->haxEnviron);
 	unixClientData->environSize = 0;
 	unixClientData->haxEnviron = NULL;

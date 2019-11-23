@@ -1838,6 +1838,17 @@ Hax_UnixCoreDelete(
 	ckfree(memoryp, clientDataPtr->curBuf);
     }
 
+    if (clientDataPtr->haxEnviron != NULL) {
+	for (i = 0; i < clientDataPtr->environSize; i++) {
+	    /* The last allocated entry is divided by NULL */
+	    if (clientDataPtr->haxEnviron[i] == NULL) {
+		break;
+	    }
+	    ckfree(memoryp, clientDataPtr->haxEnviron[i]);
+	}
+	ckfree(memoryp, clientDataPtr->haxEnviron);
+    }
+
     ckfree(memoryp, (char *) clientDataPtr);
 }
 
