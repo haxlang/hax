@@ -64,6 +64,7 @@ static CmdInfo builtInCmds[] = {
  */
 
 static int		CleanupChildren (Hax_Interp *interp,
+			    ClientData clientData,
 			    int numPids, int *pidPtr, int errorId);
 static char *		GetFileType (int mode);
 static int		StoreStatData (Hax_Interp *interp,
@@ -197,7 +198,7 @@ Hax_CloseCmd(
      */
 
     if (filePtr->numPids > 0) {
-	if (CleanupChildren(interp, filePtr->numPids, filePtr->pidPtr,
+	if (CleanupChildren(interp, clientData, filePtr->numPids, filePtr->pidPtr,
 		filePtr->errorId) != HAX_OK) {
 	    result = HAX_ERROR;
 	}
@@ -301,7 +302,7 @@ Hax_ExecCmd(
 	if (numPids < 0) {
 	    return HAX_ERROR;
 	}
-	Hax_DetachPids(numPids, pidPtr);
+	Hax_DetachPids(clientData, numPids, pidPtr);
 	ckfree(memoryp, (char *) pidPtr);
 	return HAX_OK;
     }
@@ -346,7 +347,7 @@ Hax_ExecCmd(
 	close(outputId);
     }
 
-    if (CleanupChildren(interp, numPids, pidPtr, errorId) != HAX_OK) {
+    if (CleanupChildren(interp, clientData, numPids, pidPtr, errorId) != HAX_OK) {
 	result = HAX_ERROR;
     }
     return result;
@@ -1164,7 +1165,7 @@ Hax_OpenCmd(
 	fclose(filePtr->f2);
     }
     if (filePtr->numPids > 0) {
-	Hax_DetachPids(filePtr->numPids, filePtr->pidPtr);
+	Hax_DetachPids(clientData, filePtr->numPids, filePtr->pidPtr);
 	ckfree(memoryp, (char *) filePtr->pidPtr);
     }
     if (filePtr->errorId != -1) {
@@ -1673,6 +1674,7 @@ Hax_TimeCmd(
 static int
 CleanupChildren(
     Hax_Interp *interp,		/* Used for error messages. */
+    ClientData clientData,
     int numPids,		/* Number of entries in pidPtr array. */
     int *pidPtr,		/* Array of process ids of children. */
     int errorId			/* File descriptor index for file containing
@@ -1687,7 +1689,7 @@ CleanupChildren(
     memoryp = Hax_GetMemoryp(interp);
 
     for (i = 0; i < numPids; i++) {
-	pid = Hax_WaitPids(1, &pidPtr[i], (int *) &waitStatus);
+	pid = Hax_WaitPids(clientData, 1, &pidPtr[i], (int *) &waitStatus);
 	if (pid == -1) {
 	    Hax_AppendResult(interp, "error waiting for process to exit: ",
 		    Hax_UnixError(interp), (char *) NULL);
@@ -1818,7 +1820,8 @@ Hax_UnixCoreDelete(
 		    fclose(filePtr->f2);
 		}
 		if (filePtr->numPids > 0) {
-		    Hax_DetachPids(filePtr->numPids, filePtr->pidPtr);
+		    Hax_DetachPids(clientData, filePtr->numPids,
+			filePtr->pidPtr);
 		    ckfree(memoryp, (char *) filePtr->pidPtr);
 		}
 	    }
@@ -1867,6 +1870,9 @@ Hax_InitUnixCore(
     clientDataPtr->curBuf = clientDataPtr->staticBuf;
     clientDataPtr->environSize = 0;
     clientDataPtr->haxEnviron = NULL;
+    clientDataPtr->waitTable = NULL;
+    clientDataPtr->waitTableSize = 0;
+    clientDataPtr->waitTableUsed = 0;
 
     for (cmdInfoPtr = builtInCmds; cmdInfoPtr->name != NULL;
 	 cmdInfoPtr++) {

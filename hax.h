@@ -254,7 +254,8 @@ HAX_EXTERN int		Hax_DeleteCommand (Hax_Interp *interp,
 HAX_EXTERN void		Hax_DeleteInterp (Hax_Interp *interp);
 HAX_EXTERN void		Hax_DeleteTrace (Hax_Interp *interp,
 			    Hax_Trace trace);
-HAX_EXTERN void		Hax_DetachPids (int numPids, int *pidPtr);
+HAX_EXTERN void		Hax_DetachPids (ClientData clientData,
+			    int numPids, int *pidPtr);
 HAX_EXTERN char *	Hax_ErrnoId (void);
 HAX_EXTERN int		Hax_Eval (Hax_Interp *interp, char *scriptFile,
 			    char *cmd, int flags, char **termPtr);
@@ -270,7 +271,8 @@ HAX_EXTERN int		Hax_ExprLongLong (Hax_Interp *interp,
 			    char *string, long long int *ptr);
 HAX_EXTERN int		Hax_ExprString (Hax_Interp *interp,
 			    char *string);
-HAX_EXTERN int		Hax_Fork (Hax_Interp *interp);
+HAX_EXTERN int		Hax_Fork (Hax_Interp *interp,
+			    ClientData clientData);
 HAX_EXTERN int		Hax_GetBoolean (Hax_Interp *interp,
 			    char *string, int *boolPtr);
 HAX_EXTERN int		Hax_GetDouble (Hax_Interp *interp,
@@ -340,7 +342,8 @@ HAX_EXTERN ClientData	Hax_VarTraceInfo2 (Hax_Interp *interp,
 			    char *part1, char *part2, int flags,
 			    Hax_VarTraceProc *procPtr,
 			    ClientData prevClientData);
-HAX_EXTERN int		Hax_WaitPids (int numPids, int *pidPtr,
+HAX_EXTERN int		Hax_WaitPids (ClientData clientData,
+			    int numPids, int *pidPtr,
 			    int *statusPtr);
 HAX_EXTERN ClientData	Hax_InitUnixCore (Hax_Interp *interp);
 

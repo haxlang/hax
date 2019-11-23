@@ -27,41 +27,6 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUnixUtil.c,v 1.19 93/01
 #include "hax.h"
 #include "haxUnix.h"
 
-/*
- * Data structures of the following type are used by Hax_Fork and
- * Hax_WaitPids to keep track of child processes.
- */
-
-typedef struct {
-    int pid;			/* Process id of child. */
-    int status;			/* Status returned when child exited or
-				 * suspended. */
-    int flags;			/* Various flag bits;  see below for
-				 * definitions. */
-} WaitInfo;
-
-/*
- * Flag bits in WaitInfo structures:
- *
- * WI_READY -			Non-zero means process has exited or
- *				suspended since it was forked or last
- *				returned by Hax_WaitPids.
- * WI_DETACHED -		Non-zero means no-one cares about the
- *				process anymore.  Ignore it until it
- *				exits, then forget about it.
- */
-
-#define WI_READY	1
-#define WI_DETACHED	2
-
-static WaitInfo *waitTable = NULL;
-static int waitTableSize = 0;	/* Total number of entries available in
-				 * waitTable. */
-static int waitTableUsed = 0;	/* Number of entries in waitTable that
-				 * are actually in use right now.  Active
-				 * entries are always at the beginning
-				 * of the table. */
-#define WAIT_TABLE_GROW_BY 4
 
 /*
  *----------------------------------------------------------------------
@@ -170,8 +135,10 @@ Hax_EvalFile(
 
 int
 Hax_Fork(
-    Hax_Interp *interp)
+    Hax_Interp *interp,
+    ClientData clientData)
 {
+    UnixClientData *unixClientData = (UnixClientData *) clientData;
     Hax_Memoryp *memoryp;
     WaitInfo *waitPtr;
     pid_t pid;
@@ -186,7 +153,7 @@ Hax_Fork(
      * arbiter for signals to allow them to be "shared".
      */
 
-    if (waitTable == NULL) {
+    if (unixClientData->waitTable == NULL) {
 	(void) signal(SIGPIPE, SIG_IGN);
     }
 
@@ -195,20 +162,19 @@ Hax_Fork(
      * entry.
      */
 
-    if (waitTableUsed == waitTableSize) {
+    if (unixClientData->waitTableUsed == unixClientData->waitTableSize) {
 	int newSize;
 	WaitInfo *newWaitTable;
 
-	newSize = waitTableSize + WAIT_TABLE_GROW_BY;
-	newWaitTable = (WaitInfo *) ckalloc(memoryp, (unsigned)
-		(newSize * sizeof(WaitInfo)));
-	memcpy(newWaitTable, waitTable,
-		(waitTableSize * sizeof(WaitInfo)));
-	if (waitTable != NULL) {
-	    ckfree(memoryp, (char *) waitTable);
+	newSize = unixClientData->waitTableSize + WAIT_TABLE_GROW_BY;
+	newWaitTable = ckalloc(memoryp, newSize * sizeof(WaitInfo));
+	memcpy(newWaitTable, unixClientData->waitTable,
+		(unixClientData->waitTableSize * sizeof(WaitInfo)));
+	if (unixClientData->waitTable != NULL) {
+	    ckfree(memoryp, unixClientData->waitTable);
 	}
-	waitTable = newWaitTable;
-	waitTableSize = newSize;
+	unixClientData->waitTable = newWaitTable;
+	unixClientData->waitTableSize = newSize;
     }
 
     /*
@@ -216,12 +182,12 @@ Hax_Fork(
      * is successful.
      */
 
-    waitPtr = &waitTable[waitTableUsed];
+    waitPtr = &unixClientData->waitTable[unixClientData->waitTableUsed];
     pid = fork();
     if (pid > 0) {
 	waitPtr->pid = pid;
 	waitPtr->flags = 0;
-	waitTableUsed++;
+	unixClientData->waitTableUsed++;
     }
     return pid;
 }
@@ -251,12 +217,14 @@ Hax_Fork(
 
 int
 Hax_WaitPids(
+    ClientData clientData,
     int numPids,		/* Number of pids to wait on:  gives size
 				 * of array pointed to by pidPtr. */
     int *pidPtr,		/* Pids to wait on:  return when one of
 				 * these processes exits or suspends. */
     int *statusPtr		/* Wait status is returned here. */)
 {
+    UnixClientData *unixClientData = (UnixClientData *) clientData;
     int i, count, pid;
     WaitInfo *waitPtr;
     int anyProcesses;
@@ -270,7 +238,8 @@ Hax_WaitPids(
 	 */
 
 	anyProcesses = 0;
-	for (waitPtr = waitTable, count = waitTableUsed;
+	for (waitPtr = unixClientData->waitTable,
+		count = unixClientData->waitTableUsed;
 		count > 0; waitPtr++, count--) {
 	    for (i = 0; i < numPids; i++) {
 		if (pidPtr[i] != waitPtr->pid) {
@@ -282,8 +251,9 @@ Hax_WaitPids(
 		    pid = waitPtr->pid;
 		    if (WIFEXITED(waitPtr->status)
 			    || WIFSIGNALED(waitPtr->status)) {
-			*waitPtr = waitTable[waitTableUsed-1];
-			waitTableUsed--;
+			*waitPtr = unixClientData->waitTable
+				[unixClientData->waitTableUsed-1];
+			unixClientData->waitTableUsed--;
 		    } else {
 			waitPtr->flags &= ~WI_READY;
 		    }
@@ -312,7 +282,8 @@ Hax_WaitPids(
 	if (pid < 0) {
 	    return pid;
 	}
-	for (waitPtr = waitTable, count = waitTableUsed; ;
+	for (waitPtr = unixClientData->waitTable,
+	     count = unixClientData->waitTableUsed; ;
 		waitPtr++, count--) {
 	    if (count == 0) {
 		break;			/* Ignore unknown processes. */
@@ -328,8 +299,9 @@ Hax_WaitPids(
 
 	    if (waitPtr->flags & WI_DETACHED) {
 		if (WIFEXITED(status) || WIFSIGNALED(status)) {
-		    *waitPtr = waitTable[waitTableUsed-1];
-		    waitTableUsed--;
+		    *waitPtr = unixClientData->waitTable
+			[unixClientData->waitTableUsed-1];
+		    unixClientData->waitTableUsed--;
 		}
 	    } else {
 		waitPtr->status = status;
@@ -361,17 +333,20 @@ Hax_WaitPids(
 
 void
 Hax_DetachPids(
+    ClientData clientData,
     int numPids,		/* Number of pids to detach:  gives size
 				 * of array pointed to by pidPtr. */
     int *pidPtr			/* Array of pids to detach:  must have
 				 * been created by Hax_Fork. */)
 {
+    UnixClientData *unixClientData = (UnixClientData *) clientData;
     WaitInfo *waitPtr;
     int i, count, pid;
 
     for (i = 0; i < numPids; i++) {
 	pid = pidPtr[i];
-	for (waitPtr = waitTable, count = waitTableUsed;
+	for (waitPtr = unixClientData->waitTable,
+		count = unixClientData->waitTableUsed;
 		count > 0; waitPtr++, count--) {
 	    if (pid != waitPtr->pid) {
 		continue;
@@ -384,8 +359,9 @@ Hax_DetachPids(
 
 	    if ((waitPtr->flags & WI_READY) && (WIFEXITED(waitPtr->status)
 		    || WIFSIGNALED(waitPtr->status))) {
-		*waitPtr = waitTable[waitTableUsed-1];
-		waitTableUsed--;
+		*waitPtr = unixClientData->waitTable
+			[unixClientData->waitTableUsed-1];
+		unixClientData->waitTableUsed--;
 	    } else {
 		waitPtr->flags |= WI_DETACHED;
 	    }
@@ -722,7 +698,7 @@ Hax_CreatePipeline(
 	    outputId = pipeIds[1];
 	}
 	execName = Hax_TildeSubst(interp, clientData, argv[firstArg]);
-	pid = Hax_Fork(interp);
+	pid = Hax_Fork(interp, clientData);
 	if (pid == -1) {
 	    Hax_AppendResult(interp, "couldn't fork child process: ",
 		    Hax_UnixError(interp), (char *) NULL);
@@ -812,7 +788,7 @@ cleanup:
     if (pidPtr != NULL) {
 	for (i = 0; i < numPids; i++) {
 	    if (pidPtr[i] != -1) {
-		Hax_DetachPids(1, &pidPtr[i]);
+		Hax_DetachPids(clientData, 1, &pidPtr[i]);
 	    }
 	}
 	ckfree(memoryp, (char *) pidPtr);

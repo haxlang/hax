@@ -89,6 +89,35 @@ typedef struct OpenFile {
 				 * used (i.e. this is a normal file). */
 } OpenFile;
 
+/*
+ * Data structures of the following type are used by Hax_Fork and
+ * Hax_WaitPids to keep track of child processes.
+ */
+
+typedef struct {
+    int pid;			/* Process id of child. */
+    int status;			/* Status returned when child exited or
+				 * suspended. */
+    int flags;			/* Various flag bits;  see below for
+				 * definitions. */
+} WaitInfo;
+
+/*
+ * Flag bits in WaitInfo structures:
+ *
+ * WI_READY -			Non-zero means process has exited or
+ *				suspended since it was forked or last
+ *				returned by Hax_WaitPids.
+ * WI_DETACHED -		Non-zero means no-one cares about the
+ *				process anymore.  Ignore it until it
+ *				exits, then forget about it.
+ */
+
+#define WI_READY	1
+#define WI_DETACHED	2
+
+#define WAIT_TABLE_GROW_BY 4
+
 typedef struct UnixClientData {
     /*
      * Information related to files.
@@ -139,6 +168,17 @@ typedef struct UnixClientData {
     Hax_EnvWriteProc *writeProc;
     Hax_EnvUnsetProc *unsetProc;
     Hax_EnvDestroyProc *destroyProc;
+
+    /*
+     * haxUnixUtil.c
+     */
+    WaitInfo *waitTable;
+    int waitTableSize;		/* Total number of entries available in
+				 * waitTable. */
+    int waitTableUsed;		/* Number of entries in waitTable that
+				 * are actually in use right now.  Active
+				 * entries are always at the beginning
+				 * of the table. */
 } UnixClientData;
 
 /*
