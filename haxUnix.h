@@ -124,6 +124,21 @@ typedef struct UnixClientData {
     char staticBuf[STATIC_BUF_SIZE];
     int curSize;
     char *curBuf;
+
+    /*
+     * Used in haxEnv.c
+     */
+    int environSize;		/* Non-zero means that the all of the
+				 * environ-related information is malloc-ed
+				 * and the environ array itself has this
+				 * many total entries allocated to it (not
+				 * all may be in use at once).  Zero means
+				 * that the environment array is in its
+				 * original static state. */
+    char **haxEnviron;		/* Hax's copy of environ. */
+    Hax_EnvWriteProc *writeProc;
+    Hax_EnvUnsetProc *unsetProc;
+    Hax_EnvDestroyProc *destroyProc;
 } UnixClientData;
 
 /*
@@ -138,7 +153,8 @@ extern int		HaxGetOpenFile (Hax_Interp *interp,
 			    char *string, OpenFile **filePtrPtr);
 extern void		HaxMakeFileTable (Hax_Interp *interp,
 			    UnixClientData *clientDataPtr, int index);
-extern void		HaxSetupEnv (Hax_Interp *interp);
+extern void		HaxSetupEnv (Hax_Interp *interp,
+			    UnixClientData *unixClientData);
 
 /*
  *----------------------------------------------------------------

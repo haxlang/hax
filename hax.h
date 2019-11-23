@@ -111,6 +111,11 @@ typedef void (Hax_CmdTraceProc) (ClientData clientData,
 typedef void (Hax_FreeProc) (char *blockPtr);
 typedef char *(Hax_VarTraceProc) (ClientData clientData,
 	Hax_Interp *interp, char *part1, char *part2, int flags);
+typedef void (Hax_EnvWriteProc) (Hax_Interp *interp, ClientData clientData,
+	char *name, char *value);
+typedef void (Hax_EnvUnsetProc) (Hax_Interp *interp, ClientData clientData,
+	char *name);
+typedef void (Hax_EnvDestroyProc) (Hax_Interp *interp, ClientData clientData);
 
 /*
  * Flag values passed to Hax_Eval (see the man page for details;  also
@@ -467,5 +472,25 @@ HAX_EXTERN void			Hax_InitHashTable (Hax_HashTable *tablePtr,
 				    int keyType);
 HAX_EXTERN Hax_HashEntry *	Hax_NextHashEntry (
 				    Hax_HashSearch *searchPtr);
+/*
+ * Exported procedures for the management of environment variables.
+ */
+HAX_EXTERN int			Hax_FindVariable(
+				    ClientData clientData,
+				    char *name, int *lengthPtr);
+HAX_EXTERN int			Hax_SetEnv(Hax_Interp *interp,
+				    ClientData clientData,
+				    char *name, char *value, int overwrite);
+HAX_EXTERN int			Hax_PutEnv(Hax_Interp *interp,
+				    ClientData clientData,
+				    char *string);
+HAX_EXTERN int			Hax_UnsetEnv(Hax_Interp *interp,
+				    ClientData clientData,
+				    char *name);
+HAX_EXTERN void			Hax_EnvTraceProc(Hax_Interp *interp,
+				    ClientData clientData,
+				    Hax_EnvWriteProc *writeProc,
+				    Hax_EnvUnsetProc *unsetProc,
+				    Hax_EnvDestroyProc *destroyProc);
 
 #endif /* _HAX */

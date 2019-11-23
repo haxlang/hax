@@ -31,6 +31,9 @@ Hax_CmdBuf buffer;
 int quitFlag = 0;
 
 #ifndef RHAXSH
+extern char **environ;
+ClientData unixClientData;
+
 char initCmd[] =
     "if [file exists [info library]/init.tcl] {source [info library]/init.tcl}";
 #endif
@@ -84,6 +87,35 @@ cmdEcho(
     return HAX_OK;
 }
 
+#ifndef RHAXSH
+static void
+writeEnv(
+    Hax_Interp *interp,
+    ClientData clientData,
+    char *name,
+    char *value)
+{
+    setenv(name, value, 1);
+}
+
+static void
+unsetEnv(
+    Hax_Interp *interp,
+    ClientData clientData,
+    char *name)
+{
+    unsetenv(name);
+}
+
+static void
+destroyEnv(
+    Hax_Interp *interp,
+    ClientData clientData)
+{
+    environ = NULL;
+}
+#endif
+
 int
 main(int argc, char **argv)
 {
@@ -94,7 +126,8 @@ main(int argc, char **argv)
     interp = Hax_CreateInterp(memoryp);
     Hax_InitMemory(interp);
 #ifndef RHAXSH
-    Hax_InitUnixCore(interp);
+    unixClientData = (ClientData) Hax_InitUnixCore(interp);
+    Hax_EnvTraceProc(interp, unixClientData, writeEnv, unsetEnv, destroyEnv);
 #endif
     Hax_CreateCommand(interp, (char *) "echo", cmdEcho, (ClientData) "echo",
 	    (Hax_CmdDeleteProc *) NULL);

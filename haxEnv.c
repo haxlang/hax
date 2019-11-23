@@ -22,44 +22,14 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclEnv.c,v 1.10 93/02/01 1
 #include "haxUnix.h"
 
 /*
- * The structure below is used to keep track of all of the interpereters
- * for which we're managing the "env" array.  It's needed so that they
- * can all be updated whenever an environment variable is changed
- * anywhere.
- */
-
-typedef struct EnvInterp {
-    Hax_Interp *interp;		/* Interpreter for which we're managing
-				 * the env array. */
-    struct EnvInterp *nextPtr;	/* Next in list of all such interpreters,
-				 * or zero. */
-} EnvInterp;
-
-static EnvInterp *firstInterpPtr;
-				/* First in list of all managed interpreters,
-				 * or NULL if none. */
-
-static int environSize = 0;	/* Non-zero means that the all of the
-				 * environ-related information is malloc-ed
-				 * and the environ array itself has this
-				 * many total entries allocated to it (not
-				 * all may be in use at once).  Zero means
-				 * that the environment array is in its
-				 * original static state. */
-
-/*
  * Declarations for local procedures defined in this file:
  */
 
-static void		EnvInit (Hax_Interp *interp);
+static void		EnvInit (Hax_Interp *interp,
+			    UnixClientData *unixClientData);
 static char *		EnvTraceProc (ClientData clientData,
 			    Hax_Interp *interp, char *name1, char *name2,
 			    int flags);
-static int		FindVariable (const char *name,
-			    int *lengthPtr);
-static void		SetEnv (Hax_Interp *interp, const char *name,
-			    const char *value);
-static void		UnsetEnv (Hax_Interp *interp, const char *name);
 
 /*
  *----------------------------------------------------------------------
@@ -86,11 +56,11 @@ static void		UnsetEnv (Hax_Interp *interp, const char *name);
 
 void
 HaxSetupEnv(
-    Hax_Interp *interp		/* Interpreter whose "env" array is to be
-				 * managed. */)
+    Hax_Interp *interp,		/* Interpreter whose "env" array is to be
+				 * managed. */
+    UnixClientData *unixClientData	/* Unix Client Data */)
 {
     Hax_Memoryp *memoryp;
-    EnvInterp *eiPtr;
     int i;
 
     /*
@@ -98,24 +68,17 @@ HaxSetupEnv(
      * necessary.
      */
 
-    if (environSize == 0) {
-	EnvInit(interp);
+    if (unixClientData->environSize != 0) {
+	Hax_Panic ((char *) "Unexpected initialized environ");
     }
+
+    EnvInit(interp, unixClientData);
 
     /*
      * Next, get the pointer to Memoryp.
      */
 
     memoryp = Hax_GetMemoryp(interp);
-
-    /*
-     * Next, add the interpreter to the list of those that we manage.
-     */
-
-    eiPtr = (EnvInterp *) ckalloc(memoryp, sizeof(EnvInterp));
-    eiPtr->interp = interp;
-    eiPtr->nextPtr = firstInterpPtr;
-    firstInterpPtr = eiPtr;
 
     /*
      * Store the environment variable values into the interpreter's
@@ -127,7 +90,7 @@ HaxSetupEnv(
     for (i = 0; ; i++) {
 	char *p, *p2;
 
-	p = environ[i];
+	p = unixClientData->haxEnviron[i];
 	if (p == NULL) {
 	    break;
 	}
@@ -140,13 +103,13 @@ HaxSetupEnv(
     }
     Hax_TraceVar2(interp, (char *) "env", (char *) NULL,
 	    HAX_GLOBAL_ONLY | HAX_TRACE_WRITES | HAX_TRACE_UNSETS,
-	    EnvTraceProc, (ClientData) NULL);
+	    EnvTraceProc, (ClientData) unixClientData);
 }
 
 /*
  *----------------------------------------------------------------------
  *
- * FindVariable --
+ * Hax_FindVariable --
  *
  *	Locate the entry in environ for a given name.
  *
@@ -163,18 +126,25 @@ HaxSetupEnv(
  *----------------------------------------------------------------------
  */
 
-static int
-FindVariable(
-    const char *name,		/* Name of desired environment variable. */
+int
+Hax_FindVariable(
+    ClientData clientData,	/* Unix Client Data */
+    char *name,			/* Name of desired environment variable. */
     int *lengthPtr		/* Used to return length of name (for
 				 * successful searches) or number of non-NULL
 				 * entries in environ (for unsuccessful
 				 * searches). */)
 {
+    UnixClientData *unixClientData = (UnixClientData *) clientData;
     int i;
     const char *p1, *p2;
 
-    for (i = 0, p1 = environ[i]; p1 != NULL; i++, p1 = environ[i]) {
+    if (unixClientData->environSize == 0) {
+	Hax_Panic ((char *) "Unexpected uninitialized environ");
+    }
+
+    for (i = 0, p1 = unixClientData->haxEnviron[i]; p1 != NULL; i++,
+	p1 = unixClientData->haxEnviron[i]) {
 	for (p2 = name; *p2 == *p1; p1++, p2++) {
 	    /* NULL loop body. */
 	}
@@ -190,7 +160,7 @@ FindVariable(
 /*
  *----------------------------------------------------------------------
  *
- * SetEnv --
+ * Hax_SetEnv --
  *
  *	Set an environment variable, replacing an existing value
  *	or creating a new variable if there doesn't exist a variable
@@ -200,26 +170,27 @@ FindVariable(
  *	None.
  *
  * Side effects:
- *	The environ array gets updated, as do all of the interpreters
- *	that we manage.
+ *	The environ array gets updated.
  *
  *----------------------------------------------------------------------
  */
 
-void
-SetEnv(
+int
+Hax_SetEnv(
     Hax_Interp *interp,
-    const char *name,		/* Name of variable whose value is to be
+    ClientData clientData,	/* Unix Client Data */
+    char *name,			/* Name of variable whose value is to be
 				 * set. */
-    const char *value		/* New value for variable. */)
+    char *value,		/* New value for variable. */
+    int overwrite)
 {
+    UnixClientData *unixClientData = (UnixClientData *) clientData;
     Hax_Memoryp *memoryp;
     int index, length, nameLength;
     char *p;
-    EnvInterp *eiPtr;
 
-    if (environSize == 0) {
-	EnvInit(interp);
+    if (unixClientData->environSize == 0) {
+	Hax_Panic ((char *) "Unexpected uninitialized environ");
     }
 
     memoryp = Hax_GetMemoryp(interp);
@@ -230,21 +201,21 @@ SetEnv(
      * the name exists, free its old entry.
      */
 
-    index = FindVariable(name, &length);
+    index = Hax_FindVariable((ClientData) unixClientData, name, &length);
     if (index == -1) {
-	if ((length+2) > environSize) {
+	if ((length+2) > unixClientData->environSize) {
 	    char **newEnviron;
 
 	    newEnviron = (char **) ckalloc(memoryp, (unsigned)
 		    ((length+5) * sizeof(char *)));
 	    memcpy(newEnviron, environ,
 		    length*sizeof(char *));
-	    ckfree(memoryp, environ);
-	    environ = newEnviron;
-	    environSize = length+5;
+	    ckfree(memoryp, unixClientData->haxEnviron);
+	    unixClientData->haxEnviron = newEnviron;
+	    unixClientData->environSize = length+5;
 	}
 	index = length;
-	environ[index+1] = NULL;
+	unixClientData->haxEnviron[index+1] = NULL;
 	nameLength = strlen(name);
     } else {
 	/*
@@ -255,10 +226,19 @@ SetEnv(
 	 * of the same value among the interpreters.
 	 */
 
-	if (strcmp(value, environ[index]+length+1) == 0) {
-	    return;
+	if (strcmp(value, unixClientData->haxEnviron[index]+length+1) == 0) {
+	    return HAX_OK;
 	}
-	ckfree(memoryp, environ[index]);
+
+	/*
+	 * If the variable does exist, the argument overwrite is tested;
+	 * if overwrite is zero, the variable is not reset, otherwise it is
+	 * reset to the given value.
+	 */
+	if (!overwrite) {
+	    return HAX_OK;
+	}
+	ckfree(memoryp, unixClientData->haxEnviron[index]);
 	nameLength = length;
     }
 
@@ -266,21 +246,17 @@ SetEnv(
      * Create a new entry and enter it into the table.
      */
 
-    p = (char *) ckalloc(memoryp, (unsigned) (nameLength + strlen(value) + 2));
-    environ[index] = p;
+    p = ckalloc(memoryp, nameLength + strlen(value) + 2);
+    unixClientData->haxEnviron[index] = p;
     strcpy(p, name);
     p += nameLength;
     *p = '=';
     strcpy(p+1, value);
 
-    /*
-     * Update all of the interpreters.
-     */
+    Hax_SetVar2(interp, (char *) "env", (char *) name,
+	p+1, HAX_GLOBAL_ONLY);
 
-    for (eiPtr= firstInterpPtr; eiPtr != NULL; eiPtr = eiPtr->nextPtr) {
-	(void) Hax_SetVar2(eiPtr->interp, (char *) "env", (char *) name,
-		p+1, HAX_GLOBAL_ONLY);
-    }
+    return HAX_OK;
 }
 
 /*
@@ -299,24 +275,32 @@ SetEnv(
  *	None.
  *
  * Side effects:
- *	The environ array gets updated, as do all of the interpreters
- *	that we manage.
+ *	The environ array gets updated.
  *
  *----------------------------------------------------------------------
  */
 
 int
-PutEnv(
+Hax_PutEnv(
     Hax_Interp *interp,
+    ClientData clientData,	/* Unix Client Data */
     char *string		/* Info about environment variable in the
 				 * form NAME=value. */)
 {
+    UnixClientData *unixClientData = (UnixClientData *) clientData;
     Hax_Memoryp *memoryp;
     int nameLength;
     char *name, *value;
 
-    if (string == NULL) {
-	return 0;
+    if (unixClientData->environSize == 0) {
+	Hax_Panic ((char *) "Unexpected uninitialized environ");
+    }
+
+    if (string == NULL || strchr(name, '=') == NULL || string[0] == '=' ||
+	strchr(strchr(name, '='), '=') != NULL /* two '=' detected */ ) {
+	Hax_AppendResult(interp, "bad args: should be \""
+                " NAME=value\"", (char *) NULL);
+	return HAX_ERROR;
     }
 
     memoryp = Hax_GetMemoryp(interp);
@@ -337,7 +321,7 @@ PutEnv(
     name = (char *) ckalloc(memoryp, nameLength+1);
     memcpy(name, string, nameLength);
     name[nameLength] = 0;
-    SetEnv(interp, name, value+1);
+    Hax_SetEnv(interp, clientData, name, value+1, 1);
     ckfree(memoryp, name);
     return 0;
 }
@@ -345,7 +329,7 @@ PutEnv(
 /*
  *----------------------------------------------------------------------
  *
- * UnsetEnv --
+ * Hax_UnsetEnv --
  *
  *	Remove an environment variable, updating the "env" arrays
  *	in all interpreters managed by us.
@@ -359,18 +343,25 @@ PutEnv(
  *----------------------------------------------------------------------
  */
 
-void
-UnsetEnv(
+int
+Hax_UnsetEnv(
     Hax_Interp *interp,
-    const char *name			/* Name of variable to remove. */)
+    ClientData clientData,		/* Unix Client Data */
+    char *name				/* Name of variable to remove. */)
 {
+    UnixClientData *unixClientData = (UnixClientData *) clientData;
     Hax_Memoryp *memoryp;
     int index, dummy;
     char **envPtr;
-    EnvInterp *eiPtr;
 
-    if (environSize == 0) {
-	EnvInit(interp);
+    if (unixClientData->environSize == 0) {
+	Hax_Panic ((char *) "Unexpected uninitialized environ");
+    }
+
+    if (name == NULL || strchr(name, '=') != NULL) {
+	Hax_AppendResult(interp, "invalid name: should be \""
+                " name\"", (char *) NULL);
+	return HAX_ERROR;
     }
 
     memoryp = Hax_GetMemoryp(interp);
@@ -379,26 +370,22 @@ UnsetEnv(
      * Update the environ array.
      */
 
-    index = FindVariable(name, &dummy);
+    index = Hax_FindVariable((ClientData) unixClientData, name, &dummy);
     if (index == -1) {
-	return;
+	return HAX_OK;
     }
-    ckfree(memoryp, environ[index]);
-    for (envPtr = environ+index+1; ; envPtr++) {
+    ckfree(memoryp, unixClientData->haxEnviron[index]);
+    for (envPtr = unixClientData->haxEnviron+index+1; ; envPtr++) {
 	envPtr[-1] = *envPtr;
 	if (*envPtr == NULL) {
 	    break;
-       }
+	}
     }
 
-    /*
-     * Update all of the interpreters.
-     */
+    (void) Hax_UnsetVar2(interp, (char *) "env", (char *) name,
+	HAX_GLOBAL_ONLY);
 
-    for (eiPtr = firstInterpPtr; eiPtr != NULL; eiPtr = eiPtr->nextPtr) {
-	(void) Hax_UnsetVar2(eiPtr->interp, (char *) "env", (char *) name,
-		HAX_GLOBAL_ONLY);
-    }
+    return HAX_OK;
 }
 
 /*
@@ -426,7 +413,7 @@ UnsetEnv(
 	/* ARGSUSED */
 static char *
 EnvTraceProc(
-    ClientData clientData,	/* Not used. */
+    ClientData clientData,	/* Unix Client Data */
     Hax_Interp *interp,		/* Interpreter whose "env" variable is
 				 * being modified. */
     char *name1,		/* Better be "env". */
@@ -434,7 +421,9 @@ EnvTraceProc(
 				 * NULL if whole array is being deleted. */
     int flags			/* Indicates what's happening. */)
 {
+    UnixClientData *unixClientData = (UnixClientData *) clientData;
     Hax_Memoryp *memoryp;
+    char *value;
 
     memoryp = Hax_GetMemoryp(interp);
 
@@ -444,29 +433,16 @@ EnvTraceProc(
      */
 
     if (name2 == NULL) {
-	EnvInterp *eiPtr, *prevPtr;
-
 	if ((flags & (HAX_TRACE_UNSETS|HAX_TRACE_DESTROYED))
 		!= (HAX_TRACE_UNSETS|HAX_TRACE_DESTROYED)) {
 	    Hax_Panic((char *) "EnvTraceProc called with confusing arguments");
 	}
-	eiPtr = firstInterpPtr;
-	if (eiPtr->interp == interp) {
-	    firstInterpPtr = eiPtr->nextPtr;
-	} else {
-	    for (prevPtr = eiPtr, eiPtr = eiPtr->nextPtr; ;
-		    prevPtr = eiPtr, eiPtr = eiPtr->nextPtr) {
-		if (eiPtr == NULL) {
-		    Hax_Panic(
-			(char *) "EnvTraceProc couldn't find interpreter");
-		}
-		if (eiPtr->interp == interp) {
-		    prevPtr->nextPtr = eiPtr->nextPtr;
-		    break;
-		}
-	    }
+	ckfree(memoryp, unixClientData->haxEnviron);
+	unixClientData->environSize = 0;
+	unixClientData->haxEnviron = NULL;
+	if (unixClientData->destroyProc) {
+	    (*unixClientData->destroyProc)(interp, unixClientData);
 	}
-	ckfree(memoryp, (char *) eiPtr);
 	return NULL;
     }
 
@@ -475,12 +451,18 @@ EnvTraceProc(
      */
 
     if (flags & HAX_TRACE_WRITES) {
-	SetEnv(interp, name2,
-	    Hax_GetVar2(interp, (char *) "env", name2, HAX_GLOBAL_ONLY));
+	value = Hax_GetVar2(interp, (char *) "env", name2, HAX_GLOBAL_ONLY);
+	Hax_SetEnv(interp, (ClientData) unixClientData, name2, value, 1);
+	if (unixClientData->writeProc) {
+	    (*unixClientData->writeProc)(interp, unixClientData, name2, value);
+	}
     }
 
     if (flags & HAX_TRACE_UNSETS) {
-	UnsetEnv(interp, name2);
+	Hax_UnsetEnv(interp, (ClientData) unixClientData, name2);
+	if (unixClientData->unsetProc) {
+	    (*unixClientData->unsetProc)(interp, unixClientData, name2);
+	}
     }
     return NULL;
 }
@@ -505,14 +487,15 @@ EnvTraceProc(
  */
 
 static void
-EnvInit(Hax_Interp *interp)
+EnvInit(
+    Hax_Interp *interp,
+    UnixClientData *unixClientData)
 {
     Hax_Memoryp *memoryp;
-    char **newEnviron;
     int i, length;
 
-    if (environSize != 0) {
-	return;
+    if (unixClientData->environSize != 0) {
+	Hax_Panic ((char *) "Unexpected double initialization of environ");
     }
 
     memoryp = Hax_GetMemoryp(interp);
@@ -520,14 +503,28 @@ EnvInit(Hax_Interp *interp)
     for (length = 0; environ[length] != NULL; length++) {
 	/* Empty loop body. */
     }
-    environSize = length+5;
-    newEnviron = (char **) ckalloc(memoryp, (unsigned)
-		(environSize * sizeof(char *)));
+    unixClientData->environSize = length+5;
+    unixClientData->haxEnviron = ckalloc(memoryp,
+		unixClientData->environSize * sizeof(char *));
     for (i = 0; i < length; i++) {
-	newEnviron[i] = (char *) ckalloc(memoryp, (unsigned)
-		(strlen(environ[i]) + 1));
-	strcpy(newEnviron[i], environ[i]);
+	unixClientData->haxEnviron[i] = ckalloc(memoryp,
+		strlen(environ[i]) + 1);
+	strcpy(unixClientData->haxEnviron[i], environ[i]);
     }
-    newEnviron[length] = NULL;
-    environ = newEnviron;
+    unixClientData->haxEnviron[length] = NULL;
+}
+
+void
+Hax_EnvTraceProc(
+    Hax_Interp *interp,
+    ClientData clientData,
+    Hax_EnvWriteProc *writeProc,
+    Hax_EnvUnsetProc *unsetProc,
+    Hax_EnvDestroyProc *destroyProc)
+{
+    UnixClientData *unixClientData = (UnixClientData *) clientData;
+
+    unixClientData->writeProc = writeProc;
+    unixClientData->unsetProc = unsetProc;
+    unixClientData->destroyProc = destroyProc;
 }

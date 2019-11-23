@@ -1865,6 +1865,8 @@ Hax_InitUnixCore(
     memset(&clientDataPtr->staticBuf, 0, sizeof(clientDataPtr->staticBuf));
     clientDataPtr->curSize = STATIC_BUF_SIZE;
     clientDataPtr->curBuf = clientDataPtr->staticBuf;
+    clientDataPtr->environSize = 0;
+    clientDataPtr->haxEnviron = NULL;
 
     for (cmdInfoPtr = builtInCmds; cmdInfoPtr->name != NULL;
 	 cmdInfoPtr++) {
@@ -1880,7 +1882,7 @@ Hax_InitUnixCore(
 	Hax_SetLibraryPath(interp, libraryPath);
     }
 
-    HaxSetupEnv(interp);
+    HaxSetupEnv(interp, clientDataPtr);
 
     return (ClientData) clientDataPtr;
 }
