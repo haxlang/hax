@@ -168,8 +168,8 @@ main(int argc, char **argv)
 		printf("%s\n", interp->result);
 	    }
 	    if (quitFlag) {
-		Hax_DeleteInterp(interp);
 		Hax_DeleteCmdBuf(interp, buffer);
+		Hax_DeleteInterp(interp);
 		Hax_DumpActiveMemory(memoryp);
 		exit(0);
 	    }
