@@ -8,3 +8,4 @@ foreach i [lsort [glob *.test]] {
     puts stdout $i
     source $i
 }
+checkmem
