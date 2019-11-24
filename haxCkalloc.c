@@ -63,20 +63,19 @@ typedef struct Memoryp {
  */
 static void
 dump_memory_info(
-    Memoryp *memoryp,
-    FILE *outFile)
+    Memoryp *memoryp)
 {
-        fprintf(outFile,"total mallocs             %10lld\n",
+        printf("total mallocs             %10lld\n",
                 memoryp->total_mallocs);
-        fprintf(outFile,"total frees               %10lld\n",
+        printf("total frees               %10lld\n",
                 memoryp->total_frees);
-        fprintf(outFile,"current packets allocated %10lu\n",
+        printf("current packets allocated %10lu\n",
                 memoryp->current_malloc_packets);
-        fprintf(outFile,"current bytes allocated   %10lu\n",
+        printf("current bytes allocated   %10lu\n",
                 memoryp->current_bytes_malloced);
-        fprintf(outFile,"maximum packets allocated %10lu\n",
+        printf("maximum packets allocated %10lu\n",
                 memoryp->maximum_malloc_packets);
-        fprintf(outFile,"maximum bytes allocated   %10lu\n",
+        printf("maximum bytes allocated   %10lu\n",
                 memoryp->maximum_bytes_malloced);
 }
 
@@ -107,16 +106,16 @@ ValidateMemory (
             guard_failed = TRUE;
             fflush (stdout);
 	    byte &= 0xff;
-            fprintf(stderr, "low guard byte %d is 0x%x  \t%c\n", idx, byte,
+            printf("low guard byte %d is 0x%x  \t%c\n", idx, byte,
 	    	    (isprint(byte) ? byte : ' '));
         }
     }
     if (guard_failed) {
-        dump_memory_info (memoryp, stderr);
-        fprintf (stderr, "low guard failed at %p, %s %d\n",
+        dump_memory_info (memoryp);
+        printf ("low guard failed at %p, %s %d\n",
                  memHeaderP->body, file, line);
-        fflush (stderr);  /* In case name pointer is bad. */
-        fprintf (stderr, "%lu bytes allocated at (%s %d)\n", memHeaderP->length,
+        fflush (stdout);  /* In case name pointer is bad. */
+        printf ("%lu bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
         Hax_Panic ((char *) "Memory validation failure");
     }
@@ -126,19 +125,19 @@ ValidateMemory (
         byte = *(hiPtr + idx);
         if (byte != GUARD_VALUE) {
             guard_failed = TRUE;
-            fflush (stdout);
+            fflush(stdout);
 	    byte &= 0xff;
-            fprintf(stderr, "hi guard byte %d is 0x%x  \t%c\n", idx, byte,
+            printf("hi guard byte %d is 0x%x  \t%c\n", idx, byte,
 	    	    (isprint(byte) ? byte : ' '));
         }
     }
 
     if (guard_failed) {
-        dump_memory_info (memoryp, stderr);
-        fprintf (stderr, "high guard failed at %p, %s %d\n",
+        dump_memory_info (memoryp);
+        printf ("high guard failed at %p, %s %d\n",
                  memHeaderP->body, file, line);
-        fflush (stderr);  /* In case name pointer is bad. */
-        fprintf (stderr, "%lu bytes allocated at (%s %d)\n", memHeaderP->length,
+        fflush (stdout);  /* In case name pointer is bad. */
+        printf ("%lu bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
         Hax_Panic ((char *) "Memory validation failure");
     }
@@ -241,7 +240,7 @@ Hax_DbCkalloc(
                               sizeof(struct mem_header) + GUARD_SIZE);
     if (result == NULL) {
         fflush(stdout);
-        dump_memory_info(memCtx, stderr);
+        dump_memory_info(memCtx);
         Hax_Panic((char *) "unable to alloc %lu bytes, %s line %d", size, file,
               line);
     }
@@ -264,25 +263,25 @@ Hax_DbCkalloc(
     if (memCtx->trace_on_at_malloc &&
 	(memCtx->total_mallocs >= memCtx->trace_on_at_malloc)) {
         (void) fflush(stdout);
-        fprintf(stderr, "reached malloc trace enable point (%lld)\n",
+        printf("reached malloc trace enable point (%lld)\n",
                 memCtx->total_mallocs);
-        fflush(stderr);
+        fflush(stdout);
         memCtx->alloc_tracing = TRUE;
         memCtx->trace_on_at_malloc = 0;
     }
 
     if (memCtx->alloc_tracing)
-        fprintf(stderr,"ckalloc %p %lu %s %d\n", result->body, size,
+        printf("ckalloc %p %lu %s %d\n", result->body, size,
                 file, line);
 
     if (memCtx->break_on_malloc &&
 	(memCtx->total_mallocs >= memCtx->break_on_malloc)) {
         memCtx->break_on_malloc = 0;
         (void) fflush(stdout);
-        fprintf(stderr,"reached malloc break limit (%lld)\n",
+        printf("reached malloc break limit (%lld)\n",
                 memCtx->total_mallocs);
-        fprintf(stderr, "program will now enter C debugger\n");
-        (void) fflush(stderr);
+        printf("program will now enter C debugger\n");
+        (void) fflush(stdout);
 	Hax_Breakpoint();
     }
 
@@ -340,7 +339,7 @@ Hax_DbCkfree(
 	offsetof(struct mem_header, body));
 
     if (memCtx->alloc_tracing)
-        fprintf(stderr, "ckfree %p %lu %s %d\n", memp->body,
+        printf("ckfree %p %lu %s %d\n", memp->body,
                 memp->length, file, line);
 
     if (memCtx->validate_memory)
@@ -461,7 +460,7 @@ MemoryCmd (
     }
 
     if (strcmp(argv[1],"info") == 0) {
-        dump_memory_info(memCtx, stdout);
+        dump_memory_info(memCtx);
         return HAX_OK;
     }
     if (strcmp(argv[1],"active") == 0) {
