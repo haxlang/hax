@@ -1849,6 +1849,10 @@ Hax_UnixCoreDelete(
 	ckfree(memoryp, clientDataPtr->haxEnviron);
     }
 
+    if (clientDataPtr->waitTable != NULL) {
+	ckfree(memoryp, clientDataPtr->waitTable);
+    }
+
     ckfree(memoryp, (char *) clientDataPtr);
 }
 
