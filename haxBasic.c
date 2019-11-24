@@ -150,7 +150,7 @@ Hax_CreateInterp(
     iPtr->resultSpace[0] = 0;
     iPtr->internalErrno = 0;
 #ifdef HAX_LIBRARY
-    iPtr->libraryPath = ckalloc(memoryp, strlen(HAX_LIBRARY) + 1);
+    iPtr->libraryPath = (char *) ckalloc(memoryp, strlen(HAX_LIBRARY) + 1);
     strcpy(iPtr->libraryPath, HAX_LIBRARY);
 #else
     iPtr->libraryPath = NULL;
@@ -1089,6 +1089,6 @@ Hax_SetLibraryPath(
 	ckfree(memoryp, iPtr->libraryPath);
     }
 
-    iPtr->libraryPath = ckalloc(memoryp, strlen(path) + 1);
+    iPtr->libraryPath = (char *) ckalloc(memoryp, strlen(path) + 1);
     strcpy(iPtr->libraryPath, path);
 }

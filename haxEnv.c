@@ -246,7 +246,7 @@ Hax_SetEnv(
      * Create a new entry and enter it into the table.
      */
 
-    p = ckalloc(memoryp, nameLength + strlen(value) + 2);
+    p = (char *) ckalloc(memoryp, nameLength + strlen(value) + 2);
     unixClientData->haxEnviron[index] = p;
     strcpy(p, name);
     p += nameLength;
@@ -507,10 +507,10 @@ EnvInit(
 	/* Empty loop body. */
     }
     unixClientData->environSize = length+5;
-    unixClientData->haxEnviron = ckalloc(memoryp,
+    unixClientData->haxEnviron = (char **) ckalloc(memoryp,
 		unixClientData->environSize * sizeof(char *));
     for (i = 0; i < length; i++) {
-	unixClientData->haxEnviron[i] = ckalloc(memoryp,
+	unixClientData->haxEnviron[i] = (char *) ckalloc(memoryp,
 		strlen(environ[i]) + 1);
 	strcpy(unixClientData->haxEnviron[i], environ[i]);
     }

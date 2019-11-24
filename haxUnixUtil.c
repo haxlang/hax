@@ -167,7 +167,8 @@ Hax_Fork(
 	WaitInfo *newWaitTable;
 
 	newSize = unixClientData->waitTableSize + WAIT_TABLE_GROW_BY;
-	newWaitTable = ckalloc(memoryp, newSize * sizeof(WaitInfo));
+	newWaitTable = (WaitInfo *) ckalloc(memoryp,
+		newSize * sizeof(WaitInfo));
 	memcpy(newWaitTable, unixClientData->waitTable,
 		(unixClientData->waitTableSize * sizeof(WaitInfo)));
 	if (unixClientData->waitTable != NULL) {

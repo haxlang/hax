@@ -474,7 +474,8 @@ Hax_TildeSubst(
 	    ckfree(memoryp, clientDataPtr->curBuf);
 	}
 	clientDataPtr->curSize = length + 1;
-	clientDataPtr->curBuf = ckalloc(memoryp, clientDataPtr->curSize);
+	clientDataPtr->curBuf = (char *) ckalloc(memoryp,
+		clientDataPtr->curSize);
     }
 
     /*
