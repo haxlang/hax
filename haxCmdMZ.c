@@ -1354,9 +1354,11 @@ TraceVarProc(
 	 * result from the interpreter used for the command.
 	 */
 
+	dummy.memoryp = iPtr->memoryp;
 	if (interp->freeProc == 0) {
 	    dummy.freeProc = (Hax_FreeProc *) 0;
-	    dummy.result = (char *) "";
+	    dummy.result = dummy.resultSpace;
+	    dummy.resultSpace[0] = 0;
 	    Hax_SetResult((Hax_Interp *) &dummy, interp->result, HAX_VOLATILE);
 	} else {
 	    dummy.freeProc = interp->freeProc;
@@ -1371,8 +1373,17 @@ TraceVarProc(
 	    Hax_ResetResult(interp);		/* Must clear error state. */
 	}
 	Hax_FreeResult(interp);
-	interp->result = dummy.result;
-	interp->freeProc = dummy.freeProc;
+	if (dummy.result == dummy.resultSpace) {
+	    if (dummy.freeProc != HAX_STATIC) {
+		Hax_Panic((char *) "Corrupted state of dummy Interpreter");
+	    }
+	    iPtr->result = iPtr->resultSpace;
+	    strcpy(iPtr->resultSpace, dummy.resultSpace);
+	    iPtr->freeProc = HAX_STATIC;
+	} else {
+	    interp->result = dummy.result;
+	    interp->freeProc = dummy.freeProc;
+	}
     }
     if (flags & HAX_TRACE_DESTROYED) {
 	ckfree(memoryp, (char *) tvarPtr);
