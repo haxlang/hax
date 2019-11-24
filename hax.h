@@ -191,6 +191,8 @@ HAX_EXTERN void		Hax_ValidateAllMemory (Hax_Memoryp *, char *file,
 #define ckfree(m,x)  Hax_DbCkfree((m), (x), (char *) __FILE__, __LINE__)
 #define ckrealloc(m,x,y)					\
 	Hax_DbCkrealloc((m), (x), (y), (char *) __FILE__, __LINE__)
+#define ckvalidateallmemory(m)					\
+	Hax_ValidateAllMemory((m), (char *) __FILE__, __LINE__)
 
 
 /*
