@@ -326,7 +326,7 @@ Hax_DbCkfree(
     int          line)
 {
     Memoryp *memCtx = (Memoryp *) memoryp;
-    struct mem_header *memp = 0;  /* Must be zero for size calc */
+    struct mem_header *memp;
 
     if (ptr == NULL) {
 	Hax_Panic ((char *) "Cannot free memory at addres 0x0, %s line %d",
@@ -336,7 +336,8 @@ Hax_DbCkfree(
     /*
      * Since header ptr is zero, body offset will be size
      */
-    memp = (struct mem_header *)(((char *) ptr) - (long)memp->body);
+    memp = (struct mem_header *)(((char *) ptr) -
+	offsetof(struct mem_header, body));
 
     if (memCtx->alloc_tracing)
         fprintf(stderr, "ckfree %p %lu %s %d\n", memp->body,
