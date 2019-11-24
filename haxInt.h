@@ -172,7 +172,7 @@ typedef struct Var {
     int flags;			/* Miscellaneous bits of information about
 				 * variable.  See below for definitions. */
     union {
-	char string[4];		/* String value of variable.  The actual
+	char string[1];		/* String value of variable.  The actual
 				 * length of this field is given by the
 				 * valueSpace field above. */
 	Hax_HashTable *tablePtr;/* For array variables, this points to

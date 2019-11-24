@@ -473,14 +473,14 @@ Hax_SetVar2(
 
     if (flags & HAX_LIST_ELEMENT) {
 	if ((varPtr->valueLength > 0) && !(flags & HAX_NO_SPACE)) {
-	    varPtr->value.string[varPtr->valueLength] = ' ';
+	    ((char *)varPtr->value.string)[varPtr->valueLength] = ' ';
 	    varPtr->valueLength++;
 	}
 	varPtr->valueLength += Hax_ConvertElement(newValue,
-		varPtr->value.string + varPtr->valueLength, listFlags);
-	varPtr->value.string[varPtr->valueLength] = 0;
+		(char *)varPtr->value.string + varPtr->valueLength, listFlags);
+	((char *)varPtr->value.string)[varPtr->valueLength] = 0;
     } else {
-	strcpy(varPtr->value.string + varPtr->valueLength, newValue);
+	strcpy(((char *)varPtr->value.string) + varPtr->valueLength, newValue);
 	varPtr->valueLength += length;
     }
     varPtr->flags &= ~VAR_UNDEFINED;
