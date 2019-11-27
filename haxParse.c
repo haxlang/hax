@@ -1114,6 +1114,11 @@ Hax_ParseVar(
 #define NUM_CHARS 200
     char copyStorage[NUM_CHARS];
     ParseValue pv;
+    const char *ellipsis = "";		/* Used in setting errorInfo variable;
+					 * set to "..." to indicate that not
+					 * all of offending command is included
+					 * in errorInfo.  "" means that the
+					 * command is all there. */
 
     /*
      * There are three cases:
@@ -1177,8 +1182,13 @@ Hax_ParseVar(
 	    if (HaxParseQuotes(interp, string+1, ')', 0, &end, &pv)
 		    != HAX_OK) {
 		char msg[100];
-		sprintf(msg, "\n    (parsing index for array \"%.*s\")",
-			(int)(string-name1), name1);
+		int n = (int) (string - name1);
+		if (n > sizeof(msg)) {
+			n = sizeof(msg);
+			ellipsis = " ...";
+		}
+		sprintf(msg, "\n    (parsing index for array \"%.*s%s\")",
+			n, name1, ellipsis);
 		Hax_AddErrorInfo(interp, msg);
 		result = NULL;
 		name2 = pv.buffer;
