@@ -202,7 +202,10 @@ test: haxsh
 
 clean:
 	rm -f $(OBJS) $(UNIX_OBJS) libhax.a libhaxunix.a \
-		haxsh.o haxsh rhaxsh.o rhaxsh
+		haxsh.o haxsh rhaxsh.o rhaxsh libfuzzer
+
+libfuzzer: libhax.a libfuzzer.o
+	$(CC) $(LDFLAGS) -o $@ libfuzzer.o libhax.a
 
 $(OBJS): hax.h haxInt.h
 $(UNIX_OJBS): hax.h haxUnix.h
