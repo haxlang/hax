@@ -34,6 +34,7 @@
  * 2019-11-08 Correct build issued with a C++ compiler (g++, clang++)
  * 2019-11-19 Add Hax_Interp argument in RegComp()
  * 2019-11-19 Convert the usage of allocators to the new prototype
+ * 2019-11-27 Remove usage of stderr
  */
 #include "haxInt.h"
 
@@ -819,12 +820,12 @@ char *prog)
 	scan = prog;
 #ifdef DEBUG
 	if (scan != NULL && regnarrate)
-		fprintf(stderr, "%s(\n", Regprop(scan));
+		printf("%s(\n", Regprop(scan));
 #endif
 	while (scan != NULL) {
 #ifdef DEBUG
 		if (regnarrate)
-			fprintf(stderr, "%s...\n", Regprop(scan));
+			printf("%s...\n", Regprop(scan));
 #endif
 		next = RegNext(scan);
 
