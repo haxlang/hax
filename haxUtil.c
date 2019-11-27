@@ -42,16 +42,6 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/RCS/tclUtil.c,v 1.66 92/10/21 
 #define BRACES_UNMATCHED	4
 
 /*
- * The variable below is set to NULL before invoking regexp functions
- * and checked after those functions.  If an error occurred then RegError
- * will set the variable to point to a (static) error message.  This
- * mechanism unfortunately does not support multi-threading, but then
- * neither does the rest of the regexp facilities.
- */
-
-char *haxRegexpError = NULL;
-
-/*
  * Function prototypes for local procedures in this file:
  */
 
@@ -1408,12 +1398,12 @@ HaxCompileRegexp(
      * cache.
      */
 
-    haxRegexpError = NULL;
+    iPtr->haxRegexpError = NULL;
     result = RegComp(interp, string);
-    if (haxRegexpError != NULL) {
+    if (iPtr->haxRegexpError != NULL) {
 	Hax_AppendResult(interp,
 	    "couldn't compile regular expression pattern: ",
-	    haxRegexpError, (char *) NULL);
+	    iPtr->haxRegexpError, (char *) NULL);
 	return NULL;
     }
     if (iPtr->patterns[NUM_REGEXPS-1] != NULL) {
@@ -1452,7 +1442,10 @@ HaxCompileRegexp(
 
 void
 RegError(
+    Hax_Interp *interp,			/* For use in error reporting. */
     char *string			/* Error message. */)
 {
-    haxRegexpError = string;
+    Interp *iPtr = (Interp *) interp;
+
+    iPtr->haxRegexpError = string;
 }

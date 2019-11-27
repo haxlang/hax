@@ -128,14 +128,14 @@ Hax_RegexpCmd(
     } else {
 	string = argPtr[1];
     }
-    haxRegexpError = NULL;
-    match = RegExec(regexpPtr, string);
+    iPtr->haxRegexpError = NULL;
+    match = RegExec(interp, regexpPtr, string);
     if (string != argPtr[1]) {
 	ckfree(memoryp, string);
     }
-    if (haxRegexpError != NULL) {
+    if (iPtr->haxRegexpError != NULL) {
 	Hax_AppendResult(interp, "error while matching pattern: ",
-		haxRegexpError, (char *) NULL);
+		iPtr->haxRegexpError, (char *) NULL);
 	return HAX_ERROR;
     }
     if (!match) {
@@ -279,11 +279,11 @@ Hax_RegsubCmd(
 
     flags = 0;
     for (p = string; *p != 0; ) {
-	haxRegexpError = NULL;
-	match = RegExec(regexpPtr, p);
-	if (haxRegexpError != NULL) {
+	iPtr->haxRegexpError = NULL;
+	match = RegExec(interp, regexpPtr, p);
+	if (iPtr->haxRegexpError != NULL) {
 	    Hax_AppendResult(interp, "error while matching pattern: ",
-		    haxRegexpError, (char *) NULL);
+		    iPtr->haxRegexpError, (char *) NULL);
 	    result = HAX_ERROR;
 	    goto done;
 	}

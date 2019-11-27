@@ -70,9 +70,9 @@ typedef struct regexp {
 } regexp;
 
 extern regexp *RegComp (Hax_Interp *interp, char *exp);
-extern int RegExec (regexp *prog, char *string);
+extern int RegExec (Hax_Interp *interp, regexp *prog, char *string);
 extern void RegSub (regexp *prog, char *source, char *dest);
-extern void RegError (char *msg);
+extern void RegError (Hax_Interp *interp, char *msg);
 
 /*
  *----------------------------------------------------------------
@@ -489,6 +489,33 @@ typedef struct Interp {
 				 * defines from <errno.h>. */
     Hax_Memoryp *memoryp;	/* Memory Management context. */
     char *libraryPath;		/* Hax library (HAX_LIBRARY) path. */
+
+    /*
+     * The variable below is set to NULL before invoking regexp functions
+     * and checked after those functions.  If an error occurred then RegError
+     * will set the variable to point to a (static) error message.  This
+     * mechanism unfortunately does not support multi-threading, but then
+     * neither does the rest of the regexp facilities.
+     */
+
+    char *haxRegexpError;
+
+    /*
+     * Global work variables for Regcomp().
+     */
+    char *regparse;		/* Input-scan pointer. */
+    int regnpar;		/* () count. */
+    char regdummy;
+    char *regcode;		/* Code-emit pointer; &regdummy = don't. */
+    long regsize;		/* Code size. */
+
+    /*
+     * Global work variables for RegExec().
+     */
+    char *reginput;		/* String-input pointer. */
+    char *regbol;		/* Beginning of input, for ^ check. */
+    char **regstartp;	/* Pointer to startp array. */
+    char **regendp;		/* Ditto for endp. */
 } Interp;
 
 /*
@@ -600,13 +627,6 @@ extern char haxTypeTable[];
  */
 
 #define MAX_NESTING_DEPTH	100
-
-/*
- * Variables shared among Hax modules but not used by the outside
- * world:
- */
-
-extern char *		haxRegexpError;
 
 /*
  *----------------------------------------------------------------

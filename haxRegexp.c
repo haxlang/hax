@@ -35,6 +35,7 @@
  * 2019-11-19 Add Hax_Interp argument in RegComp()
  * 2019-11-19 Convert the usage of allocators to the new prototype
  * 2019-11-27 Remove usage of stderr
+ * 2019-11-27 Remove global state and rework API as needed
  */
 #include "haxInt.h"
 
@@ -141,7 +142,7 @@
 #define	UCHARAT(p)	((int)*(p)&CHARBITS)
 #endif
 
-#define	FAIL(m)	do { RegError(m); return(NULL); } while (0)
+#define	FAIL(m)	do { RegError(interp, (m)); return(NULL); } while (0)
 #define	ISMULT(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	META	"^$.[()|?+*\\"
 
@@ -154,15 +155,6 @@
 #define	WORST		0	/* Worst case. */
 
 /*
- * Global work variables for Regcomp().
- */
-static char *regparse;		/* Input-scan pointer. */
-static int regnpar;		/* () count. */
-static char regdummy;
-static char *regcode;		/* Code-emit pointer; &regdummy = don't. */
-static long regsize;		/* Code size. */
-
-/*
  * The first byte of the regexp internal "program" is actually this magic
  * number; the start node begins in the second byte.
  */
@@ -172,16 +164,16 @@ static long regsize;		/* Code size. */
 /*
  * Forward declarations for Regcomp()'s friends.
  */
-static char *Reg(int paren, int *flagp);
-static char *RegBranch(int *flagp);
-static char *RegPiece(int *flagp);
-static char *RegAtom(int *flagp);
-static char *RegNode(char op);
-static char *RegNext(char *p);
-static void RegC(char b);
-static void RegInsert(char op, char *opnd);
-static void RegTail(char *p, char *val);
-static void RegOpTail(char *p, char *val);
+static char *Reg(Hax_Interp *interp, int paren, int *flagp);
+static char *RegBranch(Hax_Interp *interp, int *flagp);
+static char *RegPiece(Hax_Interp *interp, int *flagp);
+static char *RegAtom(Hax_Interp *interp, int *flagp);
+static char *RegNode(Hax_Interp *interp, char op);
+static char *RegNext(Hax_Interp *interp, char *p);
+static void RegC(Hax_Interp *interp, char b);
+static void RegInsert(Hax_Interp *interp, char op, char *opnd);
+static void RegTail(Hax_Interp *interp, char *p, char *val);
+static void RegOpTail(Hax_Interp *interp, char *p, char *val);
 
 /*
  - Regcomp - compile a regular expression into internal code
@@ -213,29 +205,29 @@ RegComp(Hax_Interp *interp, char *exp)
 		FAIL((char *) "NULL argument");
 
 	/* First pass: determine size, legality. */
-	regparse = exp;
-	regnpar = 1;
-	regsize = 0L;
-	regcode = &regdummy;
-	RegC(MAGIC);
-	if (Reg(0, &flags) == NULL)
+	iPtr->regparse = exp;
+	iPtr->regnpar = 1;
+	iPtr->regsize = 0L;
+	iPtr->regcode = &iPtr->regdummy;
+	RegC(interp, MAGIC);
+	if (Reg(interp, 0, &flags) == NULL)
 		return(NULL);
 
 	/* Small enough for pointer-storage convention? */
-	if (regsize >= 32767L)		/* Probably could be 65535L. */
+	if (iPtr->regsize >= 32767L)		/* Probably could be 65535L. */
 		FAIL((char *) "regexp too big");
 
 	/* Allocate space. */
-	r = (regexp *)ckalloc(memoryp, sizeof(regexp) + (unsigned)regsize);
+	r = (regexp *)ckalloc(memoryp, sizeof(regexp) + (unsigned)iPtr->regsize);
 	if (r == NULL)
 		FAIL((char *) "out of space");
 
 	/* Second pass: emit code. */
-	regparse = exp;
-	regnpar = 1;
-	regcode = r->program;
-	RegC(MAGIC);
-	if (Reg(0, &flags) == NULL)
+	iPtr->regparse = exp;
+	iPtr->regnpar = 1;
+	iPtr->regcode = r->program;
+	RegC(interp, MAGIC);
+	if (Reg(interp, 0, &flags) == NULL)
 		return(NULL);
 
 	/* Dig out information for optimizations. */
@@ -244,7 +236,7 @@ RegComp(Hax_Interp *interp, char *exp)
 	r->regmust = NULL;
 	r->regmlen = 0;
 	scan = r->program+1;			/* First BRANCH. */
-	if (OP(RegNext(scan)) == END) {		/* Only one top-level choice. */
+	if (OP(RegNext(interp, scan)) == END) {		/* Only one top-level choice. */
 		scan = OPERAND(scan);
 
 		/* Starting-point info. */
@@ -264,7 +256,7 @@ RegComp(Hax_Interp *interp, char *exp)
 		if (flags&SPSTART) {
 			longest = NULL;
 			len = 0;
-			for (; scan != NULL; scan = RegNext(scan))
+			for (; scan != NULL; scan = RegNext(interp, scan))
 				if (OP(scan) == EXACTLY && strlen(OPERAND(scan)) >= len) {
 					longest = OPERAND(scan);
 					len = strlen(OPERAND(scan));
@@ -288,9 +280,11 @@ RegComp(Hax_Interp *interp, char *exp)
  */
 static char *
 Reg(
+Hax_Interp *interp,
 int paren,			/* Parenthesized? */
 int *flagp)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *ret;
 	char *br;
 	char *ender;
@@ -301,49 +295,49 @@ int *flagp)
 
 	/* Make an OPEN node, if parenthesized. */
 	if (paren) {
-		if (regnpar >= NSUBEXP)
+		if (iPtr->regnpar >= NSUBEXP)
 			FAIL((char *) "too many ()");
-		parno = regnpar;
-		regnpar++;
-		ret = RegNode(OPEN+parno);
+		parno = iPtr->regnpar;
+		iPtr->regnpar++;
+		ret = RegNode(interp, OPEN+parno);
 	} else
 		ret = NULL;
 
 	/* Pick up the branches, linking them together. */
-	br = RegBranch(&flags);
+	br = RegBranch(interp, &flags);
 	if (br == NULL)
 		return(NULL);
 	if (ret != NULL)
-		RegTail(ret, br);	/* OPEN -> first. */
+		RegTail(interp, ret, br);	/* OPEN -> first. */
 	else
 		ret = br;
 	if (!(flags&HASWIDTH))
 		*flagp &= ~HASWIDTH;
 	*flagp |= flags&SPSTART;
-	while (*regparse == '|') {
-		regparse++;
-		br = RegBranch(&flags);
+	while (*iPtr->regparse == '|') {
+		iPtr->regparse++;
+		br = RegBranch(interp, &flags);
 		if (br == NULL)
 			return(NULL);
-		RegTail(ret, br);	/* BRANCH -> BRANCH. */
+		RegTail(interp, ret, br);	/* BRANCH -> BRANCH. */
 		if (!(flags&HASWIDTH))
 			*flagp &= ~HASWIDTH;
 		*flagp |= flags&SPSTART;
 	}
 
 	/* Make a closing node, and hook it on the end. */
-	ender = RegNode((paren) ? CLOSE+parno : END);
-	RegTail(ret, ender);
+	ender = RegNode(interp, (paren) ? CLOSE+parno : END);
+	RegTail(interp, ret, ender);
 
 	/* Hook the tails of the branches to the closing node. */
-	for (br = ret; br != NULL; br = RegNext(br))
-		RegOpTail(br, ender);
+	for (br = ret; br != NULL; br = RegNext(interp, br))
+		RegOpTail(interp, br, ender);
 
 	/* Check for proper termination. */
-	if (paren && *regparse++ != ')') {
+	if (paren && *iPtr->regparse++ != ')') {
 		FAIL((char *) "unmatched ()");
-	} else if (!paren && *regparse != '\0') {
-		if (*regparse == ')') {
+	} else if (!paren && *iPtr->regparse != '\0') {
+		if (*iPtr->regparse == ')') {
 			FAIL((char *) "unmatched ()");
 		} else
 			FAIL((char *) "junk on end");	/* "Can't happen". */
@@ -360,8 +354,10 @@ int *flagp)
  */
 static char *
 RegBranch(
+Hax_Interp *interp,
 int *flagp)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *ret;
 	char *chain;
 	char *latest;
@@ -369,21 +365,21 @@ int *flagp)
 
 	*flagp = WORST;		/* Tentatively. */
 
-	ret = RegNode(BRANCH);
+	ret = RegNode(interp, BRANCH);
 	chain = NULL;
-	while (*regparse != '\0' && *regparse != '|' && *regparse != ')') {
-		latest = RegPiece(&flags);
+	while (*iPtr->regparse != '\0' && *iPtr->regparse != '|' && *iPtr->regparse != ')') {
+		latest = RegPiece(interp, &flags);
 		if (latest == NULL)
 			return(NULL);
 		*flagp |= flags&HASWIDTH;
 		if (chain == NULL)	/* First piece. */
 			*flagp |= flags&SPSTART;
 		else
-			RegTail(chain, latest);
+			RegTail(interp, chain, latest);
 		chain = latest;
 	}
 	if (chain == NULL)	/* Loop ran zero times. */
-		(void) RegNode(NOTHING);
+		(void) RegNode(interp, NOTHING);
 
 	return(ret);
 }
@@ -399,18 +395,20 @@ int *flagp)
  */
 static char *
 RegPiece(
+Hax_Interp *interp,
 int *flagp)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *ret;
 	char op;
 	char *next;
 	int flags;
 
-	ret = RegAtom(&flags);
+	ret = RegAtom(interp, &flags);
 	if (ret == NULL)
 		return(NULL);
 
-	op = *regparse;
+	op = *iPtr->regparse;
 	if (!ISMULT(op)) {
 		*flagp = flags;
 		return(ret);
@@ -421,33 +419,33 @@ int *flagp)
 	*flagp = (op != '+') ? (WORST|SPSTART) : (WORST|HASWIDTH);
 
 	if (op == '*' && (flags&SIMPLE))
-		RegInsert(STAR, ret);
+		RegInsert(interp, STAR, ret);
 	else if (op == '*') {
 		/* Emit x* as (x&|), where & means "self". */
-		RegInsert(BRANCH, ret);			/* Either x */
-		RegOpTail(ret, RegNode(BACK));		/* and loop */
-		RegOpTail(ret, ret);			/* back */
-		RegTail(ret, RegNode(BRANCH));		/* or */
-		RegTail(ret, RegNode(NOTHING));		/* null. */
+		RegInsert(interp, BRANCH, ret);			/* Either x */
+		RegOpTail(interp, ret, RegNode(interp, BACK));		/* and loop */
+		RegOpTail(interp, ret, ret);			/* back */
+		RegTail(interp, ret, RegNode(interp, BRANCH));		/* or */
+		RegTail(interp, ret, RegNode(interp, NOTHING));		/* null. */
 	} else if (op == '+' && (flags&SIMPLE))
-		RegInsert(PLUS, ret);
+		RegInsert(interp, PLUS, ret);
 	else if (op == '+') {
 		/* Emit x+ as x(&|), where & means "self". */
-		next = RegNode(BRANCH);			/* Either */
-		RegTail(ret, next);
-		RegTail(RegNode(BACK), ret);		/* loop back */
-		RegTail(next, RegNode(BRANCH));		/* or */
-		RegTail(ret, RegNode(NOTHING));		/* null. */
+		next = RegNode(interp, BRANCH);			/* Either */
+		RegTail(interp, ret, next);
+		RegTail(interp, RegNode(interp, BACK), ret);		/* loop back */
+		RegTail(interp, next, RegNode(interp, BRANCH));		/* or */
+		RegTail(interp, ret, RegNode(interp, NOTHING));		/* null. */
 	} else if (op == '?') {
 		/* Emit x? as (x|) */
-		RegInsert(BRANCH, ret);			/* Either x */
-		RegTail(ret, RegNode(BRANCH));		/* or */
-		next = RegNode(NOTHING);		/* null. */
-		RegTail(ret, next);
-		RegOpTail(ret, next);
+		RegInsert(interp, BRANCH, ret);			/* Either x */
+		RegTail(interp, ret, RegNode(interp, BRANCH));		/* or */
+		next = RegNode(interp, NOTHING);		/* null. */
+		RegTail(interp, ret, next);
+		RegOpTail(interp, ret, next);
 	}
-	regparse++;
-	if (ISMULT(*regparse))
+	iPtr->regparse++;
+	if (ISMULT(*iPtr->regparse))
 		FAIL((char *) "nested *?+");
 
 	return(ret);
@@ -463,61 +461,63 @@ int *flagp)
  */
 static char *
 RegAtom(
+Hax_Interp *interp,
 int *flagp)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *ret;
 	int flags;
 
 	*flagp = WORST;		/* Tentatively. */
 
-	switch (*regparse++) {
+	switch (*iPtr->regparse++) {
 	case '^':
-		ret = RegNode(BOL);
+		ret = RegNode(interp, BOL);
 		break;
 	case '$':
-		ret = RegNode(EOL);
+		ret = RegNode(interp, EOL);
 		break;
 	case '.':
-		ret = RegNode(ANY);
+		ret = RegNode(interp, ANY);
 		*flagp |= HASWIDTH|SIMPLE;
 		break;
 	case '[': {
 			int clss;
 			int classend;
 
-			if (*regparse == '^') {	/* Complement of range. */
-				ret = RegNode(ANYBUT);
-				regparse++;
+			if (*iPtr->regparse == '^') {	/* Complement of range. */
+				ret = RegNode(interp, ANYBUT);
+				iPtr->regparse++;
 			} else
-				ret = RegNode(ANYOF);
-			if (*regparse == ']' || *regparse == '-')
-				RegC(*regparse++);
-			while (*regparse != '\0' && *regparse != ']') {
-				if (*regparse == '-') {
-					regparse++;
-					if (*regparse == ']' || *regparse == '\0')
-						RegC('-');
+				ret = RegNode(interp, ANYOF);
+			if (*iPtr->regparse == ']' || *iPtr->regparse == '-')
+				RegC(interp, *iPtr->regparse++);
+			while (*iPtr->regparse != '\0' && *iPtr->regparse != ']') {
+				if (*iPtr->regparse == '-') {
+					iPtr->regparse++;
+					if (*iPtr->regparse == ']' || *iPtr->regparse == '\0')
+						RegC(interp, '-');
 					else {
-						clss = UCHARAT(regparse-2)+1;
-						classend = UCHARAT(regparse);
+						clss = UCHARAT(iPtr->regparse-2)+1;
+						classend = UCHARAT(iPtr->regparse);
 						if (clss > classend+1)
 							FAIL((char *) "invalid [] range");
 						for (; clss <= classend; clss++)
-							RegC(clss);
-						regparse++;
+							RegC(interp, clss);
+						iPtr->regparse++;
 					}
 				} else
-					RegC(*regparse++);
+					RegC(interp, *iPtr->regparse++);
 			}
-			RegC('\0');
-			if (*regparse != ']')
+			RegC(interp, '\0');
+			if (*iPtr->regparse != ']')
 				FAIL((char *) "unmatched []");
-			regparse++;
+			iPtr->regparse++;
 			*flagp |= HASWIDTH|SIMPLE;
 		}
 		break;
 	case '(':
-		ret = Reg(1, &flags);
+		ret = Reg(interp, 1, &flags);
 		if (ret == NULL)
 			return(NULL);
 		*flagp |= flags&(HASWIDTH|SPSTART);
@@ -535,33 +535,33 @@ int *flagp)
 		/* NOTREACHED */
 		break;
 	case '\\':
-		if (*regparse == '\0')
+		if (*iPtr->regparse == '\0')
 			FAIL((char *) "trailing \\");
-		ret = RegNode(EXACTLY);
-		RegC(*regparse++);
-		RegC('\0');
+		ret = RegNode(interp, EXACTLY);
+		RegC(interp, *iPtr->regparse++);
+		RegC(interp, '\0');
 		*flagp |= HASWIDTH|SIMPLE;
 		break;
 	default: {
 			int len;
 			char ender;
 
-			regparse--;
-			len = strcspn(regparse, META);
+			iPtr->regparse--;
+			len = strcspn(iPtr->regparse, META);
 			if (len <= 0)
 				FAIL((char *) "internal disaster");
-			ender = *(regparse+len);
+			ender = *(iPtr->regparse+len);
 			if (len > 1 && ISMULT(ender))
 				len--;		/* Back off clear of ?+* operand. */
 			*flagp |= HASWIDTH;
 			if (len == 1)
 				*flagp |= SIMPLE;
-			ret = RegNode(EXACTLY);
+			ret = RegNode(interp, EXACTLY);
 			while (len > 0) {
-				RegC(*regparse++);
+				RegC(interp, *iPtr->regparse++);
 				len--;
 			}
-			RegC('\0');
+			RegC(interp, '\0');
 		}
 		break;
 	}
@@ -574,14 +574,16 @@ int *flagp)
  */
 static char *			/* Location. */
 RegNode(
+Hax_Interp *interp,
 char op)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *ret;
 	char *ptr;
 
-	ret = regcode;
-	if (ret == &regdummy) {
-		regsize += 3;
+	ret = iPtr->regcode;
+	if (ret == &iPtr->regdummy) {
+		iPtr->regsize += 3;
 		return(ret);
 	}
 
@@ -589,7 +591,7 @@ char op)
 	*ptr++ = op;
 	*ptr++ = '\0';		/* Null "next" pointer. */
 	*ptr++ = '\0';
-	regcode = ptr;
+	iPtr->regcode = ptr;
 
 	return(ret);
 }
@@ -599,12 +601,15 @@ char op)
  */
 static void
 RegC(
+Hax_Interp *interp,
 char b)
 {
-	if (regcode != &regdummy)
-		*regcode++ = b;
+	Interp *iPtr = (Interp *) interp;
+
+	if (iPtr->regcode != &iPtr->regdummy)
+		*iPtr->regcode++ = b;
 	else
-		regsize++;
+		iPtr->regsize++;
 }
 
 /*
@@ -614,21 +619,23 @@ char b)
  */
 static void
 RegInsert(
+Hax_Interp *interp,
 char op,
 char *opnd)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *src;
 	char *dst;
 	char *place;
 
-	if (regcode == &regdummy) {
-		regsize += 3;
+	if (iPtr->regcode == &iPtr->regdummy) {
+		iPtr->regsize += 3;
 		return;
 	}
 
-	src = regcode;
-	regcode += 3;
-	dst = regcode;
+	src = iPtr->regcode;
+	iPtr->regcode += 3;
+	dst = iPtr->regcode;
 	while (src > opnd)
 		*--dst = *--src;
 
@@ -643,20 +650,22 @@ char *opnd)
  */
 static void
 RegTail(
+Hax_Interp *interp,
 char *p,
 char *val)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *scan;
 	char *temp;
 	int offset;
 
-	if (p == &regdummy)
+	if (p == &iPtr->regdummy)
 		return;
 
 	/* Find last node. */
 	scan = p;
 	for (;;) {
-		temp = RegNext(scan);
+		temp = RegNext(interp, scan);
 		if (temp == NULL)
 			break;
 		scan = temp;
@@ -675,13 +684,16 @@ char *val)
  */
 static void
 RegOpTail(
+Hax_Interp *interp,
 char *p,
 char *val)
 {
+	Interp *iPtr = (Interp *) interp;
+
 	/* "Operandless" and "op != BRANCH" are synonymous in practice. */
-	if (p == NULL || p == &regdummy || OP(p) != BRANCH)
+	if (p == NULL || p == &iPtr->regdummy || OP(p) != BRANCH)
 		return;
-	RegTail(OPERAND(p), val);
+	RegTail(interp, OPERAND(p), val);
 }
 
 /*
@@ -689,19 +701,11 @@ char *val)
  */
 
 /*
- * Global work variables for RegExec().
- */
-static char *reginput;		/* String-input pointer. */
-static char *regbol;		/* Beginning of input, for ^ check. */
-static char **regstartp;	/* Pointer to startp array. */
-static char **regendp;		/* Ditto for endp. */
-
-/*
  * Forwards.
  */
-static int RegTry(regexp *prog, char *string);
-static int RegMatch(char *prog);
-static int RegRepeat(char *p);
+static int RegTry(Hax_Interp *interp, regexp *prog, char *string);
+static int RegMatch(Hax_Interp *interp, char *prog);
+static int RegRepeat(Hax_Interp *interp, char *p);
 
 #ifdef DEBUG
 int regnarrate = 0;
@@ -714,20 +718,22 @@ static char *RegProp(char *op);
  */
 int
 RegExec(
+Hax_Interp *interp,
 regexp *prog,
 char *string)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *s;
 
 	/* Be paranoid... */
 	if (prog == NULL || string == NULL) {
-		RegError((char *) "NULL parameter");
+		RegError(interp, (char *) "NULL parameter");
 		return(0);
 	}
 
 	/* Check validity of program. */
 	if (UCHARAT(prog->program) != MAGIC) {
-		RegError((char *) "corrupted program");
+		RegError(interp, (char *) "corrupted program");
 		return(0);
 	}
 
@@ -744,25 +750,25 @@ char *string)
 	}
 
 	/* Mark beginning of line for ^ . */
-	regbol = string;
+	iPtr->regbol = string;
 
 	/* Simplest case:  anchored match need be tried only once. */
 	if (prog->reganch)
-		return(RegTry(prog, string));
+		return(RegTry(interp, prog, string));
 
 	/* Messy cases:  unanchored match. */
 	s = string;
 	if (prog->regstart != '\0')
 		/* We know what char it must start with. */
 		while ((s = strchr(s, prog->regstart)) != NULL) {
-			if (RegTry(prog, s))
+			if (RegTry(interp, prog, s))
 				return(1);
 			s++;
 		}
 	else
 		/* We don't -- general case. */
 		do {
-			if (RegTry(prog, s))
+			if (RegTry(interp, prog, s))
 				return(1);
 		} while (*s++ != '\0');
 
@@ -775,16 +781,18 @@ char *string)
  */
 static int			/* 0 failure, 1 success */
 RegTry(
+Hax_Interp *interp,
 regexp *prog,
 char *string)
 {
+	Interp *iPtr = (Interp *) interp;
 	int i;
 	char **sp;
 	char **ep;
 
-	reginput = string;
-	regstartp = prog->startp;
-	regendp = prog->endp;
+	iPtr->reginput = string;
+	iPtr->regstartp = prog->startp;
+	iPtr->regendp = prog->endp;
 
 	sp = prog->startp;
 	ep = prog->endp;
@@ -792,9 +800,9 @@ char *string)
 		*sp++ = NULL;
 		*ep++ = NULL;
 	}
-	if (RegMatch(prog->program + 1)) {
+	if (RegMatch(interp, prog->program + 1)) {
 		prog->startp[0] = string;
-		prog->endp[0] = reginput;
+		prog->endp[0] = iPtr->reginput;
 		return(1);
 	} else
 		return(0);
@@ -812,8 +820,10 @@ char *string)
  */
 static int			/* 0 failure, 1 success */
 RegMatch(
+Hax_Interp *interp,
 char *prog)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *scan;	/* Current node. */
 	char *next;		/* Next node. */
 
@@ -827,21 +837,21 @@ char *prog)
 		if (regnarrate)
 			printf("%s...\n", Regprop(scan));
 #endif
-		next = RegNext(scan);
+		next = RegNext(interp, scan);
 
 		switch (OP(scan)) {
 		case BOL:
-			if (reginput != regbol)
+			if (iPtr->reginput != iPtr->regbol)
 				return(0);
 			break;
 		case EOL:
-			if (*reginput != '\0')
+			if (*iPtr->reginput != '\0')
 				return(0);
 			break;
 		case ANY:
-			if (*reginput == '\0')
+			if (*iPtr->reginput == '\0')
 				return(0);
-			reginput++;
+			iPtr->reginput++;
 			break;
 		case EXACTLY: {
 				int len;
@@ -849,23 +859,23 @@ char *prog)
 
 				opnd = OPERAND(scan);
 				/* Inline the first character, for speed. */
-				if (*opnd != *reginput)
+				if (*opnd != *iPtr->reginput)
 					return(0);
 				len = strlen(opnd);
-				if (len > 1 && strncmp(opnd, reginput, len) != 0)
+				if (len > 1 && strncmp(opnd, iPtr->reginput, len) != 0)
 					return(0);
-				reginput += len;
+				iPtr->reginput += len;
 			}
 			break;
 		case ANYOF:
- 			if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) == NULL)
+ 			if (*iPtr->reginput == '\0' || strchr(OPERAND(scan), *iPtr->reginput) == NULL)
 				return(0);
-			reginput++;
+			iPtr->reginput++;
 			break;
 		case ANYBUT:
- 			if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) != NULL)
+ 			if (*iPtr->reginput == '\0' || strchr(OPERAND(scan), *iPtr->reginput) != NULL)
 				return(0);
-			reginput++;
+			iPtr->reginput++;
 			break;
 		case NOTHING:
 			break;
@@ -884,16 +894,16 @@ char *prog)
 				char *save;
 
 				no = OP(scan) - OPEN;
-				save = reginput;
+				save = iPtr->reginput;
 
-				if (RegMatch(next)) {
+				if (RegMatch(interp, next)) {
 					/*
 					 * Don't set startp if some later
 					 * invocation of the same parentheses
 					 * already has.
 					 */
-					if (regstartp[no] == NULL)
-						regstartp[no] = save;
+					if (iPtr->regstartp[no] == NULL)
+						iPtr->regstartp[no] = save;
 					return(1);
 				} else
 					return(0);
@@ -912,16 +922,16 @@ char *prog)
 				char *save;
 
 				no = OP(scan) - CLOSE;
-				save = reginput;
+				save = iPtr->reginput;
 
-				if (RegMatch(next)) {
+				if (RegMatch(interp, next)) {
 					/*
 					 * Don't set endp if some later
 					 * invocation of the same parentheses
 					 * already has.
 					 */
-					if (regendp[no] == NULL)
-						regendp[no] = save;
+					if (iPtr->regendp[no] == NULL)
+						iPtr->regendp[no] = save;
 					return(1);
 				} else
 					return(0);
@@ -934,11 +944,11 @@ char *prog)
 					next = OPERAND(scan);	/* Avoid recursion. */
 				else {
 					do {
-						save = reginput;
-						if (RegMatch(OPERAND(scan)))
+						save = iPtr->reginput;
+						if (RegMatch(interp, OPERAND(scan)))
 							return(1);
-						reginput = save;
-						scan = RegNext(scan);
+						iPtr->reginput = save;
+						scan = RegNext(interp, scan);
 					} while (scan != NULL && OP(scan) == BRANCH);
 					return(0);
 					/* NOTREACHED */
@@ -961,16 +971,16 @@ char *prog)
 				if (OP(next) == EXACTLY)
 					nextch = *OPERAND(next);
 				min = (OP(scan) == STAR) ? 0 : 1;
-				save = reginput;
-				no = RegRepeat(OPERAND(scan));
+				save = iPtr->reginput;
+				no = RegRepeat(interp, OPERAND(scan));
 				while (no >= min) {
 					/* If it could work, try it. */
-					if (nextch == '\0' || *reginput == nextch)
-						if (RegMatch(next))
+					if (nextch == '\0' || *iPtr->reginput == nextch)
+						if (RegMatch(interp, next))
 							return(1);
 					/* Couldn't or didn't -- back up. */
 					no--;
-					reginput = save + no;
+					iPtr->reginput = save + no;
 				}
 				return(0);
 			}
@@ -978,7 +988,7 @@ char *prog)
 		case END:
 			return(1);	/* Success! */
 		default:
-			RegError((char *) "memory corruption");
+			RegError(interp, (char *) "memory corruption");
 			return(0);
 		}
 
@@ -989,7 +999,7 @@ char *prog)
 	 * We get here only if there's trouble -- normally "case END" is
 	 * the terminating point.
 	 */
-	RegError((char *) "corrupted pointers");
+	RegError(interp, (char *) "corrupted pointers");
 	return(0);
 }
 
@@ -998,13 +1008,15 @@ char *prog)
  */
 static int
 RegRepeat(
+Hax_Interp *interp,
 char *p)
 {
+	Interp *iPtr = (Interp *) interp;
 	int count = 0;
 	char *scan;
 	char *opnd;
 
-	scan = reginput;
+	scan = iPtr->reginput;
 	opnd = OPERAND(p);
 	switch (OP(p)) {
 	case ANY:
@@ -1030,11 +1042,11 @@ char *p)
 		}
 		break;
 	default:		/* Oh dear.  Called inappropriately. */
-		RegError((char *) "internal foulup");
+		RegError(interp, (char *) "internal foulup");
 		count = 0;	/* Best compromise. */
 		break;
 	}
-	reginput = scan;
+	iPtr->reginput = scan;
 
 	return(count);
 }
@@ -1044,11 +1056,13 @@ char *p)
  */
 static char *
 RegNext(
+Hax_Interp *interp,
 char *p)
 {
+	Interp *iPtr = (Interp *) interp;
 	int offset;
 
-	if (p == &regdummy)
+	if (p == &iPtr->regdummy)
 		return(NULL);
 
 	offset = NEXT(p);
@@ -1070,8 +1084,10 @@ static char *RegProp(char *op);
  */
 void
 RegDump(
+Hax_interp *interp,
 regexp *r)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *s;
 	char op = EXACTLY;	/* Arbitrary non-END op. */
 	char *next;
@@ -1081,7 +1097,7 @@ regexp *r)
 	while (op != END) {	/* While that wasn't END last time... */
 		op = OP(s);
 		printf("%2d%s", s-r->program, Regprop(s));	/* Where, what. */
-		next = RegNext(s);
+		next = RegNext(interp, s);
 		if (next == NULL)		/* Next ptr. */
 			printf("(0)");
 		else
@@ -1113,8 +1129,10 @@ regexp *r)
  */
 static char *
 RegProp(
+Hax_interp *interp,
 char *op)
 {
+	Interp *iPtr = (Interp *) interp;
 	char *p;
 	static char buf[50];
 

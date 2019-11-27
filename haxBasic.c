@@ -149,6 +149,17 @@ Hax_CreateInterp(
     iPtr->tracePtr = NULL;
     iPtr->resultSpace[0] = 0;
     iPtr->internalErrno = 0;
+    iPtr->haxRegexpError = NULL;
+    iPtr->regparse = NULL;
+    iPtr->regnpar = 0;
+    iPtr->regdummy = 0;
+    iPtr->regcode = NULL;
+    iPtr->regsize = 0;
+    iPtr->reginput = NULL;
+    iPtr->regbol = NULL;
+    iPtr->regstartp = NULL;
+    iPtr->regendp = NULL;
+
 #ifdef HAX_LIBRARY
     iPtr->libraryPath = (char *) ckalloc(memoryp, strlen(HAX_LIBRARY) + 1);
     strcpy(iPtr->libraryPath, HAX_LIBRARY);
