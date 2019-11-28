@@ -23,6 +23,11 @@ static char rcsid[] = "$Header: /user6/ouster/tcl/tclTest/RCS/tclTest.c,v 1.22 9
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+
+#ifndef RHAXSH
+#include <unistd.h>
+#endif
+
 #include "hax.h"
 
 Hax_Memoryp *memoryp;
@@ -36,6 +41,13 @@ ClientData unixClientData;
 
 char initCmd[] =
     "if [file exists [info library]/init.tcl] {source [info library]/init.tcl}";
+
+static void
+usage(void)
+{
+    fprintf(stderr, "haxsh: [-f fileName] args...\n");
+    exit(1);
+}
 #endif
 
 	/* ARGSUSED */
@@ -119,8 +131,14 @@ destroyEnv(
 int
 main(int argc, char **argv)
 {
+    int i;
     char line[1000], *cmd;
     int result, gotPartial;
+    char *argv0 = argv[0];
+#ifndef RHAXSH
+    int ch;
+    char *fileName = NULL;
+#endif
 
     memoryp = Hax_CreateMemoryManagement(0, 0, 0, 0, 1);
     interp = Hax_CreateInterp(memoryp);
@@ -134,11 +152,49 @@ main(int argc, char **argv)
     Hax_CreateCommand(interp, (char *) "checkmem", cmdCheckmem, (ClientData) 0,
 	    (Hax_CmdDeleteProc *) NULL);
     buffer = Hax_CreateCmdBuf(interp);
+
+#ifndef RHAXSH
+    while ((ch = getopt(argc, argv, "f:")) != -1) {
+	switch (ch) {
+	case 'f':
+	    if (fileName != NULL) {
+		usage();
+	    }
+	    fileName = optarg;
+	    argv0 = fileName;
+	    break;
+	default:
+	    usage();
+	    /* NOTREACHED */
+	}
+    }
+
+    argc -= optind;
+    argv += optind;
+#endif
+
+    Hax_SetVar(interp, (char *) "argv0", argv0, HAX_GLOBAL_ONLY);
+    Hax_SetVar(interp, (char *) "argv", "", HAX_GLOBAL_ONLY);
+    for (i = 0; i < argc; i++) {
+	Hax_SetVar(interp, (char *) "argv", argv[i], HAX_APPEND_VALUE | HAX_LIST_ELEMENT);
+    }
+    sprintf(line, "%d", argc);
+    Hax_SetVar(interp, (char *) "argc", line, HAX_GLOBAL_ONLY);
+
 #ifndef RHAXSH
     result = Hax_Eval(interp, NULL, initCmd, 0, (char **) NULL);
     if (result != HAX_OK) {
 	printf("%s\n", interp->result);
 	exit(1);
+    }
+
+    if (fileName != NULL) {
+	Hax_EvalFile(interp, unixClientData, fileName);
+	if (result != HAX_OK) {
+	    printf("%s\n", interp->result);
+	    exit(1);
+	}
+	exit(0);
     }
 #endif
 
