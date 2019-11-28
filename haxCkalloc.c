@@ -104,7 +104,6 @@ ValidateMemory (
         byte = *(memHeaderP->low_guard + idx);
         if (byte != GUARD_VALUE) {
             guard_failed = TRUE;
-            fflush (stdout);
 	    byte &= 0xff;
             printf("low guard byte %d is 0x%x  \t%c\n", idx, byte,
 	    	    (isprint(byte) ? byte : ' '));
@@ -114,7 +113,6 @@ ValidateMemory (
         dump_memory_info (memoryp);
         printf ("low guard failed at %p, %s %d\n",
                  memHeaderP->body, file, line);
-        fflush (stdout);  /* In case name pointer is bad. */
         printf ("%lu bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
         Hax_Panic ((char *) "Memory validation failure");
@@ -125,7 +123,6 @@ ValidateMemory (
         byte = *(hiPtr + idx);
         if (byte != GUARD_VALUE) {
             guard_failed = TRUE;
-            fflush(stdout);
 	    byte &= 0xff;
             printf("hi guard byte %d is 0x%x  \t%c\n", idx, byte,
 	    	    (isprint(byte) ? byte : ' '));
@@ -136,7 +133,6 @@ ValidateMemory (
         dump_memory_info (memoryp);
         printf ("high guard failed at %p, %s %d\n",
                  memHeaderP->body, file, line);
-        fflush (stdout);  /* In case name pointer is bad. */
         printf ("%lu bytes allocated at (%s %d)\n", memHeaderP->length,
 		memHeaderP->file, memHeaderP->line);
         Hax_Panic ((char *) "Memory validation failure");
@@ -239,7 +235,6 @@ Hax_DbCkalloc(
     result = (struct mem_header *)malloc(size +
                               sizeof(struct mem_header) + GUARD_SIZE);
     if (result == NULL) {
-        fflush(stdout);
         dump_memory_info(memCtx);
         Hax_Panic((char *) "unable to alloc %lu bytes, %s line %d", size, file,
               line);
@@ -262,10 +257,8 @@ Hax_DbCkalloc(
     memCtx->total_mallocs++;
     if (memCtx->trace_on_at_malloc &&
 	(memCtx->total_mallocs >= memCtx->trace_on_at_malloc)) {
-        (void) fflush(stdout);
         printf("reached malloc trace enable point (%lld)\n",
                 memCtx->total_mallocs);
-        fflush(stdout);
         memCtx->alloc_tracing = TRUE;
         memCtx->trace_on_at_malloc = 0;
     }
@@ -277,11 +270,9 @@ Hax_DbCkalloc(
     if (memCtx->break_on_malloc &&
 	(memCtx->total_mallocs >= memCtx->break_on_malloc)) {
         memCtx->break_on_malloc = 0;
-        (void) fflush(stdout);
         printf("reached malloc break limit (%lld)\n",
                 memCtx->total_mallocs);
         printf("program will now enter C debugger\n");
-        (void) fflush(stdout);
 	Hax_Breakpoint();
     }
 
