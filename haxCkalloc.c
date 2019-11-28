@@ -196,7 +196,7 @@ Hax_DumpActiveMemory (
         if (strcmp(memScanP->file, "haxHash.c") == 0 && memScanP->line == 514){
 	    printf("\t|%s|", ((Hax_HashEntry *) address)->key.string);
 	}
-	(void) putchar('\n');
+	(void) printf("\n");
     }
     return HAX_OK;
 }
