@@ -136,6 +136,43 @@ Strtoul(
     return result;
 }
 
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Strtod --
+ *
+ *	Convert string value to double.
+ *
+ * Results:
+ *	Converted integer on successful operation.
+ *
+ * Side effects:
+ *	On error, errno is stored in the interpreter structure.
+ *
+ *----------------------------------------------------------------------
+ */
+
+double
+Strtod(
+    Interp *iPtr,
+    const char *nptr,
+    char **endptr)
+{
+    double result;
+    int saved_errno;
+
+    saved_errno = errno;
+    errno = 0;
+    result = strtod(nptr, endptr);
+    if (iPtr) {
+	iPtr->internalErrno = ErrnoToInternalErrno(errno);
+    }
+    errno = saved_errno;
+
+    return result;
+}
+
 /*
  *----------------------------------------------------------------------
  *

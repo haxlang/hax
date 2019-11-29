@@ -638,6 +638,7 @@ extern long long int	Strtoll(Interp *iPtr, const char *nptr, char **endptr,
 			    int base);
 extern unsigned long int Strtoul(Interp *iPtr, const char *nptr, char **endptr,
 			    int base);
+extern double		Strtod(Interp *iPtr, const char *nptr, char **endptr);
 extern regexp *		HaxCompileRegexp (Hax_Interp *interp,
 			    char *string);
 extern void		HaxCopyAndCollapse (int count, char *src,

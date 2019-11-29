@@ -208,7 +208,7 @@ ExprParseString(
 	if ((c == '.') || (c == 'e') || (c == 'E') ||
 	    (iPtr->internalErrno == HAX_ERANGE)) {
 	    iPtr->internalErrno = 0;
-	    valuePtr->doubleValue = strtod(string, &term);
+	    valuePtr->doubleValue = Strtod(iPtr, string, &term);
 	    if (iPtr->internalErrno == HAX_ERANGE) {
 		Hax_ResetResult(interp);
 		if (valuePtr->doubleValue == 0.0) {
@@ -325,7 +325,7 @@ ExprLex(
 		char *term2;
 
 		iPtr->internalErrno = 0;
-		valuePtr->doubleValue = strtod(p, &term2);
+		valuePtr->doubleValue = Strtod(iPtr, p, &term2);
 		if (iPtr->internalErrno == HAX_ERANGE) {
 		    Hax_ResetResult(interp);
 		    if (valuePtr->doubleValue == 0.0) {
