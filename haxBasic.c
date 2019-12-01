@@ -1083,6 +1083,23 @@ Hax_GetMemoryp(
 /*
  *----------------------------------------------------------------------
  *
+ * Hax_GetLibraryPath --
+ *     Get location of the Hax library.
+ *
+ *----------------------------------------------------------------------
+ */
+char *
+Hax_GetLibraryPath(
+    Hax_Interp *interp)
+{
+    Interp *iPtr = (Interp *) interp;
+
+    return iPtr->libraryPath;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
  * Hax_SetLibraryPath --
  *     Set location of the Hax library.
  *
