@@ -75,10 +75,12 @@ libhaxunix.a: $(UNIX_OBJS)
 	$(AR) cr $@ $(UNIX_OBJS)
 	$(RANLIB) $@
 
-rhaxsh: rhaxsh.o libhax.a
+rhaxsh: libhax.a
+	$(CC) $(CFLAGS) -o rhaxsh.o -c rhaxsh.c
 	$(CC) $(LDFLAGS) -o $@ rhaxsh.o libhax.a
 
-haxsh: haxsh.o libhax.a libhaxunix.a
+haxsh: libhax.a libhaxunix.a
+	$(CC) $(CFLAGS) -o haxsh.o -c haxsh.c
 	$(CC) $(LDFLAGS) -o $@ haxsh.o libhax.a libhaxunix.a
 
 install: libhax.a libhaxunix.a haxsh rhaxsh
@@ -204,7 +206,8 @@ clean:
 	rm -f $(OBJS) $(UNIX_OBJS) libhax.a libhaxunix.a \
 		haxsh.o haxsh rhaxsh.o rhaxsh libfuzzer
 
-libfuzzer: libhax.a libfuzzer.o
+libfuzzer: libhax.a
+	$(CC) $(CFLAGS) -o libfuzzer.o -c libfuzzer.c
 	$(CC) $(LDFLAGS) -o $@ libfuzzer.o libhax.a
 
 $(OBJS): hax.h haxInt.h
