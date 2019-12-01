@@ -517,11 +517,6 @@ Hax_InfoCmd(
 	    return HAX_ERROR;
 	}
 
-	/*
-	 * Note:  HAX_VERSION below is expected to be set with a "-D"
-	 * switch in the Makefile.
-	 */
-
 	strcpy(iPtr->result, HAX_VERSION);
 	return HAX_OK;
     } else if ((c == 'v') && (strncmp(argv[1], "vars", length)) == 0) {
