@@ -1,4 +1,7 @@
 *.o
+*.la
+*.lo
+.libs
 *~
 *.core
 libhax.a

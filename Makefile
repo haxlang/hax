@@ -31,7 +31,7 @@
 #    CC			Path to cc(1).
 #    AR			Path to ar(1).
 #    RANLIB		Path to ranlib(1).
-#    RANLIB		Path to ranlib(1).
+#    LIBTOOL		Path to libtool(1).
 #
 #    CFLAGS		Flags passed to a compiler.
 #    LDFLAGS		Flags passed to a linker.
@@ -42,6 +42,7 @@
 AR	= ar
 RANLIB	= ranlib
 CC	= cc
+LIBTOOL	= libtool
 CFLAGS	=
 LDFLAGS	=
 
@@ -54,36 +55,49 @@ MAN_DIR ?=	man
 MAN3_DIR ?=	$(MAN_DIR)/man3
 MANN_DIR ?=	$(MAN_DIR)/mann
 
-all: libhax.a libhaxunix.a haxsh rhaxsh
+all: libhax.la libhaxunix.la haxsh rhaxsh
 
 GENERIC_OBJS =	haxRegexp.o haxAssem.o haxBasic.o haxCkalloc.o \
 	haxCmdAH.o haxCmdIL.o haxCmdMZ.o haxExpr.o haxGet.o \
 	haxHash.o haxHistory.o haxParse.o haxProc.o haxUtil.o \
 	haxVar.o haxPanic.o haxBreakpoint.o haxStrtol.o
 
+GENERIC_LOBJS =	haxRegexp.lo haxAssem.lo haxBasic.lo haxCkalloc.lo \
+	haxCmdAH.lo haxCmdIL.lo haxCmdMZ.lo haxExpr.lo haxGet.lo \
+	haxHash.lo haxHistory.lo haxParse.lo haxProc.lo haxUtil.lo \
+	haxVar.lo haxPanic.lo haxBreakpoint.lo haxStrtol.lo
+
 UNIX_OBJS = haxEnv.o haxGlob.o haxUnixAZ.o haxUnixStr.o haxUnixUtil.o
+
+UNIX_LOBJS = haxEnv.lo haxGlob.lo haxUnixAZ.lo haxUnixStr.lo haxUnixUtil.lo
 
 COMPAT_OBJS =
 
+COMPAT_LOBJS =
+
 OBJS = $(GENERIC_OBJS) $(COMPAT_OBJS)
 
-libhax.a: $(OBJS)
-	$(AR) cr $@ $(OBJS)
-	$(RANLIB) $@
+LOBJS = $(GENERIC_LOBJS) $(COMPAT_LOBJS)
 
-libhaxunix.a: $(UNIX_OBJS)
-	$(AR) cr $@ $(UNIX_OBJS)
-	$(RANLIB) $@
+libhax.la: $(OBJS)
+	${LIBTOOL} --mode=link --tag=CC ${CC} -avoid-version ${LDFLAGS} \
+		-o $@ ${LOBJS} -rpath ${PREFIX}/lib
 
-rhaxsh: libhax.a
+libhaxunix.la: $(UNIX_OBJS)
+	${LIBTOOL} --mode=link --tag=CC ${CC} -avoid-version ${LDFLAGS} \
+		-o $@ ${UNIX_LOBJS} -rpath ${PREFIX}/lib
+
+rhaxsh: libhax.la
 	$(CC) $(CFLAGS) -o rhaxsh.o -c rhaxsh.c
-	$(CC) $(LDFLAGS) -o $@ rhaxsh.o libhax.a
+	${LIBTOOL} --mode=link --tag=CC ${CC} ${LDFLAGS} \
+		-o $@ rhaxsh.o libhax.la
 
-haxsh: libhax.a libhaxunix.a
+haxsh: libhax.la libhaxunix.la
 	$(CC) $(CFLAGS) -o haxsh.o -c haxsh.c
-	$(CC) $(LDFLAGS) -o $@ haxsh.o libhax.a libhaxunix.a
+	${LIBTOOL} --mode=link --tag=CC ${CC} ${LDFLAGS} \
+		-o $@ haxsh.o libhax.la libhaxunix.la
 
-install: libhax.a libhaxunix.a haxsh rhaxsh
+install: libhax.la libhaxunix.la haxsh rhaxsh
 	install -d $(DESTDIR)$(PREFIX)/$(BIN_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(HAX_LIBRARY)
@@ -91,15 +105,19 @@ install: libhax.a libhaxunix.a haxsh rhaxsh
 	install -d $(DESTDIR)$(PREFIX)/$(MAN3_DIR)
 	install -d $(DESTDIR)$(PREFIX)/$(MANN_DIR)
 
-	install haxsh $(DESTDIR)$(PREFIX)/$(BIN_DIR)
-	install rhaxsh $(DESTDIR)$(PREFIX)/$(BIN_DIR)
+	${LIBTOOL} --mode=install install \
+		-c haxsh $(DESTDIR)$(PREFIX)/$(BIN_DIR)
+	${LIBTOOL} --mode=install install \
+		-c rhaxsh $(DESTDIR)$(PREFIX)/$(BIN_DIR)
 
 	cd library; for i in *.tcl; do \
 		install $$i $(DESTDIR)$(PREFIX)/$(HAX_LIBRARY); \
 	done
 
-	install libhax.a $(DESTDIR)$(PREFIX)/$(LIB_DIR)
-	install libhaxunix.a $(DESTDIR)$(PREFIX)/$(LIB_DIR)
+	${LIBTOOL} --mode=install install \
+		-c libhax.la $(DESTDIR)$(PREFIX)/$(LIB_DIR)
+	${LIBTOOL} --mode=install install \
+		-c libhaxunix.la $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 
 	install hax.h $(DESTDIR)$(PREFIX)/$(INCLUDE_DIR)
 
@@ -200,19 +218,23 @@ install: libhax.a libhaxunix.a haxsh rhaxsh
 		rm -f Hax_library.n
 
 test: haxsh
-	( echo cd tests ; echo source all ) | ./haxsh
+	( echo cd tests ; echo source all ) | ${LIBTOOL} --mode=execute ./haxsh
 
 clean:
 	rm -f $(OBJS) $(UNIX_OBJS) libhax.a libhaxunix.a \
-		haxsh.o haxsh rhaxsh.o rhaxsh libfuzzer
+		haxsh.o haxsh rhaxsh.o rhaxsh libfuzzer \
+		$(LOBJS) $(UNIX_LOBJS) libhax.la libhaxunix.la
+	rm -rf .libs
 
-libfuzzer: libhax.a
+libfuzzer: libhax.la
 	$(CC) $(CFLAGS) -o libfuzzer.o -c libfuzzer.c
-	$(CC) $(LDFLAGS) -o $@ libfuzzer.o libhax.a
+	${LIBTOOL} --mode=link --tag=CC ${CC} ${LDFLAGS} \
+		-o $@ libfuzzer.o libhax.la
 
 $(OBJS): hax.h haxInt.h
 $(UNIX_OJBS): hax.h haxUnix.h
 
 .SUFFIXES: .c .o
 .c.o:
-	$(CC) $(CFLAGS) -I. -DHAX_LIBRARY=\"$(PREFIX)/$(HAX_LIBRARY)\" -o $@ -c $<
+	${LIBTOOL} --mode=compile --tag=CC $(CC) $(CFLAGS) \
+		-I. -DHAX_LIBRARY=\"$(PREFIX)/$(HAX_LIBRARY)\" -o $@ -c $<
