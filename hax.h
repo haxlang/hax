@@ -21,9 +21,14 @@
 #ifndef _HAX
 #define _HAX
 
+/* Historic Tcl #defines -- probably will remain untouched for all time. */
 #define HAX_VERSION "6.7"
 #define HAX_MAJOR_VERSION 6
 #define HAX_MINOR_VERSION 7
+
+/* Patchlevel that is the only value that still increments. */
+#define HAX_PATCHLEVEL "6.7.0"
+#define HAX_PATCH_VERSION 0
 
 /*
  * Definitions that allow this header to be used with C++.

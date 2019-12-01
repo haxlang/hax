@@ -480,6 +480,15 @@ Hax_InfoCmd(
 	    Hax_AppendElement(interp, name, 0);
 	}
 	return HAX_OK;
+    } else if ((c == 'p') && (strncmp(argv[1], "patchlevel", length) == 0)) {
+	if (argc != 2) {
+	    Hax_AppendResult(interp, "wrong # args: should be \"",
+		    argv[0], " patchlevel\"", (char *) NULL);
+	    return HAX_ERROR;
+	}
+
+	strcpy(iPtr->result, HAX_PATCHLEVEL);
+	return HAX_OK;
     } else if ((c == 'p') && (strncmp(argv[1], "procs", length)) == 0) {
 	if (argc > 3) {
 	    Hax_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -550,7 +559,7 @@ Hax_InfoCmd(
 	Hax_AppendResult(interp, "bad option \"", argv[1],
 		"\": should be args, body, cmdcount, commands, ",
 		"complete, default, ",
-		"exists, globals, level, library, locals, procs, ",
+		"exists, globals, level, library, locals, patchlevel, procs, ",
 		"script, tclversion, or vars",
 		(char *) NULL);
 	return HAX_ERROR;

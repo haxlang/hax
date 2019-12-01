@@ -1842,6 +1842,13 @@ If \fIpattern\fR is specified, only those names matching \fIpattern\fR
 are returned.  Matching is determined using the same rules as for
 \fBstring match\fR.
 .TP
+\fBinfo patchlevel\fR
+Returns the patchlevel number for this version of Hax in the form \fIx.y.z\fR,
+where changes to \fIx\fR represent major changes with probable
+incompatibilities and changes to \fIy\fR represent small enhancements and
+bug fixes that retain backward compatibility.
+\fz\fR represents patches that retain backward compatibility.
+.TP
 \fBinfo procs \fR?\fIpattern\fR?
 If \fIpattern\fR isn't specified, returns a list of all the
 names of Hax command procedures.
