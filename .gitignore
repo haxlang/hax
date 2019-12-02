@@ -1,10 +1,10 @@
 *.o
 *.la
 *.lo
+*.so
+*.a
 .libs
 *~
 *.core
-libhax.a
-libhaxunix.a
 haxsh
 rhaxsh
