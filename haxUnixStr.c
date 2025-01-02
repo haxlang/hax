@@ -525,7 +525,7 @@ Hax_SignalId(
 #ifdef SIGKILL
 	case SIGKILL: return (char *) "SIGKILL";
 #endif
-#if defined(SIGLOST) && (!defined(SIGIOT) || (SIGLOST != SIGIOT)) && (!defined(SIGURG) || (SIGLOST != SIGURG))
+#if defined(SIGLOST) && (!defined(SIGIOT) || (SIGLOST != SIGIOT)) && (!defined(SIGURG) || (SIGLOST != SIGURG)) && (!defined(SIGPWR) || (SIGLOST != SIGPWR))
 	case SIGLOST: return (char *) "SIGLOST";
 #endif
 #ifdef SIGPIPE
@@ -657,7 +657,7 @@ Hax_SignalMsg(
 #ifdef SIGKILL
 	case SIGKILL: return (char *) "kill signal";
 #endif
-#if defined(SIGLOST) && (!defined(SIGIOT) || (SIGLOST != SIGIOT)) && (!defined(SIGURG) || (SIGLOST != SIGURG))
+#if defined(SIGLOST) && (!defined(SIGIOT) || (SIGLOST != SIGIOT)) && (!defined(SIGURG) || (SIGLOST != SIGURG)) && (!defined(SIGPWR) || (SIGLOST != SIGPWR))
 	case SIGLOST: return (char *) "resource lost";
 #endif
 #ifdef SIGPIPE
